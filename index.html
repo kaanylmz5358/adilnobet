@@ -4,16 +4,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>AdilNöbet</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root{
   --teal:#0FA396; --teal-deep:#0B7C72; --teal-dark:#085E56; --teal-tint:#DCF5F1; --teal-glow:rgba(15,163,150,.22);
-  --coral:#FF6F61; --coral-tint:#FFE9E6; --gold:#F5B841; --gold-tint:#FDF3DC;
+  --coral:#FF6F61; --coral-tint:#FFE9E6; --gold:#E8A312; --gold-tint:#FBF1D7;
   --ink:#12332E; --ink-soft:#5E7C76; --bg:#F2FBF9; --card:#FFFFFF;
   --wknd:#FFF9EC; --line:#E3F0ED;
-  --sh-sm:0 2px 10px rgba(11,124,114,.08);
-  --sh-md:0 6px 24px rgba(11,124,114,.14);
+  --sh-sm:0 2px 10px rgba(11,124,114,.08); --sh-md:0 6px 24px rgba(11,124,114,.14);
   --purple:#6D46B8; --purple-tint:#EDE4FA; --blue:#2470A8; --blue-tint:#DFEEFB; --pink:#C0348A; --pink-tint:#FBE3F0;
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
@@ -21,35 +20,20 @@ html,body{height:100%}
 body{font-family:ui-rounded,-apple-system,"SF Pro Rounded","Segoe UI",Roboto,sans-serif;
   background:var(--bg);color:var(--ink);display:flex;justify-content:center}
 #phone{width:100%;max-width:430px;min-height:100dvh;display:flex;flex-direction:column;position:relative}
-
-/* ---------- HERO HEADER ---------- */
-header{
-  background:linear-gradient(135deg,#12B5A6 0%,#0B7C72 60%,#085E56 100%);
-  border-radius:0 0 30px 30px;color:#fff;
-  padding:calc(18px + env(safe-area-inset-top)) 22px 6px;
+header{background:linear-gradient(135deg,#12B5A6 0%,#0B7C72 60%,#085E56 100%);
+  border-radius:0 0 30px 30px;color:#fff;padding:calc(18px + env(safe-area-inset-top)) 22px 6px;
   box-shadow:var(--sh-md);position:relative;overflow:hidden}
-header::before{content:"";position:absolute;top:-70px;right:-60px;width:210px;height:210px;
-  border-radius:50%;background:rgba(255,255,255,.09)}
-header::after{content:"";position:absolute;top:40px;right:-100px;width:160px;height:160px;
-  border-radius:50%;background:rgba(255,255,255,.06)}
+header::before{content:"";position:absolute;top:-70px;right:-60px;width:210px;height:210px;border-radius:50%;background:rgba(255,255,255,.09)}
 .brand{display:flex;align-items:center;gap:12px;position:relative;z-index:1}
-.logo{width:50px;height:50px;border-radius:16px;background:rgba(255,255,255,.16);
-  border:1.5px solid rgba(255,255,255,.35);display:grid;place-items:center;font-size:26px;
-  animation:pulse 2.6s ease-in-out infinite}
-@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+.logo{width:50px;height:50px;border-radius:16px;background:rgba(255,255,255,.16);border:1.5px solid rgba(255,255,255,.35);
+  display:grid;place-items:center;font-size:26px}
 .brand h1{font-size:1.6rem;font-weight:800;letter-spacing:-.02em}
 .brand h1 em{font-style:normal;color:#B7F0E8}
-.brand p{font-size:.78rem;opacity:.85}
-.vtag{margin-left:auto;font-size:.62rem;font-weight:800;background:rgba(255,255,255,.18);
-  border:1px solid rgba(255,255,255,.3);padding:4px 10px;border-radius:20px;letter-spacing:.06em}
-.ekg{width:100%;height:36px;margin-top:4px;position:relative;z-index:1}
-.ekg path{stroke:#FFD9D4;stroke-width:2.5;fill:none;stroke-linecap:round;
-  stroke-dasharray:600;stroke-dashoffset:600;animation:beat 3.4s linear infinite;
-  filter:drop-shadow(0 0 4px rgba(255,111,97,.6))}
+.brand p{font-size:.75rem;opacity:.85}
+.vtag{margin-left:auto;font-size:.6rem;font-weight:800;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);padding:4px 10px;border-radius:20px;cursor:pointer}
+.ekg{width:100%;height:30px;margin-top:4px;position:relative;z-index:1}
+.ekg path{stroke:#FFD9D4;stroke-width:2.5;fill:none;stroke-linecap:round;stroke-dasharray:600;stroke-dashoffset:600;animation:beat 3.4s linear infinite}
 @keyframes beat{to{stroke-dashoffset:0}}
-@media(prefers-reduced-motion:reduce){.ekg path{animation:none;stroke-dashoffset:0}.logo{animation:none}}
-
-/* ---------- CONTENT ---------- */
 main{flex:1;overflow-y:auto;padding:16px 16px 118px}
 .eyebrow{font-size:.64rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--teal-deep);margin-bottom:2px}
 .card{background:var(--card);border-radius:22px;padding:18px;margin-bottom:14px;box-shadow:var(--sh-sm);border:1px solid rgba(227,240,237,.8)}
@@ -57,94 +41,95 @@ main{flex:1;overflow-y:auto;padding:16px 16px 118px}
 .hint{font-size:.79rem;color:var(--ink-soft);margin-bottom:13px;line-height:1.5}
 .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 label{font-size:.78rem;font-weight:700;color:var(--ink-soft)}
-input,select{padding:11px 13px;border:1.5px solid var(--line);border-radius:13px;font-size:.92rem;background:#FBFEFD;font-family:inherit;color:var(--ink)}
+input,select,textarea{padding:11px 13px;border:1.5px solid var(--line);border-radius:13px;font-size:.92rem;background:#FBFEFD;font-family:inherit;color:var(--ink)}
 input:focus,select:focus{outline:2px solid var(--teal-glow);border-color:var(--teal)}
-input[type=number]{width:78px}
+input[type=number]{width:70px}
+input:disabled,select:disabled{opacity:.55}
 .btn{background:linear-gradient(135deg,#12B5A6,#0B7C72);color:#fff;border:none;border-radius:15px;
-  padding:14px 20px;font-size:1rem;font-weight:800;cursor:pointer;font-family:inherit;
-  box-shadow:0 5px 16px var(--teal-glow);transition:.15s}
+  padding:14px 20px;font-size:1rem;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 5px 16px var(--teal-glow);transition:.15s}
 .btn:active{transform:scale(.97)}
 .btn.ghost{background:#fff;color:var(--teal-deep);border:2px solid var(--teal);box-shadow:none}
 .btn.small{padding:9px 15px;font-size:.84rem;border-radius:12px}
-
-/* people */
-.person{display:flex;align-items:center;gap:11px;padding:10px 0;border-bottom:1px dashed var(--line)}
+.btn.gold{background:linear-gradient(135deg,#F2B830,#D89206)}
+.btn.red{background:#fff;color:#C33D2E;border:2px solid var(--coral);box-shadow:none}
+.btn:disabled{opacity:.5}
+.person{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px dashed var(--line);flex-wrap:wrap}
 .person:last-child{border-bottom:none}
-.avatar{width:42px;height:42px;border-radius:14px;display:grid;place-items:center;font-size:20px;flex-shrink:0}
+.avatar{width:40px;height:40px;border-radius:13px;display:grid;place-items:center;font-size:19px;flex-shrink:0}
 .av-gh{background:var(--teal-tint)}.av-gc{background:var(--purple-tint)}.av-an{background:var(--blue-tint)}.av-kd{background:var(--pink-tint)}
-.person .info{flex:1;min-width:0}
-.person .nm{font-weight:800;font-size:.9rem}
-.person .sub{font-size:.71rem;color:var(--ink-soft)}
-.person input[type=number]{width:60px;padding:7px}
-.tag{font-size:.63rem;font-weight:800;padding:2.5px 9px;border-radius:12px;vertical-align:1px}
+.person .info{flex:1;min-width:120px}
+.person .nm{font-weight:800;font-size:.88rem}
+.person .sub{font-size:.7rem;color:var(--ink-soft)}
+.tag{font-size:.62rem;font-weight:800;padding:2.5px 9px;border-radius:12px}
 .t-gh{background:var(--teal-tint);color:var(--teal-dark)}.t-gc{background:var(--purple-tint);color:var(--purple)}
 .t-an{background:var(--blue-tint);color:var(--blue)}.t-kd{background:var(--pink-tint);color:var(--pink)}
-.del{background:none;border:none;color:#D9948C;font-size:1rem;cursor:pointer;padding:4px}
-
-/* stats */
 .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
 .stat{background:linear-gradient(160deg,#fff,#F4FBFA);border:1px solid var(--line);border-radius:18px;padding:12px 8px;text-align:center;box-shadow:var(--sh-sm)}
 .stat .v{font-size:1.45rem;font-weight:800;color:var(--teal-deep)}
 .stat .v.bad{color:var(--coral)}
-.stat .l{font-size:.64rem;font-weight:700;color:var(--ink-soft);letter-spacing:.04em;text-transform:uppercase}
-
-/* calendar */
+.stat .l{font-size:.62rem;font-weight:700;color:var(--ink-soft);text-transform:uppercase}
 .cal{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-top:12px}
-.dh{font-size:.64rem;font-weight:800;text-align:center;color:var(--ink-soft);letter-spacing:.04em}
-.day{min-height:60px;border:1.5px solid var(--line);border-radius:13px;padding:4px;background:#fff;font-size:.62rem;transition:.12s}
+.dh{font-size:.64rem;font-weight:800;text-align:center;color:var(--ink-soft)}
+.day{min-height:58px;border:1.5px solid var(--line);border-radius:13px;padding:4px;background:#fff;font-size:.62rem}
 .day.wknd{background:var(--wknd);border-color:#F3E4C2}
+.day.bay{background:var(--gold-tint);border-color:var(--gold)}
 .day .num{font-weight:800;font-size:.72rem;color:var(--ink-soft)}
+.day.bay .num::after{content:" 🌙";font-size:.6rem}
 .day .who{display:flex;flex-direction:column;gap:2px;margin-top:2px}
 .chip-p{display:block;border-radius:7px;padding:1.5px 4px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:.6rem}
+.chip-p.me{outline:1.5px solid var(--teal-deep)}
 .c-gh{background:var(--teal-tint);color:var(--teal-dark)}.c-gc{background:var(--purple-tint);color:var(--purple)}
 .c-an{background:var(--blue-tint);color:var(--blue)}.c-kd{background:var(--pink-tint);color:var(--pink)}
 .day.empty{border:none;background:none}
-.prefday{min-height:48px;text-align:center;padding-top:13px;font-weight:800;font-size:.86rem;cursor:pointer;user-select:none}
+.day.click{cursor:pointer}
+.prefday{min-height:46px;text-align:center;padding-top:12px;font-weight:800;font-size:.86rem;cursor:pointer;user-select:none}
 .prefday.no{background:var(--coral-tint);border-color:var(--coral)}
 .prefday.yes{background:var(--teal-tint);border-color:var(--teal)}
+.prefday.izin{background:#ECF1F0;border-color:#C9D6D2;color:#9AACA7;cursor:not-allowed}
+.prefday.izin::after{content:"🔒";font-size:.55rem;display:block;margin-top:-2px}
 .legend{display:flex;gap:12px;font-size:.71rem;color:var(--ink-soft);margin-top:10px;flex-wrap:wrap}
 .dot{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:4px;vertical-align:middle}
-.empty-state{text-align:center;padding:26px 10px;color:var(--ink-soft)}
-.empty-state .big{font-size:2.2rem;margin-bottom:6px}
-
-/* fairness table */
-table{width:100%;border-collapse:collapse;font-size:.8rem}
-th{text-align:left;font-size:.62rem;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-soft);padding:8px 4px;border-bottom:2px solid var(--line)}
-td{padding:8px 4px;border-bottom:1px solid var(--line);vertical-align:middle}
-.bar{height:7px;border-radius:6px;background:var(--teal-tint);overflow:hidden;min-width:46px}
+.empty-state{text-align:center;padding:24px 10px;color:var(--ink-soft)}
+.empty-state .big{font-size:2.1rem;margin-bottom:6px}
+table{width:100%;border-collapse:collapse;font-size:.76rem}
+th{text-align:left;font-size:.6rem;text-transform:uppercase;color:var(--ink-soft);padding:8px 3px;border-bottom:2px solid var(--line)}
+td{padding:8px 3px;border-bottom:1px solid var(--line)}
+.bar{height:7px;border-radius:6px;background:var(--teal-tint);overflow:hidden;min-width:40px}
 .bar i{display:block;height:100%;border-radius:6px;background:linear-gradient(90deg,#12B5A6,#0B7C72)}
 .banner{padding:12px 15px;border-radius:15px;font-size:.85rem;margin:12px 0 4px;font-weight:700}
 .banner.ok{background:var(--teal-tint);color:var(--teal-dark)}
 .banner.err{background:var(--coral-tint);color:#C33D2E}
-
-/* AI chat */
-#chatBox{display:flex;flex-direction:column;gap:10px;min-height:220px;margin-bottom:12px}
-.msg{max-width:86%;padding:12px 15px;border-radius:19px;font-size:.9rem;line-height:1.5;white-space:pre-wrap}
-.msg.user{align-self:flex-end;background:linear-gradient(135deg,#12B5A6,#0B7C72);color:#fff;border-bottom-right-radius:6px;box-shadow:0 3px 10px var(--teal-glow)}
-.msg.ai{align-self:flex-start;background:#fff;border:1.5px solid var(--line);border-bottom-left-radius:6px;box-shadow:var(--sh-sm)}
-.msg.ai .act{display:block;margin-top:7px;font-size:.73rem;color:var(--teal-deep);font-weight:800;background:var(--teal-tint);border-radius:9px;padding:5px 9px}
-.typing i{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--teal);margin-right:3px;animation:ty 1s infinite}
-.typing i:nth-child(2){animation-delay:.18s}.typing i:nth-child(3){animation-delay:.36s}
-@keyframes ty{0%,100%{opacity:.25;transform:translateY(0)}50%{opacity:1;transform:translateY(-3px)}}
-.chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
-.chip{background:#fff;border:1.5px solid var(--teal);color:var(--teal-deep);border-radius:20px;padding:8px 14px;font-size:.78rem;font-weight:700;cursor:pointer;font-family:inherit}
-.chip:active{background:var(--teal-tint)}
-#chatForm{display:flex;gap:8px}
-#chatInput{flex:1;border-radius:22px}
-#aiOut{white-space:pre-wrap;font-size:.86rem;background:var(--teal-tint);border-radius:15px;padding:15px;margin-top:12px;display:none;line-height:1.55}
-
-/* ---------- FLOATING TAB BAR ---------- */
+.banner.info{background:var(--gold-tint);color:#9A6E06}
+.req{border:1.5px solid var(--line);border-radius:16px;padding:13px;margin-bottom:10px;background:#FBFEFD}
+.req .head{font-weight:800;font-size:.88rem;margin-bottom:3px}
+.req .note{font-size:.82rem;color:var(--ink-soft);font-style:italic;margin-bottom:8px}
+.st{font-size:.7rem;font-weight:800;padding:3px 10px;border-radius:12px;display:inline-block;margin-bottom:6px}
+.st.bekliyor{background:var(--gold-tint);color:#9A6E06}
+.st.kabul{background:var(--teal-tint);color:var(--teal-dark)}
+.st.red{background:var(--coral-tint);color:#C33D2E}
+#aiOut,#aiAnswer{white-space:pre-wrap;font-size:.86rem;background:var(--teal-tint);border-radius:15px;padding:15px;margin-top:12px;display:none;line-height:1.55}
 nav{position:fixed;bottom:calc(12px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);
-  width:calc(100% - 28px);max-width:402px;
-  background:rgba(255,255,255,.88);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
-  border:1px solid rgba(227,240,237,.9);border-radius:26px;box-shadow:0 10px 30px rgba(11,124,114,.18);
-  display:flex;padding:9px 6px;z-index:10}
+  width:calc(100% - 28px);max-width:402px;background:rgba(255,255,255,.9);backdrop-filter:blur(18px);
+  border:1px solid rgba(227,240,237,.9);border-radius:26px;box-shadow:0 10px 30px rgba(11,124,114,.18);display:none;padding:9px 6px;z-index:10}
 nav button{flex:1;background:none;border:none;font-family:inherit;cursor:pointer;border-radius:18px;padding:6px 2px;
-  display:flex;flex-direction:column;align-items:center;gap:2px;font-size:.63rem;font-weight:800;color:var(--ink-soft);transition:.15s}
-nav button .ic{font-size:1.4rem;filter:grayscale(.85);transition:.15s}
+  display:flex;flex-direction:column;align-items:center;gap:2px;font-size:.62rem;font-weight:800;color:var(--ink-soft)}
+nav button .ic{font-size:1.35rem;filter:grayscale(.85)}
 nav button.active{color:var(--teal-dark);background:var(--teal-tint)}
-nav button.active .ic{filter:none;transform:scale(1.1)}
+nav button.active .ic{filter:none}
+.view{display:none}.view.active{display:block}
 .tab{display:none}.tab.active{display:block}
+.center{max-width:340px;margin:40px auto;text-align:center}
+.center input{width:100%;margin-bottom:10px}
+.center .btn{width:100%;margin-bottom:10px}
+.switchlink{font-size:.82rem;color:var(--teal-deep);font-weight:700;cursor:pointer;text-decoration:underline}
+.codebox{font-size:1.6rem;font-weight:800;letter-spacing:.3em;background:var(--gold-tint);border-radius:14px;padding:12px;margin:10px 0;color:#9A6E06}
+@media print{
+  body{background:#fff}
+  header,nav,#tab-kurulum,#tab-izin,#tab-takas,.btn,#aiOut,#aiAnswer,.stats,.hint,.eyebrow{display:none!important}
+  #tab-cizelge{display:block!important}
+  main{padding:0}.card{box-shadow:none;border:none}
+  .day,.chip-p{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
 </style>
 </head>
 <body>
@@ -152,59 +137,122 @@ nav button.active .ic{filter:none;transform:scale(1.1)}
 <header>
   <div class="brand">
     <div class="logo">🩺</div>
-    <div><h1>Adil<em>Nöbet</em></h1><p>Nöbetin adaletli hali 💚</p></div>
-    <span class="vtag">PROTOTİP</span>
+    <div><h1>Adil<em>Nöbet</em></h1><p id="subTitle">Nöbetin adaletli hali 💚</p></div>
+    <span class="vtag" id="logoutBtn" onclick="logout()" style="display:none">ÇIKIŞ</span>
   </div>
-  <svg class="ekg" viewBox="0 0 400 34" preserveAspectRatio="none" aria-hidden="true">
-    <path d="M0 20 H60 L72 20 82 6 92 30 100 20 H160 L172 20 182 4 192 31 200 20 H260 L272 20 282 7 292 29 300 20 H400"/>
-  </svg>
+  <svg class="ekg" viewBox="0 0 400 34" preserveAspectRatio="none"><path d="M0 20 H60 L72 20 82 6 92 30 100 20 H160 L172 20 182 4 192 31 200 20 H260 L272 20 282 7 292 29 300 20 H400"/></svg>
 </header>
 <main>
 
-<!-- EKİP -->
-<section id="tab-ekip" class="tab active">
+<!-- KURULUM UYARISI -->
+<div id="view-config" class="view">
+  <div class="card center">
+    <h2>⚙️ Kurulum gerekli</h2>
+    <p class="hint">Bu dosyanın en üstündeki SUPABASE_URL ve SUPABASE_KEY alanlarına kendi Supabase projenin bilgilerini yapıştırman gerekiyor. Adımlar için Claude'daki rehbere bak.</p>
+  </div>
+</div>
+
+<!-- GİRİŞ -->
+<div id="view-auth" class="view">
+  <div class="card center">
+    <h2 id="authTitle">👋 Giriş yap</h2>
+    <p class="hint" id="authHint">Bölümündeki herkes kendi hesabıyla girer; kimse kimsenin isteğine dokunamaz.</p>
+    <input type="text" id="authName" placeholder="Ad Soyad (ör. Dr. Kaan Yılmaz)" style="display:none">
+    <input type="email" id="authEmail" placeholder="E-posta">
+    <input type="password" id="authPass" placeholder="Şifre (en az 6 karakter)">
+    <button class="btn" onclick="doAuth()" id="authBtn">Giriş</button>
+    <span class="switchlink" onclick="toggleAuth()" id="authSwitch">Hesabın yok mu? Kayıt ol</span>
+    <div id="authMsg" class="banner err" style="display:none"></div>
+  </div>
+</div>
+
+<!-- BÖLÜM SEÇ -->
+<div id="view-dept" class="view">
+  <div class="card center">
+    <h2>🏥 Bölüme katıl</h2>
+    <p class="hint">Şefin/planlayıcının paylaştığı 6 haneli kodu gir.</p>
+    <input type="text" id="joinCode" placeholder="Davet kodu (ör. A3F9K2)" style="text-transform:uppercase">
+    <button class="btn" onclick="joinDept()">Katıl</button>
+  </div>
+  <div class="card center">
+    <h2>➕ Yeni bölüm kur</h2>
+    <p class="hint">Bölümü kuran kişi yönetici (planlayıcı) olur.</p>
+    <input type="text" id="newDeptName" placeholder="Bölüm adı (ör. Genel Cerrahi - X Hastanesi)">
+    <button class="btn gold" onclick="createDept()">Bölüm Kur</button>
+    <div id="deptMsg" class="banner err" style="display:none"></div>
+  </div>
+</div>
+
+<!-- ANA UYGULAMA -->
+<div id="view-app" class="view">
+
+<section id="tab-kurulum" class="tab active">
+  <div class="card" id="inviteCard" style="display:none">
+    <p class="eyebrow">Davet</p>
+    <h2>📣 Ekibi davet et</h2>
+    <p class="hint">Bu kodu bölüm grubuna at — herkes kendi telefonundan kayıt olup bu kodla katılsın.</p>
+    <div class="codebox" id="inviteCode">——————</div>
+  </div>
   <div class="card">
-    <p class="eyebrow">Aylık kurulum</p>
-    <h2>📅 Ay & kurallar</h2>
-    <p class="hint">Her ayın başında 1 dakikada güncelle — ya da AI Asistan'a söyle, o halletsin.</p>
+    <p class="eyebrow">Ay başı kurulum · 1/2</p>
+    <h2>📅 Ay, kurallar & bayram</h2>
+    <p class="hint" id="setupHint">Bayram/tatil günlerini virgülle yaz — algoritma baştan buna göre hesaplar.</p>
     <div class="row">
-      <input type="month" id="month" value="2026-08" onchange="renderAll()">
-      <label>Oda/gece</label><input type="number" id="rooms" value="2" min="1" max="6">
-      <label>Min ara</label><input type="number" id="minGap" value="2" min="1" max="7">
+      <input type="month" id="month">
+      <label>Oda/gece</label><input type="number" id="rooms" min="1" max="6">
+      <label>Min ara</label><input type="number" id="minGap" min="1" max="7">
     </div>
+    <div class="row" style="margin-top:10px">
+      <label>🌙 Bayram</label>
+      <input type="text" id="bayramDays" placeholder="ör. 15,16,17" style="flex:1;min-width:110px">
+    </div>
+    <button class="btn small" style="margin-top:12px" id="saveSettingsBtn" onclick="saveSettings()">💾 Ayarları Kaydet</button>
+  </div>
+  <div class="card">
+    <p class="eyebrow">Kesin engel</p>
+    <h2>🏖 İzinlerim</h2>
+    <p class="hint">İzinli/raporlu olduğun günleri virgülle yaz (ör. 12,13,14) — o günlere <b>asla</b> nöbet yazılmaz. Herkes yalnızca kendi iznini girebilir; sunucu bunu garanti eder.</p>
+    <div class="row">
+      <input type="text" id="izinInput" placeholder="ör. 12,13,14" style="flex:1;min-width:120px">
+      <button class="btn small" onclick="saveIzin()">💾 Kaydet</button>
+    </div>
+    <div id="izinStatus" class="banner ok" style="display:none"></div>
   </div>
   <div class="card">
     <p class="eyebrow">Kadro</p>
     <h2>🧑‍⚕️ Ekip <span style="font-weight:700;font-size:.75rem;color:var(--ink-soft)" id="teamCount"></span></h2>
+    <p class="hint" id="teamHint"></p>
     <div id="peopleList"></div>
-    <div class="row" style="margin-top:13px">
-      <input type="text" id="newName" placeholder="İsim" style="flex:1;min-width:110px">
-      <select id="newPool">
-        <option value="GH">Genel Havuz</option><option value="GC">Genel Cerrahi</option>
-        <option value="AN">Anestezi</option><option value="KD">Kadın Doğum</option>
-      </select>
-      <button class="btn small" onclick="addPerson()">＋ Ekle</button>
-    </div>
+  </div>
+  <div class="card" id="devirCard">
+    <p class="eyebrow">Aylar arası adalet</p>
+    <h2>🔄 Devir</h2>
+    <p class="hint">Geçmiş ayların birikmiş yükü — sunucuda saklanır, kaybolmaz.</p>
+    <table><thead><tr><th>Kişi</th><th>Toplam</th><th>H.sonu</th><th>🌙</th></tr></thead><tbody id="devirBody"></tbody></table>
   </div>
 </section>
 
-<!-- İSTEKLER -->
-<section id="tab-istek" class="tab">
+<section id="tab-izin" class="tab">
   <div class="card">
-    <p class="eyebrow">Tercih toplama</p>
-    <h2>🙋 İstekler</h2>
-    <p class="hint">1 tık = <b style="color:var(--coral)">müsait değilim</b> · 2 tık = <b style="color:var(--teal-deep)">nöbet isterim</b> · 3 tık = temizle. Gerçek üründe herkes kendi telefonundan girer.</p>
-    <select id="prefPerson" onchange="renderPrefCal()" style="width:100%"></select>
+    <p class="eyebrow">Ay başı kurulum · 2/2</p>
+    <h2>⭐ Tercihlerim</h2>
+    <p class="hint">Sadece <b>kendi</b> takvimini işaretleyebilirsin: 1 tık = <b style="color:var(--coral)">istemediğim gün</b> (mümkünse yazılmaz) · 2 tık = <b style="color:var(--teal-deep)">istediğim gün</b> (öncelik verilir) · 3 tık = temizle. 🔒 günler Kurulum'da girdiğin izinler — kesin engel.</p>
     <div class="cal" id="prefCal"></div>
     <div class="legend">
-      <span><span class="dot" style="background:var(--coral-tint);border:1px solid var(--coral)"></span>Müsait değil</span>
-      <span><span class="dot" style="background:var(--teal-tint);border:1px solid var(--teal)"></span>Tercih</span>
-      <span><span class="dot" style="background:var(--wknd);border:1px solid #F3E4C2"></span>Hafta sonu</span>
+      <span><span class="dot" style="background:var(--coral-tint);border:1px solid var(--coral)"></span>İstemediğim</span>
+      <span><span class="dot" style="background:var(--teal-tint);border:1px solid var(--teal)"></span>İstediğim</span>
+      <span><span class="dot" style="background:#ECF1F0;border:1px solid #C9D6D2"></span>🔒 İzin</span>
+      <span><span class="dot" style="background:var(--gold-tint);border:1px solid var(--gold)"></span>Bayram</span>
     </div>
+    <div id="prefStatus" class="banner ok" style="display:none">✅ Kaydedildi</div>
+  </div>
+  <div class="card">
+    <h2>👀 Ekibin doluluk özeti</h2>
+    <p class="hint">Kim ne kadar girmiş (sadece sayılar — mahremiyet korunur).</p>
+    <div id="prefSummary"></div>
   </div>
 </section>
 
-<!-- ÇİZELGE -->
 <section id="tab-cizelge" class="tab">
   <div class="stats">
     <div class="stat"><div class="v" id="stTotal">—</div><div class="l">Toplam nöbet</div></div>
@@ -214,141 +262,306 @@ nav button.active .ic{filter:none;transform:scale(1.1)}
   <div class="card">
     <p class="eyebrow">Aylık plan</p>
     <h2>🗓 Çizelge</h2>
-    <p class="hint">Çözücü yüzlerce olasılığı dener, kural ihlalsiz en adil listeyi seçer.</p>
-    <button class="btn" style="width:100%" onclick="generate()">⚙️ Çizelgeyi Üret</button>
+    <div id="genRow"><p class="hint">Herkes izinlerini girince yönetici üretir; anında herkeste görünür.</p>
+    <button class="btn" style="width:100%" id="genBtn" onclick="generate()">⚙️ Çizelgeyi Üret & Yayınla</button></div>
     <div id="genBanner"></div>
-    <div id="schedWrap"><div class="empty-state"><div class="big">🗓️</div>Henüz çizelge yok.<br>Yukarıdaki butona bas, sihir başlasın ✨</div></div>
+    <div id="schedWrap"><div class="empty-state"><div class="big">🗓️</div>Henüz yayınlanmış çizelge yok.</div></div>
+    <div class="row" style="margin-top:12px">
+      <button class="btn ghost small" onclick="window.print()">🖨 PDF</button>
+      <button class="btn ghost small" onclick="csvIndir()">📊 Excel</button>
+      <button class="btn gold small" id="devirBtn" onclick="devireEkle()">➕ Devire ekle</button>
+      <button class="btn ghost small" onclick="loadAll()">🔄 Yenile</button>
+    </div>
   </div>
   <div class="card">
     <p class="eyebrow">Şeffaflık</p>
     <h2>⚖️ Adalet tablosu</h2>
-    <div id="fairWrap"><div class="empty-state">Çizelge üretilince burada kişi kişi denge görünür.</div></div>
+    <div id="fairWrap"><div class="empty-state">Çizelge yayınlanınca burada denge görünür.</div></div>
     <button class="btn ghost" style="width:100%;margin-top:12px" onclick="aiReport()">🤖 AI Adalet Raporu</button>
     <div id="aiOut"></div>
+    <div class="row" style="margin-top:12px">
+      <input type="text" id="aiQ" placeholder="Adaletle ilgili soru sor…" style="flex:1;min-width:150px">
+      <button class="btn small" onclick="aiAsk()">Sor</button>
+    </div>
+    <div id="aiAnswer"></div>
   </div>
 </section>
 
-<!-- AI ASİSTAN -->
-<section id="tab-ai" class="tab">
+<section id="tab-takas" class="tab">
   <div class="card">
-    <p class="eyebrow">Konuşarak yönet</p>
-    <h2>🤖 AI Asistan</h2>
-    <p class="hint">Ayar menüsü yok — sadece söyle: "Ayşe 12-15 arası izinli", "odaları 3 yap", "yeni asistan Kerem geldi"…</p>
-    <div class="chips">
-      <button class="chip" onclick="quickAsk('Bu ay odaları 3 yap')">🚪 Oda değiştir</button>
-      <button class="chip" onclick="quickAsk('Zeynep 10 ile 14 arası müsait değil')">🏖 İzin bildir</button>
-      <button class="chip" onclick="quickAsk('Çizelge adil mi, kim yüklü?')">⚖️ Adalet sorusu</button>
-    </div>
-    <div id="chatBox"></div>
-    <form id="chatForm" onsubmit="sendChat(event)">
-      <input type="text" id="chatInput" placeholder="Mesaj yaz…" autocomplete="off">
-      <button class="btn small" type="submit">➤</button>
-    </form>
+    <p class="eyebrow">Değişim</p>
+    <h2>🔁 Takas isteği gönder</h2>
+    <p class="hint">Sadece <b>kendi</b> nöbetin için istek açabilirsin. Karşı taraf kendi telefonundan kabul/red eder.</p>
+    <label>Nöbetim</label>
+    <select id="reqDay" style="width:100%;margin-bottom:8px"></select>
+    <label>Devralmasını istediğim kişi</label>
+    <select id="reqIn" style="width:100%;margin-bottom:8px"></select>
+    <label>Kısa açıklama</label>
+    <input type="text" id="reqNote" placeholder="ör. Kızımın okul gösterisi var 🙏" style="width:100%;margin-bottom:10px">
+    <button class="btn small" onclick="createReq()">📨 Gönder</button>
+  </div>
+  <div class="card">
+    <p class="eyebrow">Gelen kutusu</p>
+    <h2>📬 İstekler</h2>
+    <div id="reqList"><div class="empty-state">Henüz istek yok.</div></div>
+    <button class="btn ghost small" style="margin-top:8px" onclick="loadAll()">🔄 Yenile</button>
   </div>
 </section>
+</div>
 </main>
 
-<nav>
-  <button class="active" data-tab="ekip" onclick="showTab('ekip')"><span class="ic">🧑‍⚕️</span>Ekip</button>
-  <button data-tab="istek" onclick="showTab('istek')"><span class="ic">🙋</span>İstekler</button>
+<nav id="mainNav">
+  <button class="active" data-tab="kurulum" onclick="showTab('kurulum')"><span class="ic">🧑‍⚕️</span>Kurulum</button>
+  <button data-tab="izin" onclick="showTab('izin')"><span class="ic">⭐</span>Tercihler</button>
   <button data-tab="cizelge" onclick="showTab('cizelge')"><span class="ic">🗓</span>Çizelge</button>
-  <button data-tab="ai" onclick="showTab('ai')"><span class="ic">🤖</span>Asistan</button>
+  <button data-tab="takas" onclick="showTab('takas')"><span class="ic">🔁</span>Takas</button>
 </nav>
 </div>
 
 <script>
-/* ---------- STATE ---------- */
-let people=[
- {id:1,name:"Sen (Gen. Cerrahi)",pool:"GC",quota:6,worksAfter:true},
- {id:2,name:"Anestezi As. 1",pool:"AN",quota:8,worksAfter:false},
- {id:3,name:"Anestezi As. 2",pool:"AN",quota:8,worksAfter:false},
- {id:4,name:"Kadın Doğum As.",pool:"KD",quota:6,worksAfter:false},
-];
-["Ahmet","Zeynep","Mehmet","Elif","Can","Selin","Burak","Deniz","Emre","Merve","Kaan","Aslı"]
- .forEach((n,i)=>people.push({id:5+i,name:n,pool:"GH",quota:0,worksAfter:false}));
-let prefs={}, schedule=null, chatHist=[];
+/* ================= AYAR — BURAYI DOLDUR ================= */
+const SUPABASE_URL = "https://kxvmbngmfjbrtjbldcuv.supabase.co";    // ör. https://abcdefgh.supabase.co
+const SUPABASE_KEY = "sb_publishable_Pg7QxEPEENlXR_cDgWGEoQ_SVxb73DO"; // Settings > API > anon public
+/* ======================================================== */
+
 const POOL_LABEL={GC:"Genel Cerrahi",AN:"Anestezi",KD:"Kadın Doğum",GH:"Genel Havuz"};
 const POOL_EMOJI={GC:"🔪",AN:"💉",KD:"🤰",GH:"🩺"};
 const DAYS_TR=["Pzt","Sal","Çar","Per","Cum","Cmt","Paz"];
+let sb=null, me=null, myProfile=null, dept=null, members=[], allPrefs={}, schedule=null, requests=[];
+let signupMode=false;
 
-/* ---------- HELPERS ---------- */
-function monthInfo(){const [y,m]=document.getElementById("month").value.split("-").map(Number);
+function $(id){return document.getElementById(id)}
+function showView(v){document.querySelectorAll(".view").forEach(e=>e.classList.remove("active"));$("view-"+v).classList.add("active");
+  $("mainNav").style.display=v==="app"?"flex":"none";
+  $("logoutBtn").style.display=(v==="app"||v==="dept")?"inline-block":"none";}
+function showTab(t){document.querySelectorAll(".tab").forEach(e=>e.classList.remove("active"));
+  document.querySelectorAll("nav button").forEach(e=>e.classList.remove("active"));
+  $("tab-"+t).classList.add("active");
+  document.querySelector(`nav button[data-tab=${t}]`).classList.add("active");}
+
+function monthInfo(){const [y,m]=($("month").value||"2026-08").split("-").map(Number);
   return {y,m,nDays:new Date(y,m,0).getDate(),firstDow:(new Date(y,m-1,1).getDay()+6)%7};}
 function isWknd(y,m,d){const w=new Date(y,m-1,d).getDay();return w===0||w===6;}
 function isFri(y,m,d){return new Date(y,m-1,d).getDay()===5;}
-function pref(pid,d){return (prefs[pid]||{})[d]||"";}
-function showTab(t){
-  document.querySelectorAll(".tab").forEach(e=>e.classList.remove("active"));
-  document.querySelectorAll("nav button").forEach(e=>e.classList.remove("active"));
-  document.getElementById("tab-"+t).classList.add("active");
-  document.querySelector(`nav button[data-tab=${t}]`).classList.add("active");
+function bayramSet(){return new Set(($("bayramDays").value||"").split(",").map(s=>parseInt(s.trim())).filter(n=>n>0));}
+function isBay(d){return bayramSet().has(d);}
+function pref(uid,d){return (allPrefs[uid]||{})[d]||"";}
+function isAdmin(){return myProfile&&myProfile.is_admin;}
+
+/* ---------- BAŞLAT ---------- */
+window.addEventListener("load",async()=>{
+  if(SUPABASE_URL.includes("BURAYA")){showView("config");return;}
+  sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+  const {data:{session}}=await sb.auth.getSession();
+  if(!session){showView("auth");return;}
+  me=session.user;await afterLogin();
+});
+function toggleAuth(){
+  signupMode=!signupMode;
+  $("authName").style.display=signupMode?"block":"none";
+  $("authTitle").textContent=signupMode?"📝 Kayıt ol":"👋 Giriş yap";
+  $("authBtn").textContent=signupMode?"Kayıt Ol":"Giriş";
+  $("authSwitch").textContent=signupMode?"Zaten hesabın var mı? Giriş yap":"Hesabın yok mu? Kayıt ol";
+}
+async function doAuth(){
+  const email=$("authEmail").value.trim(),pass=$("authPass").value;
+  const msg=$("authMsg");msg.style.display="none";
+  try{
+    let res;
+    if(signupMode){
+      const name=$("authName").value.trim();
+      if(!name){throw new Error("Adını yaz");}
+      res=await sb.auth.signUp({email,password:pass,options:{data:{name}}});
+      if(res.error)throw res.error;
+      if(!res.data.session){msg.className="banner info";msg.textContent="E-postana onay linki gitti olabilir — Supabase'de 'Confirm email' kapalıysa direkt giriş yapabilirsin.";msg.style.display="block";}
+    }else{
+      res=await sb.auth.signInWithPassword({email,password:pass});
+      if(res.error)throw res.error;
+    }
+    if(res.data.session){me=res.data.user;await afterLogin();}
+  }catch(e){msg.className="banner err";msg.textContent="⚠️ "+(e.message||e);msg.style.display="block";}
+}
+async function logout(){await sb.auth.signOut();location.reload();}
+async function afterLogin(){
+  const {data:p}=await sb.from("profiles").select("*").eq("id",me.id).maybeSingle();
+  myProfile=p;
+  if(!p||!p.dept_id){showView("dept");return;}
+  showView("app");await loadAll();
+}
+async function createDept(){
+  const name=$("newDeptName").value.trim();
+  const myName=(me.user_metadata&&me.user_metadata.name)||me.email.split("@")[0];
+  if(!name){alert("Bölüm adı yaz");return;}
+  const {data,error}=await sb.rpc("create_department",{dept_name:name,my_name:myName});
+  if(error){$("deptMsg").textContent="⚠️ "+error.message;$("deptMsg").style.display="block";return;}
+  alert("Bölüm kuruldu! Davet kodun: "+data.join_code);
+  await afterLogin();
+}
+async function joinDept(){
+  const code=$("joinCode").value.trim();
+  const myName=(me.user_metadata&&me.user_metadata.name)||me.email.split("@")[0];
+  if(!code){alert("Kodu yaz");return;}
+  const {data,error}=await sb.rpc("join_department",{code,my_name:myName});
+  if(error||data.error){$("deptMsg").textContent="⚠️ "+(data&&data.error||error.message);$("deptMsg").style.display="block";return;}
+  await afterLogin();
 }
 
-/* ---------- EKİP ---------- */
+/* ---------- VERİ YÜKLE ---------- */
+async function loadAll(){
+  const [{data:d},{data:mem}]=await Promise.all([
+    sb.from("departments").select("*").eq("id",myProfile.dept_id).single(),
+    sb.from("profiles").select("*").eq("dept_id",myProfile.dept_id).order("name")
+  ]);
+  dept=d;members=mem||[];
+  myProfile=members.find(x=>x.id===me.id)||myProfile;
+  $("month").value=dept.month;$("rooms").value=dept.rooms;$("minGap").value=dept.min_gap;$("bayramDays").value=dept.bayram||"";
+  $("subTitle").textContent=dept.name+(isAdmin()?" · 👑 Yönetici":"");
+  $("inviteCard").style.display=isAdmin()?"block":"none";
+  $("inviteCode").textContent=dept.join_code;
+  const ro=!isAdmin();
+  ["month","rooms","minGap","bayramDays"].forEach(id=>$(id).disabled=ro);
+  $("saveSettingsBtn").style.display=ro?"none":"inline-block";
+  $("genRow").style.display=ro?"none":"block";
+  $("devirBtn").style.display=ro?"none":"inline-block";
+  $("teamHint").textContent=ro?"Havuz ve kotaları yönetici düzenler.":"Havuz, kota ve 'ertesi gün çalışır' ayarlarını buradan yönet.";
+  const {data:prefRows}=await sb.from("prefs").select("*").eq("dept_id",dept.id).eq("month",dept.month);
+  allPrefs={};(prefRows||[]).forEach(r=>allPrefs[r.user_id]=r.days||{});
+  const myIzin=Object.entries(allPrefs[me.id]||{}).filter(([d,v])=>v==="izin").map(([d])=>d);
+  $("izinInput").value=myIzin.sort((a,b)=>a-b).join(",");
+  const {data:sch}=await sb.from("schedules").select("*").eq("dept_id",dept.id).eq("month",dept.month).maybeSingle();
+  schedule=sch?sch.data:null;
+  const {data:reqs}=await sb.from("swap_requests").select("*").eq("dept_id",dept.id).eq("month",dept.month).order("id",{ascending:false});
+  requests=reqs||[];
+  renderPeople();renderPrefCal();renderPrefSummary();renderSchedule();renderReqs();fillReqForm();
+}
+
+/* ---------- KURULUM ---------- */
+async function saveSettings(){
+  const {error}=await sb.from("departments").update({
+    month:$("month").value,rooms:+$("rooms").value,min_gap:+$("minGap").value,bayram:$("bayramDays").value
+  }).eq("id",dept.id);
+  if(error){alert("⚠️ "+error.message);return;}
+  await loadAll();alert("Ayarlar kaydedildi ✅");
+}
 function renderPeople(){
-  const list=document.getElementById("peopleList");list.innerHTML="";
-  document.getElementById("teamCount").textContent=`(${people.length} kişi)`;
-  people.forEach(p=>{
+  const list=$("peopleList");list.innerHTML="";
+  $("teamCount").textContent=`(${members.length} kişi)`;
+  const ro=!isAdmin();
+  members.forEach(p=>{
     const d=document.createElement("div");d.className="person";
     d.innerHTML=`<div class="avatar av-${p.pool.toLowerCase()}">${POOL_EMOJI[p.pool]}</div>
-      <div class="info"><div class="nm">${p.name} <span class="tag t-${p.pool.toLowerCase()}">${POOL_LABEL[p.pool]}</span></div>
-      <div class="sub">${p.pool==="GH"?"kota: otomatik dengeli":"aylık kota →"} · ertesi gün ${p.worksAfter?"çalışır 💪":"izinli 😴"}</div></div>
-      ${p.pool!=="GH"?`<input type="number" value="${p.quota}" min="1" max="15" onchange="people.find(x=>x.id===${p.id}).quota=+this.value">`:""}
-      <button class="del" onclick="delPerson(${p.id})">✕</button>`;
+      <div class="info"><div class="nm">${p.name}${p.id===me.id?" (sen)":""} ${p.is_admin?"👑":""}</div>
+      <div class="sub">${POOL_LABEL[p.pool]} · ${p.pool==="GH"?"kota oto":"kota "+p.quota} · ertesi gün ${p.works_after?"çalışır":"izinli"}</div></div>
+      ${ro?"":`<select onchange="updProfile('${p.id}',{pool:this.value})">
+        ${Object.keys(POOL_LABEL).map(k=>`<option value="${k}" ${p.pool===k?"selected":""}>${POOL_LABEL[k]}</option>`).join("")}</select>
+      ${p.pool!=="GH"?`<input type="number" value="${p.quota}" min="0" max="15" onchange="updProfile('${p.id}',{quota:+this.value})">`:""}
+      <label><input type="checkbox" ${p.works_after?"checked":""} onchange="updProfile('${p.id}',{works_after:this.checked})">ertesi çalışır</label>`}`;
     list.appendChild(d);
   });
-  const sel=document.getElementById("prefPerson");sel.innerHTML="";
-  people.forEach(p=>{const o=document.createElement("option");o.value=p.id;o.textContent=p.name;sel.appendChild(o);});
+  const db=$("devirBody");db.innerHTML="";
+  members.forEach(p=>{
+    const tr=document.createElement("tr");
+    tr.innerHTML=`<td>${POOL_EMOJI[p.pool]} ${p.name}</td>
+      ${["carry_t","carry_w","carry_b"].map(f=>`<td>${ro?p[f]:`<input type="number" value="${p[f]}" min="0" style="width:54px;padding:5px" onchange="updProfile('${p.id}',{${f}:+this.value})">`}</td>`).join("")}`;
+    db.appendChild(tr);
+  });
 }
-function addPerson(name,pool){
-  const n=(name||document.getElementById("newName").value).trim();
-  const pl=pool||document.getElementById("newPool").value;
-  if(!n)return;
-  people.push({id:Date.now()+Math.random(),name:n,pool:pl,quota:pl==="GH"?0:6,worksAfter:false});
-  document.getElementById("newName").value="";renderAll();
+async function updProfile(id,patch){
+  const {error}=await sb.from("profiles").update(patch).eq("id",id);
+  if(error){alert("⚠️ Yetki yok veya hata: "+error.message);}
+  await loadAll();
 }
-function delPerson(id){people=people.filter(p=>p.id!==id);delete prefs[id];renderAll();}
 
-/* ---------- İSTEKLER ---------- */
+/* ---------- İZİNLERİM (sadece kendi) ---------- */
 function renderPrefCal(){
   const {y,m,nDays,firstDow}=monthInfo();
-  const pid=+document.getElementById("prefPerson").value;
-  const cal=document.getElementById("prefCal");cal.innerHTML="";
+  const cal=$("prefCal");cal.innerHTML="";
   DAYS_TR.forEach(d=>{const h=document.createElement("div");h.className="dh";h.textContent=d;cal.appendChild(h);});
   for(let i=0;i<firstDow;i++){const e=document.createElement("div");e.className="day empty";cal.appendChild(e);}
   for(let d=1;d<=nDays;d++){
-    const c=document.createElement("div");const st=pref(pid,d);
-    c.className="day prefday "+(st==="no"?"no":st==="yes"?"yes":"")+(isWknd(y,m,d)?" wknd":"");
+    const c=document.createElement("div");const st=pref(me.id,d);
+    const cls=st==="izin"?"izin":st==="avoid"?"no":st==="yes"?"yes":"";
+    c.className="day prefday "+cls+(isBay(d)?" bay":isWknd(y,m,d)?" wknd":"");
     c.textContent=d;
-    c.onclick=()=>{prefs[pid]=prefs[pid]||{};prefs[pid][d]=st===""?"no":st==="no"?"yes":"";renderPrefCal();};
+    if(st!=="izin")c.onclick=()=>togglePref(d);
     cal.appendChild(c);
   }
 }
+let prefSaveTimer=null;
+async function togglePref(d){
+  const cur=pref(me.id,d);
+  if(cur==="izin")return;
+  allPrefs[me.id]=allPrefs[me.id]||{};
+  allPrefs[me.id][d]=cur===""?"avoid":cur==="avoid"?"yes":"";
+  if(allPrefs[me.id][d]==="")delete allPrefs[me.id][d];
+  renderPrefCal();
+  clearTimeout(prefSaveTimer);
+  prefSaveTimer=setTimeout(async()=>{
+    const {error}=await sb.from("prefs").upsert({user_id:me.id,dept_id:dept.id,month:dept.month,days:allPrefs[me.id]});
+    const s=$("prefStatus");
+    s.style.display="block";
+    s.className=error?"banner err":"banner ok";
+    s.textContent=error?"⚠️ Kaydedilemedi: "+error.message:"✅ Sunucuya kaydedildi";
+    setTimeout(()=>s.style.display="none",2000);
+  },600);
+}
+async function saveIzin(){
+  const days=($("izinInput").value||"").split(",").map(s=>parseInt(s.trim())).filter(n=>n>0);
+  allPrefs[me.id]=allPrefs[me.id]||{};
+  Object.keys(allPrefs[me.id]).forEach(d=>{if(allPrefs[me.id][d]==="izin")delete allPrefs[me.id][d];});
+  days.forEach(d=>allPrefs[me.id][d]="izin");
+  const {error}=await sb.from("prefs").upsert({user_id:me.id,dept_id:dept.id,month:dept.month,days:allPrefs[me.id]});
+  const s=$("izinStatus");s.style.display="block";
+  s.className=error?"banner err":"banner ok";
+  s.textContent=error?"⚠️ Kaydedilemedi: "+error.message:"✅ İzinlerin sunucuya kaydedildi ("+days.length+" gün)";
+  setTimeout(()=>s.style.display="none",2500);
+  renderPrefCal();renderPrefSummary();
+}
+function renderPrefSummary(){
+  const box=$("prefSummary");box.innerHTML="";
+  members.forEach(p=>{
+    const days=allPrefs[p.id]||{};
+    const izin=Object.values(days).filter(v=>v==="izin").length;
+    const no=Object.values(days).filter(v=>v==="avoid").length;
+    const yes=Object.values(days).filter(v=>v==="yes").length;
+    const d=document.createElement("div");d.className="person";
+    d.innerHTML=`<div class="avatar av-${p.pool.toLowerCase()}">${POOL_EMOJI[p.pool]}</div>
+      <div class="info"><div class="nm">${p.name}</div>
+      <div class="sub">🔒 ${izin} izin · 🚫 ${no} istemediği · ⭐ ${yes} istediği ${izin+no+yes===0?"· ⏳ henüz girmedi":""}</div></div>`;
+    box.appendChild(d);
+  });
+}
 
-/* ---------- SOLVER ---------- */
-function generate(){
+/* ---------- ÇÖZÜCÜ (yönetici) ---------- */
+async function generate(){
+  if(!isAdmin()){alert("Sadece yönetici üretebilir");return;}
   const {y,m,nDays}=monthInfo();
-  const rooms=+document.getElementById("rooms").value;
-  const gap=+document.getElementById("minGap").value;
-  const gh=people.filter(p=>p.pool==="GH"), spread=people.filter(p=>p.pool!=="GH");
+  const rooms=dept.rooms,gap=dept.min_gap,bays=bayramSet();
+  const gh=members.filter(p=>p.pool==="GH"),spread=members.filter(p=>p.pool!=="GH");
   let best=null;
   for(let iter=0;iter<400;iter++){
-    const asg={},last={},cnt={},wk={},viol=[];
-    people.forEach(p=>{cnt[p.id]=0;wk[p.id]=0;last[p.id]=-99;});
-    const put=(d,p)=>{(asg[d]=asg[d]||[]).push(p.id);cnt[p.id]++;last[p.id]=d;if(isWknd(y,m,d))wk[p.id]++;};
+    const asg={},cnt={},wk={},bay={},viol=[];
+    members.forEach(p=>{cnt[p.id]=0;wk[p.id]=0;bay[p.id]=0;});
+    const put=(d,p)=>{(asg[d]=asg[d]||[]).push(p.id);cnt[p.id]++;
+      if(isWknd(y,m,d))wk[p.id]++;if(bays.has(d))bay[p.id]++;};
     for(const p of spread){
-      const q=p.quota;let placed=0;
+      const q=p.quota;if(!q)continue;let placed=0;
       const step=nDays/q;
       const targets=[...Array(q)].map((_,i)=>Math.round(step*(i+Math.random()*0.8+0.1)));
       for(let t of targets){
         let d=Math.min(Math.max(1,t),nDays),ok=false;
-        for(let off=0;off<nDays&&!ok;off++){
-          for(const cand of [d+off,d-off]){
-            if(cand<1||cand>nDays)continue;
-            if(pref(p.id,cand)==="no")continue;
-            let clash=(asg[cand]||[]).includes(p.id);
-            for(let g=1;g<gap&&!clash;g++){if((asg[cand-g]||[]).includes(p.id)||(asg[cand+g]||[]).includes(p.id))clash=true;}
-            if(!clash){put(cand,p);ok=true;placed++;break;}
+        for(const allowAvoid of [false,true]){
+          if(ok)break;
+          for(let off=0;off<nDays&&!ok;off++){
+            for(const cand of [d+off,d-off]){
+              if(cand<1||cand>nDays)continue;
+              const pv=pref(p.id,cand);
+              if(pv==="izin")continue;
+              if(pv==="avoid"&&!allowAvoid)continue;
+              let clash=(asg[cand]||[]).includes(p.id);
+              for(let g=1;g<gap&&!clash;g++){if((asg[cand-g]||[]).includes(p.id)||(asg[cand+g]||[]).includes(p.id))clash=true;}
+              if(!clash){put(cand,p);ok=true;placed++;break;}
+            }
           }
         }
       }
@@ -357,157 +570,217 @@ function generate(){
     for(let d=1;d<=nDays;d++){
       for(let r=0;r<rooms;r++){
         const elig=gh.filter(p=>{
-          if(pref(p.id,d)==="no")return false;
+          if(pref(p.id,d)==="izin")return false;
           if((asg[d]||[]).includes(p.id))return false;
           for(let g=1;g<gap;g++){if((asg[d-g]||[]).includes(p.id))return false;}
           return true;});
         if(!elig.length){viol.push(`Gün ${d}: oda ${r+1} boş`);continue;}
-        elig.sort((a,b)=>
-          (cnt[a.id]*10+(isWknd(y,m,d)?wk[a.id]*6:0)-(pref(a.id,d)==="yes"?8:0)+Math.random()*4)-
-          (cnt[b.id]*10+(isWknd(y,m,d)?wk[b.id]*6:0)-(pref(b.id,d)==="yes"?8:0)+Math.random()*4));
+        const wgt=p=>{
+          let w=(cnt[p.id]+p.carry_t*0.3)*10;
+          if(isWknd(y,m,d))w+=(wk[p.id]+p.carry_w)*6;
+          if(bays.has(d))w+=(bay[p.id]+p.carry_b)*14;
+          if(pref(p.id,d)==="yes")w-=8;
+          if(pref(p.id,d)==="avoid")w+=12;
+          return w+Math.random()*4;};
+        elig.sort((a,b)=>wgt(a)-wgt(b));
         put(d,elig[0]);
       }
     }
     const varr=a=>{const mu=a.reduce((x,y)=>x+y,0)/(a.length||1);return a.reduce((s,v)=>s+(v-mu)**2,0);};
     let prefMiss=0;
-    people.forEach(p=>{for(let d=1;d<=nDays;d++){if(pref(p.id,d)==="yes"&&!(asg[d]||[]).includes(p.id))prefMiss++;}});
-    const score=viol.length*10000+varr(gh.map(p=>cnt[p.id]))*50+varr(gh.map(p=>wk[p.id]))*30+prefMiss;
-    if(!best||score<best.score)best={asg,viol,score,cnt,wk};
+    members.forEach(p=>{for(let d=1;d<=nDays;d++){
+      const on=(asg[d]||[]).includes(p.id);
+      if(pref(p.id,d)==="yes"&&!on)prefMiss++;
+      if(pref(p.id,d)==="avoid"&&on)prefMiss+=3;
+    }});
+    const score=viol.length*10000
+      +varr(gh.map(p=>cnt[p.id]+p.carry_t*0.3))*50
+      +varr(gh.map(p=>wk[p.id]+p.carry_w))*30
+      +varr(gh.map(p=>bay[p.id]+p.carry_b))*40+prefMiss;
+    if(!best||score<best.score)best={asg,viol,cnt,wk,bay,score};
   }
-  schedule=best;renderSchedule();showTab("cizelge");
+  const {error}=await sb.from("schedules").upsert({dept_id:dept.id,month:dept.month,
+    data:{asg:best.asg,viol:best.viol,cnt:best.cnt,wk:best.wk,bay:best.bay}});
+  if(error){alert("⚠️ "+error.message);return;}
+  await loadAll();showTab("cizelge");
 }
+
+/* ---------- ÇİZELGE GÖRÜNÜM ---------- */
 function renderSchedule(){
-  if(!schedule)return;
+  if(!schedule){$("schedWrap").innerHTML='<div class="empty-state"><div class="big">🗓️</div>Henüz yayınlanmış çizelge yok.</div>';
+    $("fairWrap").innerHTML='<div class="empty-state">Çizelge yayınlanınca burada denge görünür.</div>';
+    ["stTotal","stViol","stBal"].forEach(i=>$(i).textContent="—");$("genBanner").innerHTML="";return;}
   const {y,m,nDays,firstDow}=monthInfo();
-  // stats
   const total=Object.values(schedule.cnt).reduce((a,b)=>a+b,0);
-  document.getElementById("stTotal").textContent=total;
-  const v=document.getElementById("stViol");v.textContent=schedule.viol.length;
-  v.className="v"+(schedule.viol.length?" bad":"");
-  const gh=people.filter(p=>p.pool==="GH").map(p=>schedule.cnt[p.id]);
-  const spreadDiff=Math.max(...gh)-Math.min(...gh);
-  document.getElementById("stBal").textContent=spreadDiff<=1?"A+":spreadDiff===2?"B":"C";
-  document.getElementById("genBanner").innerHTML=schedule.viol.length===0
-    ?`<div class="banner ok">✅ Hazır — kural ihlali yok!</div>`
+  $("stTotal").textContent=total;
+  const v=$("stViol");v.textContent=schedule.viol.length;v.className="v"+(schedule.viol.length?" bad":"");
+  const ghc=members.filter(p=>p.pool==="GH").map(p=>schedule.cnt[p.id]||0);
+  const diff=ghc.length?Math.max(...ghc)-Math.min(...ghc):0;
+  $("stBal").textContent=diff<=1?"A+":diff===2?"B":"C";
+  $("genBanner").innerHTML=schedule.viol.length===0
+    ?`<div class="banner ok">✅ Yayında — kural ihlali yok!</div>`
     :`<div class="banner err">⚠️ ${schedule.viol.length} sorun: ${[...new Set(schedule.viol)].slice(0,3).join(" · ")}</div>`;
-  // calendar
-  const wrap=document.getElementById("schedWrap");wrap.innerHTML="";
+  const wrap=$("schedWrap");wrap.innerHTML="";
   const cal=document.createElement("div");cal.className="cal";
   DAYS_TR.forEach(d=>{const h=document.createElement("div");h.className="dh";h.textContent=d;cal.appendChild(h);});
   for(let i=0;i<firstDow;i++){const e=document.createElement("div");e.className="day empty";cal.appendChild(e);}
   for(let d=1;d<=nDays;d++){
-    const c=document.createElement("div");c.className="day"+(isWknd(y,m,d)?" wknd":"");
+    const c=document.createElement("div");
+    c.className="day click"+(isBay(d)?" bay":isWknd(y,m,d)?" wknd":"");
     c.innerHTML=`<span class="num">${d}</span><div class="who">${(schedule.asg[d]||[]).map(id=>{
-      const p=people.find(x=>x.id===id);return p?`<span class="chip-p c-${p.pool.toLowerCase()}">${p.name.split(" ")[0]}</span>`:"";}).join("")}</div>`;
+      const p=members.find(x=>x.id===id);
+      return p?`<span class="chip-p c-${p.pool.toLowerCase()} ${p.id===me.id?"me":""}">${p.name.split(" ")[0]}</span>`:"";}).join("")}</div>`;
+    c.onclick=()=>{fillReqForm(d);showTab("takas");};
     cal.appendChild(c);
   }
   wrap.appendChild(cal);
-  // fairness
-  const fw=document.getElementById("fairWrap");fw.innerHTML="";
+  renderFair();
+}
+function renderFair(){
+  const {y,m,nDays}=monthInfo();
+  const fw=$("fairWrap");fw.innerHTML="";
   const maxCnt=Math.max(...Object.values(schedule.cnt),1);
   const tbl=document.createElement("table");
-  tbl.innerHTML=`<thead><tr><th>Kişi</th><th style="width:26%">Yük</th><th>Nöbet</th><th>H.sonu</th><th>Cuma</th><th>İstek</th></tr></thead>`;
+  tbl.innerHTML=`<thead><tr><th>Kişi</th><th style="width:20%">Yük</th><th>Nöb.</th><th>Hs</th><th>🌙</th><th>Cum</th></tr></thead>`;
   const tb=document.createElement("tbody");
-  people.forEach(p=>{
-    let fri=0,yh=0,yt=0;
-    for(let d=1;d<=nDays;d++){
-      const on=(schedule.asg[d]||[]).includes(p.id);
-      if(on&&isFri(y,m,d))fri++;
-      if(pref(p.id,d)==="yes"){yt++;if(on)yh++;}
-    }
+  members.forEach(p=>{
+    let fri=0;
+    for(let d=1;d<=nDays;d++){if((schedule.asg[d]||[]).includes(p.id)&&isFri(y,m,d))fri++;}
     const tr=document.createElement("tr");
-    tr.innerHTML=`<td>${POOL_EMOJI[p.pool]} ${p.name.split(" (")[0]}</td>
-      <td><div class="bar"><i style="width:${Math.round(schedule.cnt[p.id]/maxCnt*100)}%"></i></div></td>
-      <td><b style="color:var(--teal-deep)">${schedule.cnt[p.id]}</b></td>
-      <td>${schedule.wk[p.id]}</td><td>${fri}</td><td>${yt?Math.round(yh/yt*100)+"%":"—"}</td>`;
+    tr.innerHTML=`<td>${POOL_EMOJI[p.pool]} ${p.name}${p.id===me.id?" ⭐":""}</td>
+      <td><div class="bar"><i style="width:${Math.round((schedule.cnt[p.id]||0)/maxCnt*100)}%"></i></div></td>
+      <td><b style="color:var(--teal-deep)">${schedule.cnt[p.id]||0}</b>${p.carry_t?`<span style="color:var(--ink-soft);font-size:.65rem">+${p.carry_t}</span>`:""}</td>
+      <td>${schedule.wk[p.id]||0}</td><td>${schedule.bay[p.id]||0}</td><td>${fri}</td>`;
     tb.appendChild(tr);
   });
   tbl.appendChild(tb);fw.appendChild(tbl);
 }
+async function devireEkle(){
+  if(!schedule){alert("Önce çizelge üret");return;}
+  if(!confirm("Bu ayın yükleri herkesin devrine eklensin mi?"))return;
+  for(const p of members){
+    await sb.from("profiles").update({
+      carry_t:p.carry_t+(schedule.cnt[p.id]||0),
+      carry_w:p.carry_w+(schedule.wk[p.id]||0),
+      carry_b:p.carry_b+(schedule.bay[p.id]||0)}).eq("id",p.id);
+  }
+  await loadAll();alert("Devir güncellendi ✅ (sunucuda saklı)");
+}
 
-/* ---------- AI: fairness report ---------- */
+/* ---------- TAKAS ---------- */
+function fillReqForm(preselect){
+  const sel=$("reqDay");sel.innerHTML="";
+  if(!schedule){sel.innerHTML="<option>Henüz çizelge yok</option>";return;}
+  const {nDays}=monthInfo();
+  let found=false;
+  for(let d=1;d<=nDays;d++){
+    if(!(schedule.asg[d]||[]).includes(me.id))continue;
+    found=true;
+    const o=document.createElement("option");o.value=d;o.textContent=d+". gün"+(isBay(d)?" 🌙":"");
+    if(preselect===d)o.selected=true;
+    sel.appendChild(o);
+  }
+  if(!found)sel.innerHTML="<option value=''>Bu ay nöbetin yok 🎉</option>";
+  const inSel=$("reqIn");inSel.innerHTML="";
+  members.filter(p=>p.pool===myProfile.pool&&p.id!==me.id).forEach(p=>{
+    const o=document.createElement("option");o.value=p.id;o.textContent=p.name;inSel.appendChild(o);
+  });
+}
+async function createReq(){
+  const day=+$("reqDay").value,inId=$("reqIn").value,note=$("reqNote").value.trim();
+  if(!day||!inId){alert("Gün ve kişi seç");return;}
+  const {error}=await sb.from("swap_requests").insert({
+    dept_id:dept.id,month:dept.month,day,out_id:me.id,in_id:inId,note});
+  if(error){alert("⚠️ "+error.message);return;}
+  $("reqNote").value="";await loadAll();alert("İstek gönderildi 📨");
+}
+function renderReqs(){
+  const box=$("reqList");box.innerHTML="";
+  if(!requests.length){box.innerHTML='<div class="empty-state">Henüz istek yok.</div>';return;}
+  requests.forEach(rq=>{
+    const outP=members.find(x=>x.id===rq.out_id)||{name:"?"};
+    const inP=members.find(x=>x.id===rq.in_id)||{name:"?"};
+    const mine=rq.in_id===me.id&&rq.status==="bekliyor";
+    const d=document.createElement("div");d.className="req";
+    d.innerHTML=`<span class="st ${rq.status}">${rq.status.toUpperCase()}${rq.reason?" — "+rq.reason:""}</span>
+      <div class="head">${rq.day}. gün: ${outP.name} → ${inP.name}${rq.in_id===me.id?" (sana)":""}</div>
+      ${rq.note?`<div class="note">"${rq.note}"</div>`:""}
+      ${mine?`<div class="row">
+        <button class="btn small" onclick="acceptReq(${rq.id})">✔ Kabul</button>
+        <button class="btn red small" onclick="rejectReq(${rq.id})">✖ Red</button></div>`
+      :rq.status==="bekliyor"?`<div class="sub" style="font-size:.72rem;color:var(--ink-soft)">⏳ ${inP.name} yanıtlayacak</div>`:""}`;
+    box.appendChild(d);
+  });
+}
+async function acceptReq(id){
+  const rq=requests.find(r=>r.id===id);if(!rq||!schedule)return;
+  const gap=dept.min_gap;
+  let reason="";
+  if(pref(me.id,rq.day)==="izin")reason="izinlisin";
+  else if((schedule.asg[rq.day]||[]).includes(me.id))reason="zaten nöbetçisin";
+  else{for(let g=1;g<gap;g++){
+    if((schedule.asg[rq.day-g]||[]).includes(me.id)||(schedule.asg[rq.day+g]||[]).includes(me.id)){reason="min ara kuralı";break;}}}
+  if(reason){
+    await sb.from("swap_requests").update({status:"red",reason:"kural: "+reason}).eq("id",id);
+    await loadAll();alert("Takas kurala takıldı: "+reason);return;
+  }
+  const {y,m}=monthInfo();
+  const arr=schedule.asg[rq.day];arr[arr.indexOf(rq.out_id)]=me.id;
+  schedule.cnt[rq.out_id]--;schedule.cnt[me.id]=(schedule.cnt[me.id]||0)+1;
+  if(isWknd(y,m,rq.day)){schedule.wk[rq.out_id]--;schedule.wk[me.id]=(schedule.wk[me.id]||0)+1;}
+  if(isBay(rq.day)){schedule.bay[rq.out_id]--;schedule.bay[me.id]=(schedule.bay[me.id]||0)+1;}
+  await sb.from("schedules").update({data:schedule}).eq("dept_id",dept.id).eq("month",dept.month);
+  await sb.from("swap_requests").update({status:"kabul"}).eq("id",id);
+  await loadAll();alert("Takas uygulandı ✅");
+}
+async function rejectReq(id){
+  await sb.from("swap_requests").update({status:"red",reason:"reddedildi"}).eq("id",id);
+  await loadAll();
+}
+
+/* ---------- EXPORT & AI ---------- */
+function csvIndir(){
+  if(!schedule){alert("Henüz çizelge yok");return;}
+  const {y,m,nDays}=monthInfo();
+  let rows=["Gün;Tarih;Tip;Nöbetçiler"];
+  for(let d=1;d<=nDays;d++){
+    const tip=isBay(d)?"BAYRAM":isWknd(y,m,d)?"Hafta sonu":"Hafta içi";
+    const isim=(schedule.asg[d]||[]).map(id=>(members.find(x=>x.id===id)||{}).name||"").join(" | ");
+    rows.push(`${DAYS_TR[(new Date(y,m-1,d).getDay()+6)%7]};${d}.${m}.${y};${tip};${isim}`);
+  }
+  rows.push("");rows.push("Kişi;Nöbet;Hafta sonu;Bayram;Devir");
+  members.forEach(p=>rows.push(`${p.name};${schedule.cnt[p.id]||0};${schedule.wk[p.id]||0};${schedule.bay[p.id]||0};${p.carry_t}`));
+  const blob=new Blob(["\uFEFF"+rows.join("\n")],{type:"text/csv;charset=utf-8"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);
+  a.download="adilnobet-"+dept.month+".csv";a.click();
+}
+function fairContext(){
+  return members.map(p=>`${p.name} (${POOL_LABEL[p.pool]}): ${schedule.cnt[p.id]||0} nöbet, ${schedule.wk[p.id]||0} hafta sonu, ${schedule.bay[p.id]||0} bayram, devir:${p.carry_t}`).join("\n")
+    +`\nİhlaller: ${schedule.viol.join("; ")||"yok"}`;
+}
 async function aiReport(){
-  if(!schedule){alert("Önce çizelgeyi üret 🙂");return;}
-  const out=document.getElementById("aiOut");out.style.display="block";out.textContent="🤖 Rapor hazırlanıyor…";
-  const summary=people.map(p=>`${p.name} (${POOL_LABEL[p.pool]}): ${schedule.cnt[p.id]} nöbet, ${schedule.wk[p.id]} hafta sonu`).join("\n");
+  if(!schedule){alert("Henüz çizelge yok");return;}
+  const out=$("aiOut");out.style.display="block";out.textContent="🤖 Rapor hazırlanıyor…";
   try{
     const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},
       body:JSON.stringify({model:"claude-sonnet-4-6",max_tokens:1000,messages:[{role:"user",content:
-`Hastane nöbet adalet analisti olarak bu aylık dağılımı incele. Türkçe, samimi, kısa (2-3 paragraf, madde işareti yok) bir rapor yaz: adil mi, kim yüklü, gelecek ay önerin ne? Not: Genel Cerrahi asistanı kural gereği 6 nöbet tutar ve ertesi gün çalışır; Genel Havuz otomatik dengelenir.\n\n${summary}\n\nİhlaller: ${schedule.viol.length?schedule.viol.join("; "):"yok"}`}]})});
+`Hastane nöbet adalet analisti olarak incele; Türkçe, samimi, 2-3 paragraf: adil mi, kim yüklü, devir dengesi, öneri?\n\n${fairContext()}`}]})});
     const data=await r.json();
     out.textContent=(data.content||[]).filter(b=>b.type==="text").map(b=>b.text).join("\n")||"Rapor alınamadı.";
-  }catch(e){out.textContent="AI'ya şu an ulaşılamadı (prototip Claude ortamında açıkken çalışır): "+e.message;}
+  }catch(e){out.textContent="AI'ya ulaşılamadı — bu özellik bir sonraki adımda kendi sunucumuz üzerinden bağlanacak.";}
 }
-
-/* ---------- AI: chat assistant ---------- */
-function addMsg(txt,cls,html){
-  const box=document.getElementById("chatBox");
-  const d=document.createElement("div");d.className="msg "+cls;
-  if(html)d.innerHTML=txt;else d.textContent=txt;
-  box.appendChild(d);box.scrollTop=box.scrollHeight;return d;
-}
-function quickAsk(t){document.getElementById("chatInput").value=t;sendChat(new Event("submit"));}
-function stateSummary(){
-  const {nDays}=monthInfo();
-  return `Ay: ${document.getElementById("month").value} (${nDays} gün). Oda/gece: ${document.getElementById("rooms").value}. Min ara: ${document.getElementById("minGap").value}.
-Ekip: ${people.map(p=>`${p.name}|${p.pool}|kota:${p.pool==="GH"?"oto":p.quota}`).join("; ")}
-${schedule?`Son çizelge: ${people.map(p=>p.name+":"+schedule.cnt[p.id]).join(", ")}. İhlal: ${schedule.viol.length}`:"Henüz çizelge üretilmedi."}`;
-}
-async function sendChat(e){
-  e.preventDefault();
-  const inp=document.getElementById("chatInput");
-  const txt=inp.value.trim();if(!txt)return;
-  inp.value="";addMsg(txt,"user");
-  chatHist.push({role:"user",content:txt});
-  const thinking=addMsg('<span class="typing"><i></i><i></i><i></i></span>',"ai",true);
-  const sys=`Sen AdilNöbet uygulamasının içindeki asistansın. Türkçe, samimi ve KISA konuş. Mevcut durum:\n${stateSummary()}\n
-SADECE şu JSON formatında yanıt ver, başka hiçbir şey yazma, markdown kullanma:
-{"reply":"kullanıcıya kısa mesajın","actions":[...]}
-Kullanılabilir action türleri:
-{"type":"set_rooms","value":N} {"type":"set_gap","value":N}
-{"type":"add_person","name":"X","pool":"GH|GC|AN|KD"} {"type":"remove_person","name":"X"}
-{"type":"set_quota","name":"X","value":N}
-{"type":"set_unavailable","name":"X","days":[g1,g2,...]} {"type":"set_preferred","name":"X","days":[...]}
-{"type":"generate"}
-Eylem gerekmiyorsa actions boş dizi olsun. Kişi adlarını ekipteki en yakın isimle eşleştir. Gün aralığı söylenirse (ör. 12-15 arası) tüm günleri diziye yaz.`;
+async function aiAsk(){
+  if(!schedule){alert("Henüz çizelge yok");return;}
+  const q=$("aiQ").value.trim();if(!q)return;
+  const out=$("aiAnswer");out.style.display="block";out.textContent="🤖 Düşünüyorum…";$("aiQ").value="";
   try{
     const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({model:"claude-sonnet-4-6",max_tokens:1000,
-        messages:[{role:"user",content:sys},{role:"assistant",content:"{\"reply\":\"Anladım, hazırım! 🩺\",\"actions\":[]}"},...chatHist.slice(-10)]})});
+      body:JSON.stringify({model:"claude-sonnet-4-6",max_tokens:800,messages:[{role:"user",content:
+`Sen nöbet adalet analistisin. SADECE adalet sorularını yanıtla, konu dışına "Ben sadece adalet analiziyle ilgilenirim 🙂" de. Türkçe, kısa.\n\n${fairContext()}\n\nSoru: ${q}`}]})});
     const data=await r.json();
-    const raw=(data.content||[]).filter(b=>b.type==="text").map(b=>b.text).join("").replace(/```json|```/g,"").trim();
-    let parsed;try{parsed=JSON.parse(raw);}catch{parsed={reply:raw||"Anlayamadım, tekrar dener misin?",actions:[]};}
-    chatHist.push({role:"assistant",content:raw});
-    const done=applyActions(parsed.actions||[]);
-    thinking.textContent=parsed.reply||"Tamam!";
-    if(done.length){const a=document.createElement("span");a.className="act";a.textContent="✅ Uygulandı: "+done.join(", ");thinking.appendChild(a);}
-  }catch(err){thinking.textContent="Bağlantı sorunu (prototip Claude ortamında açıkken çalışır): "+err.message;}
+    out.textContent=(data.content||[]).filter(b=>b.type==="text").map(b=>b.text).join("\n")||"Yanıt alınamadı.";
+  }catch(e){out.textContent="AI'ya ulaşılamadı — bir sonraki adımda kendi sunucumuzdan bağlanacak.";}
 }
-function findPerson(name){
-  const n=(name||"").toLocaleLowerCase("tr");
-  return people.find(p=>p.name.toLocaleLowerCase("tr").includes(n))||null;
-}
-function applyActions(actions){
-  const done=[];
-  for(const a of actions){
-    try{
-      if(a.type==="set_rooms"){document.getElementById("rooms").value=a.value;done.push(`oda=${a.value}`);}
-      else if(a.type==="set_gap"){document.getElementById("minGap").value=a.value;done.push(`min ara=${a.value}`);}
-      else if(a.type==="add_person"){addPerson(a.name,a.pool||"GH");done.push(`${a.name} eklendi`);}
-      else if(a.type==="remove_person"){const p=findPerson(a.name);if(p){delPerson(p.id);done.push(`${p.name} çıkarıldı`);}}
-      else if(a.type==="set_quota"){const p=findPerson(a.name);if(p){p.quota=a.value;done.push(`${p.name} kota=${a.value}`);}}
-      else if(a.type==="set_unavailable"){const p=findPerson(a.name);if(p){prefs[p.id]=prefs[p.id]||{};a.days.forEach(d=>prefs[p.id][d]="no");done.push(`${p.name} izin: ${a.days.length} gün`);}}
-      else if(a.type==="set_preferred"){const p=findPerson(a.name);if(p){prefs[p.id]=prefs[p.id]||{};a.days.forEach(d=>prefs[p.id][d]="yes");done.push(`${p.name} tercih: ${a.days.length} gün`);}}
-      else if(a.type==="generate"){generate();done.push("çizelge üretildi");}
-    }catch(e){}
-  }
-  renderAll();return done;
-}
-
-/* ---------- INIT ---------- */
-function renderAll(){renderPeople();renderPrefCal();}
-renderAll();
-addMsg("Merhaba! 👋 Ben AdilNöbet asistanıyım. Ayarları konuşarak değiştirebilirsin: \"Elif 20-24 arası kongrede\", \"odaları 3 yap\", \"çizelgeyi üret\" gibi. Ne yapalım?","ai");
 </script>
 </body>
 </html>
