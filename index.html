@@ -211,6 +211,22 @@ nav button.active .ic{filter:none}
         <option value="shifts">⏰ Vardiya tabanlı (acil / icap / kat)</option>
       </select>
     </div>
+    <div class="row" style="margin-top:10px">
+      <label>🧭 Çalışma düzeni</label>
+      <select id="workModel" style="flex:1;min-width:180px">
+        <option value="shift_only">Nöbet/vardiya = tüm mesai (acil, sekreter, hemşire…)</option>
+        <option value="duty_rest">Mesai + nöbet · nöbet ertesi izinli</option>
+        <option value="duty_work">Mesai + nöbet · nöbet ertesi çalışır</option>
+      </select>
+    </div>
+    <div class="row" style="margin-top:10px">
+      <label>🔁 Ritim:</label>
+      <input type="number" id="patternOn" min="0" max="7" value="0">
+      <label>gün üst üste →</label>
+      <input type="number" id="patternOff" min="0" max="7" value="0">
+      <label>gün dinlen</label>
+    </div>
+    <p class="hint" style="margin:6px 0 0">Ritim örneği: 2 → 2 = iki gün art arda gelen, sonraki iki gün gelmez (0 = kapalı; vardiya modunda çalışır).</p>
     <button class="btn small" style="margin-top:12px" id="saveSettingsBtn" onclick="saveSettings()">💾 Ayarları Kaydet</button>
   </div>
   <div class="card" id="roomCard">
@@ -285,6 +301,18 @@ nav button.active .ic{filter:none}
       <button class="btn small" onclick="saveWish()">💾 Kaydet</button>
     </div>
     <div id="wishStatus" class="banner ok" style="display:none"></div>
+  </div>
+  <div class="card">
+    <p class="eyebrow">Ay düzeni</p>
+    <h2>🏖 Nöbetlerim nasıl dağılsın?</h2>
+    <p class="hint" id="shapeHint">Tatilini büyütmek için nöbetlerinin ay içindeki yerleşimini seç.</p>
+    <select id="shapeSel" style="width:100%" onchange="saveShape()">
+      <option value="">Farketmez / eşit dağılsın</option>
+      <option value="mid">Ay başı + sonu yoğun · ortası boş (ortada tatil)</option>
+      <option value="start">Ay başı yoğun · sonu boş</option>
+      <option value="end">Ay sonu yoğun · başı boş</option>
+    </select>
+    <div id="shapeStatus" class="banner ok" style="display:none"></div>
   </div>
   <div class="card">
     <h2>👀 Ekibin doluluk özeti</h2>
@@ -377,12 +405,18 @@ nav button.active .ic{filter:none}
 
 <script>
 /* ================= AYAR — BURAYI DOLDUR ================= */
-const SUPABASE_URL = "https://kxvmbngmfjbrtjbldcuv.supabase.co";
-const SUPABASE_KEY = "sb_publishable_Pg7QxEPEENlXR_cDgWGEoQ_SVxb73DO";
+const SUPABASE_URL = "BURAYA_SUPABASE_URL";
+const SUPABASE_KEY = "BURAYA_SUPABASE_ANON_KEY";
 /* ======================================================== */
 
 const BRANCHES=["Acil Tıp","Anestezi","Beyin Cerrahisi","Çocuk Cerrahisi","Çocuk Sağlığı","Dahiliye","Dermatoloji","Enfeksiyon","FTR","Genel Cerrahi","Göğüs Hastalıkları","Göz","Kadın Doğum","KBB","Kardiyoloji","Nöroloji","Ortopedi","Patoloji","Plastik Cerrahi","Psikiyatri","Radyoloji","Üroloji"];
-const BR_EMOJI={"Anestezi":"💉","Genel Cerrahi":"🔪","Kadın Doğum":"🤰","Göz":"👁","Kardiyoloji":"❤️","Ortopedi":"🦴","Psikiyatri":"🧠","Acil Tıp":"🚑","Çocuk Sağlığı":"🧸","Radyoloji":"🩻"};
+const ROLES=["Hemşire (Kat)","Hemşire (Yoğun Bakım)","Hemşire (Ameliyathane)","Yoğun Bakım Doktoru","Sekreter","Kat Sekreteri","Güvenlik","Temizlik Personeli","Porter","Aşçı","Mutfak Personeli","Teknisyen"];
+const BR_EMOJI={"Anestezi":"💉","Genel Cerrahi":"🔪","Kadın Doğum":"🤰","Göz":"👁","Kardiyoloji":"❤️","Ortopedi":"🦴","Psikiyatri":"🧠","Acil Tıp":"🚑","Çocuk Sağlığı":"🧸","Radyoloji":"🩻",
+"Hemşire (Kat)":"💚","Hemşire (Yoğun Bakım)":"🫀","Hemşire (Ameliyathane)":"🏥","Yoğun Bakım Doktoru":"🫁","Sekreter":"🗂","Kat Sekreteri":"📋","Güvenlik":"🛡️","Temizlik Personeli":"🧹","Porter":"🛏","Aşçı":"👨‍🍳","Mutfak Personeli":"🍽","Teknisyen":"🔧"};
+function branchOptionsHTML(selected){
+  return `<optgroup label="🩺 Asistanlık Branşları">${BRANCHES.map(b=>`<option value="${b}" ${selected===b?"selected":""}>${b}</option>`).join("")}</optgroup>`+
+    `<optgroup label="🏥 Diğer Görevler">${ROLES.map(b=>`<option value="${b}" ${selected===b?"selected":""}>${b}</option>`).join("")}</optgroup>`;
+}
 const DAYS_TR=["Pzt","Sal","Çar","Per","Cum","Cmt","Paz"];
 let sb=null, me=null, myProfile=null, dept=null, members=[], allPrefs={}, schedule=null, requests=[];
 let signupMode=false, roomRows=[], shiftRows=[], ovrRows=[];
@@ -412,7 +446,7 @@ function generalStaff(){return members.filter(p=>!hasOwnRoom(p.pool));}
 
 /* ---------- BAŞLAT ---------- */
 window.addEventListener("load",async()=>{
-  const sel=$("myBranch");BRANCHES.forEach(b=>{const o=document.createElement("option");o.value=b;o.textContent=brEmoji(b)+" "+b;sel.appendChild(o);});
+  const sel=$("myBranch");sel.innerHTML=branchOptionsHTML(BRANCHES[0]);
   if(SUPABASE_URL.includes("BURAYA")){showView("config");return;}
   sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
   const {data:{session}}=await sb.auth.getSession();
@@ -489,7 +523,7 @@ async function loadAll(){
   $("inviteCard").style.display=isAdmin()?"block":"none";
   $("inviteCode").textContent=dept.join_code;
   const ro=!isAdmin();
-  ["month","minGap","bayramDays","generalRooms","schedMode"].forEach(id=>$(id).disabled=ro);
+  ["month","minGap","bayramDays","generalRooms","schedMode","workModel","patternOn","patternOff"].forEach(id=>$(id).disabled=ro);
   $("saveSettingsBtn").style.display=ro?"none":"inline-block";
   $("addRoomBtn").style.display=ro?"none":"inline-block";
   $("genRow").style.display=ro?"none":"block";
@@ -500,6 +534,11 @@ async function loadAll(){
   const myIzin=Object.entries(allPrefs[me.id]||{}).filter(([d,v])=>v==="izin").map(([d])=>d);
   $("izinInput").value=myIzin.sort((a,b)=>a-b).join(",");
   $("wishInput").value=((allPrefs[me.id]||{})._wish)||"";
+  $("shapeSel").value=((allPrefs[me.id]||{})._shape)||"";
+  $("workModel").value=dept.work_model||"shift_only";
+  $("patternOn").value=dept.pattern_on||0;
+  $("patternOff").value=dept.pattern_off||0;
+  updateShapeHint();
   const {data:sch}=await sb.from("schedules").select("*").eq("dept_id",dept.id).eq("month",dept.month).maybeSingle();
   schedule=sch?sch.data:null;
   const {data:reqs}=await sb.from("swap_requests").select("*").eq("dept_id",dept.id).eq("month",dept.month).order("id",{ascending:false});
@@ -514,7 +553,7 @@ function renderRooms(){
   roomRows.forEach((r,i)=>{
     const d=document.createElement("div");d.className="roomrow";
     d.innerHTML=`<select ${ro?"disabled":""} onchange="roomRows[${i}].branch=this.value">
-        ${BRANCHES.map(b=>`<option value="${b}" ${r.branch===b?"selected":""}>${brEmoji(b)} ${b}</option>`).join("")}</select>
+        ${branchOptionsHTML(r.branch)}</select>
       <input type="number" value="${r.rooms}" min="1" max="5" ${ro?"disabled":""} onchange="roomRows[${i}].rooms=+this.value">
       <select ${ro?"disabled":""} onchange="roomRows[${i}].shared=this.value==='1'">
         <option value="0" ${!r.shared?"selected":""}>🔒 Kilitli (boşsa boş kalır)</option>
@@ -631,7 +670,8 @@ async function saveSettings(){
   const {error}=await sb.from("departments").update({
     month:$("month").value,min_gap:+$("minGap").value,bayram:$("bayramDays").value,
     general_rooms:+$("generalRooms").value,branch_rooms:br,
-    sched_mode:$("schedMode").value,shifts:shiftRows,shift_overrides:ovrRows
+    sched_mode:$("schedMode").value,shifts:shiftRows,
+    work_model:$("workModel").value,pattern_on:+$("patternOn").value||0,pattern_off:+$("patternOff").value||0,shift_overrides:ovrRows
   }).eq("id",dept.id);
   if(error){alert("⚠️ "+error.message);return;}
   await loadAll();alert("Ayarlar kaydedildi ✅");
@@ -666,7 +706,7 @@ function renderPeople(){
       <div class="info"><div class="nm">${p.name}${own?" (sen)":""} ${p.is_admin?"👑":""}</div>
       <div class="sub"><span class="tag" style="${brStyle(p.pool)}">${p.pool||"?"}</span> · ${dedicated?"kota "+p.quota:"genel oda · kota oto"} · ertesi gün ${p.works_after?"çalışır":"izinli"}</div></div>
       ${admin?`<select onchange="updProfile('${p.id}',{pool:this.value})">
-        ${BRANCHES.map(b=>`<option value="${b}" ${p.pool===b?"selected":""}>${b}</option>`).join("")}</select>`:""}
+        ${branchOptionsHTML(p.pool)}</select>`:""}
       ${admin&&dedicated?`<input type="number" value="${p.quota}" min="0" max="15" onchange="updProfile('${p.id}',{quota:+this.value})">`:""}
       ${admin?`<label><input type="checkbox" ${p.works_after?"checked":""} onchange="updProfile('${p.id}',{works_after:this.checked})">ertesi çalışır</label>`:""}
       ${isShiftMode()&&shiftRows.length?`<div class="row" style="width:100%;margin-top:5px">
@@ -747,6 +787,38 @@ async function saveWish(){
   renderPrefSummary();
 }
 function wishOf(p){return ((allPrefs[p.id]||{})._wish)||0;}
+async function saveShape(){
+  const v=$("shapeSel").value;
+  allPrefs[me.id]=allPrefs[me.id]||{};
+  if(v)allPrefs[me.id]._shape=v;else delete allPrefs[me.id]._shape;
+  const {error}=await sb.from("prefs").upsert({user_id:me.id,dept_id:dept.id,month:dept.month,days:allPrefs[me.id]});
+  const s=$("shapeStatus");s.style.display="block";
+  s.className=error?"banner err":"banner ok";
+  s.textContent=error?"⚠️ "+error.message:"✅ Ay düzeni tercihin kaydedildi";
+  setTimeout(()=>s.style.display="none",2200);
+}
+function updateShapeHint(){
+  const wm=(dept&&dept.work_model)||"shift_only";
+  const el=$("shapeHint");if(!el)return;
+  if(wm==="shift_only")el.textContent="Bu ekipte nöbet/vardiya = tüm mesain. Uzun tatil için 'ortası boş' seçebilirsin; ritim kuralı açıksa 2+2 gibi bloklar otomatik oluşur ve boş günlerin kümelenir.";
+  else if(wm==="duty_rest")el.textContent="Nöbet ertesi izinli olduğun için tatili büyütmenin yolu: nöbetleri hafta sonuna bitişik günlere almak (Cuma nöbeti = Cmt izin). ⭐ istediğin günleri buna göre işaretle, dağılımı da buradan seç.";
+  else el.textContent="Nöbet ertesi çalıştığın için art arda yoğunluk yorucu olur — eşit dağılım genelde en sağlıklısı; yine de tatil planın varsa o haftayı 🚫 işaretle ve dağılımı buradan seç.";
+}
+function shapeW(p,d,nDays){
+  const sh=(allPrefs[p.id]||{})._shape||"";
+  if(!sh)return 0;
+  if(sh==="mid"){const edge=Math.min(d-1,nDays-d);return edge>nDays/3?6:-3;}
+  if(sh==="start")return d>nDays/2?6:-3;
+  if(sh==="end")return d<=nDays/2?6:-3;
+  return 0;
+}
+function longestFree(pid){
+  const {nDays}=monthInfo();let best=0,cur=0;
+  for(let d=1;d<=nDays;d++){
+    if(entryList(d).some(e=>e.id===pid))cur=0;else{cur++;if(cur>best)best=cur;}
+  }
+  return best;
+}
 function renderPrefSummary(){
   const box=$("prefSummary");box.innerHTML="";
   members.forEach(p=>{
@@ -918,6 +990,7 @@ function generateRooms(){
           if(bays.has(d))w+=(bay[p.id]+p.carry_b)*14;
           if(pref(p.id,d)==="yes")w-=8;
           if(pref(p.id,d)==="avoid")w+=12;
+          w+=shapeW(p,d,nDays);
           return w+Math.random()*4;};
         elig.sort((a,b2)=>wgt(a)-wgt(b2));
         put(d,elig[0],slot);
@@ -950,6 +1023,7 @@ function generateShifts(){
   const bays=bayramSet();
   if(!shiftRows.length){alert("Önce vardiya tanımla (⏰ Vardiyalar kartı)");return;}
   const dayIdx=d=>(new Date(y,m-1,d).getDay()+6)%7;
+  const patOn=+($("patternOn").value||0),patOff=+($("patternOff").value||0);
   // kronolojik vardiya olayları: gün + başlangıç saatine göre sıralı
   const occ=[];
   for(let d=1;d<=nDays;d++){
@@ -974,6 +1048,11 @@ function generateShifts(){
           if(spf.allowed&&spf.allowed[o.si]===false)return false;
           if(tg>0&&C[p.id]>=tg)return false;
           if(spf.gap>0&&dutyDays[p.id].some(dd=>dd!==o.d&&Math.abs(o.d-dd)<=spf.gap))return false;
+          if(patOn>0&&dutyDays[p.id].length){
+            const ld=Math.max(...dutyDays[p.id]);
+            let st=0;for(let dd=ld;dd>0&&dutyDays[p.id].includes(dd);dd--)st++;
+            if(st>=patOn&&o.d>ld&&o.d-ld<=patOff)return false;
+          }
           if(pref(p.id,o.d)==="izin")return false;
           if(oi<=blockedUntil[p.id])return false;
           const [a,b]=interval(o.si,o.d,p.id);
@@ -990,6 +1069,8 @@ function generateShifts(){
             +(mt.wkH?WH[p.id]*1.2:0)
             +(mt.bayH?(BH[p.id]+p.carry_b)*2:0)
             +(tg>0?(C[p.id]/tg)*25:0)
+            +(patOn>0&&dutyDays[p.id].includes(o.d-1)?(function(){let st=0;for(let dd=o.d-1;dd>0&&dutyDays[p.id].includes(dd);dd--)st++;return st<patOn?-15:0;})():0)
+            +shapeW(p,o.d,nDays)
             +(pref(p.id,o.d)==="yes"?-6:0)+(pref(p.id,o.d)==="avoid"?10:0)
             +Math.random()*3;};
         elig.sort((a2,b2)=>wgt(a2)-wgt(b2));
@@ -1083,8 +1164,8 @@ function renderFair(){
              :Math.max(...Object.values(schedule.cnt),1);
   const tbl=document.createElement("table");
   tbl.innerHTML=sm
-    ?`<thead><tr><th>Kişi</th><th style="width:18%">Yük</th><th>Saat</th><th>Gece</th><th>Hs</th><th>🌙</th><th>Adet</th></tr></thead>`
-    :`<thead><tr><th>Kişi</th><th style="width:20%">Yük</th><th>Nöb.</th><th>Hs</th><th>🌙</th><th>Cum</th></tr></thead>`;
+    ?`<thead><tr><th>Kişi</th><th style="width:18%">Yük</th><th>Saat</th><th>Gece</th><th>Hs</th><th>🌙</th><th>Adet</th><th>🏖</th></tr></thead>`
+    :`<thead><tr><th>Kişi</th><th style="width:20%">Yük</th><th>Nöb.</th><th>Hs</th><th>🌙</th><th>Cum</th><th>🏖</th></tr></thead>`;
   const tb=document.createElement("tbody");
   members.forEach(p=>{
     const tr=document.createElement("tr");
@@ -1094,14 +1175,14 @@ function renderFair(){
         <td><div class="bar"><i style="width:${Math.round(h/maxV*100)}%"></i></div></td>
         <td><b style="color:var(--teal-deep)">${h}</b>${p.carry_t?`<span style="color:var(--ink-soft);font-size:.65rem">+${p.carry_t}</span>`:""}</td>
         <td>${(schedule.night&&schedule.night[p.id])||0}</td>
-        <td>${schedule.wk[p.id]||0}</td><td>${schedule.bay[p.id]||0}</td><td>${schedule.cnt[p.id]||0}</td>`;
+        <td>${schedule.wk[p.id]||0}</td><td>${schedule.bay[p.id]||0}</td><td>${schedule.cnt[p.id]||0}</td><td>${longestFree(p.id)}</td>`;
     }else{
       let fri=0;
       for(let d=1;d<=nDays;d++){if(entryList(d).some(e=>e.id===p.id)&&isFri(y,m,d))fri++;}
       tr.innerHTML=`<td>${brEmoji(p.pool)} ${p.name}${p.id===me.id?" ⭐":""}</td>
         <td><div class="bar"><i style="width:${Math.round((schedule.cnt[p.id]||0)/maxV*100)}%"></i></div></td>
         <td><b style="color:var(--teal-deep)">${schedule.cnt[p.id]||0}</b>${p.carry_t?`<span style="color:var(--ink-soft);font-size:.65rem">+${p.carry_t}</span>`:""}</td>
-        <td>${schedule.wk[p.id]||0}</td><td>${schedule.bay[p.id]||0}</td><td>${fri}</td>`;
+        <td>${schedule.wk[p.id]||0}</td><td>${schedule.bay[p.id]||0}</td><td>${fri}</td><td>${longestFree(p.id)}</td>`;
     }
     tb.appendChild(tr);
   });
