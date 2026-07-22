@@ -163,7 +163,24 @@ nav button.active .ic{filter:none}
   </div>
 </div>
 
+<div id="view-teams" class="view">
+  <div class="card">
+    <p class="eyebrow">Listelerim</p>
+    <h2>📋 Nöbet listelerim</h2>
+    <p class="hint">Hangi listeyi açmak istersin? Birden fazla listede olabilirsin (ör. bölüm nöbeti + kat nöbeti).</p>
+    <div id="teamList"></div>
+  </div>
+  <div class="card">
+    <p class="eyebrow">Yeni</p>
+    <h2>➕ Başka listeye katıl / kur</h2>
+    <button class="btn ghost" style="width:100%" onclick="showView('dept')">Davet kodu gir veya yeni liste kur</button>
+  </div>
+</div>
+
 <div id="view-dept" class="view">
+  <div class="card center" id="deptBackCard" style="display:none">
+    <span class="switchlink" onclick="showView('teams')">← Listelerime dön</span>
+  </div>
   <div class="card center">
     <h2>🎓 Bölümün</h2>
     <p class="hint">Asistanlığını yaptığın branşı seç — nöbet hesabı buna göre yapılır.</p>
@@ -393,6 +410,15 @@ nav button.active .ic{filter:none}
     <div id="profStatus" class="banner ok" style="display:none"></div>
   </div>
   <div class="card">
+    <p class="eyebrow">Listeler</p>
+    <h2>🔀 Liste değiştir / ayrıl</h2>
+    <p class="hint" id="leaveHint">Başka bir nöbet listesine geçebilir ya da bu listeden ayrılabilirsin.</p>
+    <div class="row">
+      <button class="btn ghost small" onclick="showView('teams')">📋 Listelerim</button>
+      <button class="btn red small" onclick="leaveTeam()">🚪 Bu listeden ayrıl</button>
+    </div>
+  </div>
+  <div class="card">
     <p class="eyebrow">Bu ay</p>
     <h2>🗓 Nöbetlerim</h2>
     <div id="myDuties"><div class="empty-state">Çizelge yayınlanınca nöbetlerin burada listelenir.</div></div>
@@ -452,6 +478,7 @@ function branchOptionsHTML(selected){
 }
 const DAYS_TR=["Pzt","Sal","Çar","Per","Cum","Cmt","Paz"];
 let sb=null, me=null, myProfile=null, dept=null, members=[], allPrefs={}, schedule=null, requests=[];
+let myTeams=[], activeDept=null;
 let signupMode=false, roomRows=[], shiftRows=[], ovrRows=[];
 
 function $(id){return document.getElementById(id)}
@@ -513,10 +540,33 @@ async function doAuth(){
 }
 async function logout(){await sb.auth.signOut();location.reload();}
 async function afterLogin(){
-  const {data:p}=await sb.from("profiles").select("*").eq("id",me.id).maybeSingle();
-  myProfile=p;
-  if(!p||!p.dept_id){showView("dept");return;}
-  showView("app");await loadAll();
+  const {data:rows,error}=await sb.from("memberships").select("*, departments(id,name,join_code)").eq("user_id",me.id);
+  if(error){alert("⚠️ Üyelikler okunamadı: "+error.message);showView("dept");return;}
+  myTeams=(rows||[]).filter(r=>r.departments);
+  $("deptBackCard").style.display=myTeams.length?"block":"none";
+  if(!myTeams.length){showView("dept");return;}
+  if(myTeams.length===1){await openTeam(myTeams[0].dept_id);return;}
+  renderTeams();showView("teams");
+}
+function renderTeams(){
+  const box=$("teamList");box.innerHTML="";
+  myTeams.forEach(t=>{
+    const d=document.createElement("div");d.className="person";
+    d.style.cursor="pointer";
+    d.onclick=()=>openTeam(t.dept_id);
+    d.innerHTML=`<div class="avatar" style="${brStyle(t.pool)}">${brEmoji(t.pool)}</div>
+      <div class="info"><div class="nm">${t.departments.name} ${t.is_admin?"👑":""}</div>
+      <div class="sub">${t.pool||"—"} · ${t.is_admin?"yönetici":"üye"}</div></div>
+      <button class="btn ghost small">Aç →</button>`;
+    box.appendChild(d);
+  });
+}
+async function openTeam(deptId){
+  activeDept=deptId;
+  const t=myTeams.find(x=>x.dept_id===deptId);
+  myProfile=t?{...t,id:me.id}:myProfile;
+  showView("app");
+  await loadAll();
 }
 async function createDept(){
   const name=$("newDeptName").value.trim();
@@ -524,9 +574,10 @@ async function createDept(){
   if(!name){alert("Ekip adı yaz");return;}
   const {data,error}=await sb.rpc("create_department",{dept_name:name,my_name:myName});
   if(error){$("deptMsg").textContent="⚠️ "+error.message;$("deptMsg").style.display="block";return;}
-  await sb.from("profiles").update({pool:$("myBranch").value}).eq("id",me.id);
+  await sb.from("memberships").update({pool:$("myBranch").value}).eq("user_id",me.id).eq("dept_id",data.dept_id);
   alert("Ekip kuruldu! Davet kodun: "+data.join_code);
-  await afterLogin();
+  activeDept=data.dept_id;
+  await refreshTeamsThenOpen(data.dept_id);
 }
 async function joinDept(){
   const code=$("joinCode").value.trim();
@@ -534,18 +585,23 @@ async function joinDept(){
   if(!code){alert("Kodu yaz");return;}
   const {data,error}=await sb.rpc("join_department",{code,my_name:myName});
   if(error||data.error){$("deptMsg").textContent="⚠️ "+((data&&data.error)||error.message);$("deptMsg").style.display="block";return;}
-  await sb.from("profiles").update({pool:$("myBranch").value}).eq("id",me.id);
-  await afterLogin();
+  await sb.from("memberships").update({pool:$("myBranch").value}).eq("user_id",me.id).eq("dept_id",data.dept_id);
+  await refreshTeamsThenOpen(data.dept_id);
 }
 
 /* ---------- VERİ ---------- */
 async function loadAll(){
+  const did=activeDept||(myProfile&&myProfile.dept_id);
+  if(!did){showView("dept");return;}
   const [{data:d},{data:mem}]=await Promise.all([
-    sb.from("departments").select("*").eq("id",myProfile.dept_id).single(),
-    sb.from("profiles").select("*").eq("dept_id",myProfile.dept_id).order("name")
+    sb.from("departments").select("*").eq("id",did).single(),
+    sb.from("memberships").select("*").eq("dept_id",did).order("name")
   ]);
-  dept=d;members=mem||[];
+  if(!d){alert("⚠️ Liste bulunamadı");showView("teams");return;}
+  dept=d;
+  members=(mem||[]).map(r=>({...r,id:r.user_id}));
   myProfile=members.find(x=>x.id===me.id)||myProfile;
+  const mt=myTeams.find(x=>x.dept_id===did); if(mt&&myProfile)mt.is_admin=myProfile.is_admin;
   $("month").value=dept.month;$("minGap").value=dept.min_gap;$("bayramDays").value=dept.bayram||"";
   $("generalRooms").value=dept.general_rooms!=null?dept.general_rooms:2;
   roomRows=Object.entries(branchRooms()).map(([b,v])=>({branch:b,rooms:v.rooms,shared:!!v.shared}));
@@ -762,16 +818,38 @@ function renderPeople(){
     db.appendChild(tr);
   });
 }
+async function refreshTeamsThenOpen(deptId){
+  const {data:rows}=await sb.from("memberships").select("*, departments(id,name,join_code)").eq("user_id",me.id);
+  myTeams=(rows||[]).filter(r=>r.departments);
+  $("deptBackCard").style.display=myTeams.length?"block":"none";
+  renderTeams();
+  await openTeam(deptId);
+}
+async function leaveTeam(){
+  if(!dept)return;
+  const admin=isAdmin();
+  const first=admin
+    ? `${dept.name} listesinden ayrılmak üzeresin.\n\nSen yöneticisin — ayrılırsan yöneticilik ekipteki en eski üyeye geçer.\n\nDevam edilsin mi?`
+    : `${dept.name} listesinden ayrılmak üzeresin.\n\nBu ayki izin ve tercihlerin silinir.\n\nDevam edilsin mi?`;
+  if(!confirm(first))return;
+  if(!confirm("Son kez soruyorum: bu listeden ayrılmak istediğine emin misin?"))return;
+  const {data,error}=await sb.rpc("leave_department",{d:dept.id});
+  if(error||(data&&data.error)){alert("⚠️ "+((data&&data.error)||error.message));return;}
+  alert(data&&data.transferred?"Ayrıldın ✅ Yöneticilik en eski üyeye devredildi.":"Listeden ayrıldın ✅");
+  dept=null;activeDept=null;schedule=null;members=[];
+  await afterLogin();
+}
 async function removeMember(id,name){
   if(!isAdmin())return;
   if(!confirm(`${name} ekipten çıkarılsın mı?\n\n• Bu ayki izin/tercihleri ve takas istekleri silinir\n• Yayınlanmış çizelgede adı kalır — çıkardıktan sonra çizelgeyi yeniden üretmen önerilir\n• Hesabı silinmez, isterse başka ekibe katılabilir`))return;
-  const {data,error}=await sb.rpc("remove_member",{target:id});
+  if(!confirm("Son kez soruyorum: "+name+" ekipten çıkarılsın mı?"))return;
+  const {data,error}=await sb.rpc("remove_member",{target:id,d:dept.id});
   if(error||(data&&data.error)){alert("⚠️ "+((data&&data.error)||error.message));return;}
   await loadAll();
   alert(name+" ekipten çıkarıldı ✅");
 }
 async function updProfile(id,patch){
-  const {error}=await sb.from("profiles").update(patch).eq("id",id);
+  const {error}=await sb.from("memberships").update(patch).eq("user_id",id).eq("dept_id",dept.id);
   if(error)alert("⚠️ Yetki yok veya hata: "+error.message);
   await loadAll();
 }
@@ -969,10 +1047,10 @@ async function confirmDecide(){
     if(finals[p.id]==null)continue;
     if(isShiftMode()){
       const nsp={...sp(p),target:finals[p.id]};
-      await sb.from("profiles").update({shift_prefs:nsp}).eq("id",p.id);
+      await sb.from("memberships").update({shift_prefs:nsp}).eq("user_id",p.id).eq("dept_id",dept.id);
       p.shift_prefs=nsp;
     }else if(!hasOwnRoom(p.pool)){
-      await sb.from("profiles").update({quota:finals[p.id]}).eq("id",p.id);
+      await sb.from("memberships").update({quota:finals[p.id]}).eq("user_id",p.id).eq("dept_id",dept.id);
       p.quota=finals[p.id];
     }
   }
@@ -1257,10 +1335,10 @@ async function devireEkle(){
   if(!confirm("Bu ayın yükleri herkesin devrine eklensin mi?"))return;
   for(const p of members){
     const sm=schedule.mode==="shifts";
-    await sb.from("profiles").update({
+    await sb.from("memberships").update({
       carry_t:p.carry_t+(sm?((schedule.hours&&schedule.hours[p.id])||0):(schedule.cnt[p.id]||0)),
       carry_w:p.carry_w+(sm?((schedule.night&&schedule.night[p.id])||0):(schedule.wk[p.id]||0)),
-      carry_b:p.carry_b+(schedule.bay[p.id]||0)}).eq("id",p.id);
+      carry_b:p.carry_b+(schedule.bay[p.id]||0)}).eq("user_id",p.id).eq("dept_id",dept.id);
   }
   await loadAll();alert("Devir güncellendi ✅");
 }
@@ -1387,6 +1465,10 @@ async function rejectReq(id){
 function renderProfile(){
   if(!myProfile)return;
   $("profName").value=myProfile.name||"";
+  const lh=$("leaveHint");
+  if(lh)lh.textContent=isAdmin()
+    ? "Bu listenin yöneticisisin. Ayrılırsan yöneticilik ekipteki en eski üyeye geçer. Ayrılma işlemi iki kez sorulur."
+    : "Başka bir nöbet listesine geçebilir ya da bu listeden ayrılabilirsin. Ayrılma işlemi iki kez sorulur.";
   $("profBranch").innerHTML=branchOptionsHTML(myProfile.pool);
   renderMyDuties();
 }
@@ -1395,7 +1477,7 @@ async function saveProfile(){
   const pool=$("profBranch").value;
   const st=$("profStatus");
   if(!name){st.style.display="block";st.className="banner err";st.textContent="⚠️ Ad boş olamaz";return;}
-  const {error}=await sb.from("profiles").update({name,pool}).eq("id",me.id);
+  const {error}=await sb.from("memberships").update({name,pool}).eq("user_id",me.id).eq("dept_id",dept.id);
   st.style.display="block";
   st.className=error?"banner err":"banner ok";
   st.textContent=error?"⚠️ "+error.message:"✅ Profilin güncellendi";
