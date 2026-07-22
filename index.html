@@ -212,6 +212,13 @@ nav button.active .ic{filter:none}
       </select>
     </div>
     <div class="row" style="margin-top:10px">
+      <label>🎯 Doluluk politikası</label>
+      <select id="fillPolicy" style="flex:1;min-width:180px">
+        <option value="fill_all">Tüm oda/vardiyaları doldur (boş bırakma)</option>
+        <option value="by_capacity">İstenen nöbet sayısına göre dağıt (bazı slotlar boş kalabilir)</option>
+      </select>
+    </div>
+    <div class="row" style="margin-top:10px">
       <label>🧭 Çalışma düzeni</label>
       <select id="workModel" style="flex:1;min-width:180px">
         <option value="shift_only">Nöbet/vardiya = tüm mesai (acil, sekreter, hemşire…)</option>
@@ -327,13 +334,14 @@ nav button.active .ic{filter:none}
     <div class="stat"><div class="v" id="stBal">—</div><div class="l">Denge skoru</div></div>
   </div>
   <div class="card" id="decideCard" style="display:none">
-    <p class="eyebrow">Yönetici kararı</p>
-    <h2>⚖️ İstekler kapasiteye uymuyor</h2>
+    <p class="eyebrow">Yönetici onayı · taslak</p>
+    <h2>⚖️ Nöbet sayılarını onayla</h2>
     <p class="hint" id="decideHint"></p>
-    <table><thead><tr><th>Kişi</th><th>İstek</th><th>Karar</th></tr></thead><tbody id="decideBody"></tbody></table>
+    <table><thead><tr><th>Kişi</th><th>İstek</th><th>İzin</th><th>Taslak</th></tr></thead><tbody id="decideBody"></tbody></table>
     <div class="banner info" id="decideTotal" style="margin-top:10px">—</div>
     <div class="row" style="margin-top:8px">
-      <button class="btn small" onclick="confirmDecide()">✔ Onayla, kaydet ve üret</button>
+      <button class="btn small" onclick="confirmDecide()">✔ Onayla ve yayınla</button>
+      <button class="btn ghost small" onclick="redraft()">🔄 Sayılarla yeniden hazırla</button>
       <button class="btn ghost small" onclick="hideDecide()">Vazgeç</button>
     </div>
   </div>
@@ -372,6 +380,30 @@ nav button.active .ic{filter:none}
   </div>
 </section>
 
+<section id="tab-profil" class="tab">
+  <div class="card">
+    <p class="eyebrow">Profilim</p>
+    <h2>👤 Bilgilerim</h2>
+    <p class="hint">Adını ve birimini buradan güncelleyebilirsin. Yönetici de ekip listesinden herkesin birimini değiştirebilir.</p>
+    <label>Ad Soyad</label>
+    <input type="text" id="profName" style="width:100%;margin-bottom:10px">
+    <label>Birim / Görev</label>
+    <select id="profBranch" style="width:100%;margin-bottom:10px"></select>
+    <button class="btn small" onclick="saveProfile()">💾 Kaydet</button>
+    <div id="profStatus" class="banner ok" style="display:none"></div>
+  </div>
+  <div class="card">
+    <p class="eyebrow">Bu ay</p>
+    <h2>🗓 Nöbetlerim</h2>
+    <div id="myDuties"><div class="empty-state">Çizelge yayınlanınca nöbetlerin burada listelenir.</div></div>
+    <div class="row" style="margin-top:12px">
+      <button class="btn ghost small" onclick="gcalAll()">📅 Google Takvim'e aktar</button>
+      <button class="btn ghost small" onclick="icsIndir()">⬇️ Takvim dosyası (.ics)</button>
+    </div>
+    <p class="hint" style="margin-top:8px">Google Takvim butonu her nöbet için ayrı ekleme sayfası açar; .ics dosyası ise tüm nöbetleri tek seferde takvime aktarır (iPhone Takvim, Google Takvim, Outlook).</p>
+  </div>
+</section>
+
 <section id="tab-takas" class="tab">
   <div class="card">
     <p class="eyebrow">Değişim</p>
@@ -400,6 +432,7 @@ nav button.active .ic{filter:none}
   <button data-tab="izin" onclick="showTab('izin')"><span class="ic">⭐</span>Tercihler</button>
   <button data-tab="cizelge" onclick="showTab('cizelge')"><span class="ic">🗓</span>Çizelge</button>
   <button data-tab="takas" onclick="showTab('takas')"><span class="ic">🔁</span>Takas</button>
+  <button data-tab="profil" onclick="showTab('profil')"><span class="ic">👤</span>Profil</button>
 </nav>
 </div>
 
@@ -523,7 +556,7 @@ async function loadAll(){
   $("inviteCard").style.display=isAdmin()?"block":"none";
   $("inviteCode").textContent=dept.join_code;
   const ro=!isAdmin();
-  ["month","minGap","bayramDays","generalRooms","schedMode","workModel","patternOn","patternOff"].forEach(id=>$(id).disabled=ro);
+  ["month","minGap","bayramDays","generalRooms","schedMode","workModel","patternOn","patternOff","fillPolicy"].forEach(id=>$(id).disabled=ro);
   $("saveSettingsBtn").style.display=ro?"none":"inline-block";
   $("addRoomBtn").style.display=ro?"none":"inline-block";
   $("genRow").style.display=ro?"none":"block";
@@ -536,6 +569,7 @@ async function loadAll(){
   $("wishInput").value=((allPrefs[me.id]||{})._wish)||"";
   $("shapeSel").value=((allPrefs[me.id]||{})._shape)||"";
   $("workModel").value=dept.work_model||"shift_only";
+  $("fillPolicy").value=dept.fill_policy||"fill_all";
   $("patternOn").value=dept.pattern_on||0;
   $("patternOff").value=dept.pattern_off||0;
   updateShapeHint();
@@ -543,7 +577,7 @@ async function loadAll(){
   schedule=sch?sch.data:null;
   const {data:reqs}=await sb.from("swap_requests").select("*").eq("dept_id",dept.id).eq("month",dept.month).order("id",{ascending:false});
   requests=reqs||[];
-  renderRooms();renderShifts();modeChanged();renderPeople();renderPrefCal();renderPrefSummary();renderSchedule();renderReqs();fillReqForm();
+  renderRooms();renderShifts();modeChanged();renderProfile();renderPeople();renderPrefCal();renderPrefSummary();renderSchedule();renderReqs();fillReqForm();
 }
 
 /* ---------- ODA AYARLARI ---------- */
@@ -644,6 +678,7 @@ function renderOvr(){
   });
   if(!ovrRows.length)box.innerHTML='<p class="hint">İstisna yok — tüm vardiyalar standart saatlerinde.</p>';
   $("addOvrBtn").style.display=ro?"none":"inline-block";
+  $("addShiftBtn").style.display=ro?"none":"inline-block";
 }
 function addOvrRow(){
   if(!shiftRows.length){alert("Önce vardiya tanımla");return;}
@@ -671,7 +706,8 @@ async function saveSettings(){
     month:$("month").value,min_gap:+$("minGap").value,bayram:$("bayramDays").value,
     general_rooms:+$("generalRooms").value,branch_rooms:br,
     sched_mode:$("schedMode").value,shifts:shiftRows,
-    work_model:$("workModel").value,pattern_on:+$("patternOn").value||0,pattern_off:+$("patternOff").value||0,shift_overrides:ovrRows
+    work_model:$("workModel").value,pattern_on:+$("patternOn").value||0,pattern_off:+$("patternOff").value||0,
+    fill_policy:$("fillPolicy").value,shift_overrides:ovrRows
   }).eq("id",dept.id);
   if(error){alert("⚠️ "+error.message);return;}
   await loadAll();alert("Ayarlar kaydedildi ✅");
@@ -836,7 +872,8 @@ function renderPrefSummary(){
 }
 
 /* ---------- ÇÖZÜCÜ ---------- */
-let runTargets={};
+let runTargets={}, draft=null;
+function fillAll(){return ($("fillPolicy").value||"fill_all")==="fill_all";}
 function tOf(p){
   if(runTargets[p.id]!=null)return runTargets[p.id];
   if(isShiftMode())return sp(p).target||0;
@@ -856,39 +893,46 @@ function totalSlots(){
   }
   return s;
 }
+/* Üretim = her zaman iki aşama: taslak üret -> yönetici onaylar -> yayınla */
 function generate(){
   if(!isAdmin()){alert("Sadece yönetici üretebilir");return;}
   hideDecide();
-  const rel=isShiftMode()?members.slice():generalStaff();
-  const wishes=rel.map(p=>({p,w:wishOf(p)}));
   runTargets={};
-  if(!wishes.some(x=>x.w>0))return proceedGenerate();
-  const S=totalSlots();
-  const W=wishes.reduce((a,x)=>a+x.w,0);
-  const autoN=wishes.filter(x=>x.w===0).length;
-  if(W===S||(W<S&&autoN>0)){
-    wishes.forEach(x=>{if(x.w>0)runTargets[x.p.id]=x.w;});
-    return proceedGenerate();
-  }
-  showDecide(wishes,S,W,autoN);
+  const rel=isShiftMode()?members.slice():generalStaff();
+  rel.forEach(p=>{const w=wishOf(p);if(w>0)runTargets[p.id]=w;});
+  buildDraft();
 }
-function proceedGenerate(){
-  if(($("schedMode").value||"rooms")==="shifts")return generateShifts();
-  return generateRooms();
+function buildDraft(){
+  draft=isShiftMode()?computeShifts():computeRooms();
+  if(!draft)return;
+  showDraft();
+}
+function redraft(){
+  if(!isAdmin())return;
+  const finals={};
+  document.querySelectorAll(".decInp").forEach(i=>{finals[i.dataset.pid]=+i.value||0;});
+  runTargets=finals;
+  buildDraft();
 }
 function hideDecide(){$("decideCard").style.display="none";}
-function showDecide(wishes,S,W,autoN){
+function showDraft(){
+  const S=totalSlots();
+  const rel=isShiftMode()?members.slice():generalStaff();
+  const assigned=rel.reduce((a,p)=>a+(draft.cnt[p.id]||0),0);
+  const empty=draft.viol.length;
   $("decideCard").style.display="block";
-  $("decideHint").textContent=W>S
-    ?`Toplam istek ${W}, kapasite ${S} — ${W-S} nöbet fazla istek var. Önceliği sen belirle: sayıları düzenle, toplam ${S} olsun. Kararın kaydedilir ve sen değiştirene kadar her ay geçerli kalır.`
-    :`Toplam istek ${W}, kapasite ${S} — ${S-W} nöbet sahipsiz ve otomatik dengelenecek kimse yok. Eksik nöbetleri kimlerin alacağını belirle, toplam ${S} olsun.`;
+  $("decideHint").innerHTML=`Taslak hazır. Aşağıda kimin kaç nöbet tuttuğu görünüyor — <b>izinli olanlar dahil herkesin sayısına sen karar verirsin</b>. Sayıyı değiştirip "yeniden hazırla" diyebilir, uygun bulunca yayınlayabilirsin.<br>
+    Kapasite: <b>${S}</b> slot · Dağıtılan: <b>${assigned}</b> ${empty?`· <span style="color:#C33D2E">Boş kalan: ${empty}</span>`:"· ✅ boş yok"}<br>
+    Politika: <b>${fillAll()?"Tüm slotlar doldurulur":"İstenen sayıya göre dağıtılır (boş kalabilir)"}</b>`;
   const tb=$("decideBody");tb.innerHTML="";
-  wishes.forEach(x=>{
-    const sugg=W>0?Math.round((x.w||1)*S/Math.max(W,1)):Math.round(S/wishes.length);
+  rel.forEach(p=>{
+    const izin=Object.values(allPrefs[p.id]||{}).filter(v=>v==="izin").length;
+    const w=wishOf(p);
     const tr=document.createElement("tr");
-    tr.innerHTML=`<td>${brEmoji(x.p.pool)} ${x.p.name}</td>
-      <td>${x.w?("🙋 "+x.w):"—"}</td>
-      <td><input type="number" class="decInp" data-pid="${x.p.id}" value="${Math.max(0,Math.min(sugg,31))}" min="0" max="31" style="width:64px;padding:6px" onchange="updDecideTotal(${S})"></td>`;
+    tr.innerHTML=`<td>${brEmoji(p.pool)} ${p.name}</td>
+      <td>${w?("🙋 "+w):"—"}</td>
+      <td>${izin?("🔒 "+izin):"—"}</td>
+      <td><input type="number" class="decInp" data-pid="${p.id}" value="${draft.cnt[p.id]||0}" min="0" max="31" style="width:64px;padding:6px" onchange="updDecideTotal(${S})"></td>`;
     tb.appendChild(tr);
   });
   updDecideTotal(S);
@@ -898,14 +942,20 @@ function showDecide(wishes,S,W,autoN){
 function updDecideTotal(S){
   let t=0;document.querySelectorAll(".decInp").forEach(i=>t+=(+i.value||0));
   const el=$("decideTotal");
-  el.textContent=`Toplam karar: ${t} / kapasite: ${S} ${t===S?"✅ tam oturdu":t>S?"⚠️ "+(t-S)+" fazla":"⚠️ "+(S-t)+" eksik"}`;
-  el.className="banner "+(t===S?"ok":"info");
+  const fa=fillAll();
+  let msg=`Toplam: ${t} / kapasite: ${S} `;
+  if(fa)msg+=t===S?"✅ tam oturdu":t>S?`⚠️ ${t-S} fazla — sığmayanlar yerleşemez`:`⚠️ ${S-t} eksik — bu politikada boş slot kalamaz, sayıları artır`;
+  else msg+=t>S?`⚠️ ${t-S} fazla — sığmaz`:t===S?"✅ tam":`ℹ️ ${S-t} slot boş kalacak (politika buna izin veriyor)`;
+  el.textContent=msg;
+  el.className="banner "+((fa&&t===S)||(!fa&&t<=S)?"ok":"info");
 }
 async function confirmDecide(){
-  const S=totalSlots();
-  const finals={};let t=0;
-  document.querySelectorAll(".decInp").forEach(i=>{finals[i.dataset.pid]=+i.value||0;t+=(+i.value||0);});
-  if(t!==S&&!confirm(`Toplam ${t}, kapasite ${S} — yine de devam edilsin mi? (Eksikler boş kalır, fazlalar sığmaz)`))return;
+  if(!draft){alert("Önce taslak üret");return;}
+  const finals={};
+  document.querySelectorAll(".decInp").forEach(i=>{finals[i.dataset.pid]=+i.value||0;});
+  const changed=Object.keys(finals).some(id=>(draft.cnt[id]||0)!==finals[id]);
+  if(changed&&!confirm("Sayıları değiştirdin. Bu sayılarla yeniden hazırlanıp yayınlansın mı?")){return;}
+  if(changed){runTargets=finals;buildDraft();return;}
   for(const p of members){
     if(finals[p.id]==null)continue;
     if(isShiftMode()){
@@ -917,12 +967,12 @@ async function confirmDecide(){
       p.quota=finals[p.id];
     }
   }
-  runTargets=finals;
   hideDecide();
-  proceedGenerate();
+  await saveSchedule(draft);
 }
-function generateRooms(){
+function computeRooms(){
   const {y,m,nDays}=monthInfo();
+  const fa=fillAll();
   const gap=dept.min_gap,bays=bayramSet();
   const genRooms=dept.general_rooms!=null?dept.general_rooms:2;
   const bRooms=branchRooms();
@@ -977,11 +1027,14 @@ function generateRooms(){
         const elig=gen.filter(p=>{
           const tg=tOf(p);
           if(tg>0&&cnt[p.id]>=tg)return false;
+          if(!fa&&tg===0)return false;
           if(pref(p.id,d)==="izin")return false;
           if(onDay(d,p.id))return false;
           if(gapClash(d,p.id))return false;
           return true;});
-        if(!elig.length){viol.push(`Gün ${d}: ${slot==="G"?"genel oda":slot.slice(2)+" odası"} boş`);continue;}
+        if(!elig.length){
+          if(fa)viol.push(`Gün ${d}: ${slot==="G"?"genel oda":slot.slice(2)+" odası"} boş`);
+          continue;}
         const wgt=p=>{
           let w=(cnt[p.id]+p.carry_t*0.3)*10;
           const tg=tOf(p);
@@ -1009,7 +1062,7 @@ function generateRooms(){
       +varr(gen.map(p=>bay[p.id]+p.carry_b))*40+prefMiss;
     if(!best||score<best.score)best={asg,viol,cnt,wk,bay,score};
   }
-  saveSchedule(best);
+  return best;
 }
 async function saveSchedule(best){
   const {error}=await sb.from("schedules").upsert({dept_id:dept.id,month:dept.month,data:best});
@@ -1018,12 +1071,13 @@ async function saveSchedule(best){
 }
 
 /* ---------- VARDİYA ÇÖZÜCÜ ---------- */
-function generateShifts(){
+function computeShifts(){
   const {y,m,nDays}=monthInfo();
   const bays=bayramSet();
   if(!shiftRows.length){alert("Önce vardiya tanımla (⏰ Vardiyalar kartı)");return;}
   const dayIdx=d=>(new Date(y,m-1,d).getDay()+6)%7;
   const patOn=+($("patternOn").value||0),patOff=+($("patternOff").value||0);
+  const fa=fillAll();
   // kronolojik vardiya olayları: gün + başlangıç saatine göre sıralı
   const occ=[];
   for(let d=1;d<=nDays;d++){
@@ -1047,6 +1101,7 @@ function generateShifts(){
           const tg=runTargets[p.id]!=null?runTargets[p.id]:(spf.target||0);
           if(spf.allowed&&spf.allowed[o.si]===false)return false;
           if(tg>0&&C[p.id]>=tg)return false;
+          if(!fa&&tg===0)return false;
           if(spf.gap>0&&dutyDays[p.id].some(dd=>dd!==o.d&&Math.abs(o.d-dd)<=spf.gap))return false;
           if(patOn>0&&dutyDays[p.id].length){
             const ld=Math.max(...dutyDays[p.id]);
@@ -1058,7 +1113,7 @@ function generateShifts(){
           const [a,b]=interval(o.si,o.d,p.id);
           if(ivs[p.id].some(([x,y2])=>a<y2&&x<b))return false;
           return true;});
-        if(!elig.length){viol.push(`Gün ${o.d} ${s.name}: boş`);continue;}
+        if(!elig.length){if(fa)viol.push(`Gün ${o.d} ${s.name}: boş`);continue;}
         const wgt=p=>{
           const spf=sp(p);
           const tg=runTargets[p.id]!=null?runTargets[p.id]:(spf.target||0);
@@ -1095,7 +1150,7 @@ function generateShifts(){
       +varr(ids.map(i2=>WH[i2]))*3+varr(ids.map(i2=>BH[i2]))*5+prefMiss;
     if(!best||score<best.score)best={asg,viol,cnt:C,wk:WH,bay:BH,hours:H,night:NH,score,mode:"shifts"};
   }
-  saveSchedule(best);
+  return best;
 }
 
 /* ---------- GÖRÜNÜM ---------- */
@@ -1137,7 +1192,7 @@ function renderSchedule(){
     cal.appendChild(c);
   }
   wrap.appendChild(cal);
-  renderFair();renderMesai();
+  renderFair();renderMesai();renderMyDuties();
 }
 function renderMesai(){
   const card=$("mesaiCard");if(!card)return;
@@ -1317,6 +1372,104 @@ async function acceptReq(id){
 async function rejectReq(id){
   await sb.from("swap_requests").update({status:"red",reason:"reddedildi"}).eq("id",id);
   await loadAll();
+}
+
+/* ---------- PROFİL ---------- */
+function renderProfile(){
+  if(!myProfile)return;
+  $("profName").value=myProfile.name||"";
+  $("profBranch").innerHTML=branchOptionsHTML(myProfile.pool);
+  renderMyDuties();
+}
+async function saveProfile(){
+  const name=$("profName").value.trim();
+  const pool=$("profBranch").value;
+  const st=$("profStatus");
+  if(!name){st.style.display="block";st.className="banner err";st.textContent="⚠️ Ad boş olamaz";return;}
+  const {error}=await sb.from("profiles").update({name,pool}).eq("id",me.id);
+  st.style.display="block";
+  st.className=error?"banner err":"banner ok";
+  st.textContent=error?"⚠️ "+error.message:"✅ Profilin güncellendi";
+  setTimeout(()=>st.style.display="none",2500);
+  if(!error)await loadAll();
+}
+function myDutyList(){
+  const out=[];
+  if(!schedule)return out;
+  const {y,m,nDays}=monthInfo();
+  for(let d=1;d<=nDays;d++){
+    const e=entryList(d).find(x=>x.id===me.id);
+    if(!e)continue;
+    let start="00:00",end="23:59",label="Nöbet";
+    if(schedule.mode==="shifts"){
+      const es=effShift(e.s,d,me.id);
+      start=es.start||"08:00";end=es.end||"16:00";
+      label=(es.name||"Vardiya");
+    }else{
+      label=e.r==="G"?"Genel oda":e.r&&e.r.startsWith("S:")?e.r.slice(2)+" odası":e.r?e.r.slice(2)+" odası (devir)":"Nöbet";
+      start="08:00";end="08:00";
+    }
+    out.push({d,y,m,start,end,label,wknd:isWknd(y,m,d),bay:isBay(d)});
+  }
+  return out;
+}
+function renderMyDuties(){
+  const box=$("myDuties");if(!box)return;
+  const list=myDutyList();
+  if(!list.length){box.innerHTML='<div class="empty-state">Bu ay sana yazılmış nöbet yok 🎉</div>';return;}
+  box.innerHTML="";
+  const {y,m}=monthInfo();
+  list.forEach(x=>{
+    const dow=DAYS_TR[(new Date(y,m-1,x.d).getDay()+6)%7];
+    const d=document.createElement("div");d.className="person";
+    d.innerHTML=`<div class="avatar" style="${brStyle(myProfile.pool)}">${x.bay?"🌙":x.wknd?"🎉":"🗓"}</div>
+      <div class="info"><div class="nm">${x.d} ${["Oca","Şub","Mar","Nis","May","Haz","Tem","Ağu","Eyl","Eki","Kas","Ara"][m-1]} · ${dow}</div>
+      <div class="sub">${x.label} · ${x.start}–${x.end}${x.bay?" · bayram":x.wknd?" · hafta sonu":""}</div></div>
+      <button class="btn ghost small" onclick="gcalOne(${x.d})">📅</button>`;
+    box.appendChild(d);
+  });
+}
+function pad(n){return String(n).padStart(2,"0");}
+function gcalStamp(y,m,d,hhmm,addDay){
+  const [hh,mn]=hhmm.split(":").map(Number);
+  const dt=new Date(y,m-1,d+(addDay?1:0),hh,mn||0);
+  return dt.getFullYear()+pad(dt.getMonth()+1)+pad(dt.getDate())+"T"+pad(dt.getHours())+pad(dt.getMinutes())+"00";
+}
+function gcalOne(day){
+  const x=myDutyList().find(v=>v.d===day);if(!x)return;
+  const cross=hm(x.end)<=hm(x.start);
+  const st=gcalStamp(x.y,x.m,x.d,x.start,false);
+  const en=gcalStamp(x.y,x.m,x.d,x.end,cross);
+  const url="https://calendar.google.com/calendar/render?action=TEMPLATE"
+    +"&text="+encodeURIComponent("Nöbet · "+x.label)
+    +"&dates="+st+"/"+en
+    +"&details="+encodeURIComponent((dept?dept.name:"")+" — AdilNöbet");
+  window.open(url,"_blank");
+}
+function gcalAll(){
+  const list=myDutyList();
+  if(!list.length){alert("Bu ay nöbetin yok 🎉");return;}
+  if(list.length>3&&!confirm(list.length+" nöbet için ayrı ayrı sekme açılacak. Tümünü tek seferde aktarmak için .ics dosyasını indirmek daha pratik. Yine de devam edilsin mi?"))return;
+  list.forEach((x,i)=>setTimeout(()=>gcalOne(x.d),i*400));
+}
+function icsIndir(){
+  const list=myDutyList();
+  if(!list.length){alert("Bu ay nöbetin yok 🎉");return;}
+  const L=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//AdilNobet//TR"];
+  list.forEach(x=>{
+    const cross=hm(x.end)<=hm(x.start);
+    L.push("BEGIN:VEVENT",
+      "UID:adilnobet-"+x.y+pad(x.m)+pad(x.d)+"-"+Math.random().toString(36).slice(2,7)+"@adilnobet",
+      "DTSTART:"+gcalStamp(x.y,x.m,x.d,x.start,false),
+      "DTEND:"+gcalStamp(x.y,x.m,x.d,x.end,cross),
+      "SUMMARY:Nöbet · "+x.label,
+      "DESCRIPTION:"+((dept&&dept.name)||"")+" — AdilNöbet",
+      "END:VEVENT");
+  });
+  L.push("END:VCALENDAR");
+  const blob=new Blob([L.join("\r\n")],{type:"text/calendar;charset=utf-8"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);
+  a.download="nobetlerim-"+(dept?dept.month:"")+".ics";a.click();
 }
 
 /* ---------- EXPORT & AI ---------- */
