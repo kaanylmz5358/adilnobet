@@ -745,6 +745,7 @@ function renderPeople(){
         ${branchOptionsHTML(p.pool)}</select>`:""}
       ${admin&&dedicated?`<input type="number" value="${p.quota}" min="0" max="15" onchange="updProfile('${p.id}',{quota:+this.value})">`:""}
       ${admin?`<label><input type="checkbox" ${p.works_after?"checked":""} onchange="updProfile('${p.id}',{works_after:this.checked})">ertesi çalışır</label>`:""}
+      ${admin&&!own?`<button class="del" title="Ekipten çıkar" onclick="removeMember('${p.id}','${(p.name||"").replace(/'/g,"")}')">✕</button>`:""}
       ${isShiftMode()&&shiftRows.length?`<div class="row" style="width:100%;margin-top:5px">
         <label>vardiyaları:</label>
         ${shiftRows.map((s,si)=>`<button class="dchip ${spAllowed(p,si)?"on":""}" ${admin?"":"disabled"} onclick="toggleSP('${p.id}',${si})">${s.name||("V"+(si+1))}</button>`).join("")}
@@ -760,6 +761,14 @@ function renderPeople(){
       ${["carry_t","carry_w","carry_b"].map(f=>`<td>${isAdmin()?`<input type="number" value="${p[f]}" min="0" style="width:54px;padding:5px" onchange="updProfile('${p.id}',{${f}:+this.value})">`:p[f]}</td>`).join("")}`;
     db.appendChild(tr);
   });
+}
+async function removeMember(id,name){
+  if(!isAdmin())return;
+  if(!confirm(`${name} ekipten çıkarılsın mı?\n\n• Bu ayki izin/tercihleri ve takas istekleri silinir\n• Yayınlanmış çizelgede adı kalır — çıkardıktan sonra çizelgeyi yeniden üretmen önerilir\n• Hesabı silinmez, isterse başka ekibe katılabilir`))return;
+  const {data,error}=await sb.rpc("remove_member",{target:id});
+  if(error||(data&&data.error)){alert("⚠️ "+((data&&data.error)||error.message));return;}
+  await loadAll();
+  alert(name+" ekipten çıkarıldı ✅");
 }
 async function updProfile(id,patch){
   const {error}=await sb.from("profiles").update(patch).eq("id",id);
