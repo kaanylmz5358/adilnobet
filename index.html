@@ -1049,6 +1049,17 @@ function generate(){
   runTargets={};
   const rel=isShiftMode()?members.slice():generalStaff();
   rel.forEach(p=>{const w=wishOf(p);if(w>0)runTargets[p.id]=w;});
+  // Hedef toplamı kontrolü: yönetici sayı belirlediyse ona sadık kal
+  const targeted=rel.filter(p=>tOf(p)>0);
+  if(targeted.length===rel.length&&rel.length){
+    const T=rel.reduce((a,p)=>a+tOf(p),0), S0=totalSlots();
+    if(T<S0&&fillAll()){
+      const ans=confirm(`Belirlediğin sayılar toplamı ${T}, ancak ${S0} slot var (${S0-T} fazla).\n\n"Tamam" → sayılara sadık kal, ${S0-T} slot BOŞ kalsın\n"İptal" → slotları doldur (sayılar aşılabilir)`);
+      if(ans){$("fillPolicy").value="by_capacity";}
+    }else if(T>S0){
+      alert(`⚠️ Belirlediğin sayılar toplamı ${T}, kapasite ise ${S0}. ${T-S0} nöbet sığmayacak — sayıları düşür ya da vardiya/oda ekle.`);
+    }
+  }
   const f=feasibility();
   if(fillAll()&&!f.ok){
     const tips=[];
@@ -1077,17 +1088,23 @@ function redraft(){
 }
 function hideDecide(){$("decideCard").style.display="none";}
 function fairShare(){
-  // izin günleri oranında düşürülmüş adil pay (telafi yüklemesini önler)
+  // Hedefi (kota/target) olanlar hesap dışı — onların sayısını yönetici belirler.
+  // Kalan slotlar, hedefsiz kişilere izin günleri oranında dağıtılır.
   const {nDays}=monthInfo();
-  const S=totalSlots();
   const rel=isShiftMode()?members.slice():generalStaff();
-  const avail=rel.map(p=>{
+  let S=totalSlots();
+  const free=[];
+  rel.forEach(p=>{
+    const tg=tOf(p);
+    if(tg>0){S-=tg;return;}                       // hedefli: payı sabit, havuzdan düş
     const izin=Object.values(allPrefs[p.id]||{}).filter(v=>v==="izin").length;
-    return {p,free:Math.max(0,nDays-izin)};
+    free.push({p,f:Math.max(0,nDays-izin)});
   });
-  const totFree=avail.reduce((a,x)=>a+x.free,0)||1;
   const out={};
-  avail.forEach(x=>{out[x.p.id]=Math.round(S*x.free/totFree);});
+  if(!free.length)return out;
+  S=Math.max(0,S);
+  const totFree=free.reduce((a,x)=>a+x.f,0)||1;
+  free.forEach(x=>{out[x.p.id]=Math.round(S*x.f/totFree);});
   return out;
 }
 function showDraft(){
@@ -1205,7 +1222,7 @@ function computeRooms(){
           const tg=tOf(p);
           if(tg>0&&cnt[p.id]>=tg)return false;
           if(!fa&&tg===0)return false;
-          if(!tg&&share[p.id]&&cnt[p.id]>=share[p.id]+1)return false;
+          if(!tg&&fa&&share[p.id]&&cnt[p.id]>=share[p.id]+3)return false;
           if(pref(p.id,d)==="izin")return false;
           if(onDay(d,p.id))return false;
           if(gapClash(d,p.id))return false;
@@ -1229,7 +1246,7 @@ function computeRooms(){
           if(bays.has(d))w+=(bay[p.id]+p.carry_b)*14;
           if(pref(p.id,d)==="yes")w-=8;
           if(pref(p.id,d)==="avoid")w+=12;
-          if(!tg&&share[p.id])w+=Math.max(0,cnt[p.id]-share[p.id])*60;
+          if(!tg&&share[p.id])w+=Math.max(0,cnt[p.id]-share[p.id])*35;
           w+=shapeW(p,d,nDays);
           return w+Math.random()*4;};
         elig.sort((a,b2)=>wgt(a)-wgt(b2));
@@ -1292,7 +1309,7 @@ function computeShifts(){
           if(spf.allowed&&spf.allowed[o.si]===false)return false;
           if(tg>0&&C[p.id]>=tg)return false;
           if(!fa&&tg===0)return false;
-          if(!tg&&share[p.id]&&C[p.id]>=share[p.id]+1)return false;
+          if(!tg&&fa&&share[p.id]&&C[p.id]>=share[p.id]+3)return false;
           if(spf.gap>0&&dutyDays[p.id].some(dd=>dd!==o.d&&Math.abs(o.d-dd)<=spf.gap))return false;
           if(patOn>0&&dutyDays[p.id].length){
             const ld=Math.max(...dutyDays[p.id]);
@@ -1348,7 +1365,7 @@ function computeShifts(){
             +(mt.wkH?WH[p.id]*1.2:0)
             +(mt.bayH?(BH[p.id]+p.carry_b)*2:0)
             +(tg>0?(C[p.id]/tg)*25:0)
-            +(!tg&&share[p.id]?Math.max(0,C[p.id]-share[p.id])*60:0)
+            +(!tg&&share[p.id]?Math.max(0,C[p.id]-share[p.id])*35:0)
             +(function(){ // vardiya çeşitliliği: bu vardiyadan beklenen payı aşan ağırlaşır
                 const elig2=members.filter(q=>spAllowed(q,o.si)).length||1;
                 const exp=shiftTotals[o.si]/elig2;
