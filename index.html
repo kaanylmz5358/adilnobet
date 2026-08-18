@@ -15,10 +15,12 @@
   --sh-sm:0 2px 10px rgba(11,124,114,.08); --sh-md:0 6px 24px rgba(11,124,114,.14);
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-html,body{height:100%}
+html{min-height:100%;overflow-x:hidden;-webkit-text-size-adjust:100%}
 body{font-family:ui-rounded,-apple-system,"SF Pro Rounded","Segoe UI",Roboto,sans-serif;
-  background:var(--bg);color:var(--ink);display:flex;justify-content:center}
-#phone{width:100%;max-width:430px;min-height:100dvh;display:flex;flex-direction:column;position:relative}
+  background:var(--bg);color:var(--ink);display:flex;justify-content:center;
+  min-height:100%;width:100%;max-width:100%;overflow-x:hidden;overscroll-behavior-y:none}
+#phone{width:100%;max-width:430px;min-height:100dvh;display:flex;flex-direction:column;
+  position:relative;overflow-x:clip}
 header{background:linear-gradient(135deg,#12B5A6 0%,#0B7C72 60%,#085E56 100%);
   border-radius:0 0 30px 30px;color:#fff;padding:calc(18px + env(safe-area-inset-top)) 22px 6px;
   box-shadow:var(--sh-md);position:relative;overflow:hidden}
@@ -33,14 +35,16 @@ header::before{content:"";position:absolute;top:-70px;right:-60px;width:210px;he
 .ekg{width:100%;height:30px;margin-top:4px;position:relative;z-index:1}
 .ekg path{stroke:#FFD9D4;stroke-width:2.5;fill:none;stroke-linecap:round;stroke-dasharray:600;stroke-dashoffset:600;animation:beat 3.4s linear infinite}
 @keyframes beat{to{stroke-dashoffset:0}}
-main{flex:1;overflow-y:auto;padding:16px 16px 118px}
+main{flex:1;padding:16px 16px 124px;min-width:0}
 .eyebrow{font-size:.64rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--teal-deep);margin-bottom:2px}
-.card{background:var(--card);border-radius:22px;padding:18px;margin-bottom:14px;box-shadow:var(--sh-sm);border:1px solid rgba(227,240,237,.8)}
+.card{background:var(--card);border-radius:22px;padding:18px;margin-bottom:14px;box-shadow:var(--sh-sm);
+  border:1px solid rgba(227,240,237,.8);min-width:0;overflow-wrap:anywhere}
 .card h2{font-size:1.06rem;font-weight:800;display:flex;align-items:center;gap:8px;margin-bottom:3px}
 .hint{font-size:.79rem;color:var(--ink-soft);margin-bottom:13px;line-height:1.5}
-.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;min-width:0;max-width:100%}
 label{font-size:.78rem;font-weight:700;color:var(--ink-soft)}
-input,select,textarea{padding:11px 13px;border:1.5px solid var(--line);border-radius:13px;font-size:.92rem;background:#FBFEFD;font-family:inherit;color:var(--ink)}
+input,select,textarea{padding:11px 13px;border:1.5px solid var(--line);border-radius:13px;font-size:.92rem;
+  background:#FBFEFD;font-family:inherit;color:var(--ink);max-width:100%}
 input:focus,select:focus{outline:2px solid var(--teal-glow);border-color:var(--teal)}
 input[type=number]{width:70px}
 input:disabled,select:disabled{opacity:.55}
@@ -71,15 +75,18 @@ input[type=time]{width:96px;padding:8px}
 .stat .v{font-size:1.45rem;font-weight:800;color:var(--teal-deep)}
 .stat .v.bad{color:var(--coral)}
 .stat .l{font-size:.62rem;font-weight:700;color:var(--ink-soft);text-transform:uppercase}
-.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-top:12px}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-top:12px;min-width:0}
+.cal>*{min-width:0}
 .dh{font-size:.64rem;font-weight:800;text-align:center;color:var(--ink-soft)}
-.day{min-height:58px;border:1.5px solid var(--line);border-radius:13px;padding:4px;background:#fff;font-size:.62rem}
+.day{min-height:58px;border:1.5px solid var(--line);border-radius:13px;padding:4px;background:#fff;
+  font-size:.62rem;min-width:0;overflow:hidden}
 .day.wknd{background:var(--wknd);border-color:#F3E4C2}
 .day.bay{background:var(--gold-tint);border-color:var(--gold)}
 .day .num{font-weight:800;font-size:.72rem;color:var(--ink-soft)}
 .day.bay .num::after{content:" 🌙";font-size:.6rem}
 .day .who{display:flex;flex-direction:column;gap:2px;margin-top:2px}
-.chip-p{display:block;border-radius:7px;padding:1.5px 4px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:.6rem}
+.chip-p{display:block;border-radius:7px;padding:1.5px 4px;font-weight:700;white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis;font-size:.6rem;min-width:0;max-width:100%}
 .chip-p.me{outline:1.5px solid var(--teal-deep)}
 .chip-p.borrow{outline:1px dashed var(--ink-soft)}
 .day.empty{border:none;background:none}
@@ -93,7 +100,10 @@ input[type=time]{width:96px;padding:8px}
 .dot{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:4px;vertical-align:middle}
 .empty-state{text-align:center;padding:24px 10px;color:var(--ink-soft)}
 .empty-state .big{font-size:2.1rem;margin-bottom:6px}
-table{width:100%;border-collapse:collapse;font-size:.76rem}
+.tblwrap{overflow-x:auto;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;
+  max-width:100%;margin:0 -2px;padding:0 2px}
+.tblwrap table{min-width:100%}
+table{width:100%;border-collapse:collapse;font-size:.76rem;max-width:100%}
 th{text-align:left;font-size:.6rem;text-transform:uppercase;color:var(--ink-soft);padding:8px 3px;border-bottom:2px solid var(--line)}
 td{padding:8px 3px;border-bottom:1px solid var(--line)}
 .bar{height:7px;border-radius:6px;background:var(--teal-tint);overflow:hidden;min-width:40px}
@@ -130,10 +140,12 @@ nav button.active .ic{filter:none}
 .toast.ok{background:var(--teal-tint);color:var(--teal-dark);border:1px solid var(--teal)}
 .toast.err{background:var(--coral-tint);color:#C33D2E;border:1px solid var(--coral)}
 .savebtn{padding:6px 9px !important;min-width:auto}
-.modal{display:none;position:fixed;inset:0;background:rgba(8,94,86,.5);z-index:99;align-items:flex-end;justify-content:center}
+.modal{display:none;position:fixed;inset:0;background:rgba(8,94,86,.5);z-index:99;
+  align-items:flex-end;justify-content:center;overscroll-behavior:contain}
 .modal.on{display:flex}
 .sheet{background:var(--card);width:100%;max-width:430px;border-radius:26px 26px 0 0;
-  padding:18px 16px calc(18px + env(safe-area-inset-bottom));max-height:88dvh;overflow-y:auto;box-shadow:var(--sh-md)}
+  padding:18px 16px calc(18px + env(safe-area-inset-bottom));max-height:88dvh;overflow-y:auto;
+  -webkit-overflow-scrolling:touch;overscroll-behavior:contain;box-shadow:var(--sh-md)}
 .sheet h2{font-size:1.05rem;font-weight:800;margin-bottom:3px}
 .cdown{position:relative;z-index:1;margin-top:9px;background:rgba(255,255,255,.17);border:1px solid rgba(255,255,255,.3);
   border-radius:14px;padding:7px 11px;font-size:.72rem;font-weight:700;line-height:1.35}
@@ -390,7 +402,7 @@ nav button.active .ic{filter:none}
   <div class="card">
     <p class="eyebrow">Aylar arası adalet</p>
     <h2>🔄 Devir</h2>
-    <table><thead><tr><th>Kişi</th><th>Toplam</th><th>H.sonu</th><th>🌙</th></tr></thead><tbody id="devirBody"></tbody></table>
+    <div class="tblwrap"><table><thead><tr><th>Kişi</th><th>Toplam</th><th>H.sonu</th><th>🌙</th></tr></thead><tbody id="devirBody"></tbody></table></div>
   </div>
 </section>
 
@@ -454,7 +466,7 @@ nav button.active .ic{filter:none}
     <p class="eyebrow">Yönetici onayı · taslak</p>
     <h2>⚖️ Nöbet sayılarını onayla</h2>
     <p class="hint" id="decideHint"></p>
-    <table><thead><tr><th>Kişi</th><th>🙋</th><th>🔒</th><th>☀️/🌙/🏖</th><th>Taslak</th><th>🌙 hedef</th></tr></thead><tbody id="decideBody"></tbody></table>
+    <div class="tblwrap"><table><thead><tr><th>Kişi</th><th>🙋</th><th>🔒</th><th>☀️/🌙/🏖</th><th>Taslak</th><th>🌙 hedef</th></tr></thead><tbody id="decideBody"></tbody></table></div>
     <div class="banner info" id="decideTotal" style="margin-top:10px">—</div>
     <div class="row" style="margin-top:8px">
       <button class="btn small" onclick="confirmDecide()">✔ Onayla ve yayınla</button>
@@ -492,8 +504,8 @@ nav button.active .ic{filter:none}
     <p class="eyebrow">Fazla mesai hesabı</p>
     <h2>🕐 Mesai Raporu</h2>
     <p class="hint">Hafta içi ve hafta sonu saatleri ayrı toplanır — hafta sonu nöbetleri mesai sonrası hesabında daha uzun olduğu için ayrı sütunda. Excel çıktısına da eklenir.</p>
-    <table><thead><tr><th>Kişi</th><th>Hİ saat</th><th>HS saat</th><th>Gece</th><th>🌙</th><th>Toplam</th><th>Adet</th></tr></thead>
-    <tbody id="mesaiBody"></tbody></table>
+    <div class="tblwrap"><table><thead><tr><th>Kişi</th><th>Hİ saat</th><th>HS saat</th><th>Gece</th><th>🌙</th><th>Toplam</th><th>Adet</th></tr></thead>
+    <tbody id="mesaiBody"></tbody></table></div>
   </div>
 </section>
 
@@ -555,7 +567,7 @@ nav button.active .ic{filter:none}
 
 <div id="toast" class="toast"></div>
 
-<div id="dayPicker" class="modal">
+<div id="dayPicker" class="modal" onclick="if(event.target===this)dpClose()">
   <div class="sheet">
     <h2 id="dpTitle">📅 Gün seç</h2>
     <p class="hint" id="dpHint">Günlere dokunarak seç.</p>
@@ -2187,7 +2199,7 @@ function renderMesai(){
 }
 function renderFair(){
   const {y,m,nDays}=monthInfo();
-  const fw=$("fairWrap");fw.innerHTML="";
+  const fw=$("fairWrap");fw.innerHTML="";fw.className="tblwrap";
   const sm=schedule.mode==="shifts";
   const maxV=sm?Math.max(...members.map(p=>(schedule.hours&&schedule.hours[p.id])||0),1)
              :Math.max(...Object.values(schedule.cnt),1);
