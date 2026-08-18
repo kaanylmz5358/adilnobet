@@ -124,6 +124,12 @@ nav button.active .ic{filter:none}
 .center input,.center select{width:100%;margin-bottom:10px}
 .center .btn{width:100%;margin-bottom:10px}
 .switchlink{font-size:.82rem;color:var(--teal-deep);font-weight:700;cursor:pointer;text-decoration:underline}
+.toast{position:fixed;left:50%;transform:translateX(-50%);top:14px;z-index:120;max-width:400px;
+  width:calc(100% - 28px);padding:12px 15px;border-radius:15px;font-size:.8rem;font-weight:700;
+  display:none;box-shadow:0 10px 30px rgba(11,124,114,.22);line-height:1.4}
+.toast.ok{background:var(--teal-tint);color:var(--teal-dark);border:1px solid var(--teal)}
+.toast.err{background:var(--coral-tint);color:#C33D2E;border:1px solid var(--coral)}
+.savebtn{padding:6px 9px !important;min-width:auto}
 .modal{display:none;position:fixed;inset:0;background:rgba(8,94,86,.5);z-index:99;align-items:flex-end;justify-content:center}
 .modal.on{display:flex}
 .sheet{background:var(--card);width:100%;max-width:430px;border-radius:26px 26px 0 0;
@@ -231,16 +237,20 @@ nav button.active .ic{filter:none}
     <div class="row">
       <input type="month" id="month">
       <label>Min ara</label><input type="number" id="minGap" min="1" max="7">
+      <button class="btn small savebtn" title="Sadece bu ayarı kaydet" onclick="saveGrp('month')">💾</button>
     </div>
+    <p class="hint" style="margin:5px 0 0">Ay değiştirince sayfa o ayın izin/tercih ve çizelge verisiyle yenilenir.</p>
     <div class="row" style="margin-top:10px">
       <label>🌙 Bayram</label>
       <input type="text" id="bayramDays" placeholder="ör. 15-17,20" style="flex:1;min-width:100px">
       <button class="btn ghost small" onclick="pickBayram()">📅 Takvim</button>
+      <button class="btn small savebtn" title="Sadece bu ayarı kaydet" onclick="saveGrp('bayram')">💾</button>
     </div>
     <p class="hint" style="margin:5px 0 0">Yazarak da girebilirsin: tek gün <b>15</b>, aralık <b>15-17</b>, karışık <b>15-17,23</b>.</p>
     <div class="row" style="margin-top:10px">
       <label>📆 Liste hazırlama günü</label>
       <input type="number" id="genDay" min="1" max="28" value="25">
+      <button class="btn small savebtn" title="Sadece bu ayarı kaydet" onclick="saveGrp('genday')">💾</button>
       <span style="font-size:.72rem;color:var(--ink-soft)">· her ayın bu gününde sonraki ayın listesi hazırlanır</span>
     </div>
     <div class="row" style="margin-top:10px">
@@ -249,6 +259,7 @@ nav button.active .ic{filter:none}
         <option value="rooms">🚪 Oda tabanlı (asistan nöbeti)</option>
         <option value="shifts">⏰ Vardiya tabanlı (acil / icap / kat)</option>
       </select>
+      <button class="btn small savebtn" title="Sadece bu ayarı kaydet" onclick="saveGrp('mode')">💾</button>
     </div>
     <div class="row" style="margin-top:10px">
       <label>🎯 Doluluk politikası</label>
@@ -256,6 +267,7 @@ nav button.active .ic{filter:none}
         <option value="fill_all">Tüm oda/vardiyaları doldur (boş bırakma)</option>
         <option value="by_capacity">İstenen nöbet sayısına göre dağıt (bazı slotlar boş kalabilir)</option>
       </select>
+      <button class="btn small savebtn" title="Sadece bu ayarı kaydet" onclick="saveGrp('fill')">💾</button>
     </div>
     <div class="row" style="margin-top:10px">
       <label>🧭 Çalışma düzeni</label>
@@ -264,6 +276,7 @@ nav button.active .ic{filter:none}
         <option value="duty_rest">Mesai + nöbet · nöbet ertesi izinli</option>
         <option value="duty_work">Mesai + nöbet · nöbet ertesi çalışır</option>
       </select>
+      <button class="btn small savebtn" title="Sadece bu ayarı kaydet" onclick="saveGrp('work')">💾</button>
     </div>
     <div class="row" style="margin-top:10px">
       <label>🔁 Ritim:</label>
@@ -271,6 +284,7 @@ nav button.active .ic{filter:none}
       <label>gün üst üste →</label>
       <input type="number" id="patternOff" min="0" max="7" value="0">
       <label>gün dinlen</label>
+      <button class="btn small savebtn" title="Sadece bu ayarı kaydet" onclick="saveGrp('rhythm')">💾</button>
     </div>
     <p class="hint" style="margin:6px 0 0">Ritim örneği: 2 → 2 = iki gün art arda gelen, sonraki iki gün gelmez (0 = kapalı; vardiya modunda çalışır).</p>
     <div class="row" style="margin-top:10px">
@@ -280,14 +294,17 @@ nav button.active .ic{filter:none}
         <option value="off">Fark etmez — eşe bakma</option>
         <option value="fixed">Sabit eş — mümkün oldukça aynı kişiyle</option>
       </select>
+      <button class="btn small savebtn" title="Sadece bu ayarı kaydet" onclick="saveGrp('partner')">💾</button>
     </div>
     <div class="row" style="margin-top:10px">
       <label>⚖️ Denge</label>
       <label class="chk"><input type="checkbox" id="balDN" checked> ☀️/🌙 gece-gündüz sayısı</label>
       <label class="chk"><input type="checkbox" id="balWE" checked> 🏖 hafta içi/hafta sonu sayısı</label>
+      <button class="btn small savebtn" title="Sadece bu ayarı kaydet" onclick="saveGrp('balance')">💾</button>
     </div>
     <p class="hint" style="margin:6px 0 0">Denge açıkken herkesin <b>gece sayısı</b>, <b>gündüz sayısı</b> ve <b>hafta sonu sayısı</b> eşitlenmeye çalışılır. Tam bölünemeyen artık nöbetleri taslak onay ekranında sen dağıtırsın.</p>
-    <button class="btn small" style="margin-top:12px" id="saveSettingsBtn" onclick="saveSettings()">💾 Ayarları Kaydet</button>
+    <button class="btn ghost small" style="margin-top:12px" id="saveSettingsBtn" onclick="saveSettings()">💾 Hepsini birden kaydet</button>
+    <p class="hint" style="margin:6px 0 0">Her satırın kendi 💾 düğmesi var — sadece o ayarı kaydeder, diğerlerine dokunmaz. Alttaki düğme bu kartın <b>ve</b> odalar / vardiyalar / kural satırlarının tamamını birden kaydeder.</p>
   </div>
   <div class="card" id="roomCard">
     <p class="eyebrow">Oda ayarları</p>
@@ -296,19 +313,28 @@ nav button.active .ic{filter:none}
     <div class="row"><label>Genel asistan odası / gece</label>
       <input type="number" id="generalRooms" min="0" max="10"></div>
     <div id="roomList" style="margin-top:8px"></div>
-    <button class="btn ghost small" style="margin-top:10px" id="addRoomBtn" onclick="addRoomRow()">＋ Özel oda ekle</button>
+    <div class="row" style="margin-top:10px">
+      <button class="btn ghost small" id="addRoomBtn" onclick="addRoomRow()">＋ Özel oda ekle</button>
+      <button class="btn small savebtn" onclick="saveGrp('rooms')">💾 Odaları kaydet</button>
+    </div>
   </div>
   <div class="card" id="shiftCard" style="display:none">
     <p class="eyebrow">Vardiya ayarları</p>
     <h2>⏰ Vardiyalar</h2>
     <p class="hint">Her satır bir vardiya: ad, saat aralığı, kişi sayısı ve geçerli günler (gün düğmelerine dokun). Gece yarısını aşan vardiya (ör. 16:00→09:00) o kişiye ertesi günü otomatik dinlenme yapar. Adalet; toplam saat, gece saati (20-08), hafta sonu ve bayram saati üzerinden dengelenir.</p>
     <div id="shiftList"></div>
-    <button class="btn ghost small" style="margin-top:10px" id="addShiftBtn" onclick="addShiftRow()">＋ Vardiya ekle</button>
+    <div class="row" style="margin-top:10px">
+      <button class="btn ghost small" id="addShiftBtn" onclick="addShiftRow()">＋ Vardiya ekle</button>
+      <button class="btn small savebtn" onclick="saveGrp('shifts')">💾 Vardiyaları kaydet</button>
+    </div>
     <div style="margin-top:16px;border-top:1.5px dashed var(--line);padding-top:12px">
       <p class="eyebrow">İstisnalar</p>
       <p class="hint">Belirli bir günün veya kişinin vardiya saatini değiştir. Gün boş = tüm ay, kişi "Herkes" = o gün kim gelirse. Örnek: "15. gün · Ara · Herkes · 11:00→20:00" ya da "boş · Ara · Dr. Altuğ · 08:00→10:00".</p>
       <div id="ovrList"></div>
-      <button class="btn ghost small" style="margin-top:8px" id="addOvrBtn" onclick="addOvrRow()">＋ İstisna ekle</button>
+      <div class="row" style="margin-top:8px">
+        <button class="btn ghost small" id="addOvrBtn" onclick="addOvrRow()">＋ İstisna ekle</button>
+        <button class="btn small savebtn" onclick="saveGrp('ovr')">💾 İstisnaları kaydet</button>
+      </div>
     </div>
   </div>
   <div class="card" id="blockCard">
@@ -316,7 +342,10 @@ nav button.active .ic{filter:none}
     <h2>🎛 Tutamaz / sadece şu günler</h2>
     <p class="hint">Her satırda bir kişi ve bir kural: <b>⛔ Tutamaz</b> = seçilen gün/saatlerde asla nöbet yazılmaz. <b>✅ Sadece bu günlerde tutabilir</b> = o kişiye <u>yalnızca</u> seçilen günlerden nöbet verilir (aralarından rastgele, diğer tüm kurallara da uyarak). Haftanın günlerini düğmeyle, ayın belirli günlerini 📅 takvimle seç. Saat aralığı boşsa gün komple kapsanır; saat girersen vardiya bu aralığın tamamen içinde olmalıdır. Oda tabanlı listede saat yok sayılır, gün bazında uygulanır.</p>
     <div id="blockList"></div>
-    <button class="btn ghost small" style="margin-top:10px" id="addBlockBtn" onclick="addBlockRow()">＋ Engel ekle</button>
+    <div class="row" style="margin-top:10px">
+      <button class="btn ghost small" id="addBlockBtn" onclick="addBlockRow()">＋ Kural ekle</button>
+      <button class="btn small savebtn" onclick="saveGrp('blocks')">💾 Kuralları kaydet</button>
+    </div>
   </div>
   <div class="card" id="leaveAdminCard" style="display:none">
     <p class="eyebrow">Yönetici onayı</p>
@@ -524,6 +553,8 @@ nav button.active .ic{filter:none}
 </div>
 </main>
 
+<div id="toast" class="toast"></div>
+
 <div id="dayPicker" class="modal">
   <div class="sheet">
     <h2 id="dpTitle">📅 Gün seç</h2>
@@ -725,6 +756,7 @@ async function loadAll(){
   $("fillPolicy").value=dept.fill_policy||"fill_all";
   $("patternOn").value=dept.pattern_on||0;
   $("patternOff").value=dept.pattern_off||0;
+  document.querySelectorAll(".savebtn").forEach(b=>{b.style.display=ro?"none":"inline-flex";});
   $("genDay").value=(dept.opts&&dept.opts.gen_day)||25;
   $("partnerMode").value=(dept.opts&&dept.opts.partner_mode)||"rotate";
   $("balDN").checked=!(dept.opts&&dept.opts.bal_dn===false);
@@ -1103,10 +1135,87 @@ function addBlockRow(){
   blockRows.push({pid:"",type:"block",wdays:[1,1,1,1,1,1,1],days:"",start:"",end:""});renderBlocks();
 }
 
+/* ---------- BİLDİRİM ---------- */
+let toastTimer=null;
+function toast(msg,err){
+  const el=$("toast");if(!el){alert(msg);return;}
+  el.className="toast "+(err?"err":"ok");
+  el.textContent=msg;el.style.display="block";
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>{el.style.display="none";},err?7000:2600);
+}
+
+/* ---------- PARÇALI KAYDETME: her ayar kendi düğmesiyle ---------- */
+const OPTS_SQL="alter table departments add column if not exists opts jsonb not null default '{}'::jsonb;";
+async function saveDept(patch,label,cfg){
+  cfg=cfg||{};
+  if(!isAdmin()){toast("Bu ayarı sadece yönetici değiştirebilir.",true);return false;}
+  if(!dept){toast("Ekip yüklenmedi.",true);return false;}
+  const body={...patch};
+  let touchesOpts=false;
+  if(body.__opts){
+    touchesOpts=true;
+    body.opts={...(dept.opts||{}),...body.__opts};
+    delete body.__opts;
+  }
+  const {error}=await sb.from("departments").update(body).eq("id",dept.id);
+  if(error){
+    if(touchesOpts&&/opts/i.test(error.message||""))
+      toast("⚠️ "+label+" kaydedilemedi: veritabanında 'opts' sütunu yok.\nSupabase → SQL Editor'da bir kez çalıştır:\n"+OPTS_SQL,true);
+    else toast("⚠️ "+label+" kaydedilemedi: "+error.message,true);
+    return false;
+  }
+  Object.assign(dept,JSON.parse(JSON.stringify(body)));
+  toast("✅ "+label+" kaydedildi");
+  if(cfg.reload)await loadAll();
+  else if(cfg.after)cfg.after();
+  return true;
+}
+function roomsPatch(){
+  const br={};
+  for(const r of roomRows){
+    if(br[r.branch]){toast("Aynı branş için iki oda satırı var: "+r.branch,true);return null;}
+    br[r.branch]={rooms:r.rooms,shared:r.shared};
+  }
+  return {general_rooms:+$("generalRooms").value,branch_rooms:br};
+}
+function saveGrp(key){
+  switch(key){
+    case "month":
+      return saveDept({month:$("month").value,min_gap:+$("minGap").value},"Ay ve min ara",{reload:true});
+    case "bayram":
+      return saveDept({bayram:$("bayramDays").value},"Bayram günleri",
+        {after:()=>{renderPrefCal();renderSchedule();renderCountdown();}});
+    case "genday":
+      return saveDept({__opts:{gen_day:genDay()}},"Liste hazırlama günü",{after:renderCountdown});
+    case "mode":
+      return saveDept({sched_mode:$("schedMode").value},"Liste tipi",{reload:true});
+    case "fill":
+      return saveDept({fill_policy:$("fillPolicy").value},"Doluluk politikası");
+    case "work":
+      return saveDept({work_model:$("workModel").value},"Çalışma düzeni",{after:updateShapeHint});
+    case "rhythm":
+      return saveDept({pattern_on:+$("patternOn").value||0,pattern_off:+$("patternOff").value||0},"Ritim kuralı");
+    case "partner":
+      return saveDept({__opts:{partner_mode:$("partnerMode").value}},"Eş düzeni");
+    case "balance":
+      return saveDept({__opts:{bal_dn:$("balDN").checked,bal_we:$("balWE").checked}},"Denge ayarı");
+    case "rooms":{
+      const p=roomsPatch();if(!p)return false;
+      return saveDept(p,"Odalar",{after:renderRooms});}
+    case "shifts":
+      return saveDept({shifts:shiftRows},"Vardiyalar",{after:()=>{renderShifts();renderPeople();}});
+    case "ovr":
+      return saveDept({shift_overrides:ovrRows},"Vardiya istisnaları",{after:renderOvr});
+    case "blocks":
+      return saveDept({__opts:{blocks:blockRows.filter(b=>b.pid)}},"Gün kuralları",{after:renderBlocks});
+  }
+}
+
 async function saveSettings(){
   const br={};
   for(const r of roomRows){
-    if(br[r.branch]){alert("Aynı branş için iki oda satırı var: "+r.branch);return;}
+    if(br[r.branch]){toast("Aynı branş için iki oda satırı var: "+r.branch,true);return;}
     br[r.branch]={rooms:r.rooms,shared:r.shared};
   }
   const base={
@@ -1121,13 +1230,13 @@ async function saveSettings(){
   if(error&&/opts/i.test(error.message||"")){
     // veritabanında "opts" sütunu henüz yoksa: kalan ayarları kaydet, kullanıcıyı uyar
     const r2=await sb.from("departments").update(base).eq("id",dept.id);
-    if(r2.error){alert("⚠️ "+r2.error.message);return;}
+    if(r2.error){toast("⚠️ "+r2.error.message,true);return;}
     await loadAll();
-    alert("Ayarlar kaydedildi ✅\n\n⚠️ Ancak eş düzeni, denge ve ⛔ kişisel engeller kaydedilemedi:\nSupabase > SQL Editor'da şunu bir kez çalıştır:\n\nalter table departments add column if not exists opts jsonb not null default '{}'::jsonb;");
+    toast("Ayarlar kaydedildi ✅ — ancak eş düzeni, denge ve gün kuralları kaydedilemedi. Supabase → SQL Editor'da bir kez çalıştır:\n"+OPTS_SQL,true);
     return;
   }
-  if(error){alert("⚠️ "+error.message);return;}
-  await loadAll();alert("Ayarlar kaydedildi ✅");
+  if(error){toast("⚠️ "+error.message,true);return;}
+  await loadAll();toast("✅ Tüm ayarlar kaydedildi");
 }
 
 /* ---------- KİŞİ KURALLARI (vardiya modu) ---------- */
