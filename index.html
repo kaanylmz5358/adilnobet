@@ -403,6 +403,16 @@ details.adv[open]>summary::before{content:"▾ "}
       </div>
     </div>
   </div>
+  <div class="card" id="pinCard">
+    <p class="eyebrow">Yönetici · elle atama</p>
+    <h2>📌 Bu günde kesin şu kişi</h2>
+    <p class="hint">Özel durumlar için: seçtiğin günlerde nöbeti <b>kesin olarak</b> o kişi tutar, çizelge geri kalanı bunun etrafından kurar. Bu günler kilitlidir — dengeleme, takas ve yeniden üretme onlara dokunmaz. Kişinin toplam nöbet sayısına dahil edilirler.</p>
+    <div id="pinList"></div>
+    <div class="row" style="margin-top:10px">
+      <button class="btn ghost small" id="addPinBtn" onclick="addPinRow()">＋ Sabit atama ekle</button>
+      <button class="btn small savebtn" onclick="saveGrp('pins')">💾 Sabit atamaları kaydet</button>
+    </div>
+  </div>
   <div class="card" id="blockCard">
     <p class="eyebrow">Kişiye özel gün kuralları</p>
     <h2>🎛 Tutamaz / sadece şu günler</h2>
@@ -700,7 +710,7 @@ function branchOptionsHTML(selected){
 const DAYS_TR=["Pzt","Sal","Çar","Per","Cum","Cmt","Paz"];
 let sb=null, me=null, myProfile=null, dept=null, members=[], allPrefs={}, schedule=null, requests=[];
 let myTeams=[], activeDept=null;
-let signupMode=false, roomRows=[], shiftRows=[], ovrRows=[], blockRows=[];
+let signupMode=false, roomRows=[], shiftRows=[], ovrRows=[], blockRows=[], pinRows=[];
 
 function $(id){return document.getElementById(id)}
 function brEmoji(b){return BR_EMOJI[b]||"🩺";}
@@ -836,6 +846,7 @@ async function loadAll(){
   shiftRows=(dept.shifts||[]).map(s=>({name:s.name,start:s.start,end:s.end,count:s.count,days:(s.days||[1,1,1,1,1,1,1]).slice(),rest:s.rest||0,owner:s.owner||null,mesai:!!s.mesai}));
   ovrRows=(dept.shift_overrides||[]).map(o=>({...o}));
   blockRows=(((dept.opts||{}).blocks)||[]).map(b=>({...b,type:b.type||"block",wdays:(b.wdays||[1,1,1,1,1,1,1]).slice()}));
+  pinRows=(((dept.opts||{}).pins)||[]).map(p=>({...p}));
   $("schedMode").value=dept.sched_mode||"rooms";
   $("subTitle").textContent=dept.name+(isAdmin()?" · 👑 Yönetici":"");
   $("inviteCard").style.display=isAdmin()?"block":"none";
@@ -865,7 +876,7 @@ async function loadAll(){
   const {data:reqs}=await sb.from("swap_requests").select("*").eq("dept_id",dept.id).eq("month",dept.month).order("id",{ascending:false});
   requests=reqs||[];
   $("testCard").style.display=isAdmin()?"block":"none";
-  renderRooms();renderShifts();renderBlocks();modeChanged();renderProfile();renderPeople();renderAsPerson();syncIzinBox();renderPrefCal();renderPrefSummary();renderLeaveAdmin();renderQuota();renderCountdown();renderSchedule();renderReqs();fillReqForm();
+  renderRooms();renderShifts();renderBlocks();renderPins();modeChanged();renderProfile();renderPeople();renderAsPerson();syncIzinBox();renderPrefCal();renderPrefSummary();renderLeaveAdmin();renderQuota();renderCountdown();renderSchedule();renderReqs();fillReqForm();
   autoGenCheck();
 }
 
@@ -1228,6 +1239,59 @@ function renderBlocks(){
   if(!blockRows.length)box.innerHTML='<p class="hint">Engel yok — herkes tüm gün ve saatlerde uygun sayılır.</p>';
   const ab=$("addBlockBtn");if(ab)ab.style.display=ro?"none":"inline-block";
 }
+/* ---------- SABİT ATAMALAR ---------- */
+function pinDesc(p){
+  const k=members.find(x=>x.id===p.pid);
+  const g=parseDays(p.days);
+  const v=(p.si!=null&&p.si!=="")?((shiftRows[+p.si]||{}).name||("Vardiya "+(+p.si+1))):"";
+  if(!k)return "(kişi seçilmedi)";
+  if(!g.length)return `${k.name} · gün seçilmedi`;
+  return `${k.name} · ayın ${fmtDays(g)}. günleri${v?" · "+v:""} · ${g.length} nöbet kilitli`;
+}
+function renderPins(){
+  const box=$("pinList");if(!box)return;
+  const ro=!isAdmin();
+  box.innerHTML="";
+  pinRows.forEach((p,i)=>{
+    const d=document.createElement("div");d.className="shiftrow";
+    const cokV=isShiftMode()&&shiftRows.length>1;
+    d.innerHTML=`<div class="row">
+      <select style="flex:1;min-width:140px" ${ro?"disabled":""} onchange="pinRows[${i}].pid=this.value;renderPins()">
+        <option value="">— kişi seç —</option>
+        ${members.map(k=>`<option value="${k.id}" ${p.pid===k.id?"selected":""}>${k.name}</option>`).join("")}</select>
+      ${ro?"":`<button class="btn red small" onclick="pinRows.splice(${i},1);renderPins()">✕</button>`}
+    </div>
+    <div class="row" style="margin-top:6px">
+      <button class="btn ghost small" style="flex:1;min-width:150px" ${ro?"disabled":""} onclick="pickPinDays(${i})">📅 ${parseDays(p.days).length?"ayın "+fmtDays(parseDays(p.days))+". günleri":"günleri seç"}</button>
+      ${cokV?`<select style="min-width:120px" ${ro?"disabled":""} onchange="pinRows[${i}].si=this.value;renderPins()">
+        <option value="">Hangi vardiya olursa</option>
+        ${shiftRows.map((sh,si)=>`<option value="${si}" ${String(p.si)===String(si)?"selected":""}>${sh.name||("V"+(si+1))}</option>`).join("")}
+      </select>`:""}
+    </div>
+    <p class="hint" style="margin:5px 0 0">📌 ${pinDesc(p)}</p>`;
+    box.appendChild(d);
+  });
+  if(!pinRows.length)box.innerHTML='<p class="hint">Sabit atama yok — bütün günleri çizelge kendi dağıtır.</p>';
+  const ab=$("addPinBtn");if(ab)ab.style.display=ro?"none":"inline-block";
+}
+function addPinRow(){
+  if(!isAdmin())return;
+  pinRows.push({pid:"",days:"",si:""});renderPins();
+}
+function pickPinDays(i){
+  if(!isAdmin())return;
+  const p=pinRows[i];if(!p)return;
+  const k=members.find(x=>x.id===p.pid);
+  openDayPicker("📌 "+(k?k.name:"Sabit atama")+" · hangi günler",
+    "Seçtiğin günlerde nöbeti kesin bu kişi tutar; çizelge bu günlere dokunmaz.",
+    p.days,arr=>{pinRows[i].days=fmtDays(arr);renderPins();});
+}
+/* bir atama elle sabitlenmiş mi? (takvimde 📌 göstermek için) */
+function isPinned(d,e){
+  return pinRows.some(p=>p.pid===e.id&&parseDays(p.days).indexOf(d)>=0
+    &&(p.si==null||p.si===""||(e.s!=null&&+p.si===e.s)));
+}
+
 function addBlockRow(){
   if(!isAdmin())return;
   blockRows.push({pid:"",type:"block",wdays:[1,1,1,1,1,1,1],days:"",start:"",end:""});renderBlocks();
@@ -1504,6 +1568,8 @@ function saveGrp(key){
       return saveDept({shifts:shiftRows},"Vardiyalar",{after:()=>{renderShifts();renderPeople();}});
     case "ovr":
       return saveDept({shift_overrides:ovrRows},"Vardiya istisnaları",{after:renderOvr});
+    case "pins":
+      return saveDept({__opts:{pins:pinRows.filter(p=>p.pid&&parseDays(p.days).length)}},"Sabit atamalar",{after:renderPins});
     case "blocks":
       return saveDept({__opts:{blocks:blockRows.filter(b=>b.pid)}},"Gün kuralları",{after:renderBlocks});
   }
@@ -1523,7 +1589,8 @@ async function saveSettings(){
     fill_policy:$("fillPolicy").value,shift_overrides:ovrRows};
   const withOpts={...base,opts:{partner_mode:$("partnerMode").value,bal_dn:$("balDN").checked,
     bal_we:$("balWE").checked,gen_day:genDay(),min_rest_h:minRestH(),
-    blocks:blockRows.filter(b=>b.pid)}};
+    blocks:blockRows.filter(b=>b.pid),
+    pins:pinRows.filter(p=>p.pid&&parseDays(p.days).length)}};
   let {error}=await sb.from("departments").update(withOpts).eq("id",dept.id);
   if(error&&/opts/i.test(error.message||"")){
     // veritabanında "opts" sütunu henüz yoksa: kalan ayarları kaydet, kullanıcıyı uyar
@@ -2248,10 +2315,10 @@ function slotCapacity(slots,E){
    cap[p] = o kişinin alabileceği en fazla nöbet. Kuhn algoritması hiçbir
    kişinin yükünü DÜŞÜRMEZ, sadece artırır — bu yüzden önce yöneticinin
    kesin sayılarını doyurup sonra kalanları dağıtmak güvenlidir. */
-function kuhnMatch(slots,E,cap,A,load,onlyPersons){
+function kuhnMatch(slots,E,cap,A,load,onlyPersons,locked){
   const n=members.length,S=slots.length;
   const owned=[];for(let p=0;p<n;p++)owned.push([]);
-  for(let s=0;s<S;s++)if(A[s]>=0)owned[A[s]].push(s);
+  for(let s=0;s<S;s++)if(A[s]>=0&&!(locked&&locked[s]))owned[A[s]].push(s);
   const allow=onlyPersons||null;
   const vis=new Uint8Array(n);
   const order=[];for(let p=0;p<n;p++)if((!allow||allow[p])&&cap[p]>0)order.push(p);
@@ -2293,12 +2360,12 @@ function kuhnMatch(slots,E,cap,A,load,onlyPersons){
 /* Serbest kişiler arasında sayıları eşitle.
    Zincirleme aktarım: yükü fazla olandan yükü az olana, aradaki kişilerin
    sayısını bozmadan bir nöbet taşınır. */
-function transferOne(slots,E,A,from,to,load,freeMask){
+function transferOne(slots,E,A,from,to,load,locked){
   const n=members.length,S=slots.length;
   const prev=new Array(n).fill(-1),prevSlot=new Array(n).fill(-1);
   const vis=new Uint8Array(n);vis[from]=1;
   const slotsOf=[];for(let p=0;p<n;p++)slotsOf.push([]);
-  for(let s=0;s<S;s++)if(A[s]>=0)slotsOf[A[s]].push(s);
+  for(let s=0;s<S;s++)if(A[s]>=0&&!(locked&&locked[s]))slotsOf[A[s]].push(s);
   const q=[from];
   while(q.length){
     const p=q.shift();
@@ -2320,7 +2387,7 @@ function transferOne(slots,E,A,from,to,load,freeMask){
   }
   return false;
 }
-function balanceFree(slots,E,A,load,freeIdx){
+function balanceFree(slots,E,A,load,freeIdx,locked){
   if(freeIdx.length<2)return;
   const bad=new Set();
   let guard=0;
@@ -2334,7 +2401,7 @@ function balanceFree(slots,E,A,load,freeIdx){
       if(!best||d>best.d)best={hi,lo,d};
     }
     if(!best)break;
-    if(transferOne(slots,E,A,best.hi,best.lo,load))bad.clear();
+    if(transferOne(slots,E,A,best.hi,best.lo,load,locked))bad.clear();
     else bad.add(best.hi+"|"+best.lo);
   }
 }
@@ -2369,7 +2436,7 @@ function makeEvaluator(slots,ctxd){
       if(dayOn[p][sl.d])doubleDay++;
       dayOn[p][sl.d]=1;
       ivs[p].push(IV[s][p]||slotIV(sl,members[p].id));
-      const mt=MT[s][p];
+      const mt=MT[s][p]||slotMT(sl,members[p].id,y,m,nDays,bays);
       if(mt.isN)NC[p]++;else DC[p]++;
       if(mt.isWe)WEC[p]++;else WDC[p]++;
       if(sl.si>=0){if(!SC[p])SC[p]=new Array(shiftRows.length).fill(0);SC[p][sl.si]++;}
@@ -2456,9 +2523,10 @@ function makeEvaluator(slots,ctxd){
 }
 
 /* Takas tabanlı yerel arama — sayıları asla değiştirmez */
-function refineAsg(slots,E,A,evalFn,iters){
+function refineAsg(slots,E,A,evalFn,iters,locked){
   const S=slots.length;
   if(S<2)return A;
+  const kilit=locked||new Uint8Array(S);
   let cur=A.slice(),curP=evalFn(cur);
   let best=cur.slice(),bestP=curP;
   let temp=Math.max(60,curP/40||60);
@@ -2466,6 +2534,7 @@ function refineAsg(slots,E,A,evalFn,iters){
   for(let it=0;it<iters;it++){
     const i=(Math.random()*S)|0;let j=(Math.random()*S)|0;
     if(i===j)j=(j+1)%S;
+    if(kilit[i]||kilit[j])continue;
     const a=cur[i],b=cur[j];
     if(a===b)continue;
     if(a>=0&&!E[j][a])continue;
@@ -2502,9 +2571,10 @@ function solveSchedule(){
   for(let s=0;s<S;s++){
     const row=new Uint8Array(n),ivr=new Array(n),mtr=new Array(n);
     for(let p=0;p<n;p++){
-      const ok=slotEligible(members[p],slots[s],y,m,nDays);
-      row[p]=ok?1:0;
-      if(ok){ivr[p]=slotIV(slots[s],members[p].id);mtr[p]=slotMT(slots[s],members[p].id,y,m,nDays,bays);}
+      row[p]=slotEligible(members[p],slots[s],y,m,nDays)?1:0;
+      // elle sabitleme uygunluk dışına çıkabildiği için metrikler her çift için hesaplanır
+      ivr[p]=slotIV(slots[s],members[p].id);
+      mtr[p]=slotMT(slots[s],members[p].id,y,m,nDays,bays);
     }
     E.push(row);IV.push(ivr);MT.push(mtr);
   }
@@ -2524,10 +2594,38 @@ function solveSchedule(){
     }
   });
   const A=new Array(S).fill(-1),load=new Array(n).fill(0);
+  const locked=new Uint8Array(S);
+
+  /* --- 0. aşama: yöneticinin elle sabitlediği günler --- */
+  const pIdx={};members.forEach((p,i)=>{pIdx[p.id]=i;});
+  (pinRows||[]).forEach(pin=>{
+    const pi=pIdx[pin.pid];
+    if(pi==null)return;
+    const ad=members[pi].name;
+    const gunler=parseDays(pin.days);
+    gunler.forEach(d=>{
+      let hedef=-1;
+      for(let s2=0;s2<S;s2++){
+        if(A[s2]>=0||slots[s2].d!==d)continue;
+        if(pin.si!=null&&pin.si!==""&&slots[s2].si!==+pin.si)continue;
+        hedef=s2;break;
+      }
+      if(hedef<0){viol.push(`⚠️ ${ad}: ${d}. gün sabitlenemedi — o gün boş nöbet yeri kalmadı.`);return;}
+      if(!E[hedef][pi])viol.push(`⚠️ ${ad} ${d}. güne elle sabitlendi ama o gün kurallarına uymuyor (izin / gün kısıtı). Sabit atama üstün geldi.`);
+      A[hedef]=pi;load[pi]++;locked[hedef]=1;
+    });
+  });
+  members.forEach((p,i)=>{
+    if(isFixed[i]&&load[i]>wanted[i]){
+      viol.push(`⚠️ ${p.name}: ${load[i]} gün elle sabitlenmiş ama nöbet sayısı ${wanted[i]} yazılmış. Sabit atamalar korundu, sayı ${load[i]} oldu.`);
+      wanted[i]=load[i];
+    }
+  });
+
   const fixedMask=new Uint8Array(n);
   let fixedSum=0;
   members.forEach((p,i)=>{if(isFixed[i]){fixedMask[i]=1;fixedSum+=wanted[i];}});
-  if(fixedSum>0)kuhnMatch(slots,E,wanted,A,load,fixedMask);
+  if(fixedSum>0)kuhnMatch(slots,E,wanted,A,load,fixedMask,locked);
   members.forEach((p,i)=>{
     if(isFixed[i]&&load[i]<wanted[i])
       viol.push(`⚠️ ${p.name}: ${wanted[i]} nöbet istendi, kurallar elverdiği için ancak ${load[i]} verilebildi. (Aynı günlere sıkışan başka kişiler var.)`);
@@ -2540,8 +2638,8 @@ function solveSchedule(){
     const capAll=cap.slice();
     members.forEach((p,i)=>{if(isFixed[i])capAll[i]=wanted[i];else freeMask[i]=1;});
     const both=new Uint8Array(n);for(let i2=0;i2<n;i2++)both[i2]=1;
-    kuhnMatch(slots,E,capAll,A,load,both);
-    balanceFree(slots,E,A,load,freeIdx);          // serbest kişiler arasında eşitle
+    kuhnMatch(slots,E,capAll,A,load,both,locked);
+    balanceFree(slots,E,A,load,freeIdx,locked);   // serbest kişiler arasında eşitle
   }
 
   /* --- doldurulamayan yerler --- */
@@ -2567,7 +2665,7 @@ function solveSchedule(){
   const evalFn=makeEvaluator(slots,{y,m,nDays,bays,IV,MT,pm:partnerMode(),bDN:balDN(),bWE:balWE(),
     patOn:+($("patternOn").value||0),patOff:+($("patternOff").value||0),expShare,minRest:minRestH()});
   const iters=Math.max(4000,Math.min(40000,Math.round(900000/Math.max(1,S))));
-  const A2=refineAsg(slots,E,A,evalFn,iters);
+  const A2=refineAsg(slots,E,A,evalFn,iters,locked);
   const rep=evalFn(A2,true);
 
   /* --- sonucu uygulamanın beklediği biçime çevir --- */
@@ -2890,7 +2988,8 @@ function renderSchedule(){
       c.innerHTML=`<span class="num">${d}</span><div class="who">${liste.length?liste.map(e=>{
         const p=members.find(x=>x.id===e.id);if(!p)return"";
         const lb=slotLabel(e);
-        return `<span class="chip-p ${p.id===me.id?"me":""}" style="${pcStyle(p.id)};border-left-color:${personColor(p.id).solid}" title="${p.name} · ${lb}">${kisaAd(p.name)}${cokVardiya&&lb?`<span class="hh">${lb}</span>`:""}</span>`;
+        const pin=isPinned(d,e)?"📌":"";
+        return `<span class="chip-p ${p.id===me.id?"me":""}" style="${pcStyle(p.id)};border-left-color:${personColor(p.id).solid}" title="${p.name} · ${lb}${pin?" · sabit atama":""}">${pin}${kisaAd(p.name)}${cokVardiya&&lb?`<span class="hh">${lb}</span>`:""}</span>`;
       }).join(""):'<div class="bosgun">boş</div>'}</div>`;
       c.onclick=()=>{fillReqForm(d);showTab("takas");};
       cal.appendChild(c);
@@ -2912,7 +3011,8 @@ function renderSchedule(){
         <div class="dw">${list.length?list.map(e=>{
           const p=members.find(x=>x.id===e.id);if(!p)return"";
           const lb=slotLabel(e);
-          return `<span class="pchip ${p.id===me.id?"me":""}" style="${pcStyle(p.id)}">${p.name}${lb?` <small>${lb}</small>`:""}</span>`;
+          const pin=isPinned(d,e)?"📌 ":"";
+          return `<span class="pchip ${p.id===me.id?"me":""}" style="${pcStyle(p.id)}">${pin}${p.name}${lb?` <small>${lb}</small>`:""}</span>`;
         }).join(""):'<span class="pchip" style="background:#FDECEA;color:#C33D2E;border-color:#F5C6C0">boş</span>'}</div>`;
       r.onclick=()=>{fillReqForm(d);showTab("takas");};
       box.appendChild(r);
@@ -3056,6 +3156,9 @@ async function acceptReq(id){
   if(!entry)reason="nöbet bulunamadı";
   else if(pref(me.id,rq.day)==="izin")reason="izinlisin";
   else if(entryList(rq.day).some(e=>e.id===me.id))reason="zaten nöbetçisin";
+  else if(isPinned(rq.day,entry)){
+    reason="bu gün yönetici tarafından sabitlenmiş (📌)";
+  }
   else if(schedule.mode==="shifts"){
     const sh=(dept.shifts||[])[entry.s]||{};
     const {y:sy,m:sm2,nDays:sn}=monthInfo();
