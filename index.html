@@ -584,6 +584,11 @@ details.adv[open]>summary::before{content:"▾ "}
     <h2>🗓 Çizelge</h2>
     <div id="genRow"><p class="hint">Herkes izin/tercih girince yönetici üretir; anında herkeste görünür.</p>
     <button class="btn" style="width:100%" onclick="generate()">⚙️ Çizelgeyi Üret & Yayınla</button></div>
+    <div class="row" style="margin-bottom:10px">
+      <label>📅 Ay</label>
+      <select id="viewMonthSel" style="flex:1;min-width:150px" onchange="setViewMonth(this.value)"></select>
+    </div>
+    <div id="viewMonthBanner"></div>
     <div id="genBanner"></div>
     <div class="seg" id="schedViewRow">
       <button class="on" id="vwCal" onclick="setSchedView('cal')">🗓 Takvim</button>
@@ -653,8 +658,12 @@ details.adv[open]>summary::before{content:"▾ "}
     <div id="diagOut" class="banner info" style="display:none;white-space:pre-wrap"></div>
   </div>
   <div class="card">
-    <p class="eyebrow">Bu ay</p>
+    <p class="eyebrow">Nöbet takvimim</p>
     <h2>🗓 Nöbetlerim</h2>
+    <div class="row" style="margin-bottom:8px">
+      <label>📅 Ay</label>
+      <select id="viewMonthSel2" style="flex:1;min-width:150px" onchange="setViewMonth(this.value)"></select>
+    </div>
     <div id="myDuties"><div class="empty-state">Çizelge yayınlanınca nöbetlerin burada listelenir.</div></div>
     <div class="row" style="margin-top:12px">
       <button class="btn ghost small" onclick="gcalAll()">📅 Google Takvim'e aktar</button>
@@ -688,6 +697,20 @@ details.adv[open]>summary::before{content:"▾ "}
 </main>
 
 <div id="toast" class="toast"></div>
+
+<div id="dayEdit" class="modal" onclick="if(event.target===this)closeDayEdit()">
+  <div class="sheet">
+    <h2 id="dayEditTitle">✏️ Günü düzenle</h2>
+    <p class="hint">Bu günün nöbetçilerini elle değiştirebilirsin. Değişiklik yalnız bu güne uygulanır, ayın geri kalanı olduğu gibi kalır.</p>
+    <div id="dayEditBody"></div>
+    <div id="dayEditMeta" style="display:none"></div>
+    <div class="row" style="margin-top:12px">
+      <button class="btn small" onclick="saveDayEdit()">✔ Kaydet</button>
+      <button class="btn ghost small" onclick="closeDayEdit()">Vazgeç</button>
+      <button class="btn ghost small" onclick="closeDayEdit();fillReqForm(editDay||1);showTab('takas')">🔁 Takas iste</button>
+    </div>
+  </div>
+</div>
 
 <div id="dayPicker" class="modal" onclick="if(event.target===this)dpClose()">
   <div class="sheet">
@@ -750,8 +773,19 @@ function showTab(t){document.querySelectorAll(".tab").forEach(e=>e.classList.rem
   document.querySelectorAll("nav button").forEach(e=>e.classList.remove("active"));
   $("tab-"+t).classList.add("active");
   document.querySelector(`nav button[data-tab=${t}]`).classList.add("active");}
-function monthInfo(){const [y,m]=($("month").value||"2026-08").split("-").map(Number);
+function monthInfo(mk){const [y,m]=((mk||$("month").value)||"2026-08").split("-").map(Number);
   return {y,m,nDays:new Date(y,m,0).getDate(),firstDow:(new Date(y,m-1,1).getDay()+6)%7};}
+/* GÖRÜNTÜLENEN AY: çizelge ve "nöbetlerim" bu aya bakar.
+   Hazırlanan ay (dept.month) ayrıdır — kurulum, tercihler ve üretim ona bağlıdır. */
+let viewMonth=null, schedulesAll={};
+function vMonth(){return viewMonth||(dept&&dept.month)||$("month").value;}
+function vInfo(){return monthInfo(vMonth());}
+function planAy(){return (dept&&dept.month)||$("month").value;}
+function vBaySet(){
+  if(schedule&&schedule.bayram!=null)return new Set(parseDays(schedule.bayram));
+  return bayramSet();
+}
+function vIsBay(d){return vBaySet().has(d);}
 function isWknd(y,m,d){const w=new Date(y,m-1,d).getDay();return w===0||w===6;}
 function isFri(y,m,d){return new Date(y,m-1,d).getDay()===5;}
 function bayramSet(){return new Set(parseDays($("bayramDays").value));}
@@ -899,14 +933,16 @@ async function loadAll(){
   $("balDN").checked=!(dept.opts&&dept.opts.bal_dn===false);
   $("balWE").checked=!(dept.opts&&dept.opts.bal_we===false);
   updateShapeHint();
-  const {data:aylar}=await sb.from("schedules").select("month").eq("dept_id",dept.id);
-  savedMonths=(aylar||[]).map(r=>r.month).filter(Boolean).sort();
-  const {data:sch}=await sb.from("schedules").select("*").eq("dept_id",dept.id).eq("month",dept.month).maybeSingle();
+  const {data:tumSch}=await sb.from("schedules").select("*").eq("dept_id",dept.id);
+  schedulesAll={};(tumSch||[]).forEach(r=>{if(r&&r.month)schedulesAll[r.month]=r.data;});
+  savedMonths=Object.keys(schedulesAll).sort();
+  if(viewMonth&&viewMonth!==dept.month&&!schedulesAll[viewMonth])viewMonth=null;
+  const sch=schedulesAll[vMonth()]?{data:schedulesAll[vMonth()]}:null;
   schedule=sch?sch.data:null;
-  const {data:reqs}=await sb.from("swap_requests").select("*").eq("dept_id",dept.id).eq("month",dept.month).order("id",{ascending:false});
+  const {data:reqs}=await sb.from("swap_requests").select("*").eq("dept_id",dept.id).eq("month",vMonth()).order("id",{ascending:false});
   requests=reqs||[];
   $("testCard").style.display=isAdmin()?"block":"none";
-  renderRooms();renderShifts();renderBlocks();renderPins();modeChanged();renderProfile();renderPeople();renderAsPerson();syncIzinBox();renderPrefCal();renderPrefSummary();renderLeaveAdmin();renderQuota();renderCountdown();renderCloseMonth();renderSchedule();renderReqs();fillReqForm();
+  renderRooms();renderShifts();renderBlocks();renderPins();modeChanged();renderProfile();renderPeople();renderAsPerson();syncIzinBox();renderPrefCal();renderPrefSummary();renderLeaveAdmin();renderQuota();renderCountdown();renderCloseMonth();renderMonthPickers();renderSchedule();renderReqs();fillReqForm();
   autoGenCheck();
 }
 
@@ -1904,7 +1940,7 @@ function shapeW(p,d,nDays){
   return 0;
 }
 function longestFree(pid){
-  const {nDays}=monthInfo();let best=0,cur=0;
+  const {nDays}=vInfo();let best=0,cur=0;
   for(let d=1;d<=nDays;d++){
     if(entryList(d).some(e=>e.id===pid))cur=0;else{cur++;if(cur>best)best=cur;}
   }
@@ -2240,6 +2276,9 @@ function computeRooms(){
   return best;
 }
 async function saveSchedule(best){
+  best.bayram=$("bayramDays").value||"";
+  best.month=dept.month;
+  viewMonth=null;                       // yeni yayınlanan aya dön
   const {error}=await sb.from("schedules").upsert({dept_id:dept.id,month:dept.month,data:best});
   if(error){alert("⚠️ "+error.message);return;}
   await loadAll();showTab("cizelge");
@@ -2650,6 +2689,136 @@ function refineAsg(slots,E,A,evalFn,iters,locked){
 }
 
 /* Ana giriş: her iki mod için kesin çözüm üretir */
+/* ---------- GÖRÜNTÜLENEN AYI DEĞİŞTİR ---------- */
+function renderMonthPickers(){
+  if(!dept)return;
+  const aylar=[...new Set(savedMonths.concat([dept.month]))].sort();
+  const cur=vMonth();
+  const html=aylar.map(mk=>{
+    const et=ayAdi(mk)+(mk===dept.month?(schedulesAll[mk]?" · hazırlanan ay":" · hazırlanıyor"):"");
+    return `<option value="${mk}" ${mk===cur?"selected":""}>${et}</option>`;
+  }).join("");
+  ["viewMonthSel","viewMonthSel2"].forEach(id=>{const e=$(id);if(e){e.innerHTML=html;e.value=cur;}});
+  const b=$("viewMonthBanner");
+  if(b){
+    if(cur!==dept.month){
+      b.className="banner info";
+      b.innerHTML=`📅 <b>${ayAdi(cur)}</b> listesine bakıyorsun. Bu ayın nöbetleri hâlâ değiştirilebilir (takas ve yönetici düzenlemesi çalışır).<br>Hazırlanan ay: <b>${ayAdi(dept.month)}</b> — <a href="#" onclick="setViewMonth('${dept.month}');return false;"><b>oraya dön</b></a>`;
+      b.style.display="block";
+    }else b.style.display="none";
+  }
+}
+async function setViewMonth(mk){
+  if(!dept)return;
+  viewMonth=(mk===dept.month)?null:mk;
+  schedule=schedulesAll[vMonth()]||null;
+  const {data:reqs}=await sb.from("swap_requests").select("*")
+    .eq("dept_id",dept.id).eq("month",vMonth()).order("id",{ascending:false});
+  requests=reqs||[];
+  renderMonthPickers();renderSchedule();renderReqs();fillReqForm();
+}
+
+/* ---------- YÖNETİCİ: BİR GÜNÜ ELLE DÜZENLE ---------- */
+let editDay=null;
+function dayTap(d){
+  if(isAdmin()&&schedule)openDayEdit(d);
+  else{fillReqForm(d);showTab("takas");}
+}
+function openDayEdit(d){
+  editDay=d;renderDayEdit();$("dayEdit").classList.add("on");
+}
+function closeDayEdit(){$("dayEdit").classList.remove("on");editDay=null;}
+function dayEditSlots(){
+  if(!schedule)return [];
+  if(schedule.mode==="shifts"){
+    const out=[];
+    (dept.shifts||[]).forEach((sh,si)=>{
+      const n=sh.count||1;
+      for(let k=0;k<n;k++)out.push({key:"s"+si+"_"+k,si,label:(sh.name||"Vardiya")+" "+(sh.start||"")+"–"+(sh.end||"")});
+    });
+    return out;
+  }
+  const out=[];
+  const gr=dept.general_rooms!=null?dept.general_rooms:2;
+  for(let r=0;r<gr;r++)out.push({key:"G_"+r,room:"G",label:"Genel oda "+(r+1)});
+  const bR=(dept.branch_rooms)||{};
+  for(const b in bR){const c=bR[b]||{};
+    for(let r=0;r<(c.rooms||0);r++)out.push({key:"B"+b+"_"+r,room:"B:"+b,label:b+" odası "+(r+1)});}
+  return out;
+}
+function renderDayEdit(){
+  const box=$("dayEditBody");if(!box||editDay==null)return;
+  const {y,m}=vInfo();
+  const wd=DAYS_TR[(new Date(y,m-1,editDay).getDay()+6)%7];
+  $("dayEditTitle").textContent=`✏️ ${editDay} ${MONTHS_TR[m-1]} ${y} · ${wd}`;
+  const liste=entryList(editDay).slice();
+  const slotlar=dayEditSlots();
+  // her slota sırayla mevcut atamaları yerleştir
+  const kalan=liste.slice();
+  const dolu=slotlar.map(sl=>{
+    const i=kalan.findIndex(e=>schedule.mode==="shifts"?e.s===sl.si:e.r===sl.room);
+    return i>=0?kalan.splice(i,1)[0]:null;
+  });
+  kalan.forEach(e=>{slotlar.push({key:"x"+Math.random(),si:e.s,room:e.r,label:slotLabel(e)||"Ek"});dolu.push(e);});
+  box.innerHTML=slotlar.map((sl,i)=>{
+    const e=dolu[i];
+    const sec=e?e.id:"";
+    return `<div class="row" style="margin-top:8px">
+      <label style="flex:0 0 100px;font-size:.7rem">${sl.label}</label>
+      <select class="deSel" data-i="${i}" style="flex:1;min-width:130px">
+        <option value="">— boş —</option>
+        ${members.map(p=>`<option value="${p.id}" ${sec===p.id?"selected":""}>${p.name}</option>`).join("")}
+      </select></div>`;
+  }).join("")||'<p class="hint">Bu gün için tanımlı nöbet yeri yok.</p>';
+  $("dayEditMeta").dataset.slots=JSON.stringify(slotlar.map(sl=>({si:sl.si,room:sl.room})));
+}
+async function saveDayEdit(){
+  if(!isAdmin()||editDay==null||!schedule)return;
+  const slotlar=JSON.parse($("dayEditMeta").dataset.slots||"[]");
+  const yeni=[];
+  const secilenler=[];
+  document.querySelectorAll(".deSel").forEach(el=>{secilenler[+el.dataset.i]=el.value;});
+  for(let i=0;i<slotlar.length;i++){
+    const pid=secilenler[i];
+    if(!pid)continue;
+    if(yeni.some(e=>e.id===pid)){toast("Aynı kişi aynı güne iki kez yazılamaz.",true);return;}
+    yeni.push(schedule.mode==="shifts"?{id:pid,s:slotlar[i].si}:{id:pid,r:slotlar[i].room});
+  }
+  schedule.asg[editDay]=yeni;
+  recalcSchedule();
+  const ay=vMonth();
+  schedulesAll[ay]=schedule;
+  const {error}=await sb.from("schedules").update({data:schedule}).eq("dept_id",dept.id).eq("month",ay);
+  if(error){toast("⚠️ Kaydedilemedi: "+error.message,true);return;}
+  closeDayEdit();renderSchedule();
+  toast(`✅ ${editDay}. gün güncellendi (${ayAdi(ay)})`);
+}
+/* elle düzenlemeden sonra sayıları/saatleri yeniden hesapla */
+function recalcSchedule(){
+  if(!schedule)return;
+  const {y,m,nDays}=vInfo();
+  const bays=vBaySet();
+  const z=()=>{const o={};members.forEach(p=>{o[p.id]=0;});return o;};
+  const cnt=z(),hours=z(),night=z(),wk=z(),bay=z(),dc=z(),nc=z(),wec=z(),wdc=z();
+  for(let d=1;d<=nDays;d++)for(const e of entryList(d)){
+    if(cnt[e.id]==null)continue;
+    let mt;
+    if(schedule.mode==="shifts"){
+      const es=effShift(e.s,d,e.id);
+      mt=shiftMetrics(es,d,y,m,nDays,bays);
+      mt.isN=mt.night*2>=mt.h;mt.isWe=mt.wkH*2>=mt.h;
+    }else{
+      const we=isWknd(y,m,d);
+      mt={h:24,night:12,wkH:we?24:0,bayH:bays.has(d)?24:0,isN:true,isWe:we};
+    }
+    cnt[e.id]++;hours[e.id]+=mt.h;night[e.id]+=mt.night;wk[e.id]+=mt.wkH;bay[e.id]+=mt.bayH;
+    if(mt.isN)nc[e.id]++;else dc[e.id]++;
+    if(mt.isWe)wec[e.id]++;else wdc[e.id]++;
+  }
+  schedule.cnt=cnt;schedule.hours=hours;schedule.night=night;schedule.wk=wk;schedule.bay=bay;
+  schedule.dc=dc;schedule.nc=nc;schedule.wec=wec;schedule.wdc=wdc;
+}
+
 /* ---------- AY GEÇİŞİ / ARŞİV ---------- */
 let savedMonths=[];
 function ayAdi(key){
@@ -3122,7 +3291,7 @@ function renderSchedule(){
     $("fairWrap").innerHTML='<div class="empty-state">Çizelge yayınlanınca burada denge görünür.</div>';
     ["stTotal","stViol","stBal"].forEach(i=>$(i).textContent="—");$("genBanner").innerHTML="";
     if($("mesaiCard"))$("mesaiCard").style.display="none";return;}
-  const {y,m,nDays,firstDow}=monthInfo();
+  const {y,m,nDays,firstDow}=vInfo();
   const total=Object.values(schedule.cnt).reduce((a,b)=>a+b,0);
   $("stTotal").textContent=total;
   const v=$("stViol");v.textContent=schedule.viol.length;v.className="v"+(schedule.viol.length?" bad":"");
@@ -3144,7 +3313,7 @@ function renderSchedule(){
     for(let i=0;i<firstDow;i++){const e=document.createElement("div");e.className="day empty";cal.appendChild(e);}
     for(let d=1;d<=nDays;d++){
       const c=document.createElement("div");
-      c.className="day click"+(isBay(d)?" bay":isWknd(y,m,d)?" wknd":"")+(d===buAy?" today":"");
+      c.className="day click"+(vIsBay(d)?" bay":isWknd(y,m,d)?" wknd":"")+(d===buAy?" today":"");
       const liste=entryList(d);
       const cokVardiya=schedule.mode==="shifts"&&(dept.shifts||[]).length>1;
       c.innerHTML=`<span class="num">${d}</span><div class="who">${liste.length?liste.map(e=>{
@@ -3153,7 +3322,7 @@ function renderSchedule(){
         const pin=isPinned(d,e)?"📌":"";
         return `<span class="chip-p ${p.id===me.id?"me":""}" style="${pcStyle(p.id)};border-left-color:${personColor(p.id).solid}" title="${p.name} · ${lb}${pin?" · sabit atama":""}">${pin}${kisaAd(p.name)}${cokVardiya&&lb?`<span class="hh">${lb}</span>`:""}</span>`;
       }).join(""):'<div class="bosgun">boş</div>'}</div>`;
-      c.onclick=()=>{fillReqForm(d);showTab("takas");};
+      c.onclick=()=>dayTap(d);
       cal.appendChild(c);
     }
     wrap.appendChild(cal);
@@ -3167,7 +3336,7 @@ function renderSchedule(){
       if(sadeceBen&&!list.length)continue;
       yazildi++;
       const r=document.createElement("div");
-      r.className="dayrow"+(isBay(d)?" bay":isWknd(y,m,d)?" wknd":"")+(d===buAy?" today":"");
+      r.className="dayrow"+(vIsBay(d)?" bay":isWknd(y,m,d)?" wknd":"")+(d===buAy?" today":"");
       const wd=DAYS_TR[(new Date(y,m-1,d).getDay()+6)%7];
       r.innerHTML=`<div class="dn"><b>${d}</b><span>${wd}</span></div>
         <div class="dw">${list.length?list.map(e=>{
@@ -3176,7 +3345,7 @@ function renderSchedule(){
           const pin=isPinned(d,e)?"📌 ":"";
           return `<span class="pchip ${p.id===me.id?"me":""}" style="${pcStyle(p.id)}">${pin}${p.name}${lb?` <small>${lb}</small>`:""}</span>`;
         }).join(""):'<span class="pchip" style="background:#FDECEA;color:#C33D2E;border-color:#F5C6C0">boş</span>'}</div>`;
-      r.onclick=()=>{fillReqForm(d);showTab("takas");};
+      r.onclick=()=>dayTap(d);
       box.appendChild(r);
     }
     if(!yazildi)box.innerHTML='<div class="empty-state">Bu ay sana nöbet düşmemiş.</div>';
@@ -3287,8 +3456,9 @@ function fillReqIn(){
 async function createReq(){
   const day=+$("reqDay").value,inId=$("reqIn").value,note=$("reqNote").value.trim();
   if(!day||!inId){alert("Gün ve kişi seç");return;}
+  const _reqAy=vMonth();
   const {error}=await sb.from("swap_requests").insert({
-    dept_id:dept.id,month:dept.month,day,out_id:me.id,in_id:inId,note});
+    dept_id:dept.id,month:_reqAy,day,out_id:me.id,in_id:inId,note});
   if(error){alert("⚠️ "+error.message);return;}
   $("reqNote").value="";await loadAll();alert("İstek gönderildi 📨");
 }
@@ -3311,6 +3481,7 @@ function renderReqs(){
   });
 }
 async function acceptReq(id){
+  const _ay=vMonth();
   const rq=requests.find(r=>r.id===id);if(!rq||!schedule)return;
   const gap=dept.min_gap;
   const entry=entryList(rq.day).find(e=>e.id===rq.out_id);
@@ -3323,7 +3494,7 @@ async function acceptReq(id){
   }
   else if(schedule.mode==="shifts"){
     const sh=(dept.shifts||[])[entry.s]||{};
-    const {y:sy,m:sm2,nDays:sn}=monthInfo();
+    const {y:sy,m:sm2,nDays:sn}=vInfo();
     const sIv=[(rq.day-1)*24+hm(sh.start||"00:00"),(rq.day-1)*24+hm(sh.start||"00:00")+shiftHours(sh)];
     const sBlocked=(()=>{
       const d0=Math.max(1,Math.floor(sIv[0]/24)+1),d1=Math.min(sn,Math.floor((sIv[1]-0.0001)/24)+1);
@@ -3350,7 +3521,7 @@ async function acceptReq(id){
     await sb.from("swap_requests").update({status:"red",reason:"kural: "+reason}).eq("id",id);
     await loadAll();alert("Takas kurala takıldı: "+reason);return;
   }
-  const {y,m,nDays}=monthInfo();
+  const {y,m,nDays}=vInfo();
   entry.id=me.id;
   schedule.cnt[rq.out_id]--;schedule.cnt[me.id]=(schedule.cnt[me.id]||0)+1;
   if(schedule.mode==="shifts"){
@@ -3374,9 +3545,10 @@ async function acceptReq(id){
     schedule[kW][me.id]=(schedule[kW][me.id]||0)+1;
   }else{
     if(isWknd(y,m,rq.day)){schedule.wk[rq.out_id]--;schedule.wk[me.id]=(schedule.wk[me.id]||0)+1;}
-    if(isBay(rq.day)){schedule.bay[rq.out_id]--;schedule.bay[me.id]=(schedule.bay[me.id]||0)+1;}
+    if(vIsBay(rq.day)){schedule.bay[rq.out_id]--;schedule.bay[me.id]=(schedule.bay[me.id]||0)+1;}
   }
-  await sb.from("schedules").update({data:schedule}).eq("dept_id",dept.id).eq("month",dept.month);
+  schedulesAll[_ay]=schedule;
+  await sb.from("schedules").update({data:schedule}).eq("dept_id",dept.id).eq("month",_ay);
   await sb.from("swap_requests").update({status:"kabul"}).eq("id",id);
   await loadAll();alert("Takas uygulandı ✅");
 }
@@ -3479,7 +3651,7 @@ async function saveProfile(){
 function myDutyList(){
   const out=[];
   if(!schedule)return out;
-  const {y,m,nDays}=monthInfo();
+  const {y,m,nDays}=vInfo();
   for(let d=1;d<=nDays;d++){
     const e=entryList(d).find(x=>x.id===me.id);
     if(!e)continue;
@@ -3492,7 +3664,7 @@ function myDutyList(){
       label=e.r==="G"?"Genel oda":e.r&&e.r.startsWith("S:")?e.r.slice(2)+" odası":e.r?e.r.slice(2)+" odası (devir)":"Nöbet";
       start="08:00";end="08:00";
     }
-    out.push({d,y,m,start,end,label,wknd:isWknd(y,m,d),bay:isBay(d)});
+    out.push({d,y,m,start,end,label,wknd:isWknd(y,m,d),bay:vIsBay(d)});
   }
   return out;
 }
@@ -3501,7 +3673,7 @@ function renderMyDuties(){
   const list=myDutyList();
   if(!list.length){box.innerHTML='<div class="empty-state">Bu ay sana yazılmış nöbet yok 🎉</div>';return;}
   box.innerHTML="";
-  const {y,m}=monthInfo();
+  const {y,m}=vInfo();
   list.forEach(x=>{
     const dow=DAYS_TR[(new Date(y,m-1,x.d).getDay()+6)%7];
     const d=document.createElement("div");d.className="person";
@@ -3559,7 +3731,7 @@ function icsIndir(){
 /* ---------- RESMİ NÖBET LİSTESİ (Word) ---------- */
 function wordIndir(){
   if(!schedule){toast("Önce çizelgeyi üretip yayınla.",true);return;}
-  const {y,m,nDays}=monthInfo();
+  const {y,m,nDays}=vInfo();
   const ayAd=MONTHS_TR[m-1]+" "+y;
   const kurum=(dept&&dept.name)||"";
   const vardiyali=schedule.mode==="shifts";
@@ -3568,7 +3740,7 @@ function wordIndir(){
 
   let satirlar="";
   for(let d=1;d<=nDays;d++){
-    const hs=isWknd(y,m,d), by=isBay(d);
+    const hs=isWknd(y,m,d), by=vIsBay(d);
     const gunAd=["Pazartesi","Salı","Çarşamba","Perşembe","Cuma","Cumartesi","Pazar"][(new Date(y,m-1,d).getDay()+6)%7];
     const liste=entryList(d);
     const isimler=liste.length?liste.map(e=>{
@@ -3589,7 +3761,7 @@ function wordIndir(){
 
   // resmi tatil adedi
   const bayCnt={};members.forEach(p=>{bayCnt[p.id]=0;});
-  for(let d=1;d<=nDays;d++)if(isBay(d))entryList(d).forEach(e=>{bayCnt[e.id]=(bayCnt[e.id]||0)+1;});
+  for(let d=1;d<=nDays;d++)if(vIsBay(d))entryList(d).forEach(e=>{bayCnt[e.id]=(bayCnt[e.id]||0)+1;});
   const bayramVar=Object.values(bayCnt).some(v=>v>0);
   // gece sütunu ancak gündüz nöbeti de varsa anlamlı (24 saatlik listede hepsi gece sayılır)
   const geceGoster=members.some(p=>((schedule.dc&&schedule.dc[p.id])||0)>0)
@@ -3660,7 +3832,7 @@ th{background:#DCDCDC;font-weight:bold;text-align:center}
   const blob=new Blob(["\ufeff"+html],{type:"application/msword;charset=utf-8"});
   const a=document.createElement("a");
   a.href=URL.createObjectURL(blob);
-  a.download="Nobet-Listesi-"+dept.month+".doc";
+  a.download="Nobet-Listesi-"+vMonth()+".doc";
   document.body.appendChild(a);a.click();
   setTimeout(()=>{try{URL.revokeObjectURL(a.href);a.remove();}catch(e){}},1500);
   toast("📄 Resmi liste indirildi — Word'de açıp düzenleyebilirsin");
@@ -3668,10 +3840,10 @@ th{background:#DCDCDC;font-weight:bold;text-align:center}
 
 function csvIndir(){
   if(!schedule){alert("Henüz çizelge yok");return;}
-  const {y,m,nDays}=monthInfo();
+  const {y,m,nDays}=vInfo();
   let rows=["Gün;Tarih;Tip;Nöbetçiler (oda)"];
   for(let d=1;d<=nDays;d++){
-    const tip=isBay(d)?"BAYRAM":isWknd(y,m,d)?"Hafta sonu":"Hafta içi";
+    const tip=vIsBay(d)?"BAYRAM":isWknd(y,m,d)?"Hafta sonu":"Hafta içi";
     const isim=entryList(d).map(e=>{
       const p=members.find(x=>x.id===e.id)||{};
       if(schedule.mode==="shifts"){const sh=(dept.shifts||[])[e.s]||{};return (p.name||"")+" ("+(sh.start||"")+"-"+(sh.end||"")+")";}
@@ -3692,7 +3864,7 @@ function csvIndir(){
   }
   const blob=new Blob(["\uFEFF"+rows.join("\n")],{type:"text/csv;charset=utf-8"});
   const a=document.createElement("a");a.href=URL.createObjectURL(blob);
-  a.download="nobet-defteri-"+dept.month+".csv";a.click();
+  a.download="nobet-defteri-"+vMonth()+".csv";a.click();
 }
 function fairContext(){
   return members.map(p=>`${p.name} (${p.pool}${hasOwnRoom(p.pool)?" - özel oda":" - genel"}): ${schedule.cnt[p.id]||0} nöbet, ${schedule.wk[p.id]||0} hafta sonu, ${schedule.bay[p.id]||0} bayram, devir:${p.carry_t}`).join("\n")
