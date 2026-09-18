@@ -353,6 +353,16 @@ details.adv[open]>summary::before{content:"▾ "}
     </div>
     <p class="hint" style="margin:5px 0 0">Bir vardiya bitince aynı kişiye en az bu kadar süre nöbet yazılmaz. Örnek: 20:00–08:00 gece nöbetinden çıkan kişiye 08:00 vardiyası verilmez. 0 yazarsan kural kapanır.</p>
     <div class="row" style="margin-top:10px">
+      <label>🙋 İstenen günler</label>
+      <select id="wishPri" style="flex:1;min-width:180px">
+        <option value="normal">Normal — dengeye öncelik ver</option>
+        <option value="high">Yüksek — herkese istediği günü vermeye çalış</option>
+        <option value="off">Dikkate alma</option>
+      </select>
+      <button class="btn small savebtn" title="Sadece bu ayarı kaydet" onclick="saveGrp('wish')">💾</button>
+    </div>
+    <p class="hint" style="margin:5px 0 0">Ekip, Tercihler sekmesindeki takvimden ⭐ istediği günleri işaretler. <b>Yüksek</b> seçilirse çizelge bu günleri tutturmayı, nöbetleri aya düzgün yaymaktan ve hafta sonu dengesinden daha çok önemser. Nöbetin boş kalabildiği (her gün dolu olmak zorunda olmayan) aylarda çok işe yarar.</p>
+    <div class="row" style="margin-top:10px">
       <label>🤝 Eş düzeni</label>
       <select id="partnerMode" style="flex:1;min-width:180px">
         <option value="rotate">Her nöbette farklı kişiyle eşleşsin (rotasyon)</option>
@@ -371,6 +381,23 @@ details.adv[open]>summary::before{content:"▾ "}
     </details>
     <button class="btn ghost small" style="margin-top:12px" id="saveSettingsBtn" onclick="saveSettings()">💾 Hepsini birden kaydet</button>
     <p class="hint" style="margin:6px 0 0">Her satırın kendi 💾 düğmesi var — sadece o ayarı kaydeder, diğerlerine dokunmaz. Alttaki düğme bu kartın <b>ve</b> odalar / vardiyalar / kural satırlarının tamamını birden kaydeder.</p>
+  </div>
+  <div class="card" id="closeMonthCard" style="display:none">
+    <p class="eyebrow">Ay geçişi</p>
+    <h2>🔒 Ayı kapat, yeni aya geç</h2>
+    <p class="hint" id="closeMonthInfo">—</p>
+    <div id="arsivKutu" class="banner ok" style="margin:8px 0">—</div>
+    <p class="hint" style="margin:8px 0 4px"><b>Yeni aya taşınmasını istemediklerin:</b></p>
+    <div class="row" style="gap:6px">
+      <label class="chk"><input type="checkbox" id="clrPins" checked> 📌 Sabit atamalar</label>
+      <label class="chk"><input type="checkbox" id="clrBayram" checked> 🌙 Bayram günleri</label>
+    </div>
+    <div class="row" style="gap:6px;margin-top:4px">
+      <label class="chk"><input type="checkbox" id="clrRules"> 🎛 Gün kuralları</label>
+      <label class="chk"><input type="checkbox" id="clrTargets"> 📊 Nöbet sayıları</label>
+    </div>
+    <p class="hint" style="margin:6px 0 0">Vardiyalar, ekip, dinlenme ve denge ayarları her hâlükârda kalır. İzinler ve tercihler zaten aya özeldir, yeni ay boş başlar.</p>
+    <button class="btn gold small" style="margin-top:12px" id="closeMonthBtn" onclick="closeMonthGo()">🔒 Bu ayı kapat ve yeni aya geç</button>
   </div>
   <div class="card" id="roomCard">
     <p class="eyebrow">Oda ayarları</p>
@@ -852,7 +879,7 @@ async function loadAll(){
   $("inviteCard").style.display=isAdmin()?"block":"none";
   $("inviteCode").textContent=dept.join_code;
   const ro=!isAdmin();
-  ["month","minGap","bayramDays","generalRooms","schedMode","workModel","patternOn","patternOff","fillPolicy","partnerMode","balDN","balWE","genDay","minRest"].forEach(id=>$(id).disabled=ro);
+  ["month","minGap","bayramDays","generalRooms","schedMode","workModel","patternOn","patternOff","fillPolicy","partnerMode","balDN","balWE","genDay","minRest","wishPri"].forEach(id=>$(id).disabled=ro);
   $("saveSettingsBtn").style.display=ro?"none":"inline-block";
   $("addRoomBtn").style.display=ro?"none":"inline-block";
   $("genRow").style.display=ro?"none":"block";
@@ -867,16 +894,19 @@ async function loadAll(){
   document.querySelectorAll(".savebtn").forEach(b=>{b.style.display=ro?"none":"inline-flex";});
   $("genDay").value=(dept.opts&&dept.opts.gen_day)||25;
   $("minRest").value=(dept.opts&&dept.opts.min_rest_h!=null)?dept.opts.min_rest_h:8;
+  $("wishPri").value=(dept.opts&&dept.opts.wish_pri)||"normal";
   $("partnerMode").value=(dept.opts&&dept.opts.partner_mode)||"rotate";
   $("balDN").checked=!(dept.opts&&dept.opts.bal_dn===false);
   $("balWE").checked=!(dept.opts&&dept.opts.bal_we===false);
   updateShapeHint();
+  const {data:aylar}=await sb.from("schedules").select("month").eq("dept_id",dept.id);
+  savedMonths=(aylar||[]).map(r=>r.month).filter(Boolean).sort();
   const {data:sch}=await sb.from("schedules").select("*").eq("dept_id",dept.id).eq("month",dept.month).maybeSingle();
   schedule=sch?sch.data:null;
   const {data:reqs}=await sb.from("swap_requests").select("*").eq("dept_id",dept.id).eq("month",dept.month).order("id",{ascending:false});
   requests=reqs||[];
   $("testCard").style.display=isAdmin()?"block":"none";
-  renderRooms();renderShifts();renderBlocks();renderPins();modeChanged();renderProfile();renderPeople();renderAsPerson();syncIzinBox();renderPrefCal();renderPrefSummary();renderLeaveAdmin();renderQuota();renderCountdown();renderSchedule();renderReqs();fillReqForm();
+  renderRooms();renderShifts();renderBlocks();renderPins();modeChanged();renderProfile();renderPeople();renderAsPerson();syncIzinBox();renderPrefCal();renderPrefSummary();renderLeaveAdmin();renderQuota();renderCountdown();renderCloseMonth();renderSchedule();renderReqs();fillReqForm();
   autoGenCheck();
 }
 
@@ -1545,6 +1575,8 @@ function saveGrp(key){
     case "bayram":
       return saveDept({bayram:$("bayramDays").value},"Bayram günleri",
         {after:()=>{renderPrefCal();renderSchedule();renderCountdown();}});
+    case "wish":
+      return saveDept({__opts:{wish_pri:$("wishPri").value}},"İstenen günler önceliği");
     case "minrest":
       return saveDept({__opts:{min_rest_h:minRestH()}},"Vardiya arası dinlenme");
     case "genday":
@@ -1588,7 +1620,7 @@ async function saveSettings(){
     work_model:$("workModel").value,pattern_on:+$("patternOn").value||0,pattern_off:+$("patternOff").value||0,
     fill_policy:$("fillPolicy").value,shift_overrides:ovrRows};
   const withOpts={...base,opts:{partner_mode:$("partnerMode").value,bal_dn:$("balDN").checked,
-    bal_we:$("balWE").checked,gen_day:genDay(),min_rest_h:minRestH(),
+    bal_we:$("balWE").checked,gen_day:genDay(),min_rest_h:minRestH(),wish_pri:$("wishPri").value,
     blocks:blockRows.filter(b=>b.pid),
     pins:pinRows.filter(p=>p.pid&&parseDays(p.days).length)}};
   let {error}=await sb.from("departments").update(withOpts).eq("id",dept.id);
@@ -2410,6 +2442,12 @@ function balanceFree(slots,E,A,load,freeIdx,locked){
 function makeEvaluator(slots,ctxd){
   const {y,m,nDays,bays,IV,MT,pm,bDN,bWE,patOn,patOff,expShare}=ctxd;
   const minRest=ctxd.minRest||0;
+  /* İstenen günlere öncelik: yüksekken ⭐ günler, aya düzgün yayılma ve
+     hafta sonu dengesinden daha ağır basar. */
+  const wp=ctxd.wishPri||"normal";
+  const wishW=wp==="high"?150:wp==="off"?0:12;
+  const shapeW2=wp==="high"?0.4:2;
+  const balW=wp==="high"?0.25:1;
   const n=members.length,S=slots.length;
   const gapOf=members.map(p=>sp(p).gap||0);
   const nightCap=members.map(p=>{
@@ -2515,11 +2553,70 @@ function makeEvaluator(slots,ctxd){
     if(expShare)for(let p=0;p<n;p++){const sc=SC[p];if(!sc)continue;
       for(let si=0;si<sc.length;si++){const e=Math.max(0,sc[si]-expShare[si]);divPen+=e*e*6;}}
     const hard=(overlap+doubleDay+gapV+restV+restGap)*HARD+nightOver*HARD*0.6;
-    const total=hard+bal+pairPen+divPen+prefMiss*12+shapeSum*2+empty*HARD*0.5;
+    const total=hard+bal*balW+pairPen+divPen+prefMiss*wishW+shapeSum*shapeW2;
     if(detail)return {total,hard,overlap,doubleDay,gapV,restV,restGap,nightOver,empty,bal,pairPen,divPen,prefMiss,
       NC,DC,WEC,WDC};
     return total;
   };
+}
+
+/* ⭐ İstenen günler için hedefli onarım.
+   Kişinin karşılanmamış istek gününde boş (ya da takas edilebilir) bir yer
+   varsa, o kişinin istemediği bir günündeki nöbeti oraya taşır.
+   Sayıları değiştirmez; yalnız puanı düşüren taşımayı kabul eder. */
+function wishRepair(slots,E,A,locked,evalFn){
+  const n=members.length,S=slots.length;
+  const wishOfP=[];
+  let varMi=false;
+  for(let p=0;p<n;p++){
+    const src=allPrefs[members[p].id]||{},w=[];
+    for(const k in src)if(src[k]==="yes"){const d=+k;if(d>0)w.push(d);}
+    wishOfP.push(w);
+    if(w.length)varMi=true;
+  }
+  if(!varMi)return A;
+  const isterMi=(p,d)=>wishOfP[p].indexOf(d)>=0;
+  let cur=evalFn(A),tur=0,ilerledi=true;
+  while(ilerledi&&tur++<8){
+    ilerledi=false;
+    for(let p=0;p<n;p++){
+      for(const wd of wishOfP[p]){
+        let zaten=false;
+        for(let s=0;s<S&&!zaten;s++)if(A[s]===p&&slots[s].d===wd)zaten=true;
+        if(zaten)continue;
+        // kişinin taşınabilir nöbetleri (istemediği günlerdekiler)
+        const kaynak=[];
+        for(let s=0;s<S;s++)if(A[s]===p&&!locked[s]&&!isterMi(p,slots[s].d))kaynak.push(s);
+        if(!kaynak.length)continue;
+        // a) o gün boş yer
+        let tasindi=false;
+        for(let h=0;h<S&&!tasindi;h++){
+          if(slots[h].d!==wd||A[h]>=0||locked[h]||!E[h][p])continue;
+          for(const k of kaynak){
+            A[k]=-1;A[h]=p;
+            const sc=evalFn(A);
+            if(sc<cur){cur=sc;ilerledi=true;tasindi=true;break;}
+            A[h]=-1;A[k]=p;
+          }
+        }
+        if(tasindi)continue;
+        // b) o günü istemeyen biriyle takas
+        for(let h=0;h<S&&!tasindi;h++){
+          if(slots[h].d!==wd||locked[h]||!E[h][p])continue;
+          const q=A[h];
+          if(q<0||q===p||isterMi(q,wd))continue;
+          for(const k of kaynak){
+            if(!E[k][q])continue;
+            A[h]=p;A[k]=q;
+            const sc=evalFn(A);
+            if(sc<cur){cur=sc;ilerledi=true;tasindi=true;break;}
+            A[h]=q;A[k]=p;
+          }
+        }
+      }
+    }
+  }
+  return A;
 }
 
 /* Takas tabanlı yerel arama — sayıları asla değiştirmez */
@@ -2529,7 +2626,7 @@ function refineAsg(slots,E,A,evalFn,iters,locked){
   const kilit=locked||new Uint8Array(S);
   let cur=A.slice(),curP=evalFn(cur);
   let best=cur.slice(),bestP=curP;
-  let temp=Math.max(60,curP/40||60);
+  let temp=Math.min(2500,Math.max(40,(curP||0)/50));
   const cool=Math.pow(0.02,1/Math.max(1,iters));
   for(let it=0;it<iters;it++){
     const i=(Math.random()*S)|0;let j=(Math.random()*S)|0;
@@ -2553,6 +2650,67 @@ function refineAsg(slots,E,A,evalFn,iters,locked){
 }
 
 /* Ana giriş: her iki mod için kesin çözüm üretir */
+/* ---------- AY GEÇİŞİ / ARŞİV ---------- */
+let savedMonths=[];
+function ayAdi(key){
+  const p=String(key||"").split("-");
+  if(p.length<2)return key||"";
+  const mi=parseInt(p[1],10)-1;
+  return (MONTHS_TR[mi]||p[1])+" "+p[0];
+}
+function sonrakiAy(key){
+  const p=String(key||"").split("-");
+  const d=new Date(+p[0],+p[1],1);
+  return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");
+}
+function renderCloseMonth(){
+  const c=$("closeMonthCard");if(!c)return;
+  c.style.display=isAdmin()?"block":"none";
+  if(!isAdmin()||!dept)return;
+  const yeni=sonrakiAy(dept.month);
+  const yayinli=!!schedule;
+  $("closeMonthInfo").innerHTML=
+    `Şu an <b>${ayAdi(dept.month)}</b> üzerinde çalışıyorsun${yayinli?" (çizelge yayınlanmış ✅)":' (<span style="color:#C33D2E">çizelge henüz yayınlanmamış</span>)'}.<br>
+     Bu düğme seni <b>${ayAdi(yeni)}</b>'a geçirir. <b>${ayAdi(dept.month)} listesi, izinleri ve takasları silinmez</b> — kayıtlı kalır, yukarıdaki ay kutusunu <b>${dept.month}</b> yaparak istediğin zaman geri dönersin.`;
+  const kutu=$("arsivKutu");
+  if(savedMonths.length){
+    kutu.className="banner ok";
+    kutu.innerHTML="📚 Kayıtlı listeler: <b>"+savedMonths.map(ayAdi).join(" · ")+"</b>";
+  }else{
+    kutu.className="banner info";
+    kutu.textContent="📚 Henüz yayınlanmış liste yok.";
+  }
+}
+async function closeMonthGo(){
+  if(!isAdmin()){toast("Bunu sadece yönetici yapabilir.",true);return;}
+  const eski=dept.month,yeni=sonrakiAy(eski);
+  let msg=`${ayAdi(eski)} kapatılıp ${ayAdi(yeni)} açılacak.\n\n`;
+  if(!schedule)msg+="⚠️ DİKKAT: Bu ayın çizelgesi henüz yayınlanmamış.\n\n";
+  msg+=`${ayAdi(eski)} listesi, izinleri ve takas kayıtları OLDUĞU GİBİ KALIR.\n`;
+  msg+=`Geri dönmek için ay kutusunu ${eski} yapman yeterli.\n\nDevam edilsin mi?`;
+  if(!confirm(msg))return;
+  const patch={month:yeni};
+  const o={...(dept.opts||{})};
+  if($("clrPins").checked)o.pins=[];
+  if($("clrRules").checked)o.blocks=[];
+  if($("clrBayram").checked)patch.bayram="";
+  patch.opts=o;
+  const {error}=await sb.from("departments").update(patch).eq("id",dept.id);
+  if(error){toast("⚠️ Ay değiştirilemedi: "+error.message,true);return;}
+  if($("clrTargets").checked){
+    for(const p of members){
+      const t=isShiftMode()?(sp(p).target||0):(p.quota||0);
+      if(!t)continue;
+      const pt=isShiftMode()?{shift_prefs:{...sp(p),target:0}}:{quota:0};
+      await sb.from("memberships").update(pt).eq("user_id",p.id).eq("dept_id",dept.id);
+    }
+  }
+  await loadAll();
+  showTab("kurulum");
+  toast(`✅ ${ayAdi(yeni)} açıldı. ${ayAdi(eski)} listesi kayıtlı duruyor.`);
+}
+
+function wishPri(){const e=$("wishPri");return (e&&e.value)||opts().wish_pri||"normal";}
 function minRestH(){const e=$("minRest");const v=+((e&&e.value)||opts().min_rest_h);
   return isNaN(v)?8:Math.max(0,Math.min(24,v));}
 
@@ -2663,9 +2821,13 @@ function solveSchedule(){
     let c=0;for(let p=0;p<n;p++){let can=false;for(let s=0;s<S&&!can;s++)if(slots[s].si===si&&E[s][p])can=true;if(can)c++;}
     return t/(c||1);}):null;
   const evalFn=makeEvaluator(slots,{y,m,nDays,bays,IV,MT,pm:partnerMode(),bDN:balDN(),bWE:balWE(),
-    patOn:+($("patternOn").value||0),patOff:+($("patternOff").value||0),expShare,minRest:minRestH()});
-  const iters=Math.max(4000,Math.min(40000,Math.round(900000/Math.max(1,S))));
-  const A2=refineAsg(slots,E,A,evalFn,iters,locked);
+    patOn:+($("patternOn").value||0),patOff:+($("patternOff").value||0),expShare,
+    minRest:minRestH(),wishPri:wishPri()});
+  const iters=Math.max(8000,Math.min(70000,S*420));
+  let A2=refineAsg(slots,E,A,evalFn,iters,locked);
+  A2=wishRepair(slots,E,A2,locked,evalFn);
+  A2=refineAsg(slots,E,A2,evalFn,Math.round(iters/3),locked);
+  A2=wishRepair(slots,E,A2,locked,evalFn);
   const rep=evalFn(A2,true);
 
   /* --- sonucu uygulamanın beklediği biçime çevir --- */
