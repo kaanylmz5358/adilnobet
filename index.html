@@ -3728,114 +3728,247 @@ function icsIndir(){
 }
 
 /* ---------- EXPORT & AI ---------- */
-/* ---------- RESMİ NÖBET LİSTESİ (Word) ---------- */
+/* ---------- RESMİ NÖBET LİSTESİ (Word .docx) ----------
+   Gerçek Office Open XML (.docx) üretir — dış kütüphane gerektirmez.
+   Eski sürüm HTML'i ".doc" uzantısıyla indiriyordu; Word bunu
+   "dosya biçimi ve uzantısı eşleşmiyor / bozuk olabilir" diye açmıyordu. */
+const DOCX=(()=>{
+  const CRC=(()=>{const t=new Uint32Array(256);
+    for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=(c&1)?(0xEDB88320^(c>>>1)):(c>>>1);t[n]=c>>>0;}
+    return t;})();
+  function crc32(u){let c=0xFFFFFFFF;for(let i=0;i<u.length;i++)c=CRC[(c^u[i])&0xFF]^(c>>>8);return (c^0xFFFFFFFF)>>>0;}
+  function zip(files,mime){
+    const enc=new TextEncoder(), parts=[], central=[];let off=0;
+    const now=new Date();
+    const dt=((now.getHours()<<11)|(now.getMinutes()<<5)|(now.getSeconds()>>1))&0xFFFF;
+    const dd=(((now.getFullYear()-1980)<<9)|((now.getMonth()+1)<<5)|now.getDate())&0xFFFF;
+    files.forEach(f=>{
+      const nm=enc.encode(f.name), data=enc.encode(f.data), crc=crc32(data);
+      const h=new DataView(new ArrayBuffer(30));
+      h.setUint32(0,0x04034b50,true);h.setUint16(4,20,true);h.setUint16(6,0x0800,true);h.setUint16(8,0,true);
+      h.setUint16(10,dt,true);h.setUint16(12,dd,true);h.setUint32(14,crc,true);
+      h.setUint32(18,data.length,true);h.setUint32(22,data.length,true);h.setUint16(26,nm.length,true);h.setUint16(28,0,true);
+      parts.push(new Uint8Array(h.buffer),nm,data);
+      const c=new DataView(new ArrayBuffer(46));
+      c.setUint32(0,0x02014b50,true);c.setUint16(4,20,true);c.setUint16(6,20,true);c.setUint16(8,0x0800,true);c.setUint16(10,0,true);
+      c.setUint16(12,dt,true);c.setUint16(14,dd,true);c.setUint32(16,crc,true);
+      c.setUint32(20,data.length,true);c.setUint32(24,data.length,true);c.setUint16(28,nm.length,true);
+      c.setUint16(30,0,true);c.setUint16(32,0,true);c.setUint16(34,0,true);c.setUint16(36,0,true);c.setUint32(38,0,true);c.setUint32(42,off,true);
+      central.push(new Uint8Array(c.buffer),nm);
+      off+=30+nm.length+data.length;
+    });
+    const cdSize=central.reduce((s,a)=>s+a.length,0);
+    const e=new DataView(new ArrayBuffer(22));
+    e.setUint32(0,0x06054b50,true);e.setUint16(8,files.length,true);e.setUint16(10,files.length,true);
+    e.setUint32(12,cdSize,true);e.setUint32(16,off,true);
+    return new Blob([...parts,...central,new Uint8Array(e.buffer)],{type:mime});
+  }
+  const x=t=>String(t==null?"":t).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g,"")
+    .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+  // metin parçası: {t, b, i, sz(pt), color}
+  function run(o){
+    if(typeof o==="string")o={t:o};
+    let pr="";
+    if(o.b)pr+="<w:b/><w:bCs/>";
+    if(o.i)pr+="<w:i/><w:iCs/>";
+    if(o.color)pr+=`<w:color w:val="${o.color}"/>`;
+    if(o.sz)pr+=`<w:sz w:val="${Math.round(o.sz*2)}"/><w:szCs w:val="${Math.round(o.sz*2)}"/>`;
+    return `<w:r>${pr?`<w:rPr>${pr}</w:rPr>`:""}<w:t xml:space="preserve">${x(o.t)}</w:t></w:r>`;
+  }
+  // paragraf: runs dizisi; opt {align, before, after(pt), keepNext}
+  function p(runs,opt={}){
+    runs=Array.isArray(runs)?runs:[runs];
+    let pr="";
+    if(opt.keepNext)pr+="<w:keepNext/>";
+    pr+=`<w:spacing w:before="${Math.round((opt.before||0)*20)}" w:after="${Math.round((opt.after||0)*20)}" w:line="240" w:lineRule="auto"/>`;
+    if(opt.align)pr+=`<w:jc w:val="${opt.align}"/>`;
+    return `<w:p><w:pPr>${pr}</w:pPr>${runs.map(run).join("")}</w:p>`;
+  }
+  // hücre: lines = metin satırları (her satır ayrı paragraf); opt {w, fill, align, b, sz, i}
+  function cell(lines,opt={}){
+    lines=(Array.isArray(lines)?lines:[lines]).filter(l=>l!=null);
+    if(!lines.length)lines=[""];
+    let pr=`<w:tcW w:w="${opt.w}" w:type="dxa"/>`;
+    if(opt.fill)pr+=`<w:shd w:val="clear" w:color="auto" w:fill="${opt.fill}"/>`;
+    pr+=`<w:vAlign w:val="center"/>`;
+    const paras=lines.map(l=>{
+      const r=(typeof l==="object")?l:{t:l,b:opt.b,i:opt.i,sz:opt.sz};
+      if(r.sz==null)r.sz=opt.sz;
+      return p([r],{align:opt.align});
+    }).join("");
+    return `<w:tc><w:tcPr>${pr}</w:tcPr>${paras}</w:tc>`;
+  }
+  function row(cells,opt={}){
+    let pr="<w:cantSplit/>";
+    if(opt.h)pr+=`<w:trHeight w:val="${opt.h}" w:hRule="atLeast"/>`;
+    if(opt.header)pr+="<w:tblHeader/>";
+    return `<w:tr><w:trPr>${pr}</w:trPr>${cells.join("")}</w:tr>`;
+  }
+  // tablo: widths (dxa), opt {borders:true/false, jc}
+  function table(rows,widths,opt={}){
+    const total=widths.reduce((a,b)=>a+b,0);
+    const bd=opt.borders===false
+      ?["top","left","bottom","right","insideH","insideV"].map(k=>`<w:${k} w:val="nil"/>`).join("")
+      :["top","left","bottom","right","insideH","insideV"].map(k=>`<w:${k} w:val="single" w:sz="6" w:space="0" w:color="000000"/>`).join("");
+    return `<w:tbl><w:tblPr><w:tblW w:w="${total}" w:type="dxa"/><w:jc w:val="${opt.jc||"center"}"/>`
+      +`<w:tblBorders>${bd}</w:tblBorders><w:tblLayout w:type="fixed"/>`
+      +`<w:tblCellMar><w:top w:w="30" w:type="dxa"/><w:left w:w="100" w:type="dxa"/><w:bottom w:w="30" w:type="dxa"/><w:right w:w="100" w:type="dxa"/></w:tblCellMar>`
+      +`<w:tblLook w:val="0000" w:firstRow="0" w:lastRow="0" w:firstColumn="0" w:lastColumn="0" w:noHBand="1" w:noVBand="1"/></w:tblPr>`
+      +`<w:tblGrid>${widths.map(w=>`<w:gridCol w:w="${w}"/>`).join("")}</w:tblGrid>${rows.join("")}</w:tbl>`;
+  }
+  // yüzdeleri tam genişliğe (dxa) böl — toplam birebir tutsun
+  function widths(perc,total){
+    const s=perc.reduce((a,b)=>a+b,0);
+    const w=perc.map(v=>Math.floor(v/s*total));
+    w[w.length-1]+=total-w.reduce((a,b)=>a+b,0);
+    return w;
+  }
+  const PAGE={w:11906,h:16838,top:794,bottom:794,left:850,right:850};
+  const CONTENT_W=PAGE.w-PAGE.left-PAGE.right;
+  function build(bodyXml,title){
+    const W='xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"';
+    const doc=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<w:document ${W}><w:body>${bodyXml}`
+      +`<w:sectPr><w:pgSz w:w="${PAGE.w}" w:h="${PAGE.h}"/>`
+      +`<w:pgMar w:top="${PAGE.top}" w:right="${PAGE.right}" w:bottom="${PAGE.bottom}" w:left="${PAGE.left}" w:header="567" w:footer="567" w:gutter="0"/>`
+      +`</w:sectPr></w:body></w:document>`;
+    const styles=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">`
+      +`<w:docDefaults><w:rPrDefault><w:rPr><w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:eastAsia="Times New Roman" w:cs="Times New Roman"/>`
+      +`<w:color w:val="000000"/><w:sz w:val="22"/><w:szCs w:val="22"/><w:lang w:val="tr-TR" w:eastAsia="tr-TR" w:bidi="ar-SA"/></w:rPr></w:rPrDefault>`
+      +`<w:pPrDefault><w:pPr><w:spacing w:after="0" w:line="240" w:lineRule="auto"/></w:pPr></w:pPrDefault></w:docDefaults>`
+      +`<w:style w:type="paragraph" w:default="1" w:styleId="Normal"><w:name w:val="Normal"/><w:qFormat/></w:style>`
+      +`<w:style w:type="table" w:default="1" w:styleId="TableNormal"><w:name w:val="Normal Table"/><w:uiPriority w:val="99"/><w:semiHidden/><w:unhideWhenUsed/>`
+      +`<w:tblPr><w:tblInd w:w="0" w:type="dxa"/><w:tblCellMar><w:top w:w="0" w:type="dxa"/><w:left w:w="108" w:type="dxa"/><w:bottom w:w="0" w:type="dxa"/><w:right w:w="108" w:type="dxa"/></w:tblCellMar></w:tblPr></w:style>`
+      +`</w:styles>`;
+    const settings=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<w:settings xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">`
+      +`<w:zoom w:percent="100"/><w:defaultTabStop w:val="708"/><w:characterSpacingControl w:val="doNotCompress"/>`
+      +`<w:compat><w:compatSetting w:name="compatibilityMode" w:uri="http://schemas.microsoft.com/office/word" w:val="15"/></w:compat></w:settings>`;
+    const iso=new Date().toISOString().replace(/\.\d+Z$/,"Z");
+    const core=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">`
+      +`<dc:title>${x(title)}</dc:title><dc:creator>Nöbet Defteri</dc:creator><dc:language>tr-TR</dc:language>`
+      +`<dcterms:created xsi:type="dcterms:W3CDTF">${iso}</dcterms:created><dcterms:modified xsi:type="dcterms:W3CDTF">${iso}</dcterms:modified></cp:coreProperties>`;
+    const app=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<Properties xmlns="http://schemas.openxmlformats.org/officeDocument/2006/extended-properties"><Application>Nöbet Defteri</Application></Properties>`;
+    const ct=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">`
+      +`<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/>`
+      +`<Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>`
+      +`<Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/>`
+      +`<Override PartName="/word/settings.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.settings+xml"/>`
+      +`<Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml"/>`
+      +`<Override PartName="/docProps/app.xml" ContentType="application/vnd.openxmlformats-officedocument.extended-properties+xml"/></Types>`;
+    const rels=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">`
+      +`<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>`
+      +`<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties" Target="docProps/core.xml"/>`
+      +`<Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/extended-properties" Target="docProps/app.xml"/></Relationships>`;
+    const drels=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">`
+      +`<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>`
+      +`<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/settings" Target="settings.xml"/></Relationships>`;
+    return zip([
+      {name:"[Content_Types].xml",data:ct},{name:"_rels/.rels",data:rels},
+      {name:"word/document.xml",data:doc},{name:"word/_rels/document.xml.rels",data:drels},
+      {name:"word/styles.xml",data:styles},{name:"word/settings.xml",data:settings},
+      {name:"docProps/core.xml",data:core},{name:"docProps/app.xml",data:app}
+    ],"application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+  }
+  return {p,cell,row,table,widths,build,CONTENT_W};
+})();
+
 function wordIndir(){
-  if(!schedule){toast("Önce çizelgeyi üretip yayınla.",true);return;}
+  if(!schedule||!schedule.asg){toast("Önce çizelgeyi üretip yayınla.",true);return;}
+  try{
+    const blob=resmiListeDocx();
+    const a=document.createElement("a");
+    a.href=URL.createObjectURL(blob);
+    a.download="Nobet-Listesi-"+vMonth()+".docx";
+    document.body.appendChild(a);a.click();
+    setTimeout(()=>{try{URL.revokeObjectURL(a.href);a.remove();}catch(e){}},4000);
+    toast("📄 Resmi liste indirildi (.docx) — Word'de açıp düzenleyebilirsin");
+  }catch(err){
+    console.error("Word çıktısı hatası:",err);
+    toast("⚠️ Word dosyası oluşturulamadı: "+(err&&err.message||err),true);
+  }
+}
+
+function resmiListeDocx(){
+  const D=DOCX;
   const {y,m,nDays}=vInfo();
   const ayAd=MONTHS_TR[m-1]+" "+y;
   const kurum=(dept&&dept.name)||"";
+  const shifts=(dept&&dept.shifts)||[];
   const vardiyali=schedule.mode==="shifts";
-  const cokVardiya=vardiyali&&(dept.shifts||[]).length>1;
-  const esc=t=>String(t==null?"":t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  const cokVardiya=vardiyali&&shifts.length>1;
+  const ekSutun=cokVardiya||!vardiyali;
+  const kisi=id=>members.find(x=>x.id===id)||{};
+  const GUN=["Pazartesi","Salı","Çarşamba","Perşembe","Cuma","Cumartesi","Pazar"];
+  const TS=10.5; // tablo yazı boyutu (pt)
 
-  let satirlar="";
+  /* --- ana tablo --- */
+  const wMain=ekSutun?D.widths([7,17,34,22,20],D.CONTENT_W):D.widths([8,22,44,26],D.CONTENT_W);
+  const hdrF="DCDCDC";
+  const bas=["Gün","Günü","Nöbetçi"].concat(ekSutun?["Vardiya / Oda"]:[]).concat(["İmza"]);
+  const rows=[D.row(bas.map((t,i)=>D.cell(t,{w:wMain[i],fill:hdrF,b:true,align:"center",sz:TS})),{header:true,h:340})];
   for(let d=1;d<=nDays;d++){
     const hs=isWknd(y,m,d), by=vIsBay(d);
-    const gunAd=["Pazartesi","Salı","Çarşamba","Perşembe","Cuma","Cumartesi","Pazar"][(new Date(y,m-1,d).getDay()+6)%7];
+    const fill=by?"F6E3C8":hs?"EFEFEF":null;
+    const gunAd=GUN[(new Date(y,m-1,d).getDay()+6)%7];
     const liste=entryList(d);
-    const isimler=liste.length?liste.map(e=>{
-      const p=members.find(x=>x.id===e.id)||{};
-      return esc(p.name||"");}).join("<br/>"):"—";
-    const detay=liste.length?liste.map(e=>{
-      if(vardiyali){const sh=(dept.shifts||[])[e.s]||{};
-        return esc((sh.name?sh.name+" ":"")+(sh.start||"")+" - "+(sh.end||""));}
-      return esc(e.r==="G"?"Genel oda":e.r?e.r.slice(2)+" odası":"");}).join("<br/>"):"";
-    const bg=by?' bgcolor="#F6E3C8"':hs?' bgcolor="#EFEFEF"':"";
-    satirlar+=`<tr>
-      <td${bg} align="center"><b>${d}</b></td>
-      <td${bg}>${gunAd}${by?" <i>(Bayram)</i>":""}</td>
-      <td${bg}>${isimler}</td>
-      ${(cokVardiya||!vardiyali)?`<td${bg}>${detay}</td>`:""}
-      <td${bg}></td></tr>`;
+    const isimler=liste.length?liste.map(e=>kisi(e.id).name||""):["—"];
+    const detay=liste.map(e=>{
+      if(vardiyali){const sh=shifts[e.s]||{};
+        return ((sh.name?sh.name+" ":"")+(sh.start||"")+" - "+(sh.end||"")).trim();}
+      return slotLabel(e);
+    });
+    const gunHucre=by?[{t:gunAd,sz:TS},{t:"(Resmi tatil)",i:true,sz:9}]:[gunAd];
+    const c=[D.cell({t:String(d),b:true,sz:TS},{w:wMain[0],fill,align:"center",sz:TS}),
+      D.cell(gunHucre,{w:wMain[1],fill,sz:TS}),
+      D.cell(isimler,{w:wMain[2],fill,sz:TS})];
+    let k=3;
+    if(ekSutun)c.push(D.cell(detay,{w:wMain[k++],fill,sz:TS}));
+    c.push(D.cell("",{w:wMain[k],fill,sz:TS}));
+    rows.push(D.row(c,{h:340}));
   }
 
-  // resmi tatil adedi
+  /* --- özet tablo --- */
   const bayCnt={};members.forEach(p=>{bayCnt[p.id]=0;});
   for(let d=1;d<=nDays;d++)if(vIsBay(d))entryList(d).forEach(e=>{bayCnt[e.id]=(bayCnt[e.id]||0)+1;});
   const bayramVar=Object.values(bayCnt).some(v=>v>0);
-  // gece sütunu ancak gündüz nöbeti de varsa anlamlı (24 saatlik listede hepsi gece sayılır)
   const geceGoster=members.some(p=>((schedule.dc&&schedule.dc[p.id])||0)>0)
                  &&members.some(p=>((schedule.nc&&schedule.nc[p.id])||0)>0);
-  let ozet="";
+  // hafta sonu adedini asg'den say (eski listelerde wec alanı olmayabilir)
+  const weCnt={};
+  for(let d=1;d<=nDays;d++)if(isWknd(y,m,d))entryList(d).forEach(e=>{weCnt[e.id]=(weCnt[e.id]||0)+1;});
+  const cnt=schedule.cnt||{};
+  const oBas=["Adı Soyadı","Ünvan / Birim","Nöbet","Hafta Sonu"].concat(bayramVar?["Resmi Tatil"]:[]).concat(geceGoster?["Gece"]:[]);
+  const oPerc=[34,26,12,14].concat(bayramVar?[14]:[]).concat(geceGoster?[10]:[]);
+  const wOz=D.widths(oPerc,Math.round(D.CONTENT_W*0.92));
+  const oRows=[D.row(oBas.map((t,i)=>D.cell(t,{w:wOz[i],fill:hdrF,b:true,align:"center",sz:TS})),{header:true,h:320})];
   members.forEach(p=>{
-    const c=schedule.cnt[p.id]||0;
+    const c=cnt[p.id]||0;
     if(!c)return;
-    ozet+=`<tr><td>${esc(p.name)}</td><td>${esc(p.pool||"")}</td>
-      <td align="center">${c}</td>
-      <td align="center">${(schedule.wec&&schedule.wec[p.id])||0}</td>
-      ${bayramVar?`<td align="center">${bayCnt[p.id]||0}</td>`:""}
-      ${geceGoster?`<td align="center">${(schedule.nc&&schedule.nc[p.id])||0}</td>`:""}</tr>`;
+    const v=[p.name||"",p.pool||"",c,weCnt[p.id]||0]
+      .concat(bayramVar?[bayCnt[p.id]||0]:[])
+      .concat(geceGoster?[(schedule.nc&&schedule.nc[p.id])||0]:[]);
+    oRows.push(D.row(v.map((t,i)=>D.cell(String(t),{w:wOz[i],align:i>=2?"center":null,sz:TS})),{h:320}));
   });
-  const ozetBas=`<th>Adı Soyadı</th><th>Ünvan / Birim</th><th>Nöbet</th><th>Hafta Sonu</th>`
-    +(bayramVar?"<th>Resmi Tatil</th>":"")+(geceGoster?"<th>Gece</th>":"");
-  const ozetEk=(bayramVar?1:0)+(geceGoster?1:0);
-  const ozetCol=`<colgroup><col width="${38-ozetEk*4}%"><col width="${30-ozetEk*4}%">`
-    +`<col width="16%"><col width="16%">${bayramVar?'<col width="16%">':""}${geceGoster?'<col width="16%">':""}</colgroup>`;
 
-  const ekSutun=cokVardiya||!vardiyali;
-  const basliklar=`<th>Gün</th><th>Günü</th><th>Nöbetçi</th>${ekSutun?"<th>Vardiya / Oda</th>":""}<th>İmza</th>`;
-  const colgroup=ekSutun
-    ?`<colgroup><col width="7%"><col width="17%"><col width="34%"><col width="22%"><col width="20%"></colgroup>`
-    :`<colgroup><col width="8%"><col width="22%"><col width="44%"><col width="26%"></colgroup>`;
+  /* --- imza bloğu --- */
+  const wImza=D.widths([50,50],D.CONTENT_W);
+  const imza=D.table([D.row([
+    D.cell(["Düzenleyen","","","……………………………","Ad Soyad / İmza"],{w:wImza[0],align:"center"}),
+    D.cell(["Onaylayan","","","……………………………","Başhekim / Klinik Şefi"],{w:wImza[1],align:"center"})
+  ])],wImza,{borders:false});
+
   const bugun=new Date();
   const tarihStr=bugun.getDate()+" "+MONTHS_TR[bugun.getMonth()]+" "+bugun.getFullYear();
-
-  const html=`<html xmlns:o="urn:schemas-microsoft-com:office:office"
-xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
-<head><meta charset="utf-8">
-<title>${esc(kurum)} ${esc(ayAd)} Nöbet Listesi</title>
-<!--[if gte mso 9]><xml><w:WordDocument><w:View>Print</w:View><w:Zoom>100</w:Zoom></w:WordDocument></xml><![endif]-->
-<style>
-@page{size:A4 portrait;margin:1.4cm 1.5cm}
-body{font-family:"Times New Roman",serif;font-size:11pt;color:#000}
-h1{font-size:14pt;text-align:center;margin:0 0 2pt;letter-spacing:.5pt}
-h2{font-size:12pt;text-align:center;margin:0 0 14pt;font-weight:normal}
-.kurum{font-size:12pt;text-align:center;font-weight:bold;margin-bottom:10pt}
-table{border-collapse:collapse;width:100%}
-th,td{border:1px solid #000;padding:2.5pt 6pt;font-size:10.5pt;vertical-align:middle;height:17pt}
-th{background:#DCDCDC;font-weight:bold;text-align:center}
-.ozet{margin-top:16pt;width:auto}
-.ozet th,.ozet td{padding:3pt 10pt}
-.imza{margin-top:26pt;width:100%;border:none}
-.imza td{border:none;text-align:center;font-size:11pt;padding-top:6pt}
-.not{font-size:9pt;margin-top:10pt;color:#333}
-</style></head><body>
-<div class="kurum">${esc(kurum)}</div>
-<h1>NÖBET LİSTESİ</h1>
-<h2>${esc(ayAd)}</h2>
-<table width="100%" border="1" cellspacing="0" cellpadding="4">${colgroup}
-<thead><tr>${basliklar}</tr></thead><tbody>${satirlar}</tbody></table>
-
-<p style="margin-top:16pt;font-weight:bold;font-size:11pt">Nöbet Dağılım Özeti</p>
-<table class="ozet" width="88%" border="1" cellspacing="0" cellpadding="4">${ozetCol}
-<thead><tr>${ozetBas}</tr></thead>
-<tbody>${ozet}</tbody></table>
-
-<p class="not">Bu liste ${esc(tarihStr)} tarihinde düzenlenmiştir. Gri satırlar hafta sonu, koyu satırlar resmi tatil / bayram günlerini gösterir.</p>
-
-<table class="imza" width="100%" border="0" cellspacing="0" cellpadding="0"><tr>
-<td width="50%">Düzenleyen<br/><br/><br/>……………………………<br/>Ad Soyad / İmza</td>
-<td width="50%">Onaylayan<br/><br/><br/>……………………………<br/>Başhekim / Klinik Şefi</td>
-</tr></table>
-</body></html>`;
-
-  const blob=new Blob(["\ufeff"+html],{type:"application/msword;charset=utf-8"});
-  const a=document.createElement("a");
-  a.href=URL.createObjectURL(blob);
-  a.download="Nobet-Listesi-"+vMonth()+".doc";
-  document.body.appendChild(a);a.click();
-  setTimeout(()=>{try{URL.revokeObjectURL(a.href);a.remove();}catch(e){}},1500);
-  toast("📄 Resmi liste indirildi — Word'de açıp düzenleyebilirsin");
+  const body=
+    (kurum?D.p([{t:kurum,b:true,sz:12}],{align:"center",after:8}):"")
+    +D.p([{t:"NÖBET LİSTESİ",b:true,sz:14}],{align:"center",after:2})
+    +D.p([{t:ayAd,sz:12}],{align:"center",after:12})
+    +D.table(rows,wMain)
+    +D.p([{t:"Nöbet Dağılım Özeti",b:true,sz:11}],{before:14,after:4,keepNext:true})
+    +D.table(oRows,wOz,{jc:"left"})
+    +D.p([{t:"Bu liste "+tarihStr+" tarihinde düzenlenmiştir. Gri satırlar hafta sonu, bej renkli satırlar resmi tatil / bayram günlerini gösterir.",sz:9,color:"333333"}],{before:8,after:20})
+    +imza
+    +D.p([""]);
+  return D.build(body,(kurum?kurum+" ":"")+ayAd+" Nöbet Listesi");
 }
 
 function csvIndir(){
