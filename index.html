@@ -236,7 +236,31 @@ details.adv[open]>summary::before{content:"▾ "}
     <input type="password" id="authPass" placeholder="Şifre (en az 6 karakter)">
     <button class="btn" onclick="doAuth()" id="authBtn">Giriş</button>
     <span class="switchlink" onclick="toggleAuth()" id="authSwitch">Hesabın yok mu? Kayıt ol</span>
+    <div style="margin-top:12px"><span class="switchlink" onclick="showForgot()" id="forgotLink">🔑 Şifremi unuttum</span></div>
     <div id="authMsg" class="banner err" style="display:none"></div>
+  </div>
+</div>
+
+<div id="view-forgot" class="view">
+  <div class="card center">
+    <h2>🔑 Şifremi unuttum</h2>
+    <p class="hint">Kayıtlı e-postanı yaz; sana yeni şifre belirleme linki gönderelim.</p>
+    <input type="email" id="forgotEmail" placeholder="E-posta">
+    <button class="btn" onclick="sendReset()" id="forgotBtn">Sıfırlama linki gönder</button>
+    <span class="switchlink" onclick="showView('auth')">← Girişe dön</span>
+    <div id="forgotMsg" class="banner err" style="display:none"></div>
+  </div>
+</div>
+
+<div id="view-reset" class="view">
+  <div class="card center">
+    <h2>🔒 Yeni şifre belirle</h2>
+    <p class="hint">Yeni şifreni iki kez yaz (en az 6 karakter).</p>
+    <input type="password" id="newPass1" placeholder="Yeni şifre">
+    <input type="password" id="newPass2" placeholder="Yeni şifre (tekrar)">
+    <button class="btn" onclick="saveNewPass()" id="resetBtn">Şifreyi kaydet</button>
+    <span class="switchlink" onclick="logout()">Vazgeç</span>
+    <div id="resetMsg" class="banner err" style="display:none"></div>
   </div>
 </div>
 
@@ -760,7 +784,7 @@ function branchOptionsHTML(selected){
 const DAYS_TR=["Pzt","Sal","Çar","Per","Cum","Cmt","Paz"];
 let sb=null, me=null, myProfile=null, dept=null, members=[], allPrefs={}, schedule=null, requests=[];
 let myTeams=[], activeDept=null;
-let signupMode=false, roomRows=[], shiftRows=[], ovrRows=[], blockRows=[], pinRows=[];
+let signupMode=false, recoveryMode=false, roomRows=[], shiftRows=[], ovrRows=[], blockRows=[], pinRows=[];
 
 function $(id){return document.getElementById(id)}
 function brEmoji(b){return BR_EMOJI[b]||"🩺";}
@@ -807,10 +831,23 @@ function generalStaff(){return members.filter(p=>!hasOwnRoom(p.pool));}
 window.addEventListener("load",async()=>{
   const sel=$("myBranch");sel.innerHTML=branchOptionsHTML(BRANCHES[0]);
   if(SUPABASE_URL.includes("BURAYA")){showView("config");return;}
+  const hp=new URLSearchParams((location.hash||"").replace(/^#/,""));
+  if(hp.get("type")==="recovery")recoveryMode=true;
+  const linkErr=hp.get("error_code")||hp.get("error");
   sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+  sb.auth.onAuthStateChange(ev=>{
+    if(ev==="PASSWORD_RECOVERY"){recoveryMode=true;if(sb&&me)showView("reset");}
+  });
   const {data:{session}}=await sb.auth.getSession();
+  if(linkErr&&!session){
+    clearAuthHash();showView("forgot");
+    showMsg("forgotMsg","err","⚠️ Bu link geçersiz ya da süresi dolmuş. Aşağıdan yeni link iste.");
+    return;
+  }
   if(!session){showView("auth");return;}
-  me=session.user;await afterLogin();
+  me=session.user;
+  if(recoveryMode){showView("reset");return;}
+  await afterLogin();
 });
 function toggleAuth(){
   signupMode=!signupMode;
@@ -818,6 +855,7 @@ function toggleAuth(){
   $("authTitle").textContent=signupMode?"📝 Kayıt ol":"👋 Giriş yap";
   $("authBtn").textContent=signupMode?"Kayıt Ol":"Giriş";
   $("authSwitch").textContent=signupMode?"Zaten hesabın var mı? Giriş yap":"Hesabın yok mu? Kayıt ol";
+  $("forgotLink").style.display=signupMode?"none":"inline";
 }
 async function doAuth(){
   const email=$("authEmail").value.trim(),pass=$("authPass").value;
@@ -835,7 +873,55 @@ async function doAuth(){
       if(res.error)throw res.error;
     }
     me=res.data.user;await afterLogin();
-  }catch(e){msg.className="banner err";msg.textContent="⚠️ "+(e.message||e);msg.style.display="block";}
+  }catch(e){msg.className="banner err";msg.textContent="⚠️ "+trAuthErr(e);msg.style.display="block";}
+}
+/* ---------- ŞİFRE SIFIRLAMA ---------- */
+function trAuthErr(e){
+  const m=String((e&&e.message)||e||"");
+  if(/invalid login credentials/i.test(m))return "E-posta veya şifre hatalı. Şifreni unuttuysan aşağıdaki \"Şifremi unuttum\"a dokun.";
+  if(/email not confirmed/i.test(m))return "E-postan henüz onaylanmamış. Gelen kutundaki onay linkine tıkla.";
+  if(/rate limit|too many|security purposes/i.test(m))return "Çok fazla deneme yapıldı. Birkaç dakika bekleyip tekrar dene.";
+  if(/not authorized/i.test(m))return "E-posta gönderilemedi (sunucunun e-posta ayarı eksik). Yöneticine haber ver.";
+  if(/different from the old|same as/i.test(m))return "Yeni şifre eskisiyle aynı olamaz.";
+  if(/at least 6|password should be/i.test(m))return "Şifre en az 6 karakter olmalı.";
+  if(/session|jwt|expired/i.test(m))return "Oturumun süresi dolmuş. Yeni sıfırlama linki iste.";
+  return m;
+}
+function showMsg(id,kind,text){const el=$(id);el.className="banner "+kind;el.textContent=text;el.style.display="block";}
+function clearAuthHash(){try{history.replaceState(null,"",location.pathname+location.search);}catch(_){}}
+function showForgot(){
+  $("forgotEmail").value=$("authEmail").value.trim();
+  $("forgotMsg").style.display="none";
+  showView("forgot");
+}
+async function sendReset(){
+  const email=$("forgotEmail").value.trim(),btn=$("forgotBtn");
+  $("forgotMsg").style.display="none";
+  if(!/^\S+@\S+\.\S+$/.test(email)){showMsg("forgotMsg","err","⚠️ Geçerli bir e-posta yaz.");return;}
+  btn.disabled=true;const old=btn.textContent;btn.textContent="Gönderiliyor…";
+  try{
+    const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:location.origin+location.pathname});
+    if(error)throw error;
+    showMsg("forgotMsg","info","📧 Bu e-posta kayıtlıysa sıfırlama linki gönderildi. Gelen kutunu (spam dahil) kontrol et ve linke bu cihazda tıkla.");
+  }catch(e){showMsg("forgotMsg","err","⚠️ "+trAuthErr(e));}
+  finally{btn.disabled=false;btn.textContent=old;}
+}
+async function saveNewPass(){
+  const p1=$("newPass1").value,p2=$("newPass2").value,btn=$("resetBtn");
+  $("resetMsg").style.display="none";
+  if(p1.length<6){showMsg("resetMsg","err","⚠️ Şifre en az 6 karakter olmalı.");return;}
+  if(p1!==p2){showMsg("resetMsg","err","⚠️ İki şifre aynı değil.");return;}
+  btn.disabled=true;const old=btn.textContent;btn.textContent="Kaydediliyor…";
+  try{
+    const {data,error}=await sb.auth.updateUser({password:p1});
+    if(error)throw error;
+    recoveryMode=false;clearAuthHash();
+    $("newPass1").value="";$("newPass2").value="";
+    if(data&&data.user)me=data.user;
+    await afterLogin();
+    toast("✅ Şifren güncellendi");
+  }catch(e){showMsg("resetMsg","err","⚠️ "+trAuthErr(e));}
+  finally{btn.disabled=false;btn.textContent=old;}
 }
 async function logout(){await sb.auth.signOut();location.reload();}
 async function afterLogin(){
