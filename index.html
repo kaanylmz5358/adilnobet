@@ -368,7 +368,7 @@ details.adv[open]>summary::before{content:"▾ "}
       <label>gün dinlen</label>
       <button class="btn small savebtn" title="Sadece bu ayarı kaydet" onclick="saveGrp('rhythm')">💾</button>
     </div>
-    <p class="hint" style="margin:6px 0 0">Ritim örneği: 2 → 2 = iki gün art arda gelen, sonraki iki gün gelmez (0 = kapalı; vardiya modunda çalışır).</p>
+    <p class="hint" style="margin:6px 0 0">Örnek: <b>2</b> ve <b>2</b> yazarsan herkes 2 gün çalışır, 2 gün dinlenir. Kapatmak için 0 yaz.<br>💡 En iyi sonuç için "Kim kaç nöbet tutacak" kartında sayıları <b>0</b> bırak — uygun sayıları program kendisi seçer.</p>
     <div class="row" style="margin-top:10px">
       <label>🛌 İki vardiya arası en az</label>
       <input type="number" id="minRest" min="0" max="24" value="8">
@@ -2170,7 +2170,7 @@ function showDraft(){
   const durum=draft.exact
     ?`<div class="banner ok" style="margin:8px 0">✅ İstediğin sayıların ve kuralların <b>hepsi</b> tutturuldu — ${S} nöbetin tamamı dağıtıldı.</div>`
     :(sorunlar.length?`<div class="banner err" style="margin:8px 0"><b>Şunlar tam tutturulamadı:</b><br>${sorunlar.map(v=>"• "+v).join("<br>")}</div>`:"");
-  const oneri=draft.rhythmSuggest?`<div style="margin:6px 0 10px"><button class="btn small" onclick="applyRhythmSuggest()">🔁 Ritme uyan sayılarla yeniden hazırla</button></div>`:"";
+  const oneri=draft.rhythmSuggest?`<div style="margin:6px 0 10px"><button class="btn small" onclick="applyRhythmSuggest()">✅ Düzeni tam oturt</button></div>`:"";
   $("decideHint").innerHTML=durum+oneri+`Sütunlar: 🙋 üyenin <i>talebi</i> · 🔒 izin günü · <b>☀️ gündüz / 🌙 gece / 🏖 hafta sonu</b> adedi · <b>Nöbet</b> = kişiye verilen sayı · 🌙 = en fazla kaç gece (0 = otomatik).<br>
     Sayıyı burada değiştirip <b>🔄 Sayılarla yeniden hazırla</b> diyebilirsin; son karar senindir.<br>
     Ayda <b>${S}</b> nöbet yeri · dağıtılan <b>${assigned}</b>${bos?` · <span style="color:#C33D2E">boş kalan ${bos}</span>`:" · ✅ boş yok"}`;
@@ -3442,7 +3442,7 @@ function solveSchedule(){
       // verilen sayılarla kusursuz ritim yok: en az değişiklikle olan sayıları öner
       const T=rhythmBuild(slots,E,IV,A,locked,wanted,isFixed,cap,evalFn,{...rc,relax:2,budget:1000,saMs:500});
       if(T){const c=new Array(n).fill(0);for(let s=0;s<S;s++)if(T[s]>=0)c[T[s]]++;
-        const ch=[];members.forEach((p,i)=>{if(isFixed[i]&&c[i]!==wanted[i])ch.push(p.name+" "+wanted[i]+"→"+c[i]);});
+        const ch=[];members.forEach((p,i)=>{if(isFixed[i]&&c[i]!==wanted[i])ch.push(p.name+": "+wanted[i]+" → "+c[i]);});
         if(ch.length){rbSuggest={};members.forEach((p,i)=>{rbSuggest[p.id]=c[i];});rbSuggest._txt=ch.join(", ");}}
     }
   }
@@ -3514,9 +3514,11 @@ function solveSchedule(){
   }
   const rep=evalFn(A2,true);
   if(patOnV>0&&rep.rhythmV>0){
-    viol.push(`⚠️ ${patOnV} tutar → ${patOffV} tutmaz ritmi ${rep.rhythmV} yerde tutturulamadı.`+
-      (rbSuggest?` Verdiğin nöbet sayılarıyla bu ritim matematiksel olarak tam oturmuyor. Kusursuz ritim için: <b>${rbSuggest._txt}</b> (aşağıdaki butonla tek tıkla uygulayabilirsin).`
-        :` İzinler / gün kısıtları / kişi sayıları buna izin vermiyor.`));
+    viol.push(`⚠️ "${patOnV} gün çalış, ${patOffV} gün dinlen" düzeni ${rep.rhythmV} yerde bozuldu.`+
+      (rbSuggest?`<br><b>Sebep:</b> yazdığın nöbet sayıları bu düzene uymuyor.`+
+        `<br><b>Çözüm:</b> aşağıdaki <b>✅ Düzeni tam oturt</b> butonuna bas. Şu sayıları değiştirir: <b>${rbSuggest._txt}</b>`
+        :`<br><b>Sebep:</b> izin günleri ya da kişilerin gün kısıtları bu düzene uymuyor.`+
+        `<br><b>Çözüm:</b> izinleri en az 2 gün art arda olacak şekilde ayarla ya da gün kısıtlarını gevşet.`));
   }
 
   /* --- sonucu uygulamanın beklediği biçime çevir --- */
