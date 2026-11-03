@@ -2170,7 +2170,8 @@ function showDraft(){
   const durum=draft.exact
     ?`<div class="banner ok" style="margin:8px 0">✅ İstediğin sayıların ve kuralların <b>hepsi</b> tutturuldu — ${S} nöbetin tamamı dağıtıldı.</div>`
     :(sorunlar.length?`<div class="banner err" style="margin:8px 0"><b>Şunlar tam tutturulamadı:</b><br>${sorunlar.map(v=>"• "+v).join("<br>")}</div>`:"");
-  $("decideHint").innerHTML=durum+`Sütunlar: 🙋 üyenin <i>talebi</i> · 🔒 izin günü · <b>☀️ gündüz / 🌙 gece / 🏖 hafta sonu</b> adedi · <b>Nöbet</b> = kişiye verilen sayı · 🌙 = en fazla kaç gece (0 = otomatik).<br>
+  const oneri=draft.rhythmSuggest?`<div style="margin:6px 0 10px"><button class="btn small" onclick="applyRhythmSuggest()">🔁 Ritme uyan sayılarla yeniden hazırla</button></div>`:"";
+  $("decideHint").innerHTML=durum+oneri+`Sütunlar: 🙋 üyenin <i>talebi</i> · 🔒 izin günü · <b>☀️ gündüz / 🌙 gece / 🏖 hafta sonu</b> adedi · <b>Nöbet</b> = kişiye verilen sayı · 🌙 = en fazla kaç gece (0 = otomatik).<br>
     Sayıyı burada değiştirip <b>🔄 Sayılarla yeniden hazırla</b> diyebilirsin; son karar senindir.<br>
     Ayda <b>${S}</b> nöbet yeri · dağıtılan <b>${assigned}</b>${bos?` · <span style="color:#C33D2E">boş kalan ${bos}</span>`:" · ✅ boş yok"}`;
   const tb=$("decideBody");tb.innerHTML="";
@@ -2191,6 +2192,12 @@ function showDraft(){
   updDecideTotal(S);
   showTab("cizelge");
   $("decideCard").scrollIntoView({behavior:"smooth"});
+}
+function applyRhythmSuggest(){
+  if(!draft||!draft.rhythmSuggest)return;
+  const sg=draft.rhythmSuggest;
+  document.querySelectorAll(".decInp").forEach(i=>{if(sg[i.dataset.pid]!=null)i.value=sg[i.dataset.pid];});
+  redraft();
 }
 function updDecideTotal(S){
   let t=0;document.querySelectorAll(".decInp").forEach(i=>t+=(+i.value||0));
@@ -2585,12 +2592,15 @@ function makeEvaluator(slots,ctxd){
   const shapeOf=members.map(p=>{const a=new Int16Array(nDays+2);
     for(let d=1;d<=nDays;d++)a[d]=shapeW(p,d,nDays);return a;});
   const restOf=slots.map(s=>s.si<0?0:((shiftRows[s.si]||{}).rest||0));
-  const HARD=100000;
+  /* oda modunda (24 saat) ritim 2+ seçildiyse yönetici art arda günü bilerek istiyor:
+     saat bazlı dinlenme kuralı bitişik oda nöbetlerini engellemesin */
+  const roomRhythm=patOn>=2&&slots.length>0&&slots.every(s=>s.si<0);
+  const HARD=100000,RHY=4000;   // ritim: katı kurallardan hafif, diğer her şeyden ağır
   return function(A,detail){
     const dayOn=[],ivs=[],NC=new Array(n).fill(0),DC=new Array(n).fill(0),
           WEC=new Array(n).fill(0),WDC=new Array(n).fill(0),SC=[];
     for(let p=0;p<n;p++){dayOn.push(new Uint8Array(nDays+2));ivs.push([]);SC.push(null);}
-    let overlap=0,doubleDay=0,gapV=0,restV=0,restGap=0,prefMiss=0,shapeSum=0,empty=0;
+    let overlap=0,doubleDay=0,gapV=0,restV=0,restGap=0,prefMiss=0,shapeSum=0,empty=0,rhythmV=0;
     const pairs=[];for(let p=0;p<n;p++)pairs.push(null);
     for(let s=0;s<S;s++){
       const p=A[s];
@@ -2616,7 +2626,7 @@ function makeEvaluator(slots,ctxd){
         iv.sort((a,b)=>a[0]-b[0]);
         for(let i=1;i<iv.length;i++){
           if(iv[i][0]<iv[i-1][1]-1e-9)overlap++;
-          else if(minRest>0&&iv[i][0]<iv[i-1][1]+minRest-1e-9)restGap++;
+          else if(minRest>0&&!(roomRhythm&&iv[i][0]>=iv[i-1][1]-1e-9)&&iv[i][0]<iv[i-1][1]+minRest-1e-9)restGap++;
         }
       }
       const g=gapOf[p];
@@ -2625,43 +2635,65 @@ function makeEvaluator(slots,ctxd){
       // istenen günler
       const pf=prefOf[p];
       for(let d=1;d<=nDays;d++)if(pf[d]===2&&!dayOn[p][d])prefMiss++;
-      // aya yayılma: aralıkların düzgünlüğü
-      if(days.length>1){
+      // aya yayılma: aralıkların düzgünlüğü (ritim açıksa blok başlangıçlarına göre)
+      if(!(patOn>0)&&days.length>1){
         const ideal=nDays/days.length;
         for(let i=1;i<days.length;i++){const gp=days[i]-days[i-1];shapeSum+=Math.abs(gp-ideal)*0.8;}
       }
-      // ritim
+      // ritim: her blok tam patOn gün, bloklar arası en az patOff gün boşluk.
+      // Ay başı/sonuna değen blok kısa olabilir (önceki/sonraki aya taşar).
       if(patOn>0){
-        let i=1;
+        let i=1;const starts=[];
         while(i<=nDays){
           if(!dayOn[p][i]){i++;continue;}
           let j=i;while(j+1<=nDays&&dayOn[p][j+1])j++;
-          const len=j-i+1;
-          if(len>patOn)shapeSum+=(len-patOn)*40;
+          const len=j-i+1;starts.push(i);
+          if(len>patOn)rhythmV+=len-patOn;
+          else if(len<patOn&&i>1&&j<nDays)rhythmV+=patOn-len;
           let k=j+1;while(k<=nDays&&!dayOn[p][k])k++;
-          if(k<=nDays){const rest=k-j-1;if(rest<patOff)shapeSum+=(patOff-rest)*60;}
+          if(k<=nDays){const rest=k-j-1;if(rest<patOff)rhythmV+=patOff-rest;}
           i=j+1;
+        }
+        if(starts.length>1){
+          const ideal=nDays/starts.length;
+          for(let z=1;z<starts.length;z++)shapeSum+=Math.abs(starts[z]-starts[z-1]-ideal)*0.8;
         }
       }
     }
     // eş rotasyonu
-    let pairPen=0;
+    let pairPen=0,pairAdj=0;
     if(pm!=="off"){
       const seen={};
       const byKey={};
+      /* kim kiminle "birlikte" çalıştı: oda modunda aynı oda; vardiya modunda aynı gün
+         saatleri çakışan vardiyalar (tek kişilik vardiyalarda da eş rotasyonu işlesin) */
+      const grpS={};
       for(let s=0;s<S;s++){
         const p=A[s];if(p<0)continue;
-        const sl=slots[s];const k=sl.d+"|"+(sl.si<0?sl.room:sl.si);
-        (byKey[k]=byKey[k]||[]).push(p);
+        const sl=slots[s];const k=sl.si<0?sl.d+"|"+sl.room:""+sl.d;
+        (grpS[k]=grpS[k]||[]).push(s);
       }
-      for(const k in byKey){
-        const g=byKey[k];
+      for(const k in grpS){
+        const g=grpS[k],ps=g.map(s=>A[s]);byKey[k]=ps;
         for(let i=0;i<g.length;i++)for(let j=i+1;j<g.length;j++){
-          const kk=Math.min(g[i],g[j])+"-"+Math.max(g[i],g[j]);
+          if(ps[i]===ps[j])continue;
+          if(slots[g[i]].si>=0){const a=IV[g[i]][ps[i]]||slotIV(slots[g[i]],members[ps[i]].id),
+            b=IV[g[j]][ps[j]]||slotIV(slots[g[j]],members[ps[j]].id);
+            if(!(a[0]<b[1]&&b[0]<a[1]))continue;}
+          const kk=Math.min(ps[i],ps[j])+"-"+Math.max(ps[i],ps[j]);
           seen[kk]=(seen[kk]||0)+1;
         }
       }
-      if(pm==="rotate"){for(const k in seen){const v=seen[k];if(v>1)pairPen+=(v-1)*(v-1)*6;}}
+      if(pm==="rotate"){
+        for(const k in seen){const v=seen[k];if(v>1)pairPen+=(v-1)*(v-1)*6;}
+        // kişinin art arda iki nöbetinde aynı eş olmasın (en göze batan tekrar)
+        const seq=[];for(let p=0;p<n;p++)seq.push([]);
+        for(const k in byKey){const g=byKey[k],d=+k.split("|")[0];
+          for(let i=0;i<g.length;i++){const ms=[];for(let j=0;j<g.length;j++)if(j!==i)ms.push(g[j]);seq[g[i]].push([d,ms]);}}
+        for(let p=0;p<n;p++){const q=seq[p];if(q.length<2)continue;q.sort((a,b)=>a[0]-b[0]);
+          for(let i=1;i<q.length;i++)for(const x of q[i][1])if(q[i-1][1].indexOf(x)>=0)pairAdj++;}
+        pairPen+=pairAdj*120;
+      }
       else{const per={};for(const k in seen){const [a,b]=k.split("-");per[a]=(per[a]||0)+1;per[b]=(per[b]||0)+1;}
         for(const a in per)if(per[a]>1)pairPen+=(per[a]-1)*(per[a]-1)*6;}
     }
@@ -2678,8 +2710,8 @@ function makeEvaluator(slots,ctxd){
     if(expShare)for(let p=0;p<n;p++){const sc=SC[p];if(!sc)continue;
       for(let si=0;si<sc.length;si++){const e=Math.max(0,sc[si]-expShare[si]);divPen+=e*e*6;}}
     const hard=(overlap+doubleDay+gapV+restV+restGap)*HARD+nightOver*HARD*0.6;
-    const total=hard+bal*balW+pairPen+divPen+prefMiss*wishW+shapeSum*shapeW2;
-    if(detail)return {total,hard,overlap,doubleDay,gapV,restV,restGap,nightOver,empty,bal,pairPen,divPen,prefMiss,
+    const total=hard+rhythmV*RHY+bal*balW+pairPen+divPen+prefMiss*wishW+shapeSum*shapeW2;
+    if(detail)return {total,hard,overlap,doubleDay,gapV,restV,restGap,nightOver,empty,bal,pairPen,pairAdj,rhythmV,divPen,prefMiss,
       NC,DC,WEC,WDC};
     return total;
   };
@@ -2751,11 +2783,39 @@ function refineAsg(slots,E,A,evalFn,iters,locked){
   const kilit=locked||new Uint8Array(S);
   let cur=A.slice(),curP=evalFn(cur);
   let best=cur.slice(),bestP=curP;
-  let temp=Math.min(2500,Math.max(40,(curP||0)/50));
-  const cool=Math.pow(0.02,1/Math.max(1,iters));
+  const rOn=+(($("patternOn")||{}).value||0);
+  // ritim cezası ağır olduğu için başlangıç sıcaklığı da onu aşabilmeli
+  let temp=rOn>0?Math.min(6000,Math.max(40,(curP||0)/20)):Math.min(2500,Math.max(40,(curP||0)/50));
+  const cool=Math.pow(rOn>0?0.005:0.02,1/Math.max(1,iters));
+  /* ritim açıksa ikili blok hamlesi: a'nın x,x+1 günleri ile b'nin y,y+1 günleri yer değiştirir */
+  const byDay={};for(let s=0;s<S;s++)(byDay[slots[s].d]=byDay[slots[s].d]||[]).push(s);
+  const findOn=(p,d)=>{const L=byDay[d];if(!L)return -1;for(const s of L)if(cur[s]===p)return s;return -1;};
+  const swapOK=(i,j)=>{if(i===j||kilit[i]||kilit[j])return false;const a=cur[i],b=cur[j];
+    if(a===b)return false;if(a>=0&&!E[j][a])return false;if(b>=0&&!E[i][b])return false;return true;};
   for(let it=0;it<iters;it++){
     const i=(Math.random()*S)|0;let j=(Math.random()*S)|0;
     if(i===j)j=(j+1)%S;
+    if(rOn>=2&&Math.random()<0.35){
+      const a=cur[i],b=cur[j];
+      if(!swapOK(i,j))continue;
+      const dx=slots[i].d+1,dy=slots[j].d+1;
+      const i2=a>=0?findOn(a,dx):-1;
+      let j2=b>=0?findOn(b,dy):-1;
+      if(i2<0&&j2<0)continue;
+      // eşleşen ikinci hücre: yoksa karşı günde boş/uygun bir yer ara
+      let I2=i2,J2=j2;
+      if(I2<0){const L=byDay[dx]||[];for(const s of L)if(cur[s]===-1){I2=s;break;}}
+      if(J2<0){const L=byDay[dy]||[];J2=-1;for(const s of L)if(cur[s]===-1){J2=s;break;}}
+      if(I2<0||J2<0||I2===i||I2===j||J2===i||J2===j||I2===J2)continue;
+      cur[i]=b;cur[j]=a;
+      if(!swapOK(I2,J2)){cur[i]=a;cur[j]=b;continue;}
+      const a2=cur[I2],b2=cur[J2];cur[I2]=b2;cur[J2]=a2;
+      const p=evalFn(cur),d=p-curP;
+      if(d<=0||Math.random()<Math.exp(-d/temp)){curP=p;if(p<bestP){bestP=p;best=cur.slice();}}
+      else{cur[I2]=a2;cur[J2]=b2;cur[i]=a;cur[j]=b;}
+      temp*=cool;
+      continue;
+    }
     if(kilit[i]||kilit[j])continue;
     const a=cur[i],b=cur[j];
     if(a===b)continue;
@@ -2772,6 +2832,334 @@ function refineAsg(slots,E,A,evalFn,iters,locked){
     if(bestP===0)break;
   }
   return best;
+}
+
+/* ---------- RİTİM KURUCUSU ----------
+   Ritim (ör. 2 tutar → 2 tutmaz) seçiliyse liste gün gün, blok blok kurulur:
+   · her çalışma bloğu tam patOn gün (yalnız ay başına / sonuna değen blok kısa olabilir),
+   · iki blok arası en az patOff gün,
+   · her gün tüm nöbet yerleri dolu, yöneticinin verdiği sayılar tam,
+   · "her nöbette farklı kişi" seçiliyse aynı gün birlikte çalışanlar mümkün olduğunca değişir.
+   Kurallar elvermezse null döner; çözücü eski (takaslı) yola düşer. */
+function rhythmBuild(slots,E,IV,A0,locked,wanted,isFixed,cap,evalFn,ctx){
+  const {nDays,patOn,patOff,minRest,roomRhythm,pm}=ctx;
+  const n=members.length,S=slots.length;
+  if(!(patOn>=1)||!(patOff>=1)||!n||!fillAll())return null;
+  if(members.some(p=>(sp(p).gap||0)>0))return null;        // "iki nöbet arası gün" ritimle çelişir
+  if(slots.some(s=>s.si>=0&&((shiftRows[s.si]||{}).rest||0)>0))return null;
+  const daySlots=[];for(let d=0;d<=nDays+1;d++)daySlots.push([]);
+  for(let s=0;s<S;s++)daySlots[slots[s].d].push(s);
+  const hiOf=daySlots.map(l=>l.length);
+  // uygunluk (gün bazında) ve sabitlenen günler
+  const elig=[],pinOn=[];
+  for(let p=0;p<n;p++){elig.push(new Uint8Array(nDays+2));pinOn.push(new Int32Array(nDays+2).fill(-1));}
+  for(let s=0;s<S;s++){const d=slots[s].d;for(let p=0;p<n;p++)if(E[s][p])elig[p][d]=1;
+    if(locked[s]&&A0[s]>=0)pinOn[A0[s]][d]=s;}
+  for(let d=1;d<=nDays;d++){const k=[];for(let p=0;p<n;p++)if(pinOn[p][d]>=0)k.push(p);
+    if(k.length>hiOf[d])return null;}
+  // hedef aralıkları: sabit sayı = tam; serbest kişiler = kalanları eşit (kapasiteye göre su doldurma)
+  const tlo=new Array(n).fill(0),thi=new Array(n).fill(0);
+  let rem=S;const free=[];
+  for(let p=0;p<n;p++){if(isFixed[p]){tlo[p]=thi[p]=wanted[p];rem-=wanted[p];}else free.push(p);}
+  if(rem<0&&!((ctx.relax||0)>=2))return null;
+  if(free.length){
+    const capF=free.map(p=>cap[p]);let left=rem;const share=new Array(free.length).fill(0);
+    let act=free.map((p,i)=>i);
+    while(left>1e-9&&act.length){const eq=left/act.length;let nx=[];
+      for(const i of act){const room=capF[i]-share[i];if(room<=eq){share[i]+=room;left-=room;}else nx.push(i);}
+      if(nx.length===act.length){for(const i of act)share[i]+=eq;left=0;}
+      act=nx;}
+    // relax≥1: serbest kişilerde ±1 esneklik (ör. 89 yer / 6 kişi ritimle 16-15-15-15-14-14 olabilir)
+    const w1=(ctx.relax||0)>=1?1:0;
+    free.forEach((p,i)=>{tlo[p]=Math.max(0,Math.floor(share[i])-w1);thi[p]=Math.min(cap[p],Math.ceil(share[i])+w1);});
+  }else if(rem!==0&&!((ctx.relax||0)>=2))return null;   // herkesin sayısı verilmiş ama toplam yer sayısını tutmuyor
+  /* relax=2: yöneticinin sayıları ±1 gevşer — yalnız "şu sayılarla kusursuz olur" önerisi için */
+  if((ctx.relax||0)>=2)for(let p=0;p<n;p++)if(isFixed[p]){tlo[p]=Math.max(0,wanted[p]-1);thi[p]=Math.min(cap[p],wanted[p]+1);}
+  let sumLo=0,sumHi=0;for(let p=0;p<n;p++){sumLo+=tlo[p];sumHi+=thi[p];}
+  if(sumLo>S||sumHi<S)return null;
+
+  const restOK=(prev,iv)=>{if(!prev)return true;
+    if(iv[0]<prev[1]-1e-9)return false;
+    if(roomRhythm)return true;
+    return !(minRest>0&&iv[0]<prev[1]+minRest-1e-9);};
+  /* kişinin bu durumdan sonra en fazla kaç gün daha çalışabileceği (üst sınır) */
+  const maxFrom=(p,d,st,rs)=>{let ss=st,rr=rs,c=0;
+    for(let dd=d;dd<=nDays;dd++){
+      const can=elig[p][dd]&&(ss>0?ss<patOn:rr>=patOff);
+      if(can){c++;ss++;rr=0;}else if(ss>0){ss=0;rr=1;}else rr++;}
+    return c;};
+  const prefOf=members.map(p=>allPrefs[p.id]||{});
+  const T0=Date.now(),BUDGET=ctx.budget||1500;
+  const cands=[];let tries=0;
+  while(Date.now()-T0<BUDGET&&tries<400&&!(tries>=30&&!cands.length)){
+    tries++;
+    const st=new Int16Array(n),rs=new Int16Array(n).fill(999),cnt=new Int16Array(n),flex=new Uint8Array(n);
+    const prevIV=new Array(n).fill(null),lastMates=new Array(n).fill(null);
+    const pairC=[];for(let p=0;p<n;p++)pairC.push(new Int16Array(n));
+    const A=new Array(S).fill(-1);
+    const SCp=[];for(let p=0;p<n;p++)SCp.push(new Int16Array(Math.max(1,shiftRows.length)));
+    let nodes=0;const NODE_MAX=6000;
+    const noise=1+Math.random()*3;
+    const step=d=>{
+      if(d>nDays){for(let p=0;p<n;p++)if(cnt[p]<tlo[p]||cnt[p]>thi[p])return false;return true;}
+      if(++nodes>NODE_MAX)return false;
+      const hi=hiOf[d];
+      const F=[],O=[];
+      for(let p=0;p<n;p++){
+        const pinned=pinOn[p][d]>=0;
+        if(pinned){F.push(p);continue;}
+        if(!elig[p][d]){
+          if(st[p]>0&&st[p]<patOn&&!flex[p])return false;   // blok ortasında izin: bu yol tıkalı
+          continue;}
+        if(st[p]>0){
+          if(st[p]<patOn){if(flex[p]){if(cnt[p]<thi[p])O.push(p);}else{if(cnt[p]>=thi[p])return false;F.push(p);}}
+          continue;}
+        if(rs[p]<patOff)continue;
+        // yeni blok: ya tam patOn gün, ya da ay sonuna dayanan kısa blok, ya da ay başı (esnek)
+        const len=d===1?1:Math.min(patOn,nDays-d+1);
+        if(thi[p]-cnt[p]>=len)O.push(p);
+      }
+      if(F.length>hi)return false;
+      const m=hi-F.length;
+      if(O.length<m)return false;
+      /* aday kümeleri: küçükse hepsi, büyükse gürültülü açgözlü örnekler; puana göre sıralı */
+      const len0=Math.min(patOn,nDays-d+1);
+      const base=O.map(p=>{
+        const need=(tlo[p]+thi[p])/2-cnt[p];
+        const skip=maxFrom(p,d+1,0,st[p]>0?1:rs[p]+1);
+        let sc=need>skip+0.01?1000:need/Math.max(1,skip)*12;
+        if(st[p]>0)sc+=6;
+        if(pm!=="off"){let rep=0;for(const q of F)rep+=pairC[p][q]+(lastMates[p]&&lastMates[p].indexOf(q)>=0?2:0);
+          sc+=(pm==="fixed"?1:-1)*rep*2.2;}
+        for(let dd=d;dd<d+len0;dd++){const v=prefOf[p][dd];if(v==="avoid")sc-=4;else if(v==="yes")sc+=4;}
+        return sc;});
+      const setScore=ix=>{let t=0;for(const z of ix)t+=base[z];
+        if(pm!=="off")for(let u=0;u<ix.length;u++)for(let v=u+1;v<ix.length;v++){
+          const p=O[ix[u]],q=O[ix[v]];t+=(pm==="fixed"?1:-1)*(pairC[p][q]*2+(lastMates[p]&&lastMates[p].indexOf(q)>=0?2:0))*2.2;}
+        return t+Math.random()*noise*2;};
+      const combos=[];
+      const nC=(a,k)=>{let r=1;for(let i=1;i<=k;i++){r=r*(a-k+i)/i;if(r>40)return 41;}return r;};
+      if(nC(O.length,m)<=40){
+        const rec=(st0,acc)=>{if(acc.length===m){combos.push(acc.slice());return;}
+          for(let z=st0;z<=O.length-(m-acc.length);z++){acc.push(z);rec(z+1,acc);acc.pop();}};
+        rec(0,[]);
+      }else{
+        for(let t=0;t<8;t++){const sc=base.map(v=>v+Math.random()*noise*(t+1)*2);
+          const ix=O.map((p,z)=>z).sort((x,y)=>sc[y]-sc[x]).slice(0,m);combos.push(ix);}
+      }
+      const ranked=combos.map(ix=>({ix,sc:setScore(ix)})).sort((x,y)=>y.sc-x.sc).slice(0,6);
+      const tried=new Set();
+      for(const cb of ranked){
+        const W=F.concat(cb.ix.map(z=>O[z]));
+        const key=W.slice().sort((a,b)=>a-b).join(",");
+        if(tried.has(key))continue;tried.add(key);
+        // gün içi yerleşim: kişi → nöbet yeri (uygunluk + dinlenme), az aldığı vardiyaya öncelik
+        const dl=daySlots[d],asg=new Array(dl.length).fill(-1);
+        let ok=true;
+        for(const p of W){const ps=pinOn[p][d];if(ps>=0){const z=dl.indexOf(ps);if(asg[z]>=0){ok=false;break;}asg[z]=p;}}
+        if(!ok)continue;
+        const canTake=(p,z)=>{const s=dl[z];return E[s][p]&&restOK(prevIV[p],IV[s][p]);};
+        const order=W.filter(p=>pinOn[p][d]<0).sort(()=>Math.random()-0.5);
+        const tryAssign=(p,vis)=>{
+          const zs=[];for(let z=0;z<dl.length;z++)if(!vis[z]&&!(asg[z]>=0&&pinOn[asg[z]][d]>=0)&&canTake(p,z))zs.push(z);
+          zs.sort((a,b)=>{const sa=slots[dl[a]].si,sb=slots[dl[b]].si;
+            return (sa>=0?SCp[p][sa]:0)-(sb>=0?SCp[p][sb]:0)+(Math.random()-0.5)*0.9;});
+          for(const z of zs){if(asg[z]<0){asg[z]=p;return true;}}
+          for(const z of zs){vis[z]=1;const q=asg[z];asg[z]=p;if(tryAssign(q,vis))return true;asg[z]=q;}
+          return false;};
+        for(const p of order){if(!tryAssign(p,new Uint8Array(dl.length))){ok=false;break;}}
+        if(!ok)continue;
+        // durumu uygula
+        const sv={st:st.slice(),rs:rs.slice(),cnt:cnt.slice(),flex:flex.slice(),prevIV:prevIV.slice(),lastMates:lastMates.slice()};
+        const on=new Uint8Array(n);for(const p of W)on[p]=1;
+        let dead=false;
+        for(let p=0;p<n;p++){
+          if(on[p]){if(st[p]===0&&d===1)flex[p]=1;st[p]++;rs[p]=0;cnt[p]++;
+            if(st[p]>=patOn)flex[p]=0;}
+          else{if(st[p]>0){st[p]=0;rs[p]=1;flex[p]=0;}else rs[p]++;prevIV[p]=null;}
+        }
+        for(let z=0;z<dl.length;z++){const p=asg[z];A[dl[z]]=p;if(p<0)continue;
+          prevIV[p]=IV[dl[z]][p];const si=slots[dl[z]].si;if(si>=0)SCp[p][si]++;}
+        for(const p of W){lastMates[p]=W.filter(q=>q!==p);for(const q of W)if(q!==p)pairC[p][q]++;}
+        // ileriye bakış: herkes alt sınırına hâlâ yetişebilir mi, toplamlar tutuyor mu
+        let remS=0;for(let dd=d+1;dd<=nDays;dd++)remS+=hiOf[dd];
+        let needLo=0,roomHi=0;
+        for(let p=0;p<n;p++){
+          if(cnt[p]>thi[p]){dead=true;break;}
+          const mf=maxFrom(p,d+1,st[p],rs[p]);
+          if(cnt[p]+mf<tlo[p]){dead=true;break;}
+          needLo+=Math.max(0,tlo[p]-cnt[p]);roomHi+=Math.min(thi[p]-cnt[p],mf);
+        }
+        if(!dead&&(needLo>remS||roomHi<remS))dead=true;
+        if(!dead&&d<nDays){const d1=d+1;let fN=0,cN=0;
+          for(let p=0;p<n;p++){
+            if(pinOn[p][d1]>=0){fN++;continue;}
+            if(!elig[p][d1])continue;
+            if(st[p]>0&&st[p]<patOn){if(flex[p])cN++;else fN++;}
+            else if(st[p]===0&&rs[p]>=patOff&&thi[p]-cnt[p]>=Math.min(patOn,nDays-d1+1))cN++;}
+          if(fN>hiOf[d1]||fN+cN<hiOf[d1])dead=true;}
+        if(!dead&&step(d+1))return true;
+        // geri al
+        for(let z=0;z<dl.length;z++){const p=asg[z];A[dl[z]]=-1;if(p<0)continue;const si=slots[dl[z]].si;if(si>=0)SCp[p][si]--;}
+        for(const p of W)for(const q of W)if(q!==p)pairC[p][q]--;
+        st.set(sv.st);rs.set(sv.rs);cnt.set(sv.cnt);flex.set(sv.flex);
+        for(let p=0;p<n;p++){prevIV[p]=sv.prevIV[p];lastMates[p]=sv.lastMates[p];}
+      }
+      return false;
+    };
+    if(step(1)){
+      const rep=evalFn(A,true);
+      if(rep.hard===0&&rep.rhythmV===0)cands.push({A,score:rep.total});
+      if(cands.length>=60)break;
+    }
+  }
+  if(!cands.length)return null;
+  cands.sort((a,b)=>a.score-b.score);
+  /* --- gün düzeyinde iyileştirme: iki kişinin bir gün dilimini takas et ---
+     Günlük kişi sayısı kendiliğinden korunur; ritim, izin, sabitleme ve sayı aralığı
+     bozulmuyorsa kabul edilir. Amaç: aynı kişilerin hep birlikte çalışmaması
+     ("her nöbette farklı kişi"), ⭐/🚫 tercihleri ve serbest kişilerde eşitlik. */
+  const rowOK=r=>{let i=1;
+    while(i<=nDays){if(!r[i]){i++;continue;}let j=i;while(j+1<=nDays&&r[j+1])j++;
+      const len=j-i+1;if(len>patOn)return false;if(len<patOn&&i>1&&j<nDays)return false;
+      let k=j+1;while(k<=nDays&&!r[k])k++;if(k<=nDays&&k-j-1<patOff)return false;i=j+1;}
+    return true;};
+  const wp=ctx.wishPri||"normal",WW=wp==="high"?150:wp==="off"?0:12;
+  const isFree=isFixed.map(f=>!f);
+  const dayObj=X=>{
+    let pen=0;const c=[];for(let p=0;p<n;p++)c.push(new Int16Array(n));
+    const lists=[];
+    for(let d=1;d<=nDays;d++){const L=[];for(let p=0;p<n;p++)if(X[p][d])L.push(p);lists.push(L);
+      for(let u=0;u<L.length;u++)for(let v=u+1;v<L.length;v++){c[L[u]][L[v]]++;}}
+    if(pm!=="off"){let sq=0;for(let p=0;p<n;p++)for(let q=p+1;q<n;q++)sq+=c[p][q]*c[p][q];
+      pen+=(pm==="fixed"?-1:1)*sq*6;
+      if(pm==="rotate"){const last=new Array(n).fill(null),mk=new Int32Array(n).fill(-1);let adj=0;
+        for(let di=0;di<lists.length;di++){const L=lists[di];
+          for(const p of L){const pr=last[p];if(pr){for(const q of pr)mk[q]=p*1000+di;
+              for(const q of L)if(q!==p&&mk[q]===p*1000+di)adj++;}
+            last[p]=L;}}
+        pen+=adj*25;}
+    }
+    let cs=0,cn=0;const cnt=new Array(n).fill(0);
+    for(let p=0;p<n;p++){const pf=prefOf[p];
+      for(let d=1;d<=nDays;d++){if(X[p][d]){cnt[p]++;const v=pf[d];if(v==="avoid")pen+=3*WW;pen+=shapeW(members[p],d,nDays)*2;}
+        else if(pf[d]==="yes")pen+=WW;}
+      if(isFree[p]){cs+=cnt[p];cn++;}}
+    if(cn>1){const mu=cs/cn;for(let p=0;p<n;p++)if(isFree[p])pen+=(cnt[p]-mu)*(cnt[p]-mu)*60;}
+    if((ctx.relax||0)>=2)for(let p=0;p<n;p++)if(isFixed[p])pen+=Math.abs(cnt[p]-wanted[p])*5000;
+    let dev=0;for(let d=1;d<=nDays;d++)dev+=Math.abs(lists[d-1].length-hiOf[d]);
+    for(let p=0;p<n;p++){if(cnt[p]<tlo[p])dev+=tlo[p]-cnt[p];else if(cnt[p]>thi[p])dev+=cnt[p]-thi[p];}
+    lastDev=dev;
+    return pen;};
+  let lastDev=0;
+  const assign=X=>{
+    const A=new Array(S).fill(-1),prevIV=new Array(n).fill(null);
+    const SCp=[];for(let p=0;p<n;p++)SCp.push(new Int16Array(Math.max(1,shiftRows.length)));
+    for(let d=1;d<=nDays;d++){
+      const dl=daySlots[d],asg=new Array(dl.length).fill(-1);const W=[];
+      for(let p=0;p<n;p++)if(X[p][d])W.push(p);
+      for(const p of W){const ps=pinOn[p][d];if(ps>=0)asg[dl.indexOf(ps)]=p;}
+      const canTake=(p,z)=>E[dl[z]][p]&&restOK(prevIV[p],IV[dl[z]][p]);
+      const tryA=(p,vis)=>{
+        const zs=[];for(let z=0;z<dl.length;z++)if(!vis[z]&&!(asg[z]>=0&&pinOn[asg[z]][d]>=0)&&canTake(p,z))zs.push(z);
+        zs.sort((x,y)=>{const sa=slots[dl[x]].si,sb=slots[dl[y]].si;
+          return (sa>=0?SCp[p][sa]:0)-(sb>=0?SCp[p][sb]:0)+(Math.random()-0.5)*0.9;});
+        for(const z of zs)if(asg[z]<0){asg[z]=p;return true;}
+        for(const z of zs){vis[z]=1;const q=asg[z];asg[z]=p;if(tryA(q,vis))return true;asg[z]=q;}
+        return false;};
+      for(const p of W.filter(p=>pinOn[p][d]<0).sort(()=>Math.random()-0.5))
+        if(!tryA(p,new Uint8Array(dl.length)))return null;
+      for(let p=0;p<n;p++)prevIV[p]=null;
+      for(let z=0;z<dl.length;z++){const p=asg[z];A[dl[z]]=p;if(p<0)continue;
+        prevIV[p]=IV[dl[z]][p];const si=slots[dl[z]].si;if(si>=0)SCp[p][si]++;}
+    }
+    return A;};
+  const polish=A=>{let cur=evalFn(A);
+    const multi=[];for(let d=1;d<=nDays;d++)if(daySlots[d].length>1)multi.push(d);
+    for(let it=0;it<1800&&multi.length;it++){
+      const dl=daySlots[multi[(Math.random()*multi.length)|0]];
+      const i=dl[(Math.random()*dl.length)|0],j=dl[(Math.random()*dl.length)|0];
+      if(i===j||locked[i]||locked[j])continue;
+      const a=A[i],b=A[j];if(a===b)continue;
+      if(a>=0&&!E[j][a])continue;if(b>=0&&!E[i][b])continue;
+      A[i]=b;A[j]=a;const v=evalFn(A);
+      if(v<=cur)cur=v;else{A[i]=a;A[j]=b;}
+    }
+    return cur;};
+  const toX=A=>{const X=[];for(let p=0;p<n;p++)X.push(new Uint8Array(nDays+2));
+    for(let s=0;s<S;s++)if(A[s]>=0)X[A[s]][slots[s].d]=1;return X;};
+  let best=null;
+  const starts=cands.slice(0,2);
+  const T1=Date.now(),SA_MS=ctx.saMs||900;
+  /* Büyük komşuluk araması: 2-3 kişi seç, diğerlerini sabit tut; bu kişilerin ayını
+     ritme uyan tüm yollar içinden (izin, sabitleme, sayı aralığı korunarak) yeniden kur,
+     en iyi puanlıyı al. Günlük kişi sayıları hiç bozulmaz. */
+  const reopt=(X,G,curV)=>{
+    const k=G.length,res=new Int16Array(nDays+2);
+    for(let d=1;d<=nDays;d++){let c=0;for(let p=0;p<n;p++)if(G.indexOf(p)<0&&X[p][d])c++;res[d]=hiOf[d]-c;
+      if(res[d]<0||res[d]>k)return curV;}
+    const save=G.map(p=>X[p].slice());
+    const st=new Int16Array(k),rs=new Int16Array(k).fill(999),cn=new Int16Array(k),fx=new Uint8Array(k);
+    let bestV=curV,bestRows=null,nodes=0;
+    const rec=d=>{
+      if(++nodes>4000)return;
+      if(d>nDays){for(let u=0;u<k;u++){const p=G[u];if(cn[u]<tlo[p]||cn[u]>thi[p])return;}
+        const v=dayObj(X);if(lastDev===0&&v<bestV-1e-9){bestV=v;bestRows=G.map(p=>X[p].slice());}return;}
+      const must=[],can=[];
+      for(let u=0;u<k;u++){const p=G[u];
+        if(pinOn[p][d]>=0){must.push(u);continue;}
+        const e=elig[p][d];
+        if(st[u]>0&&st[u]<patOn){if(fx[u]){if(e&&cn[u]<thi[p])can.push(u);}
+          else{if(!e||cn[u]>=thi[p])return;must.push(u);}continue;}
+        if(st[u]>=patOn||!e)continue;
+        if(rs[u]<patOff)continue;
+        if(thi[p]-cn[u]>=(d===1?1:Math.min(patOn,nDays-d+1)))can.push(u);}
+      const need=res[d]-must.length;
+      if(need<0||need>can.length)return;
+      // can içinden need kişilik alt kümeler (rastgele sırayla)
+      const subs=[];const M=1<<can.length;
+      for(let mk=0;mk<M;mk++){let c=0;for(let z=0;z<can.length;z++)if(mk>>z&1)c++;if(c===need)subs.push(mk);}
+      for(let z=subs.length-1;z>0;z--){const r=(Math.random()*(z+1))|0;const t=subs[z];subs[z]=subs[r];subs[r]=t;}
+      for(const mk of subs){
+        const on=new Uint8Array(k);for(const u of must)on[u]=1;for(let z=0;z<can.length;z++)if(mk>>z&1)on[can[z]]=1;
+        const sv=[st.slice(),rs.slice(),cn.slice(),fx.slice()];let dead=false;
+        for(let u=0;u<k;u++){const p=G[u];X[p][d]=on[u];
+          if(on[u]){if(st[u]===0&&d===1)fx[u]=1;st[u]++;rs[u]=0;cn[u]++;if(st[u]>=patOn)fx[u]=0;}
+          else{if(st[u]>0){st[u]=0;rs[u]=1;fx[u]=0;}else rs[u]++;}
+          if(cn[u]+maxFrom(p,d+1,st[u],rs[u])<tlo[p])dead=true;}
+        if(!dead)rec(d+1);
+        st.set(sv[0]);rs.set(sv[1]);cn.set(sv[2]);fx.set(sv[3]);
+        if(nodes>4000)break;
+      }
+    };
+    rec(1);
+    if(bestRows){G.forEach((p,u)=>{X[p]=bestRows[u];});return bestV;}
+    G.forEach((p,u)=>{X[p]=save[u];});
+    return curV;
+  };
+  for(let ci=0;ci<starts.length;ci++){
+    const X=toX(starts[ci].A);
+    let cur=dayObj(X);
+    const tEnd=Date.now()+SA_MS/starts.length;
+    let it=0;
+    while(n>1&&Date.now()<tEnd){
+      it++;
+      const k=Math.min(n,n<=3?n:(Math.random()<0.6?3:(n>=4?4:3)));
+      const G=[];while(G.length<k){const p=(Math.random()*n)|0;if(G.indexOf(p)<0)G.push(p);}
+      cur=reopt(X,G,cur);
+    }
+    const bestX=X;
+    // aynı gün deseniyle birkaç vardiya yerleşimi dene, en iyisini al
+    for(const XX of [bestX]){
+      for(let k=0;k<2;k++){
+        const A=assign(XX);if(!A)continue;
+        const sc=polish(A);const rep=evalFn(A,true);
+        if(rep.hard===0&&rep.rhythmV===0&&(!best||sc<best.score))best={A,score:sc};
+      }
+    }
+  }
+  if(!best){const A=starts[0].A.slice();best={A,score:polish(A)};}
+  return best.A;
 }
 
 /* Ana giriş: her iki mod için kesin çözüm üretir */
@@ -3035,10 +3423,47 @@ function solveSchedule(){
     }
   });
 
+  /* değerlendirici (takaslı ince ayar ve ritim kurucusu ortak kullanır) */
+  const expShare=isShiftMode()?shiftRows.map((sh,si)=>{
+    let t=0;for(let s=0;s<S;s++)if(slots[s].si===si)t++;
+    let c=0;for(let p=0;p<n;p++){let can=false;for(let s=0;s<S&&!can;s++)if(slots[s].si===si&&E[s][p])can=true;if(can)c++;}
+    return t/(c||1);}):null;
+  const patOnV=+($("patternOn").value||0),patOffV=+($("patternOff").value||0);
+  const evalFn=makeEvaluator(slots,{y,m,nDays,bays,IV,MT,pm:partnerMode(),bDN:balDN(),bWE:balWE(),
+    patOn:patOnV,patOff:patOffV,expShare,minRest:minRestH(),wishPri:wishPri()});
+  /* ritim seçiliyse önce listeyi blok blok kur; kurallar elvermezse takaslı yola geç */
+  let RB=null,rbSuggest=null;
+  if(patOnV>0){
+    const rc={nDays,patOn:patOnV,patOff:patOffV,minRest:minRestH(),pm:partnerMode(),wishPri:wishPri(),
+      roomRhythm:patOnV>=2&&slots.every(s=>s.si<0)};
+    RB=rhythmBuild(slots,E,IV,A,locked,wanted,isFixed,cap,evalFn,rc);
+    if(!RB&&isFixed.some(f=>!f))RB=rhythmBuild(slots,E,IV,A,locked,wanted,isFixed,cap,evalFn,{...rc,relax:1});
+    if(!RB&&isFixed.some(f=>f)){
+      // verilen sayılarla kusursuz ritim yok: en az değişiklikle olan sayıları öner
+      const T=rhythmBuild(slots,E,IV,A,locked,wanted,isFixed,cap,evalFn,{...rc,relax:2,budget:1000,saMs:500});
+      if(T){const c=new Array(n).fill(0);for(let s=0;s<S;s++)if(T[s]>=0)c[T[s]]++;
+        const ch=[];members.forEach((p,i)=>{if(isFixed[i]&&c[i]!==wanted[i])ch.push(p.name+" "+wanted[i]+"→"+c[i]);});
+        if(ch.length){rbSuggest={};members.forEach((p,i)=>{rbSuggest[p.id]=c[i];});rbSuggest._txt=ch.join(", ");}}
+    }
+  }
+  if(RB){for(let s=0;s<S;s++){A[s]=RB[s];}load.fill(0);for(let s=0;s<S;s++)if(A[s]>=0)load[A[s]]++;}
+
   const fixedMask=new Uint8Array(n);
   let fixedSum=0;
   members.forEach((p,i)=>{if(isFixed[i]){fixedMask[i]=1;fixedSum+=wanted[i];}});
-  if(fixedSum>0)kuhnMatch(slots,E,wanted,A,load,fixedMask,locked);
+  /* ritim açıksa önce herkesi kaydırılmış bir 2+2 (vb.) döngüsünün "çalışma" günlerine
+     yerleştir; böylece ince ayar bloklardan başlar. Kalanlar sonra normal kurallarla dolar. */
+  const rOn=+($("patternOn").value||0),rOff=+($("patternOff").value||0);
+  const EPH=rOn>0?(()=>{
+    const L=rOn+Math.max(0,rOff),ord=members.map((p,i)=>i).sort(()=>Math.random()-0.5);
+    const off=new Array(n);ord.forEach((p,k)=>{off[p]=Math.floor(k*L/n);});
+    return E.map((row,s2)=>{const r=new Uint8Array(n),d=slots[s2].d;
+      for(let p=0;p<n;p++)r[p]=row[p]&&((d-1+off[p])%L)<rOn?1:0;return r;});
+  })():null;
+  if(fixedSum>0&&!RB){
+    if(EPH)kuhnMatch(slots,EPH,wanted,A,load,fixedMask,locked);
+    kuhnMatch(slots,E,wanted,A,load,fixedMask,locked);
+  }
   members.forEach((p,i)=>{
     if(isFixed[i]&&load[i]<wanted[i])
       viol.push(`⚠️ ${p.name}: ${wanted[i]} nöbet istendi, kurallar elverdiği için ancak ${load[i]} verilebildi. (Aynı günlere sıkışan başka kişiler var.)`);
@@ -3046,11 +3471,18 @@ function solveSchedule(){
 
   /* --- 2. aşama: sayı verilmemiş kişilere kalanları dağıt --- */
   const freeIdx=[];members.forEach((p,i)=>{if(!isFixed[i])freeIdx.push(i);});
-  if(fillAll()&&freeIdx.length){
+  if(fillAll()&&freeIdx.length&&!RB){
     const freeMask=new Uint8Array(n);
     const capAll=cap.slice();
     members.forEach((p,i)=>{if(isFixed[i])capAll[i]=wanted[i];else freeMask[i]=1;});
     const both=new Uint8Array(n);for(let i2=0;i2<n;i2++)both[i2]=1;
+    if(EPH){
+      // ritim tohumu: serbest kişileri adil paya kadar döngü günlerine yerleştir
+      let rem=S;for(let s2=0;s2<S;s2++)if(A[s2]>=0)rem--;
+      const fs=Math.ceil(rem/freeIdx.length),capPh=capAll.slice();
+      freeIdx.forEach(i2=>{capPh[i2]=Math.min(cap[i2],load[i2]+fs);});
+      kuhnMatch(slots,EPH,capPh,A,load,both,locked);
+    }
     kuhnMatch(slots,E,capAll,A,load,both,locked);
     balanceFree(slots,E,A,load,freeIdx,locked);   // serbest kişiler arasında eşitle
   }
@@ -3071,19 +3503,21 @@ function solveSchedule(){
   }
 
   /* --- 3. aşama: takaslarla ince ayar (sayılar sabit kalır) --- */
-  const expShare=isShiftMode()?shiftRows.map((sh,si)=>{
-    let t=0;for(let s=0;s<S;s++)if(slots[s].si===si)t++;
-    let c=0;for(let p=0;p<n;p++){let can=false;for(let s=0;s<S&&!can;s++)if(slots[s].si===si&&E[s][p])can=true;if(can)c++;}
-    return t/(c||1);}):null;
-  const evalFn=makeEvaluator(slots,{y,m,nDays,bays,IV,MT,pm:partnerMode(),bDN:balDN(),bWE:balWE(),
-    patOn:+($("patternOn").value||0),patOff:+($("patternOff").value||0),expShare,
-    minRest:minRestH(),wishPri:wishPri()});
-  const iters=Math.max(8000,Math.min(70000,S*420));
-  let A2=refineAsg(slots,E,A,evalFn,iters,locked);
-  A2=wishRepair(slots,E,A2,locked,evalFn);
-  A2=refineAsg(slots,E,A2,evalFn,Math.round(iters/3),locked);
-  A2=wishRepair(slots,E,A2,locked,evalFn);
+  let A2;
+  if(RB)A2=A.slice();
+  else{
+    const iters=Math.round(Math.max(8000,Math.min(70000,S*420))*(patOnV>0?(rbSuggest?1.5:3):1));
+    A2=refineAsg(slots,E,A,evalFn,iters,locked);
+    A2=wishRepair(slots,E,A2,locked,evalFn);
+    A2=refineAsg(slots,E,A2,evalFn,Math.round(iters/3),locked);
+    A2=wishRepair(slots,E,A2,locked,evalFn);
+  }
   const rep=evalFn(A2,true);
+  if(patOnV>0&&rep.rhythmV>0){
+    viol.push(`⚠️ ${patOnV} tutar → ${patOffV} tutmaz ritmi ${rep.rhythmV} yerde tutturulamadı.`+
+      (rbSuggest?` Verdiğin nöbet sayılarıyla bu ritim matematiksel olarak tam oturmuyor. Kusursuz ritim için: <b>${rbSuggest._txt}</b> (aşağıdaki butonla tek tıkla uygulayabilirsin).`
+        :` İzinler / gün kısıtları / kişi sayıları buna izin vermiyor.`));
+  }
 
   /* --- sonucu uygulamanın beklediği biçime çevir --- */
   const asg={},cnt={},hours={},night={},wk={},bay={},dc={},nc={},wec={},wdc={};
@@ -3109,7 +3543,8 @@ function solveSchedule(){
   return {asg,viol,cnt,hours,night,wk,bay,dc,nc,wec,wdc,targets,
     slotCount:S,emptyCount:empty,
     exact:hedefTut&&rep.hard===0&&(!fillAll()||empty===0),
-    score:rep.total,soft:0,pm:partnerMode(),mode:isShiftMode()?"shifts":"rooms"};
+    score:rep.total,soft:0,pm:partnerMode(),mode:isShiftMode()?"shifts":"rooms",
+    rhythmSuggest:(rep.rhythmV>0&&rbSuggest)?rbSuggest:null};
 }
 
 function computeShifts(){
