@@ -495,7 +495,9 @@ details.adv[open]>summary::before{content:"▾ "}
   <div class="card" id="quotaCard" style="display:none">
     <p class="eyebrow">Ay başı kurulum · 2/2 · kararı yönetici verir</p>
     <h2>📊 Kim kaç nöbet tutacak?</h2>
-    <p class="hint">Sayılara <b>sen</b> karar verirsin; ekip yalnızca talepte bulunur (🙋). Buraya yazdığın sayı <b>kesindir</b> — çizelge tam o kadar nöbet verir. <b>0</b> bırakırsan o kişiye kalanlar eşit dağıtılır.</p>
+    <p class="hint">Sayılara <b>sen</b> karar verirsin. Ekibin istekleri (🙋 ⭐ 🚫) sadece dikkate alınır, senin sayılarını değiştirmez.<br>
+      • <b>Toplam</b>: kişi ayda kaç nöbet tutacak. <b>0</b> = program kalanları eşit dağıtır.<br>
+      • <b>🌙 Gece</b>: bunlardan kaçı gece olacak. Örnek: Toplam 9, Gece 6 → 6 gece + 3 gündüz. <b>Boş</b> bırakırsan program dengeler, <b>0</b> yazarsan hiç gece verilmez.</p>
     <div id="quotaBanner" class="banner info">—</div>
     <div id="quotaList"></div>
     <div class="row" style="margin-top:10px">
@@ -514,13 +516,19 @@ details.adv[open]>summary::before{content:"▾ "}
   <div class="card" id="testCard" style="display:none">
     <p class="eyebrow">Geliştirici · test</p>
     <h2>🧪 Test kişileri</h2>
-    <p class="hint">Hesapsız sahte üyeler ekle, tercihlerini kendi cihazından gir, senaryoları dene. Bu kişiler giriş yapamaz ve listede 🧪 ile işaretlenir. Gerçek kullanıma geçmeden <b>hepsini temizle</b>.</p>
+    <p class="hint">Hesabı olmayan deneme kişileri. Giriş yapamazlar, listede 🧪 ile görünürler. Gerçek kullanıma geçmeden <b>hepsini temizle</b>.</p>
     <div class="row">
-      <input type="number" id="testCount" value="5" min="1" max="20" style="width:70px">
-      <label>kişi ekle</label>
-      <input type="text" id="testBranch" placeholder="Birim (ör. Sekreter)" style="flex:1;min-width:120px">
-      <button class="btn small" onclick="addTestMembers()">🧪 Ekle</button>
+      <input type="text" id="testName" placeholder="İsim (ör. Dr. Ayşe)" style="flex:1;min-width:130px" onkeydown="if(event.key==='Enter')addTestMembers()">
+      <button class="btn small" onclick="addTestMembers()">➕ Ekle</button>
     </div>
+    <div class="row" style="margin-top:6px">
+      <label>ya da toplu:</label>
+      <input type="number" id="testCount" value="5" min="1" max="20" style="width:64px">
+      <label>kişi</label>
+      <input type="text" id="testBranch" placeholder="Birim (ör. Acil)" style="flex:1;min-width:110px">
+      <button class="btn ghost small" onclick="addTestMembers(true)">🧪 Toplu ekle</button>
+    </div>
+    <div id="testList" style="margin-top:8px"></div>
     <div class="row" style="margin-top:10px">
       <button class="btn ghost small" onclick="randomizePrefs()">🎲 Test kişilerine rastgele izin/tercih</button>
       <button class="btn red small" onclick="purgeTests()">🗑 Test kişilerini temizle</button>
@@ -595,7 +603,7 @@ details.adv[open]>summary::before{content:"▾ "}
     <p class="eyebrow">Yönetici onayı · taslak</p>
     <h2>⚖️ Nöbet sayılarını onayla</h2>
     <p class="hint" id="decideHint"></p>
-    <div class="tblwrap"><table><thead><tr><th>Kişi</th><th>🙋</th><th>🔒</th><th>☀️/🌙/🏖</th><th>Nöbet</th><th>🌙</th></tr></thead><tbody id="decideBody"></tbody></table></div>
+    <div class="tblwrap"><table><thead><tr><th>Kişi</th><th>🙋</th><th>🔒</th><th>☀️/🌙/🏖</th><th>⏱ Saat</th><th>Toplam</th><th>🌙 Gece</th></tr></thead><tbody id="decideBody"></tbody></table></div>
     <div class="banner info" id="decideTotal" style="margin-top:10px">—</div>
     <div class="row" style="margin-top:8px">
       <button class="btn small" onclick="confirmDecide()">✔ Onayla ve yayınla</button>
@@ -1028,6 +1036,7 @@ async function loadAll(){
   const {data:reqs}=await sb.from("swap_requests").select("*").eq("dept_id",dept.id).eq("month",vMonth()).order("id",{ascending:false});
   requests=reqs||[];
   $("testCard").style.display=isAdmin()?"block":"none";
+  renderTestList();
   renderRooms();renderShifts();renderBlocks();renderPins();modeChanged();renderProfile();renderPeople();renderAsPerson();syncIzinBox();renderPrefCal();renderPrefSummary();renderLeaveAdmin();renderQuota();renderCountdown();renderCloseMonth();renderMonthPickers();renderSchedule();renderReqs();fillReqForm();
   autoGenCheck();
 }
@@ -1099,7 +1108,7 @@ function renderShifts(){
       <label>😴 Dinlenme: sonraki</label>
       <input type="number" value="${s.rest}" min="0" max="6" ${ro?"disabled":""} onchange="shiftRows[${i}].rest=+this.value">
       <label>vardiyayı atlar</label>
-      <span style="font-size:.72rem;color:var(--ink-soft)">· ${shiftHours(s).toFixed(0)} saat · ${isNightShift(s)?"🌙 gece":"☀️ gündüz"}${shiftCross(s)?" · gece aşar":""}</span>
+      <span style="font-size:.72rem;color:var(--ink-soft)">· ${shiftHours(s).toFixed(0)} saat · ${isNightShift(s)?"🌙 gece":"☀️ gündüz"}${shiftCross(s)?` · bitiş: ertesi gün ${s.end}`:""}</span>
     </div>
     <div class="row" style="margin-top:6px">
       <label>👥 Kimler</label>
@@ -1471,7 +1480,12 @@ function pcStyle(pid){
 }
 
 /* ---------- NÖBET SAYILARI (yönetici kararı) ---------- */
-let quotaDraft={};
+let quotaDraft={},quotaNightDraft={};
+function quotaNightCur(p){
+  if(quotaNightDraft[p.id]!=null)return quotaNightDraft[p.id];
+  const s2=sp(p);return s2.nExact&&s2.nightTarget!=null?String(s2.nightTarget):"";
+}
+function quotaNightSet(pid,v){quotaNightDraft[pid]=String(v).trim();renderQuota();}
 function quotaCur(p){
   if(quotaDraft[p.id]!=null)return quotaDraft[p.id];
   return isShiftMode()?(sp(p).target||0):(p.quota||0);
@@ -1505,8 +1519,15 @@ function renderQuota(){
         <div class="nm">${p.name}</div>
         <div class="sub">🙋 talebi: ${w?w+" nöbet":"—"} · en fazla ${cap[p.id]||0} · 🔒 ${izin} izin</div>
       </div>
-      <input type="number" min="0" max="31" class="qInp" data-pid="${p.id}" value="${v}"
-        style="width:64px;padding:8px" onchange="quotaSet('${p.id}',+this.value)">`;
+      <div style="display:flex;gap:6px;align-items:flex-end">
+        <label style="display:flex;flex-direction:column;font-size:.68rem;color:var(--ink-soft)">Toplam
+          <input type="number" min="0" max="31" class="qInp" data-pid="${p.id}" value="${v}"
+            style="width:58px;padding:8px" onchange="quotaSet('${p.id}',+this.value)"></label>
+        ${isShiftMode()?`<label style="display:flex;flex-direction:column;font-size:.68rem;color:var(--ink-soft)">🌙 Gece
+          <input type="number" min="0" max="31" placeholder="oto" value="${quotaNightCur(p)}"
+            style="width:58px;padding:8px" onchange="quotaNightSet('${p.id}',this.value)"></label>
+        <div style="font-size:.72rem;min-width:52px;padding-bottom:10px">${quotaNightCur(p)!==""&&v>0?`☀️ ${Math.max(0,v-(+quotaNightCur(p)||0))} gündüz`:""}</div>`:""}
+      </div>`;
     box.appendChild(d);
   });
   const serbest=members.length-fixedCount;
@@ -1549,7 +1570,7 @@ function quotaFromWish(){
 }
 function quotaClear(){
   if(!isAdmin())return;
-  members.forEach(p=>{quotaDraft[p.id]=0;});
+  members.forEach(p=>{quotaDraft[p.id]=0;quotaNightDraft[p.id]="";});
   renderQuota();
   toast("Temizlendi — herkes otomatik dağıtıma girer");
 }
@@ -1559,14 +1580,17 @@ async function saveQuota(){
   for(const p of members){
     const v=quotaCur(p);
     const eski=isShiftMode()?(sp(p).target||0):(p.quota||0);
-    if(v===eski)continue;
-    const patch=isShiftMode()?{shift_prefs:{...sp(p),target:v}}:{quota:v};
+    const nv=isShiftMode()?quotaNightCur(p):"";
+    const nEski=isShiftMode()?(sp(p).nExact&&sp(p).nightTarget!=null?String(sp(p).nightTarget):""):"";
+    if(v===eski&&nv===nEski)continue;
+    const nsp={...sp(p),target:v,nightTarget:nv===""?null:Math.max(0,+nv||0),nExact:nv!==""};
+    const patch=isShiftMode()?{shift_prefs:nsp}:{quota:v};
     const {error}=await sb.from("memberships").update(patch).eq("user_id",p.id).eq("dept_id",dept.id);
     if(error){hata=error.message;continue;}
-    if(isShiftMode())p.shift_prefs={...sp(p),target:v};else p.quota=v;   // yereli de güncelle
+    if(isShiftMode())p.shift_prefs=nsp;else p.quota=v;   // yereli de güncelle
     n++;
   }
-  quotaDraft={};
+  quotaDraft={};quotaNightDraft={};
   if(hata)toast("⚠️ Kaydedilemedi: "+hata,true);
   else toast(n?`✅ ${n} kişinin nöbet sayısı kaydedildi`:"Değişiklik yok");
   renderQuota();renderPeople();
@@ -1760,6 +1784,19 @@ async function saveSettings(){
 
 /* ---------- KİŞİ KURALLARI (vardiya modu) ---------- */
 function sp(p){return p.shift_prefs||{};}
+/* Kişinin TAM gece sayısı (yönetici kararı). null = otomatik dengele.
+   Taslak kartından gelen (runNight) her zaman önceliklidir. */
+function nightWantOf(p){
+  if(runNight[p.id]!=null&&runNight[p.id]!=="")return Math.max(0,+runNight[p.id]||0);
+  const s2=sp(p);
+  if(s2.nExact&&s2.nightTarget!=null&&s2.nightTarget!=="")return Math.max(0,+s2.nightTarget||0);
+  return null;
+}
+async function setNight(id,raw){
+  const p=members.find(x=>x.id===id);if(!p)return;
+  const v=String(raw).trim();
+  await updProfile(id,{shift_prefs:{...sp(p),nightTarget:v===""?null:Math.max(0,+v||0),nExact:v!==""}});
+}
 function spAllowed(p,si){const a=sp(p).allowed;return !a||a[si]!==false;}
 async function toggleSP(id,si){
   const p=members.find(x=>x.id===id);if(!p)return;
@@ -1794,13 +1831,13 @@ function renderPeople(){
       ${isShiftMode()&&shiftRows.length?`<div class="row" style="width:100%;margin-top:5px">
         <label>vardiyaları:</label>
         ${shiftRows.map((s,si)=>s.owner&&s.owner!==p.id?"":`<button class="dchip ${spAllowed(p,si)?"on":""}" ${admin?"":"disabled"} onclick="toggleSP('${p.id}',${si})">${s.owner?"🔒 ":""}${s.name||("V"+(si+1))}</button>`).join("")}
-        <label>hedef</label><input type="number" value="${sp(p).target||0}" min="0" max="31" style="width:54px;padding:6px" ${admin?"":"disabled"} onchange="setSP('${p.id}','target',+this.value)" title="0 = otomatik dengele">
+        <label>toplam</label><input type="number" value="${sp(p).target||0}" min="0" max="31" style="width:54px;padding:6px" ${admin?"":"disabled"} onchange="setSP('${p.id}','target',+this.value)" title="Ayda toplam kaç nöbet · 0 = otomatik dengele">
         <label>gün arası</label><input type="number" value="${sp(p).gap||0}" min="0" max="5" style="width:54px;padding:6px" ${admin?"":"disabled"} onchange="setSP('${p.id}','gap',+this.value)" title="1 = gün aşırı nöbet">
       </div>
       <div class="row" style="width:100%;margin-top:4px">
         <label class="chk"><input type="checkbox" ${sp(p).noNight?"checked":""} ${admin?"":"disabled"} onchange="setSP('${p.id}','noNight',this.checked)">🌙 gece/akşam nöbeti tutmaz</label>
         ${ownsPrivate(p.id)?`<label class="chk"><input type="checkbox" ${sp(p).onlyOwn?"checked":""} ${admin?"":"disabled"} onchange="setSP('${p.id}','onlyOwn',this.checked)">🔒 sadece kendi vardiyası</label>`:""}
-        <label>🌙 hedef</label><input type="number" value="${sp(p).nightTarget||0}" min="0" max="31" style="width:54px;padding:6px" ${admin?"":"disabled"} onchange="setSP('${p.id}','nightTarget',+this.value)" title="0 = otomatik dengele · bu kişinin en fazla kaç gece nöbeti olacağı">
+        <label>🌙 gece</label><input type="number" value="${sp(p).nExact&&sp(p).nightTarget!=null?sp(p).nightTarget:""}" placeholder="oto" min="0" max="31" style="width:54px;padding:6px" ${admin?"":"disabled"} onchange="setNight('${p.id}',this.value)" title="Kaç tanesi gece nöbeti olacak (tam sayı). Boş = otomatik dengele">
       </div>`:""}`;
     list.appendChild(d);
   });
@@ -2171,8 +2208,8 @@ function showDraft(){
     ?`<div class="banner ok" style="margin:8px 0">✅ İstediğin sayıların ve kuralların <b>hepsi</b> tutturuldu — ${S} nöbetin tamamı dağıtıldı.</div>`
     :(sorunlar.length?`<div class="banner err" style="margin:8px 0"><b>Şunlar tam tutturulamadı:</b><br>${sorunlar.map(v=>"• "+v).join("<br>")}</div>`:"");
   const oneri=draft.rhythmSuggest?`<div style="margin:6px 0 10px"><button class="btn small" onclick="applyRhythmSuggest()">✅ Düzeni tam oturt</button></div>`:"";
-  $("decideHint").innerHTML=durum+oneri+`Sütunlar: 🙋 üyenin <i>talebi</i> · 🔒 izin günü · <b>☀️ gündüz / 🌙 gece / 🏖 hafta sonu</b> adedi · <b>Nöbet</b> = kişiye verilen sayı · 🌙 = en fazla kaç gece (0 = otomatik).<br>
-    Sayıyı burada değiştirip <b>🔄 Sayılarla yeniden hazırla</b> diyebilirsin; son karar senindir.<br>
+  $("decideHint").innerHTML=durum+oneri+`Sütunlar: 🙋 kişinin isteği · 🔒 izin günü · ☀️/🌙/🏖 gündüz/gece/hafta sonu adedi · ⏱ toplam saat · <b>Toplam</b> ve <b>🌙 Gece</b> = verilen sayılar.<br>
+    Değiştirmek için <b>Toplam</b> ya da <b>🌙 Gece</b> kutusuna yeni sayıyı yaz, <b>🔄 Sayılarla yeniden hazırla</b>'ya bas. Son karar senindir.<br>
     Ayda <b>${S}</b> nöbet yeri · dağıtılan <b>${assigned}</b>${bos?` · <span style="color:#C33D2E">boş kalan ${bos}</span>`:" · ✅ boş yok"}`;
   const tb=$("decideBody");tb.innerHTML="";
   rel.forEach(p=>{
@@ -2185,8 +2222,9 @@ function showDraft(){
       <td>${w?"🙋"+w:"—"}</td>
       <td>${izin||"—"}</td>
       <td>${isShiftMode()?`${dcv}/${ncv}/${wev}`:`—/—/${wev}`}</td>
+      <td>${Math.round((draft.hours&&draft.hours[p.id])||0)}</td>
       <td><input type="number" class="decInp" data-pid="${p.id}" value="${draft.cnt[p.id]||0}" min="0" max="31" style="width:60px;padding:6px" onchange="updDecideTotal(${S})"></td>
-      <td>${isShiftMode()?`<input type="number" class="decNight" data-pid="${p.id}" value="${runNight[p.id]!=null?runNight[p.id]:(sp(p).nightTarget||0)}" min="0" max="31" style="width:56px;padding:6px" title="0 = otomatik dengele">`:"—"}</td>`;
+      <td>${isShiftMode()?`<input type="number" class="decNight" data-pid="${p.id}" value="${ncv}" min="0" max="31" style="width:56px;padding:6px" title="Bu kişi tam olarak kaç gece tutsun">`:"—"}</td>`;
     tb.appendChild(tr);
   });
   updDecideTotal(S);
@@ -2214,14 +2252,14 @@ async function confirmDecide(){
   const finals={},nights={};
   document.querySelectorAll(".decInp").forEach(i=>{finals[i.dataset.pid]=+i.value||0;});
   document.querySelectorAll(".decNight").forEach(i=>{nights[i.dataset.pid]=+i.value||0;});
-  const nChanged=Object.keys(nights).some(id=>(runNight[id]||0)!==nights[id]);
+  const nChanged=Object.keys(nights).some(id=>((draft.nc&&draft.nc[id])||0)!==nights[id]);
   const changed=Object.keys(finals).some(id=>(draft.cnt[id]||0)!==finals[id])||nChanged;
   if(changed&&!confirm("Sayıları değiştirdin. Bu sayılarla yeniden hazırlanıp yayınlansın mı?")){return;}
   if(changed){runTargets=finals;runNight=nights;buildDraft();return;}
   for(const p of members){
     if(finals[p.id]==null)continue;
     if(isShiftMode()){
-      const nsp={...sp(p),target:finals[p.id],nightTarget:nights[p.id]||0};
+      const nsp={...sp(p),target:finals[p.id],nightTarget:nights[p.id]||0,nExact:true};
       await sb.from("memberships").update({shift_prefs:nsp}).eq("user_id",p.id).eq("dept_id",dept.id);
       p.shift_prefs=nsp;
     }else if(!hasOwnRoom(p.pool)){
@@ -2582,9 +2620,7 @@ function makeEvaluator(slots,ctxd){
   const balW=wp==="high"?0.25:1;
   const n=members.length,S=slots.length;
   const gapOf=members.map(p=>sp(p).gap||0);
-  const nightCap=members.map(p=>{
-    const v=runNight[p.id]!=null?runNight[p.id]:(sp(p).nightTarget||0);
-    return v>0?v:0;});
+  const nightWant=ctxd.nightWant||members.map(()=>null);
   const prefOf=members.map(p=>{
     const a=new Uint8Array(nDays+2),src=allPrefs[p.id]||{};
     for(let d=1;d<=nDays;d++){const v=src[d];a[d]=v==="yes"?2:v==="avoid"?3:0;}
@@ -2702,14 +2738,14 @@ function makeEvaluator(slots,ctxd){
       return a.reduce((s2,v)=>s2+(v-mu)*(v-mu),0);};
     const act=[];for(let p=0;p<n;p++)if(NC[p]+DC[p]>0)act.push(p);
     let nightOver=0;
-    for(let p=0;p<n;p++)if(nightCap[p]>0&&NC[p]>nightCap[p])nightOver+=NC[p]-nightCap[p];
+    for(let p=0;p<n;p++)if(nightWant[p]!=null)nightOver+=Math.abs(NC[p]-nightWant[p]);
     let bal=0;
     if(bDN)bal+=varr(act.map(p=>NC[p]))*30+varr(act.map(p=>DC[p]))*22;
     if(bWE)bal+=varr(act.map(p=>WEC[p]))*30+varr(act.map(p=>WDC[p]))*8;
     let divPen=0;
     if(expShare)for(let p=0;p<n;p++){const sc=SC[p];if(!sc)continue;
       for(let si=0;si<sc.length;si++){const e=Math.max(0,sc[si]-expShare[si]);divPen+=e*e*6;}}
-    const hard=(overlap+doubleDay+gapV+restV+restGap)*HARD+nightOver*HARD*0.6;
+    const hard=(overlap+doubleDay+gapV+restV+restGap+nightOver)*HARD;
     const total=hard+rhythmV*RHY+bal*balW+pairPen+divPen+prefMiss*wishW+shapeSum*shapeW2;
     if(detail)return {total,hard,overlap,doubleDay,gapV,restV,restGap,nightOver,empty,bal,pairPen,pairAdj,rhythmV,divPen,prefMiss,
       NC,DC,WEC,WDC};
@@ -3423,6 +3459,14 @@ function solveSchedule(){
     }
   });
 
+  const nWant=members.map(p=>isShiftMode()?nightWantOf(p):null);
+  members.forEach((p,i)=>{
+    if(nWant[i]==null)return;
+    let nc=0;for(let s2=0;s2<S;s2++)if(E[s2][i]&&MT[s2][i].isN)nc++;
+    if(nWant[i]>nc){viol.push(`⚠️ ${p.name}: ${nWant[i]} gece nöbeti yazıldı ama kurallarına uyan yalnızca ${nc} gece yeri var → ${nc} verildi.`);nWant[i]=nc;}
+    if(isFixed[i]&&nWant[i]>wanted[i]){viol.push(`⚠️ ${p.name}: ${nWant[i]} gece yazıldı ama toplam nöbeti ${wanted[i]}. Gece sayısı ${wanted[i]}'e indirildi.`);nWant[i]=wanted[i];}
+  });
+  const anyNW=nWant.some(v=>v!=null);
   /* değerlendirici (takaslı ince ayar ve ritim kurucusu ortak kullanır) */
   const expShare=isShiftMode()?shiftRows.map((sh,si)=>{
     let t=0;for(let s=0;s<S;s++)if(slots[s].si===si)t++;
@@ -3430,10 +3474,10 @@ function solveSchedule(){
     return t/(c||1);}):null;
   const patOnV=+($("patternOn").value||0),patOffV=+($("patternOff").value||0);
   const evalFn=makeEvaluator(slots,{y,m,nDays,bays,IV,MT,pm:partnerMode(),bDN:balDN(),bWE:balWE(),
-    patOn:patOnV,patOff:patOffV,expShare,minRest:minRestH(),wishPri:wishPri()});
+    patOn:patOnV,patOff:patOffV,expShare,minRest:minRestH(),wishPri:wishPri(),nightWant:nWant});
   /* ritim seçiliyse önce listeyi blok blok kur; kurallar elvermezse takaslı yola geç */
   let RB=null,rbSuggest=null;
-  if(patOnV>0){
+  if(patOnV>0&&!anyNW){
     const rc={nDays,patOn:patOnV,patOff:patOffV,minRest:minRestH(),pm:partnerMode(),wishPri:wishPri(),
       roomRhythm:patOnV>=2&&slots.every(s=>s.si<0)};
     RB=rhythmBuild(slots,E,IV,A,locked,wanted,isFixed,cap,evalFn,rc);
@@ -3451,6 +3495,20 @@ function solveSchedule(){
   const fixedMask=new Uint8Array(n);
   let fixedSum=0;
   members.forEach((p,i)=>{if(isFixed[i]){fixedMask[i]=1;fixedSum+=wanted[i];}});
+  /* yöneticinin verdiği TAM gece sayıları: önce gece yerlerine, sonra gündüz yerlerine eşleştir */
+  if(anyNW&&!RB){
+    const isN=(s2,p)=>(MT[s2][p]||{}).isN;
+    const EN=E.map((row,s2)=>row.map((v,p)=>v&&isN(s2,p)?1:0));
+    const ED=E.map((row,s2)=>row.map((v,p)=>v&&!isN(s2,p)?1:0));
+    const mN=new Uint8Array(n),capN=new Array(n).fill(0),capD=new Array(n).fill(0),mD=new Uint8Array(n);
+    members.forEach((p,i)=>{if(nWant[i]!=null){mN[i]=1;capN[i]=nWant[i];
+      if(isFixed[i]){mD[i]=1;capD[i]=Math.max(0,wanted[i]-nWant[i]);}}});
+    const loadN=new Array(n).fill(0);for(let s2=0;s2<S;s2++)if(A[s2]>=0&&isN(s2,A[s2]))loadN[A[s2]]++;
+    const loadD=load.map((v,i)=>v-loadN[i]);
+    kuhnMatch(slots,EN,capN,A,loadN,mN,locked);
+    kuhnMatch(slots,ED,capD,A,loadD,mD,locked);
+    for(let i=0;i<n;i++)load[i]=loadN[i]+loadD[i];
+  }
   /* ritim açıksa önce herkesi kaydırılmış bir 2+2 (vb.) döngüsünün "çalışma" günlerine
      yerleştir; böylece ince ayar bloklardan başlar. Kalanlar sonra normal kurallarla dolar. */
   const rOn=+($("patternOn").value||0),rOff=+($("patternOff").value||0);
@@ -3533,7 +3591,10 @@ function solveSchedule(){
     if(mt.isN)nc[p.id]++;else dc[p.id]++;
     if(mt.isWe)wec[p.id]++;else wdc[p.id]++;
   }
-  if(rep.nightOver)viol.push(`⚠️ ${rep.nightOver} gece nöbeti, kişilere yazdığın 🌙 gece üst sınırının üstünde kaldı.`);
+  if(rep.nightOver){
+    const ad=[];members.forEach((p,i)=>{if(nWant[i]!=null&&rep.NC[i]!==nWant[i])ad.push(`${p.name} (${nWant[i]} istendi, ${rep.NC[i]} oldu)`);});
+    viol.push(`⚠️ Gece sayısı tutmadı: ${ad.join(", ")}. Gece yerleri ya da kişilerin kuralları bu sayılara yetmiyor.`);
+  }
   if(rep.gapV)viol.push(`⚠️ ${rep.gapV} yerde "iki nöbet arası en az … gün" kuralı tutturulamadı.`);
   if(rep.restGap)viol.push(`⚠️ ${rep.restGap} yerde iki vardiya arası ${minRestH()} saat dinlenme sağlanamadı. (Ay ayarlarından bu süreyi düşürebilirsin.)`);
   if(rep.restV)viol.push(`⚠️ ${rep.restV} yerde vardiya sonrası dinlenme kuralı tutturulamadı.`);
@@ -4090,20 +4151,48 @@ function testStat(msg,err){
   el.className=err?"banner err":"banner ok";el.textContent=msg;
   setTimeout(()=>el.style.display="none",3500);
 }
-async function addTestMembers(){
+async function addTestMembers(bulk){
   if(!isAdmin())return;
-  const n=Math.max(1,Math.min(20,+$("testCount").value||1));
+  const nm=($("testName").value||"").trim();
+  if(!bulk&&!nm){testStat("⚠️ Önce isim yaz",true);$("testName").focus();return;}
+  const n=bulk?Math.max(1,Math.min(20,+$("testCount").value||1)):1;
   const branch=($("testBranch").value||"").trim()||(myProfile.pool||"Sekreter");
   const base=testMembers().length;
   const rows=[];
   for(let i=1;i<=n;i++){
-    rows.push({user_id:uuid4(),dept_id:dept.id,name:"🧪 Test-"+(base+i),pool:branch,
+    rows.push({user_id:uuid4(),dept_id:dept.id,name:bulk?"🧪 Test-"+(base+i):"🧪 "+nm,pool:branch,
       quota:0,works_after:false,carry_t:0,carry_w:0,carry_b:0,shift_prefs:{},is_admin:false,is_test:true});
   }
   const {error}=await sb.from("memberships").insert(rows);
   if(error){testStat("⚠️ "+error.message,true);return;}
+  if(!bulk)$("testName").value="";
   await loadAll();
-  testStat("✅ "+n+" test kişisi eklendi ("+branch+")");
+  testStat(bulk?"✅ "+n+" test kişisi eklendi":"✅ "+nm+" eklendi");
+}
+/* test kişileri listesi: isim değiştir / tek tek sil */
+function renderTestList(){
+  const box=$("testList");if(!box)return;
+  const list=testMembers();
+  if(!list.length){box.innerHTML="";return;}
+  box.innerHTML=list.map(p=>`<div class="row" style="margin-top:4px">
+      <span>🧪</span>
+      <input type="text" value="${(p.name||"").replace(/^🧪\s*/,"").replace(/"/g,"&quot;")}" style="flex:1;min-width:120px"
+        onchange="renameTest('${p.id}',this.value)" title="İsmi değiştirip Enter'a bas">
+      <button class="btn red small" title="Bu test kişisini sil" onclick="removeTest('${p.id}')">🗑</button>
+    </div>`).join("");
+}
+async function renameTest(id,v){
+  const nm=(v||"").trim();if(!nm){testStat("⚠️ İsim boş olamaz",true);renderTestList();return;}
+  const {error}=await sb.from("memberships").update({name:"🧪 "+nm}).eq("user_id",id).eq("dept_id",dept.id);
+  if(error){testStat("⚠️ "+error.message,true);return;}
+  await loadAll();testStat("✅ İsim değişti: "+nm);
+}
+async function removeTest(id){
+  const p=members.find(x=>x.id===id);if(!p||!p.is_test)return;
+  if(!confirm((p.name||"Bu kişi")+" silinsin mi?"))return;
+  const {data,error}=await sb.rpc("remove_member",{target:id,d:dept.id});
+  if(error||(data&&data.error)){testStat("⚠️ "+((data&&data.error)||error.message),true);return;}
+  await loadAll();testStat("🗑 "+p.name+" silindi");
 }
 async function randomizePrefs(){
   if(!isAdmin())return;
