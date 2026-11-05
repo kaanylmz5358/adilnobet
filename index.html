@@ -707,7 +707,7 @@ input[type=radio]{accent-color:var(--tint);width:22px;height:22px;min-height:0}
 /* tablolar */
 table{font-size:14px}
 th{font-size:12px;font-weight:600;letter-spacing:.02em;color:var(--ink-2);border-bottom:.5px solid var(--separator);padding:8px 4px;white-space:nowrap}
-#yearTot td,#yearTbl td,#decideBody td{white-space:nowrap}
+#yearTot td,#yearTbl td{white-space:nowrap}
 td{border-bottom:.5px solid var(--separator);padding:10px 4px}
 .bar{background:var(--surface-2)}.bar i{background:var(--tint)}
 /* segment (iOS) */
@@ -810,6 +810,142 @@ button.lgd.me:not(.on){box-shadow:inset 0 0 0 1.5px var(--tint)}
 .center{margin:24px auto}
 .center h2{font-size:28px;line-height:34px;font-weight:700}
 
+/* ---- iOS ayar sayfaları: gruplu satırlar ---- */
+.card.ios{background:none;padding:0;border-radius:0;margin-bottom:0;box-shadow:none}
+.card.ios .nd-group{margin-bottom:24px}
+.card.ios>.hint{margin:0 16px 12px;font-size:13px;line-height:18px}
+.card.ios>.banner{margin:-12px 0 24px}
+.card.ios>.btn{margin-bottom:24px}
+#tab-kurulum .card:not(.ios) .eyebrow{display:none}
+button.nd-row{width:100%;-webkit-appearance:none;appearance:none;border:0;background:transparent;font:inherit;text-align:left;color:var(--ink);cursor:pointer}
+.nd-row.is-action .nd-row__title,.nd-row.is-action>[data-icon]{color:var(--tint)}
+.nd-row.is-action>[data-icon] .nd-ico{width:20px;height:20px}
+.nd-row .rowin{background:transparent;text-align:right;color:var(--ink-2);padding:0 2px;min-height:44px;max-width:60%;flex:0 1 auto;border-radius:0;font-size:17px}
+.nd-row select.rowin{text-align-last:right;padding-right:22px;background-position:right 2px center}
+.nd-row input[type=text].rowin{flex:1 1 45%;min-width:0}
+.nd-row .rowin:focus{outline:none;color:var(--ink)}
+.nd-row .rowin::placeholder{color:var(--ink-3)}
+.nd-row input[type=checkbox]{margin-left:auto}
+.nd-row .codebox{font-family:var(--font-rounded);font-size:24px;line-height:30px;letter-spacing:.14em;font-weight:700;background:none;padding:6px 0}
+/* − / + sayaç */
+.ndstep{display:inline-flex;align-items:center;flex:none;background:var(--surface-2);border-radius:999px;height:34px}
+.ndstep__b{-webkit-appearance:none;appearance:none;border:0;background:transparent;color:var(--ink);width:40px;height:34px;display:grid;place-items:center;border-radius:999px;cursor:pointer;padding:0}
+.ndstep__b:active{background:var(--surface-3)}
+.ndstep__b .nd-ico{width:18px;height:18px}
+.ndstep input[type=number]{width:42px;min-height:34px;height:34px;padding:0;background:transparent;text-align:center;font-family:var(--font-rounded);font-weight:600;font-size:17px;-moz-appearance:textfield;border-radius:0}
+.ndstep input::-webkit-outer-spin-button,.ndstep input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.ndstep input:focus{outline:none}
+.ndstep input:disabled+.ndstep__b,.ndstep input:disabled{opacity:.45}
+/* nöbet saatleri */
+.dtpre{display:flex;gap:6px;flex-wrap:wrap;padding:2px 0 4px}
+.dtpre .dchip{background:var(--surface);min-height:32px}
+.nd-list .dtrow{padding:6px 16px;margin:0;min-height:52px;position:relative}
+.nd-list .dtrow+.dtrow::before{content:"";position:absolute;top:0;right:0;left:16px;height:.5px;background:var(--separator)}
+.nd-list .dtrow input[type=time]{min-height:36px;padding:4px 6px;text-align:center}
+/* sıra kuralları tablosu */
+.wrlist{padding:4px 12px}
+.wrlist table{font-size:15px}
+.roomlist #roomList .roomrow{padding:10px 16px;border-bottom:.5px solid var(--separator)}
+/* tercih fırçası */
+#prefBrush{margin-bottom:4px}
+#prefBrush button{font-size:12px;line-height:15px;letter-spacing:-.01em;font-weight:600;color:var(--ink);min-height:56px;gap:4px;cursor:pointer}
+#prefBrush .is-avoid{color:var(--danger)}#prefBrush .is-wish{color:var(--tint-ink)}#prefBrush .is-leave{color:var(--leave)}#prefBrush .is-erase{color:var(--ink-2)}
+#prefCal{touch-action:none;-webkit-user-select:none;user-select:none;background:var(--surface);border-radius:var(--radius-md);padding:8px;gap:4px}
+.prefday{border:0;border-radius:10px;background:var(--bg);font-family:var(--font-rounded);font-size:16px;font-weight:600;min-height:44px;padding-top:11px}
+.prefday.izin{background:var(--leave-soft);color:var(--leave)}
+.prefday.izin::after{content:""}
+.prefday.bek{background:repeating-linear-gradient(135deg,var(--leave-soft) 0 5px,var(--surface) 5px 9px);color:var(--leave)}
+.prefday.wknd{background:#FBF3E4}
+.legend{font-size:13px;color:var(--ink-2);margin:10px 4px 0}
+/* gün paneli (alttan) */
+#daySheetBody .dpanel{margin:0;padding:0;background:none}
+#daySheetBody .dp-h b{font-size:20px}
+/* üstte küçük başlık */
+.minibar{position:fixed;top:0;left:0;right:0;z-index:25;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;
+  padding:calc(4px + env(safe-area-inset-top)) 12px 4px;min-height:44px;background:var(--glass);
+  -webkit-backdrop-filter:blur(20px) saturate(180%);backdrop-filter:blur(20px) saturate(180%);border-bottom:.5px solid var(--separator);
+  transform:translateY(-110%);transition:transform var(--dur-2) var(--ease-out);pointer-events:none}
+.minibar.on{transform:none;pointer-events:auto}
+.minibar b{font-size:17px;font-weight:600;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:60vw}
+.minibar .setback{min-height:36px;padding:0}
+/* kaydırılabilir satırlar kart içinde */
+#leaveAdminList .nd-swipe,#reqList .nd-swipe{border-radius:12px;margin-bottom:8px}
+#leaveAdminList .nd-swipe .person{padding:12px;border:0}
+#reqList .nd-swipe .req{margin:0}
+/* ---- ayar sayfalarındaki diğer kartlar: gruplu liste görünümü ---- */
+#tab-kurulum .card:not(.ios){background:none;padding:0;margin-bottom:24px}
+#tab-kurulum .card:not(.ios)>h2{font-size:13px;line-height:18px;font-weight:400;letter-spacing:.02em;text-transform:uppercase;color:var(--ink-2);padding:0 16px;margin:0 0 6px}
+#tab-kurulum .card:not(.ios)>h2 span{font-size:13px!important;text-transform:none}
+#tab-kurulum .card:not(.ios)>.hint{font-size:13px;line-height:18px;padding:0 16px;margin:0 0 8px}
+#tab-kurulum .card:not(.ios) .tblwrap{background:var(--surface);border-radius:var(--radius-md);padding:4px 12px}
+#tab-kurulum .card:not(.ios)>.row{padding:0 4px}
+#tab-kurulum .card:not(.ios)>.btn,#tab-kurulum .card:not(.ios)>.row .btn{margin-top:8px}
+#roomList,#shiftList,#ovrList,#pinList,#blockList,#testList{background:var(--surface);border-radius:var(--radius-md);overflow:hidden}
+.roomlist #roomList{border-radius:0;background:none}
+.roomrow,.shiftrow{padding:12px 16px;border-bottom:.5px solid var(--separator)!important;gap:8px}
+.roomrow:last-child,.shiftrow:last-child{border-bottom:0!important}
+#roomList>.hint,#ovrList>.hint,#pinList>.hint,#blockList>.hint,#shiftList>.hint{padding:12px 16px;margin:0;font-size:15px}
+.roomrow .btn.red.small,.shiftrow .btn.red.small{min-height:30px;width:30px;padding:0;border-radius:50%;font-size:14px}
+.roomrow select,.shiftrow select,.roomrow input,.shiftrow input{min-height:38px;padding:6px 10px;font-size:16px}
+.shiftrow .row{gap:6px}
+#peopleList.nd-list,#leaveAdminList.nd-list,#quotaList.nd-list,#myDuties.nd-list{border-radius:var(--radius-md)}
+/* satır avatarı */
+.ndav{width:34px;height:34px;border-radius:50%;flex:none;display:grid;place-items:center;color:#fff;font-size:13px;font-weight:700;letter-spacing:-.02em;font-family:var(--font-rounded)}
+.ndav.is-lg{width:72px;height:72px;font-size:26px}
+.nd-row.has-av+.nd-row::before,.nd-row+.nd-row.has-av::before{left:calc(16px + 34px + 12px)}
+.nd-row__title small.adm,.nd-row__title small.tst{font-size:12px;font-weight:600;border-radius:6px;padding:1px 6px;vertical-align:1px}
+small.adm{background:var(--tint-soft);color:var(--tint-ink)}small.tst{background:var(--holiday-soft);color:var(--holiday)}
+.person-head{display:flex;flex-direction:column;align-items:center;gap:6px;padding:4px 0 20px;text-align:center}
+.person-head b{font-size:22px;line-height:28px}.person-head>span:not(.ndav){font-size:15px;line-height:20px;color:var(--ink-2)}
+#personSheet .sheet{background:var(--bg)}
+#personSheet .nd-group{margin-bottom:20px}
+.spchips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+/* izin onayı */
+.lvrow{align-items:flex-start;padding-top:10px;padding-bottom:10px}
+.lvrow .nd-row__sub b.bekt{color:var(--leave);font-weight:600}
+.lvact{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+#leaveAdminList .nd-swipe{border-radius:0;margin:0}
+/* kim kaç nöbet */
+.qrow{flex-wrap:wrap}
+.qctl{display:flex;flex-direction:column;align-items:center;gap:2px}
+.qlbl{font-size:11px;line-height:13px;font-weight:600;color:var(--ink-2)}
+/* nöbetlerim */
+#myDutiesCard{background:none;padding:0}
+#myDutiesCard>.eyebrow{display:none}
+#myDutiesCard>h2{font-size:20px;line-height:25px;font-weight:600;margin:0 0 10px}
+.datechip{width:44px;height:44px;border-radius:12px;background:var(--tint-soft);color:var(--tint-ink);display:flex;flex-direction:column;align-items:center;justify-content:center;flex:none;line-height:1}
+.datechip b{font-family:var(--font-rounded);font-size:18px}.datechip span{font-size:11px;font-weight:600;margin-top:2px}
+.datechip.is-we{background:#FBF3E4;color:#8A5A00}.datechip.is-hol{background:var(--holiday-soft);color:var(--holiday)}.datechip.is-ek{background:var(--ek-soft);color:var(--ek)}
+#myDuties .nd-btn.is-sm{flex:none}
+/* ---- tam ekran sihirbaz ---- */
+.wz{position:fixed;inset:0;z-index:60;background:var(--bg);transform:translateY(100%);transition:transform var(--dur-3) var(--ease-spring);visibility:hidden}
+.wz.is-open{transform:none;visibility:visible}
+body.wz-on{overflow:hidden}
+.wz__inner{position:absolute;inset:0;display:flex;flex-direction:column;max-width:var(--content-max);margin:0 auto}
+.wz__bar{flex:none;display:grid;grid-template-columns:44px 1fr 44px;align-items:center;gap:12px;padding:calc(6px + env(safe-area-inset-top)) 8px 4px}
+.wz__prog{display:flex;flex-direction:column;gap:6px;align-items:center}.wz__prog .nd-progress{width:100%}
+.wz__body{flex:1;overflow-y:auto;padding:16px 16px 24px}
+.wz__q{font-size:28px;line-height:34px;font-weight:700;margin:4px 0 8px}
+.wz__sub{font-size:16px;line-height:21px;color:var(--ink-2);margin:0 0 18px}
+.wz__note{font-size:13px;line-height:18px;color:var(--ink-2);margin:12px 4px 0}
+.wz__foot{flex:none;padding:10px 16px calc(20px + env(safe-area-inset-bottom));background:linear-gradient(transparent,var(--bg) 30%)}
+.wz__code{font-family:var(--font-rounded);font-size:40px;line-height:48px;font-weight:700;letter-spacing:.16em;text-align:center;background:var(--surface);border-radius:var(--radius-md);padding:20px 0;margin:0 0 16px}
+#wizard .nd-iconbtn{width:44px;height:44px;border-radius:50%;border:0;background:var(--surface);color:var(--ink);display:grid;place-items:center;cursor:pointer}
+.wkdemo{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-top:10px}
+.wkdemo span{font-size:11px;font-weight:600;color:var(--ink-2);text-align:center;background:var(--bg);border-radius:6px;padding:4px 0;display:flex;flex-direction:column}
+.wkdemo span b{font-size:10px;font-weight:600}
+.wkdemo .is-duty{background:var(--tint);color:var(--on-tint)}.wkdemo .is-rest{background:var(--rest-soft);color:var(--ink)}
+.wzcal{background:var(--surface);border-radius:var(--radius-md);padding:8px;gap:4px;margin:0}
+.wzcal button.day{border:0;font:inherit;cursor:pointer;color:var(--ink)}
+.wzcal .holsel{background:var(--holiday)!important;color:#fff!important}
+#wizard .nd-group{margin-bottom:16px}
+/* taslak onay kartı */
+#decideBody .nd-row{align-items:center}
+#decideBody .decname{white-space:normal}
+#decideBody .decSigma{white-space:nowrap}
+.decnight{display:flex;align-items:center;gap:8px;margin-top:6px;font-size:13px;color:var(--ink-2)}
+.decact{display:flex;flex-direction:column;gap:8px;margin-top:14px}
+#wizard .nd-row__value{max-width:58%}
 </style>
 <script id="ndJs">
 /* @ds-bundle: {"format":4,"namespace":"ND","components":[{"name":"Button"},{"name":"GroupedList"},{"name":"Switch"},{"name":"Stepper"},{"name":"Segmented"},{"name":"NavBar"},{"name":"TabBar"},{"name":"Sheet"},{"name":"Calendar"},{"name":"StatusBadge"},{"name":"Avatar"},{"name":"SwipeRow"},{"name":"NextDutyCard"},{"name":"ChoiceCard"},{"name":"WeekStrip"},{"name":"Banner"},{"name":"Toast"},{"name":"Progress"},{"name":"TextField"},{"name":"EmptyState"},{"name":"Stats"},{"name":"PreferenceBrush"}]} */
@@ -944,6 +1080,8 @@ window.ND={guardClick:guardClick,icon:icon,icons:ICONS,haptic:haptic,stepper:ste
 </head>
 <body>
 <div id="phone">
+<div id="miniBar" class="minibar"></div>
+<div id="wizard" class="wz" role="dialog" aria-modal="true"></div>
 <header class="ndhdr">
   <div class="ndhdr__top">
     <span class="ndhdr__team" id="subTitle">Nöbetin kolay ve adil hali</span>
@@ -1061,140 +1199,42 @@ window.ND={guardClick:guardClick,icon:icon,icons:ICONS,haptic:haptic,stepper:ste
     <button data-sub="leave" onclick="showTab('leave')">İzin</button>
     <button data-sub="takas" onclick="showTab('takas')">Takas</button>
   </div>
-  <div class="card" id="leaveAdminCard" style="display:none">
-    <p class="eyebrow">Yönetici onayı</p>
-    <h2>İzin talepleri & onay</h2>
-    <p class="hint">Herkesin girdiği izin günleri burada görünür. <b>⏳ bekleyen</b> izinler onaylanana kadar geçerli değildir. Dilediğin kişinin iznini takvimden doğrudan ekleyip silebilirsin.</p>
-    <div id="leaveAdminList"></div>
+  <div class="card ios" id="leaveAdminCard" style="display:none">
+    <div class="nd-group"><div class="nd-group__label">Ekibin izinleri</div><div id="leaveAdminList"></div>
+      <div class="nd-group__foot" id="leaveAdminFoot"></div></div>
   </div>
-  <div class="card" id="myLeaveCard">
-    <p class="eyebrow">Kesin engel</p>
-    <h2>İzinlerim</h2>
-    <p class="hint">Takvimden seç ya da yaz: tek gün <b>12</b>, aralık <b>12-16</b>, karışık <b>12-16,20</b>. İzinlerin <b>yönetici onayından sonra</b> geçerli olur — onaylanana kadar ⏳ bekler ve nöbet yazılmasını engellemez.</p>
-    <div class="row">
-      <input type="text" id="izinInput" placeholder="ör. 12-16,20" style="flex:1;min-width:100px">
-      <button class="btn ghost small" onclick="pickIzin()">Takvim</button>
-      <button class="btn small" onclick="saveIzin()">Kaydet</button>
-    </div>
-    <div id="izinBek" class="banner info" style="display:none"></div>
-    <div id="izinStatus" class="banner ok" style="display:none"></div>
-  </div>
+  <div class="card ios" id="myLeaveCard">
+  <div class="nd-group"><div class=nd-group__label>İzinlerim</div><div class="nd-list"><div class="nd-row"><span class="nd-row__body"><span class="nd-row__title">İzin günlerim</span></span><input type="text" id="izinInput" class="rowin" placeholder="ör. 12-16,20" inputmode="numeric"></div><button class="nd-row is-action" onclick="pickIzin()"><span class="nd-row__body"><span class="nd-row__title">Takvimden seç</span></span><span data-icon="calendar"></span></button></div><div class=nd-group__foot>Tek gün 12, aralık 12-16, karışık 12-16,20. İzinlerin yönetici onaylayınca geçerli olur; o zamana kadar nöbet yazılmasını engellemez.</div></div>
+  <div id="izinBek" class="banner info" style="display:none"></div>
+  <div id="izinStatus" class="banner ok" style="display:none"></div>
+</div>
 </section>
 
 <section id="tab-kurulum" class="tab" data-page="root">
   <div id="setBar" class="setbar"></div>
   <div id="setLanding"></div>
-  <div class="card" id="monthCard" data-grp="ay">
-    <p class="eyebrow">Ay başı kurulum · 1/2</p>
-    <h2>Ay, kurallar & bayram</h2>
-    <div class="row">
-      <input type="month" id="month">
-      <label>Min ara</label><input type="number" id="minGap" min="1" max="7">
-      <button class="btn small savebtn" title="Sadece bu ayarı kaydet" onclick="saveGrp('month')">Kaydet</button>
-    </div>
-    <p class="hint" style="margin:5px 0 0">Ay değiştirince sayfa o ayın izin/tercih ve çizelge verisiyle yenilenir.</p>
-    <div class="row" style="margin-top:10px">
-      <label>Bayram</label>
-      <input type="text" id="bayramDays" placeholder="ör. 15-17,20" style="flex:1;min-width:100px">
-      <button class="btn ghost small" onclick="pickBayram()">Takvim</button>
-      <button class="btn small savebtn" title="Sadece bu ayarı kaydet" onclick="saveGrp('bayram')">Kaydet</button>
-    </div>
-    <p class="hint" style="margin:5px 0 0">Yazarak da girebilirsin: tek gün <b>15</b>, aralık <b>15-17</b>, karışık <b>15-17,23</b>.</p>
-    <div class="row" style="margin-top:10px">
-      <label>Liste tipi</label>
-      <select id="schedMode" onchange="modeChanged()" style="flex:1;min-width:180px">
-        <option value="rooms">🚪 Oda tabanlı (asistan nöbeti)</option>
-        <option value="shifts">⏰ Vardiya tabanlı (acil / icap / kat)</option>
-      </select>
-      <button class="btn small savebtn" title="Sadece bu ayarı kaydet" onclick="saveGrp('mode')">Kaydet</button>
-    </div>
-    <div class="row" style="margin-top:10px">
-      <label>Diğer listelerle uyum</label>
-      <select id="linkDefault" style="flex:1;min-width:180px"></select>
-      <button class="btn small savebtn" title="Sadece bu ayarı kaydet" onclick="saveGrp('link')">Kaydet</button>
-    </div>
-    <p class="hint" style="margin:5px 0 0">Ekipten biri başka bir listede de nöbet tutuyorsa (ör. kat + acil), bu listedeki nöbetleri ona göre ayarlanır: çakışmasın, aynı günlere denk gelsin ya da sadece o günlerde tutsun. Burası ekip için varsayılan; <b>Ekip</b> kartından kişiye özel de seçebilirsin. Diğer listenin o ay için yayınlanmış olması gerekir.</p>
-    <details class="adv">
-    <summary>Gelişmiş ayarlar — çoğu ekip için dokunmaya gerek yok</summary>
-    <div class="row" style="margin-top:10px">
-      <label>Liste hazırlama günü</label>
-      <input type="number" id="genDay" min="1" max="28" value="25">
-      <button class="btn small savebtn" title="Sadece bu ayarı kaydet" onclick="saveGrp('genday')">Kaydet</button>
-      <span style="font-size:.72rem;color:var(--ink-soft)">· her ayın bu gününde sonraki ayın listesi hazırlanır</span>
-    </div>
-    <div class="row" style="margin-top:10px">
-      <label>Doluluk politikası</label>
-      <select id="fillPolicy" style="flex:1;min-width:180px">
-        <option value="fill_all">Tüm oda/vardiyaları doldur (boş bırakma)</option>
-        <option value="by_capacity">İstenen nöbet sayısına göre dağıt (bazı slotlar boş kalabilir)</option>
-      </select>
-      <button class="btn small savebtn" title="Sadece bu ayarı kaydet" onclick="saveGrp('fill')">Kaydet</button>
-    </div>
-    <div class="row" style="margin-top:10px">
-      <label>İzinlinin nöbet sayısı</label>
-      <select id="leaveProp" style="flex:1;min-width:180px">
-        <option value="">Eşit — izin günleri sayıyı düşürmez</option>
-        <option value="1">İzin günü oranında azalt</option>
-      </select>
-      <button class="btn small savebtn" title="Sadece bu ayarı kaydet" onclick="saveGrp('leaveprop')">Kaydet</button>
-    </div>
-    <p class="hint" style="margin:5px 0 0">"Oranında azalt" seçilirse ayın yarısında izinli olan kişiye yaklaşık yarı sayıda nöbet yazılır, kalanı diğerlerine eşit dağılır. Bu durumda "Kim kaç nöbet" sayıları sadece yazıldığı ay için geçerlidir.</p>
-    <div class="row" style="margin-top:10px">
-      <label>Çalışma düzeni</label>
-      <select id="workModel" style="flex:1;min-width:180px">
-        <option value="shift_only">Nöbet/vardiya = tüm mesai (acil, sekreter, hemşire…)</option>
-        <option value="duty_rest">Mesai + nöbet · nöbet ertesi izinli</option>
-        <option value="duty_work">Mesai + nöbet · nöbet ertesi çalışır</option>
-      </select>
-      <button class="btn small savebtn" title="Sadece bu ayarı kaydet" onclick="saveGrp('work')">Kaydet</button>
-    </div>
-    <div class="row" style="margin-top:10px">
-      <label>Ritim:</label>
-      <input type="number" id="patternOn" min="0" max="7" value="0">
-      <label>gün üst üste →</label>
-      <input type="number" id="patternOff" min="0" max="7" value="0">
-      <label>gün dinlen</label>
-      <button class="btn small savebtn" title="Sadece bu ayarı kaydet" onclick="saveGrp('rhythm')">Kaydet</button>
-    </div>
-    <p class="hint" style="margin:6px 0 0">Örnek: <b>2</b> ve <b>2</b> yazarsan herkes 2 gün çalışır, 2 gün dinlenir. Kapatmak için 0 yaz.<br>💡 En iyi sonuç için "Kim kaç nöbet tutacak" kartında sayıları <b>0</b> bırak — uygun sayıları program kendisi seçer.</p>
-    <div class="row" style="margin-top:10px">
-      <label>İki vardiya arası en az</label>
-      <input type="number" id="minRest" min="0" max="24" value="8">
-      <label>saat</label>
-      <button class="btn small savebtn" title="Sadece bu ayarı kaydet" onclick="saveGrp('minrest')">Kaydet</button>
-    </div>
-    <p class="hint" style="margin:5px 0 0">Bir vardiya bitince aynı kişiye en az bu kadar süre nöbet yazılmaz. Örnek: 20:00–08:00 gece nöbetinden çıkan kişiye 08:00 vardiyası verilmez. 0 yazarsan kural kapanır.</p>
-    <div class="row" style="margin-top:10px">
-      <label>İstenen günler</label>
-      <select id="wishPri" style="flex:1;min-width:180px">
-        <option value="normal">Normal — dengeye öncelik ver</option>
-        <option value="high">Yüksek — herkese istediği günü vermeye çalış</option>
-        <option value="off">Dikkate alma</option>
-      </select>
-      <button class="btn small savebtn" title="Sadece bu ayarı kaydet" onclick="saveGrp('wish')">Kaydet</button>
-    </div>
-    <p class="hint" style="margin:5px 0 0">Ekip, Tercihler sekmesindeki takvimden ⭐ istediği günleri işaretler. <b>Yüksek</b> seçilirse çizelge bu günleri tutturmayı, nöbetleri aya düzgün yaymaktan ve hafta sonu dengesinden daha çok önemser. Nöbetin boş kalabildiği (her gün dolu olmak zorunda olmayan) aylarda çok işe yarar.</p>
-    <div class="row" style="margin-top:10px">
-      <label>Eş düzeni</label>
-      <select id="partnerMode" style="flex:1;min-width:180px">
-        <option value="rotate">Her nöbette farklı kişiyle eşleşsin (rotasyon)</option>
-        <option value="off">Fark etmez — eşe bakma</option>
-        <option value="fixed">Sabit eş — mümkün oldukça aynı kişiyle</option>
-      </select>
-      <button class="btn small savebtn" title="Sadece bu ayarı kaydet" onclick="saveGrp('partner')">Kaydet</button>
-    </div>
-    <div class="row" style="margin-top:10px">
-      <label>Denge</label>
-      <label class="chk"><input type="checkbox" id="balDN" checked> ☀️/🌙 gece-gündüz sayısı</label>
-      <label class="chk"><input type="checkbox" id="balWE" checked> 🏖 hafta içi/hafta sonu sayısı</label>
-      <button class="btn small savebtn" title="Sadece bu ayarı kaydet" onclick="saveGrp('balance')">Kaydet</button>
-    </div>
-    <p class="hint" style="margin:6px 0 0">Denge açıkken herkesin <b>gece sayısı</b>, <b>gündüz sayısı</b> ve <b>hafta sonu sayısı</b> eşitlenmeye çalışılır. Tam bölünemeyen artık nöbetleri taslak onay ekranında sen dağıtırsın.</p>
-    </details>
-    <button class="btn ghost small" style="margin-top:12px" id="saveSettingsBtn" onclick="saveSettings()">Hepsini birden kaydet</button>
-    <p class="hint" style="margin:6px 0 0">Her satırın kendi Kaydet düğmesi var — sadece o ayarı kaydeder, diğerlerine dokunmaz. Alttaki düğme bu kartın <b>ve</b> odalar / vardiyalar / kural satırlarının tamamını birden kaydeder.</p>
-  </div>
-  <div class="card" id="quotaCard" style="display:none" data-grp="sayi">
+  <div class="card ios" id="monthCard" data-grp="ay">
+  <div class="nd-group"><div class=nd-group__label>Hazırlanan ay</div><div class="nd-list"><div class="nd-row"><span class="nd-row__body"><span class="nd-row__title">Ay</span></span><input type="month" id="month" class="rowin"></div><div class="nd-row"><span class="nd-row__body"><span class="nd-row__title">İki nöbet arası en az</span><span class=nd-row__sub>gün (2 = bir gün boşluk)</span></span><input type="number" id="minGap" min="1" max="7"></div><div class="nd-row"><span class="nd-row__body"><span class="nd-row__title">Resmi tatil / bayram</span></span><input type="text" id="bayramDays" class="rowin" placeholder="ör. 15-17,20" inputmode="numeric"></div><button class="nd-row is-action" onclick="pickBayram()"><span class="nd-row__body"><span class="nd-row__title">Bayram günlerini takvimden seç</span></span><span data-icon="calendar"></span></button></div><div class=nd-group__foot>Ay değişince o ayın izinleri, tercihleri ve listesi açılır.</div></div>
+  <div class="nd-group"><div class=nd-group__label>Liste</div><div class="nd-list"><div class="nd-row"><span class="nd-row__body"><span class="nd-row__title">Liste tipi</span></span><select id="schedMode" onchange="modeChanged()" class="rowin">
+        <option value="rooms">Oda tabanlı</option>
+        <option value="shifts">Vardiya tabanlı</option></select></div><div class="nd-row"><span class="nd-row__body"><span class="nd-row__title">Diğer listelerle uyum</span></span><select id="linkDefault" class="rowin"></select></div><div class="nd-row"><span class="nd-row__body"><span class="nd-row__title">Çalışma düzeni</span></span><select id="workModel" class="rowin">
+        <option value="shift_only">Nöbet = tüm mesai</option>
+        <option value="duty_rest">Mesai + nöbet, ertesi gün izinli</option>
+        <option value="duty_work">Mesai + nöbet, ertesi gün çalışır</option></select></div><div class="nd-row"><span class="nd-row__body"><span class="nd-row__title">İzinlinin nöbet sayısı</span></span><select id="leaveProp" class="rowin">
+        <option value="">Eşit</option>
+        <option value="1">İzin oranında azalt</option></select></div></div><div class=nd-group__foot>Biri başka bir listede de nöbet tutuyorsa (ör. kat + acil) bu listedeki nöbetleri ona göre ayarlanır. “Oranında azalt”: ayın yarısında izinli olana yaklaşık yarı sayıda nöbet yazılır.</div></div>
+  <div class="nd-group"><div class=nd-group__label>Dağıtım</div><div class="nd-list"><div class="nd-row"><span class="nd-row__body"><span class="nd-row__title">Boş nöbet yeri</span></span><select id="fillPolicy" class="rowin">
+        <option value="fill_all">Hepsini doldur</option>
+        <option value="by_capacity">Sayılara göre (boş kalabilir)</option></select></div><div class="nd-row"><span class="nd-row__body"><span class="nd-row__title">İstenen günler</span></span><select id="wishPri" class="rowin">
+        <option value="normal">Normal</option>
+        <option value="high">Yüksek öncelik</option>
+        <option value="off">Dikkate alma</option></select></div><div class="nd-row"><span class="nd-row__body"><span class="nd-row__title">Eş düzeni</span></span><select id="partnerMode" class="rowin">
+        <option value="rotate">Her nöbette farklı kişi</option>
+        <option value="off">Fark etmez</option>
+        <option value="fixed">Mümkünse sabit eş</option></select></div><div class="nd-row"><span class="nd-row__body"><span class="nd-row__title">Gece–gündüz sayısını eşitle</span></span><input type="checkbox" id="balDN" checked></div><div class="nd-row"><span class="nd-row__body"><span class="nd-row__title">Hafta içi–sonu sayısını eşitle</span></span><input type="checkbox" id="balWE" checked></div></div><div class=nd-group__foot>Yüksek öncelikte herkesin istediği günler, aya düzgün yayılmaktan ve hafta sonu dengesinden önce gelir.</div></div>
+  <div class="nd-group"><div class=nd-group__label>Ritim ve dinlenme</div><div class="nd-list"><div class="nd-row"><span class="nd-row__body"><span class="nd-row__title">Üst üste çalışılan gün</span><span class=nd-row__sub>0 = kapalı</span></span><input type="number" id="patternOn" min="0" max="7" value="0"></div><div class="nd-row"><span class="nd-row__body"><span class="nd-row__title">Ardından dinlenme</span><span class=nd-row__sub>gün</span></span><input type="number" id="patternOff" min="0" max="7" value="0"></div><div class="nd-row"><span class="nd-row__body"><span class="nd-row__title">İki vardiya arası en az</span><span class=nd-row__sub>saat · 0 = kapalı</span></span><input type="number" id="minRest" min="0" max="24" value="8"></div><div class="nd-row"><span class="nd-row__body"><span class="nd-row__title">Liste hazırlama günü</span><span class=nd-row__sub>her ayın bu gününde sonraki ay hazırlanır</span></span><input type="number" id="genDay" min="1" max="28" value="25"></div></div><div class=nd-group__foot>Örnek: 2 ve 2 → herkes 2 gün çalışır, 2 gün dinlenir. En iyi sonuç için “Kim kaç nöbet” sayılarını 0 bırak.</div></div>
+</div>
+  <div class="card" id="quotaCard" style="display:none" data-grp="sayi" data-autosave="quota">
     <p class="eyebrow">Ay başı kurulum · 2/2 · kararı yönetici verir</p>
     <h2>Kim kaç nöbet tutacak?</h2>
     <p class="hint">Sayılara <b>sen</b> karar verirsin. Ekibin istekleri (🙋 ⭐ 🚫) sadece dikkate alınır, senin sayılarını değiştirmez.<br>
@@ -1203,35 +1243,21 @@ window.ND={guardClick:guardClick,icon:icon,icons:ICONS,haptic:haptic,stepper:ste
     <div id="quotaBanner" class="banner info">—</div>
     <div id="quotaList"></div>
     <div class="row" style="margin-top:10px">
-      <button class="btn ghost small savebtn" onclick="quotaEqual()">Eşit dağıt</button>
-      <button class="btn ghost small savebtn" onclick="quotaFromWish()">Talepleri uygula</button>
-      <button class="btn ghost small savebtn" onclick="quotaClear()">Temizle</button>
-      <button class="btn small savebtn" onclick="saveQuota()">Sayıları kaydet</button>
+      <button class="btn ghost small" onclick="quotaEqual()">Eşit dağıt</button>
+      <button class="btn ghost small" onclick="quotaFromWish()">Talepleri uygula</button>
+      <button class="btn ghost small" onclick="quotaClear()">Temizle</button>
+      
     </div>
   </div>
-  <div class="card" id="closeMonthCard" style="display:none" data-grp="kapat">
-    <p class="eyebrow">Ay geçişi</p>
-    <h2>Ayı kapat, yeni aya geç</h2>
-    <p class="hint" id="closeMonthInfo">—</p>
-    <div id="arsivKutu" class="banner ok" style="margin:8px 0">—</div>
-    <p class="hint" style="margin:8px 0 4px"><b>Yeni aya taşınmasını istemediklerin:</b></p>
-    <div class="row" style="gap:6px">
-      <label class="chk"><input type="checkbox" id="clrPins" checked> 📌 Sabit atamalar</label>
-      <label class="chk"><input type="checkbox" id="clrBayram" checked> 🌙 Bayram günleri</label>
-    </div>
-    <div class="row" style="gap:6px;margin-top:4px">
-      <label class="chk"><input type="checkbox" id="clrRules"> 🎛 Gün kuralları</label>
-      <label class="chk"><input type="checkbox" id="clrTargets"> 📊 Nöbet sayıları</label>
-    </div>
-    <p class="hint" style="margin:6px 0 0">Vardiyalar, ekip, dinlenme, denge ve <b>izin / sıra kuralları</b> her hâlükârda kalır. İzinler ve tercihler aya özeldir, yeni ay boş başlar. Kuralları sonradan değiştirirsen geçmiş aylar kendi kurallarıyla saklandığı için sayaçları ve özetleri değişmez.</p>
-    <button class="btn gold small" style="margin-top:12px" id="closeMonthBtn" onclick="closeMonthGo()">Bu ayı kapat ve yeni aya geç</button>
-  </div>
-  <div class="card" id="inviteCard" style="display:none" data-grp="ekip">
-    <p class="eyebrow">Davet</p>
-    <h2>Ekibi davet et</h2>
-    <p class="hint">Bu kodu gruba at — herkes kayıt olup bu kodla katılsın, kendi bölümünü kendisi seçer.</p>
-    <div class="codebox" id="inviteCode">——————</div>
-  </div>
+  <div class="card ios" id="closeMonthCard" style="display:none" data-grp="kapat">
+  <p class="hint" id="closeMonthInfo">—</p>
+  <div id="arsivKutu" class="banner ok" style="margin:8px 0 16px">—</div>
+  <div class="nd-group"><div class=nd-group__label>Yeni aya taşınmasın</div><div class="nd-list"><div class="nd-row"><span class="nd-row__body"><span class="nd-row__title">Sabit atamalar</span></span><input type="checkbox" id="clrPins" checked></div><div class="nd-row"><span class="nd-row__body"><span class="nd-row__title">Bayram günleri</span></span><input type="checkbox" id="clrBayram" checked></div><div class="nd-row"><span class="nd-row__body"><span class="nd-row__title">Gün kuralları</span></span><input type="checkbox" id="clrRules"></div><div class="nd-row"><span class="nd-row__body"><span class="nd-row__title">Nöbet sayıları</span></span><input type="checkbox" id="clrTargets"></div></div><div class=nd-group__foot>Vardiyalar, ekip, dinlenme, denge ve izin / sıra kuralları her hâlükârda kalır. Geçmiş aylar kendi kurallarıyla saklanır.</div></div>
+  <button class="btn" style="width:100%" id="closeMonthBtn" onclick="closeMonthGo()">Bu ayı kapat ve yeni aya geç</button>
+</div>
+  <div class="card ios" id="inviteCard" style="display:none" data-grp="ekip">
+  <div class="nd-group"><div class=nd-group__label>Davet kodu</div><div class="nd-list"><div class="nd-row"><span class="nd-row__body"><span class="codebox" id="inviteCode">——————</span></span><button class="nd-btn is-tinted is-sm" onclick="copyInvite()"><span data-icon="copy"></span>Kopyala</button></div></div><div class=nd-group__foot>Kodu ekip grubuna gönder. Herkes kayıt olup bu kodla katılır, birimini kendisi seçer.</div></div>
+</div>
   <div class="card" id="teamCard" data-grp="ekip">
     <p class="eyebrow">Kadro</p>
     <h2>Ekip <span style="font-weight:700;font-size:.75rem;color:var(--ink-soft)" id="teamCount"></span></h2>
@@ -1260,133 +1286,86 @@ window.ND={guardClick:guardClick,icon:icon,icons:ICONS,haptic:haptic,stepper:ste
     </div>
     <div id="testStatus" class="banner ok" style="display:none"></div>
   </div>
-  <div class="card" id="wrCard" data-grp="wr">
-    <p class="eyebrow">Ay başı kurulum · izin kuralları</p>
-    <h2>Nöbet sonrası izin & sıra kuralları</h2>
-    <p class="hint">24 saat nöbet tutan ekipler için: nöbetten sonra kaç gün izinli olunacağını, hangi günlerin (ör. Perşembe, Cuma) <b>sırayla</b> verileceğini ve Cumartesi yarım gün iznini buradan ayarla. Program bu kuralları <b>kesin</b> uygular; kimin kaç kez kullandığını aylar boyunca sayar ve sırası gelene verir. Kapalıyken liste eskisi gibi hazırlanır. Kurallar kayıtlı kalır, her ay aynen kullanılır; değiştirdiğinde yalnız bundan sonraki listeler etkilenir.</p>
-    <div class="row">
-      <label class="chk"><input type="checkbox" id="wrOnChk" onchange="wrSet('on',this.checked)"> <b>Bu kuralları kullan</b></label>
-      <button class="btn ghost small savebtn" onclick="wrPreset()">Hazır şablon (Perşembe/Cuma 3 gün + Cumartesi yarım gün)</button>
-    </div>
-    <div id="wrBody">
-      <div class="tblwrap" style="margin-top:8px"><table class="wrtbl"><thead><tr><th>Nöbet günü</th><th>Sonra kaç gün izinli</th><th style="white-space:nowrap">⚖️ Sıra</th><th>Ayda en fazla</th></tr></thead><tbody id="wrDays"></tbody></table></div>
-      <p class="hint" style="margin:6px 0 0">• <b>Sonra kaç gün izinli</b>: 1 = sadece nöbet ertesi gün. 3 = örn. Perşembe nöbetçisi Cuma, Cumartesi, Pazar izinli. Bu günlere o kişiye nöbet yazılmaz.<br>• <b>⚖️ Sırayla</b>: o günün nöbeti kimin kaç kez tuttuğuna göre sırayla verilir (aylar arası eşitlenir).<br>• <b>Ayda en fazla</b>: aynı kişiye bir ayda bu günden en fazla kaç nöbet yazılır. 0 = sınır yok.</p>
-      <div id="wrExplain" class="banner info" style="margin-top:8px">—</div>
-      <div style="margin-top:12px;border-top:1.5px dashed var(--line);padding-top:10px">
-        <div class="row">
-          <label class="chk"><input type="checkbox" id="wrSatOn" onchange="wrSet('satOn',this.checked)"> 🏖 Cumartesi yarım gün</label>
-          <label>klinikte nöbetçi dahil</label>
-          <input type="number" id="wrSatNeed" min="1" max="50" style="width:60px" onchange="wrSet('satNeed',this.value)">
-          <label>kişi kalsın</label>
-        </div>
-        <div class="row" style="margin-top:6px">
-          <label>Fazla kalanlar sırayla <b>Ek Cumartesi izni</b> alır · aynı kişiye ayda en fazla</label>
-          <input type="number" id="wrSatMax" min="0" max="10" style="width:60px" onchange="wrSet('satMax',this.value)">
-          <label>kez</label>
-        </div>
-        <p class="hint" style="margin:5px 0 0">Ek izinli kişiye o Cumartesi ve ertesi Pazar nöbet yazılmaz (2 gün boş). Resmi tatile denk gelen Cumartesilerde ek izin verilmez.</p>
-      </div>
-      <div style="margin-top:12px;border-top:1.5px dashed var(--line);padding-top:10px">
-        <label class="chk"><input type="checkbox" id="wrFz" onchange="wrSet('fz',this.checked)"> ➕ Artık (fazla) nöbeti sırayla ver</label>
-        <p class="hint" style="margin:5px 0 0">Nöbetler kişi sayısına tam bölünmüyorsa (ör. 31 gün ÷ 6 kişi) fazla nöbet, şimdiye kadar en az fazla tutmuş kişiye verilir. Açıkken "Kim kaç nöbet tutacak" sayıları <b>sadece yazıldığı ay</b> için geçerlidir.</p>
-      </div>
-      <div class="row" style="margin-top:12px">
-        <label>Sayaçlar bu aydan itibaren otomatik sayılsın</label>
-        <input type="month" id="wrSince" onchange="wrSet('since',this.value)">
-      </div>
-    </div>
-    <button class="btn small savebtn" style="margin-top:12px" onclick="saveGrp('wr')">Kuralları kaydet</button>
+  <div class="card ios" id="wrCard" data-grp="wr" data-autosave="wr">
+  <div class="nd-group"><div class="nd-list"><div class="nd-row"><span class="nd-row__body"><span class="nd-row__title">Bu kuralları kullan</span></span><input type="checkbox" id="wrOnChk" onchange="wrSet('on',this.checked)"></div><button class="nd-row is-action" id="wrPresetRow" onclick="wrPreset()"><span class="nd-row__body"><span class="nd-row__title">Hazır şablonu uygula</span><span class="nd-row__sub">Perşembe/Cuma sonrası 3 gün izin, Cumartesi yarım gün</span></span></button></div><div class=nd-group__foot>24 saat nöbet tutan ekipler için. Kurallar kesin uygulanır; kimin kaç kez kullandığı aylar boyunca sayılır, sırası gelene verilir.</div></div>
+  <div id="wrBody">
+    <div class="nd-group"><div class="nd-group__label">Nöbetten sonra kaç gün izinli</div><div class="nd-list" id="wrDays"></div>
+      <div class="nd-group__foot">Bu günlerde o kişiye nöbet yazılmaz. 1 = yalnız nöbet ertesi gün.</div></div>
+    <div class="nd-group"><div class="nd-group__label">Sırayla verilen günler</div><div class="nd-list" id="wrTrack"></div>
+      <div class="nd-group__foot">Açık günün nöbeti, kimin kaç kez tuttuğuna göre aylar boyunca sırayla verilir.</div></div>
+    <div class="nd-group"><div class="nd-group__label">Bir kişiye ayda en fazla</div><div class="nd-list" id="wrMax"></div>
+      <div class="nd-group__foot">0 = sınır yok.</div></div>
+    <div id="wrExplain" class="banner info" style="margin:-8px 0 24px">—</div>
+    <div class="nd-group"><div class=nd-group__label>Cumartesi yarım gün</div><div class="nd-list"><div class="nd-row"><span class="nd-row__body"><span class="nd-row__title">Cumartesi yarım gün</span></span><input type="checkbox" id="wrSatOn" onchange="wrSet('satOn',this.checked)"></div><div class="nd-row"><span class="nd-row__body"><span class="nd-row__title">Klinikte kalacak kişi</span><span class=nd-row__sub>nöbetçi dahil</span></span><input type="number" id="wrSatNeed" min="1" max="50" onchange="wrSet('satNeed',this.value)"></div><div class="nd-row"><span class="nd-row__body"><span class="nd-row__title">Ek Cumartesi izni ayda en fazla</span><span class=nd-row__sub>kez</span></span><input type="number" id="wrSatMax" min="0" max="10" onchange="wrSet('satMax',this.value)"></div></div><div class=nd-group__foot>Fazla kalanlar sırayla Ek Cumartesi izni alır: o Cumartesi ve ertesi Pazar nöbet yazılmaz. Resmi tatile denk gelen Cumartesilerde verilmez.</div></div>
+    <div class="nd-group"><div class=nd-group__label>Sıra</div><div class="nd-list"><div class="nd-row"><span class="nd-row__body"><span class="nd-row__title">Fazla nöbeti sırayla ver</span><span class=nd-row__sub>31 gün ÷ 6 kişi gibi bölünmeyen nöbet en az tutmuş olana</span></span><input type="checkbox" id="wrFz" onchange="wrSet('fz',this.checked)"></div><div class="nd-row"><span class="nd-row__body"><span class="nd-row__title">Sayaçların başlangıç ayı</span></span><input type="month" id="wrSince" class="rowin" onchange="wrSet('since',this.value)"></div></div></div>
   </div>
-  <div class="card" id="wrCntCard" style="display:none" data-grp="wr">
+</div>
+  <div class="card" id="wrCntCard" data-autosave="wrbase" style="display:none" data-grp="wr">
     <p class="eyebrow">Aylar arası adalet · otomatik</p>
     <h2>Sıra sayaçları</h2>
     <p class="hint" id="wrCntHint">—</p>
     <div class="tblwrap"><table><thead id="wrCntHead"></thead><tbody id="wrCntBody"></tbody></table></div>
-    <button class="btn small savebtn" style="margin-top:10px" onclick="saveGrp('wrbase')">Başlangıç değerlerini kaydet</button>
+    
   </div>
-  <div class="card" id="roomCard" data-grp="oda">
-    <p class="eyebrow">Oda ayarları</p>
-    <h2>Odalar</h2>
-    <p class="hint">Genel odaları tüm asistanlar doldurur. Özel oda eklediğin branş, kendi listesi gibi çalışır: <b>🔒 kilitli</b> oda o branş nöbette değilse boş kalır; <b>🔓 devredilen</b> oda boşsa genel listeye açılır.</p>
-    <div class="row"><label>Genel asistan odası / gece</label>
-      <input type="number" id="generalRooms" min="0" max="10"></div>
-    <div id="roomList" style="margin-top:8px"></div>
-    <div class="row" style="margin-top:10px">
-      <button class="btn ghost small" id="addRoomBtn" onclick="addRoomRow()">Özel oda ekle</button>
-      <button class="btn small savebtn" onclick="saveGrp('rooms')">Odaları kaydet</button>
+  <div class="card ios" id="roomCard" data-grp="oda">
+  <div class="nd-group"><div class=nd-group__label>Odalar</div><div class="nd-list"><div class="nd-row"><span class="nd-row__body"><span class="nd-row__title">Genel oda (her gün)</span><span class=nd-row__sub>tüm asistanların doldurduğu oda sayısı</span></span><input type="number" id="generalRooms" min="0" max="10"></div></div></div>
+  <div class="nd-group" data-autosave="rooms"><div class="nd-group__label">Özel odalar</div><div class="nd-list roomlist"><div id="roomList"></div>
+    <button class="nd-row is-action" id="addRoomBtn" onclick="addRoomRow()"><span class="nd-row__body"><span class="nd-row__title">Özel oda ekle</span></span><span data-icon="plus"></span></button></div>
+    <div class="nd-group__foot">Özel oda eklenen branş kendi listesi gibi çalışır: kilitli oda o branş nöbette değilse boş kalır, devredilen oda boşsa genel listeye açılır.</div></div>
+  <div class="nd-group" data-autosave="duty"><div class="nd-group__label">Nöbet saatleri · hangi gün kaç saat</div>
+    <div class="dtpre" id="dtPresets">
+      <button class="dchip" onclick="dtPreset('24')">Hepsi 24 saat</button>
+      <button class="dchip" onclick="dtPreset('16')">Hafta içi 16→08</button>
+      <button class="dchip" onclick="dtPreset('17')">Hafta içi 17→08</button>
     </div>
-    <div style="margin-top:12px;border-top:1.5px dashed var(--line);padding-top:10px">
-      <p class="eyebrow" style="margin-bottom:2px">Nöbet saatleri · hangi gün kaç saat?</p>
-      <p class="hint" style="margin:0 0 6px">Saat dengesi (kim kaç saat tuttu), telefon takvimi ve Google Takvim bu saatlerle hesaplanır. Bitiş başlangıçtan önce ya da eşitse nöbet ertesi gün biter (08:00 → 08:00 = 24 saat).</p>
-      <div class="row" id="dtPresets" style="gap:6px;margin:4px 0 6px">
-        <button class="dchip" onclick="dtPreset('24')">Hepsi 24 saat</button>
-        <button class="dchip" onclick="dtPreset('16')">Hafta içi 16→08 · hafta sonu/tatil 24 sa</button>
-        <button class="dchip" onclick="dtPreset('17')">Hafta içi 17→08 · hafta sonu/tatil 24 sa</button>
-      </div>
-      <div id="dtTable"></div>
-      <p class="hint" style="margin:4px 0 0">Tatil = resmi tatil / bayram günleri (Ay ayarlarındaki bayram günleri).</p>
-      <div class="row" style="margin-top:8px"><button class="btn small savebtn" id="dtSaveBtn" onclick="saveGrp('duty')">Nöbet saatlerini kaydet</button></div>
-    </div>
-  </div>
+    <div class="nd-list"><div id="dtTable"></div></div>
+    <div class="nd-group__foot">Saat dengesi, telefon takvimi ve Google Takvim bu saatlerle hesaplanır. Bitiş başlangıçtan önce ya da eşitse nöbet ertesi gün biter. Tatil = resmi tatil / bayram.</div></div>
+</div>
   <div class="card" id="shiftCard" style="display:none" data-grp="vardiya">
     <p class="eyebrow">Vardiya ayarları</p>
     <h2>Vardiyalar</h2>
     <p class="hint">Her satır bir vardiya: ad, saat aralığı, kişi sayısı ve geçerli günler (gün düğmelerine dokun). Gece yarısını aşan vardiya (ör. 16:00→09:00) o kişiye ertesi günü otomatik dinlenme yapar. Adalet; toplam saat, gece saati (20-08), hafta sonu ve bayram saati üzerinden dengelenir.</p>
-    <div id="shiftList"></div>
+    <div id="shiftList" data-autosave="shifts"></div>
     <div class="row" style="margin-top:10px">
       <button class="btn ghost small" id="addShiftBtn" onclick="addShiftRow()">Vardiya ekle</button>
-      <button class="btn small savebtn" onclick="saveGrp('shifts')">Vardiyaları kaydet</button>
     </div>
     <div style="margin-top:16px;border-top:1.5px dashed var(--line);padding-top:12px">
       <p class="eyebrow">İstisnalar</p>
       <p class="hint">Belirli bir günün veya kişinin vardiya saatini değiştir. Gün boş = tüm ay, kişi "Herkes" = o gün kim gelirse. Örnek: "15. gün · Ara · Herkes · 11:00→20:00" ya da "boş · Ara · Dr. Altuğ · 08:00→10:00".</p>
-      <div id="ovrList"></div>
+      <div id="ovrList" data-autosave="ovr"></div>
       <div class="row" style="margin-top:8px">
         <button class="btn ghost small" id="addOvrBtn" onclick="addOvrRow()">İstisna ekle</button>
-        <button class="btn small savebtn" onclick="saveGrp('ovr')">İstisnaları kaydet</button>
       </div>
     </div>
   </div>
   <div class="card" id="pinCard" data-grp="sabit">
     <p class="eyebrow">Yönetici · elle atama</p>
     <h2>Bu günde kesin şu kişi</h2>
-    <p class="hint">Özel durumlar için: seçtiğin günlerde nöbeti <b>kesin olarak</b> o kişi tutar, çizelge geri kalanı bunun etrafından kurar. Bu günler kilitlidir — dengeleme, takas ve yeniden üretme onlara dokunmaz. Kişinin toplam nöbet sayısına dahil edilirler.</p>
-    <div id="pinList"></div>
+    <p class="hint">Seçtiğin günlerde nöbeti kesin o kişi tutar; liste geri kalanı buna göre kurulur. Bu günler kilitlidir ve kişinin nöbet sayısına dahildir.</p>
+    <div id="pinList" data-autosave="pins"></div>
     <div class="row" style="margin-top:10px">
       <button class="btn ghost small" id="addPinBtn" onclick="addPinRow()">Sabit atama ekle</button>
-      <button class="btn small savebtn" onclick="saveGrp('pins')">Sabit atamaları kaydet</button>
     </div>
   </div>
   <div class="card" id="blockCard" data-grp="kisit">
     <p class="eyebrow">Kişiye özel gün kuralları</p>
     <h2>Tutamaz / sadece şu günler</h2>
-    <p class="hint">Her satırda bir kişi ve bir kural: <b>⛔ Tutamaz</b> = seçilen gün/saatlerde asla nöbet yazılmaz. <b>✅ Sadece bu günlerde tutabilir</b> = o kişiye <u>yalnızca</u> seçilen günlerden nöbet verilir (aralarından rastgele, diğer tüm kurallara da uyarak). Haftanın günlerini düğmeyle, ayın belirli günlerini 📅 takvimle seç. Saat aralığı boşsa gün komple kapsanır; saat girersen vardiya bu aralığın tamamen içinde olmalıdır. Oda tabanlı listede saat yok sayılır, gün bazında uygulanır.</p>
-    <div id="blockList"></div>
+    <p class="hint"><b>Tutamaz</b>: seçilen günlerde o kişiye nöbet yazılmaz. <b>Sadece bu günler</b>: o kişiye yalnız seçilen günlerden nöbet verilir. Haftanın günlerine dokun ya da takvimden ayın günlerini seç. Saat boşsa bütün gün geçerlidir (vardiyalı listede saat aralığı da verebilirsin).</p>
+    <div id="blockList" data-autosave="blocks"></div>
     <div class="row" style="margin-top:10px">
       <button class="btn ghost small" id="addBlockBtn" onclick="addBlockRow()">Kural ekle</button>
-      <button class="btn small savebtn" onclick="saveGrp('blocks')">Kuralları kaydet</button>
     </div>
   </div>
-  <div class="card" id="profileCard" data-grp="profil">
-    <p class="eyebrow">Profilim</p>
-    <h2>Bilgilerim</h2>
-    <p class="hint">Adını ve birimini buradan güncelleyebilirsin. Yönetici de ekip listesinden herkesin birimini değiştirebilir.</p>
-    <label>Ad Soyad</label>
-    <input type="text" id="profName" style="width:100%;margin-bottom:10px">
-    <label>Birim / Görev</label>
-    <select id="profBranch" style="width:100%;margin-bottom:10px"></select>
-    <button class="btn small" onclick="saveProfile()">Kaydet</button>
-    <div id="profStatus" class="banner ok" style="display:none"></div>
-  </div>
-  <div class="card" id="switchCard" data-grp="profil">
-    <p class="eyebrow">Listeler</p>
-    <h2>Liste değiştir / ayrıl</h2>
-    <p class="hint" id="leaveHint">Başka bir nöbet listesine geçebilir ya da bu listeden ayrılabilirsin.</p>
-    <div class="row">
-      <button class="btn ghost small" onclick="showView('teams')">Listelerim</button>
-      <button class="btn red small" onclick="leaveTeam()">Bu listeden ayrıl</button>
-    </div>
-  </div>
+  <div class="card ios" id="profileCard" data-grp="profil">
+  <div class="nd-group"><div class=nd-group__label>Bilgilerim</div><div class="nd-list"><div class="nd-row"><span class="nd-row__body"><span class="nd-row__title">Ad Soyad</span></span><input type="text" id="profName" class="rowin" autocomplete="name"></div><div class="nd-row"><span class="nd-row__body"><span class="nd-row__title">Birim / görev</span></span><select id="profBranch" class="rowin"></select></div></div><div class=nd-group__foot>Yönetici de ekip listesinden herkesin birimini değiştirebilir.</div></div>
+  <div id="profStatus" class="banner ok" style="display:none"></div>
+</div>
+  <div class="card ios" id="switchCard" data-grp="profil">
+  <div class="nd-group"><div class="nd-group__label">Listeler</div><div class="nd-list">
+    <button class="nd-row is-action" onclick="showView('teams')"><span class="nd-row__body"><span class="nd-row__title">Listelerim</span><span class="nd-row__sub" id="leaveHint">Başka bir nöbet listesine geç</span></span><span data-icon="chev-r" data-icon-class="nd-row__chev"></span></button>
+    <button class="nd-row is-danger" onclick="leaveTeam()"><span class="nd-row__body"><span class="nd-row__title">Bu listeden ayrıl</span></span></button>
+  </div></div>
+</div>
   <div class="card" id="devirCard" data-grp="gelismis">
     <p class="eyebrow">Aylar arası adalet</p>
     <h2>Devir</h2>
@@ -1410,50 +1389,37 @@ window.ND={guardClick:guardClick,icon:icon,icons:ICONS,haptic:haptic,stepper:ste
     <button data-sub="leave" onclick="showTab('leave')">İzin</button>
     <button data-sub="takas" onclick="showTab('takas')">Takas</button>
   </div>
-  <div class="card">
-    <p class="eyebrow">Ay başı kurulum · 2/2</p>
-    <h2>Tercihlerim</h2>
-    <div class="row" style="margin-bottom:10px;background:var(--teal-tint);border-radius:13px;padding:10px">
-      <label>Bu ay istediğim nöbet sayısı</label>
-      <input type="number" id="myWish" min="0" max="31" placeholder="—" style="width:64px">
-      <button class="btn small" onclick="saveWish()">Kaydet</button>
-    </div>
-    <p class="hint">1 tık = <b style="color:var(--coral)">istemediğim gün</b> · 2 tık = <b style="color:var(--teal-deep)">istediğim gün</b> · 3 tık = temizle. 🔒 = izinlerin.</p>
-    <div id="asRow" style="display:none;margin-bottom:10px">
+  <div class="card ios" id="prefCard">
+  <div id="asRow" style="display:none;margin-bottom:10px">
       <label>Kimin adına giriyorum?</label>
       <select id="asPerson" onchange="renderPrefCal();syncIzinBox()" style="width:100%"></select>
     </div>
-    <div class="cal" id="prefCal"></div>
-    <div class="legend">
-      <span><span class="dot" style="background:var(--coral-tint);border:1px solid var(--coral)"></span>İstemediğim</span>
-      <span><span class="dot" style="background:var(--teal-tint);border:1px solid var(--teal)"></span>İstediğim</span>
-      <span><span class="dot" style="background:#ECF1F0;border:1px solid #C9D6D2"></span>🔒 İzin</span>
-    </div>
-    <div id="prefStatus" class="banner ok" style="display:none">✅ Kaydedildi</div>
+  <div class="nd-brush" id="prefBrush" role="radiogroup" aria-label="Fırça">
+    <button class="is-avoid" data-b="avoid" aria-pressed="true" onclick="setBrush('avoid')"><span data-icon="avoid"></span>İstemiyorum</button>
+    <button class="is-wish" data-b="yes" aria-pressed="false" onclick="setBrush('yes')"><span data-icon="wish"></span>İstiyorum</button>
+    <button class="is-leave" data-b="izin" aria-pressed="false" onclick="setBrush('izin')"><span data-icon="leave"></span>İzin</button>
+    <button class="is-erase" data-b="" aria-pressed="false" onclick="setBrush('')"><span data-icon="x"></span>Sil</button>
   </div>
-  <div class="card">
-    <p class="eyebrow">İstek</p>
-    <h2>Bu ay istediğim nöbet sayısı</h2>
-    <p class="hint">0 = farketmez, otomatik dengele. Herkesin isteği kapasiteye tam oturuyorsa çizelge direkt üretilir; uyuşmazsa karar yöneticiye sorulur.</p>
-    <div class="row">
-      <input type="number" id="wishInput" min="0" max="31" style="width:84px" placeholder="0">
-      <span style="font-size:.7rem;color:var(--ink-soft)">· bu bir <b>taleptir</b>, son kararı yönetici verir</span>
-      <button class="btn small" onclick="saveWish()">Kaydet</button>
-    </div>
-    <div id="wishStatus" class="banner ok" style="display:none"></div>
+  <p class="hint" style="margin:8px 4px 8px">Fırçayı seç, günlere dokun ya da parmağını üzerlerinde gezdir. Değişiklikler hemen kaydedilir.</p>
+  <div class="cal" id="prefCal"></div>
+  <div class="legend">
+    <span><span class="dot" style="background:var(--danger-soft);border:1px solid var(--danger)"></span>İstemiyorum</span>
+    <span><span class="dot" style="background:var(--tint-soft);border:1px solid var(--tint)"></span>İstiyorum</span>
+    <span><span class="dot" style="background:var(--leave-soft);border:1px solid var(--leave)"></span>İzin</span>
   </div>
-  <div class="card">
-    <p class="eyebrow">Ay düzeni</p>
-    <h2>Nöbetlerim nasıl dağılsın?</h2>
-    <p class="hint" id="shapeHint">Tatilini büyütmek için nöbetlerinin ay içindeki yerleşimini seç.</p>
-    <select id="shapeSel" style="width:100%" onchange="saveShape()">
-      <option value="">Farketmez / eşit dağılsın</option>
-      <option value="mid">Ay başı + sonu yoğun · ortası boş (ortada tatil)</option>
-      <option value="start">Ay başı yoğun · sonu boş</option>
-      <option value="end">Ay sonu yoğun · başı boş</option>
-    </select>
-    <div id="shapeStatus" class="banner ok" style="display:none"></div>
-  </div>
+  <div id="prefStatus" class="banner ok" style="display:none">Kaydedildi</div>
+</div>
+  <div class="card ios" id="wishCard">
+  <div class="nd-group" id="wishGroup"><div class=nd-group__label>Bu ay</div><div class="nd-list"><div class="nd-row"><span class="nd-row__body"><span class="nd-row__title">İstediğim nöbet sayısı</span><span class=nd-row__sub>0 = fark etmez · son kararı yönetici verir</span></span><input type="number" id="wishInput" min="0" max="31" placeholder="0"></div><div class="nd-row"><span class="nd-row__body"><span class="nd-row__title">Nöbetlerim nasıl dağılsın</span></span><select id="shapeSel" class="rowin" onchange="saveShape()">
+      <option value="">Eşit dağılsın</option>
+      <option value="mid">Başı + sonu yoğun, ortası boş</option>
+      <option value="start">Başı yoğun, sonu boş</option>
+      <option value="end">Sonu yoğun, başı boş</option></select></div></div></div>
+  <p class="hint" id="shapeHint" style="margin:-16px 16px 16px;font-size:13px">Tatilini büyütmek için nöbetlerinin ay içindeki yerleşimini seç.</p>
+  <div id="wishStatus" class="banner ok" style="display:none"></div>
+  <div id="shapeStatus" class="banner ok" style="display:none"></div>
+</div>
+  
   <div class="card">
     <h2>Ekibin doluluk özeti</h2>
     <div id="prefSummary"></div>
@@ -1466,16 +1432,20 @@ window.ND={guardClick:guardClick,icon:icon,icons:ICONS,haptic:haptic,stepper:ste
     <div class="stat"><div class="v" id="stViol">—</div><div class="l">Kural ihlali</div></div>
     <div class="stat"><div class="v" id="stBal">—</div><div class="l">Denge skoru</div></div>
   </div>
-  <div class="card" id="decideCard" style="display:none">
+  <div class="card ios" id="decideCard" style="display:none">
     <p class="eyebrow">Yönetici onayı · taslak</p>
-    <h2>Nöbet sayılarını onayla</h2>
-    <p class="hint" id="decideHint"></p>
-    <div class="tblwrap"><table><thead><tr><th>Kişi</th><th>🙋</th><th>🔒</th><th>☀️/🌙/🏖</th><th>⏱ Saat</th><th title="Geçmiş aylar + bu taslak: adil paya göre saat farkı (+ fazla, − eksik)">⏱ Σ fark</th><th>Toplam</th><th>🌙 Gece</th></tr></thead><tbody id="decideBody"></tbody></table></div>
-    <div class="banner info" id="decideTotal" style="margin-top:10px">—</div>
+    <h2>Taslağı kontrol et</h2>
+    <div id="decideHint"></div>
+    <div class="nd-group" style="margin-top:12px">
+      <div class="nd-group__label">Kim kaç nöbet</div>
+      <div class="nd-list" id="decideBody"></div>
+      <div class="nd-group__foot" id="decideFoot"></div>
+    </div>
+    <div class="banner info" id="decideTotal" style="margin-top:4px">—</div>
     <div id="decideWR"></div>
     <div class="draftbox" id="draftBox">
-      <span class="draft-rib">📝 TASLAK · HENÜZ YAYINLANMADI · EKİP GÖRMÜYOR</span>
-      <p class="hint" style="margin:0 0 8px">Yayınlamadan önce listeyi gün gün kontrol et. İstersen <b>📄 Taslağı Word olarak indir</b> ile resmi listenin aynısını indirip oku; uygunsa <b>✔ Onayla ve yayınla</b>.</p>
+      <span class="draft-rib">Taslak · ekip henüz görmüyor</span>
+      <p class="hint" style="margin:0 0 8px">Yayınlamadan önce gün gün kontrol et. İstersen resmi listenin aynısını Word olarak indirip oku.</p>
       <div class="seg" id="dvRow" style="margin-bottom:6px">
         <button id="dvCal" onclick="setDraftView('cal')">Takvim</button>
         <button id="dvList" onclick="setDraftView('list')">Liste</button>
@@ -1483,18 +1453,21 @@ window.ND={guardClick:guardClick,icon:icon,icons:ICONS,haptic:haptic,stepper:ste
       <div id="draftLegend"></div>
       <div id="draftWrap"></div>
     </div>
-    <div class="row" style="margin-top:10px">
-      <button class="btn gold small" onclick="draftWord()">Taslağı Word olarak indir</button>
-      <button class="btn small" onclick="confirmDecide()">Onayla ve yayınla</button>
-      <button class="btn ghost small" onclick="redraft()">Sayılarla yeniden hazırla</button>
-      <button class="btn ghost small" onclick="hideDecide()">Vazgeç</button>
+    <div class="decact">
+      <button class="btn" style="width:100%" onclick="confirmDecide()">Onayla ve yayınla</button>
+      <div class="nd-btn-row">
+        <button class="nd-btn is-tinted" onclick="draftWord()">Word'e indir</button>
+        <button class="nd-btn is-tinted" id="redraftBtn" onclick="redraft()">Yeniden hazırla</button>
+      </div>
+      <button class="nd-btn is-plain" style="width:100%" onclick="hideDecide()">Vazgeç</button>
     </div>
   </div>
   <div class="card">
     <p class="eyebrow">Aylık plan</p>
     <h2>Çizelge</h2>
     <div id="genRow"><p class="hint">Herkes izin/tercih girince yönetici üretir; anında herkeste görünür.</p>
-    <button class="btn" style="width:100%" onclick="generate()">Çizelgeyi Üret & Yayınla</button></div>
+    <button class="btn" style="width:100%" onclick="openPrepWizard()">Listeyi hazırla</button>
+    <button class="btn ghost small" style="width:100%;margin-top:8px" onclick="generate()">Doğrudan taslak üret</button></div>
     <div class="row" style="margin-bottom:10px">
       <label>Ay</label>
       <select id="viewMonthSel" style="flex:1;min-width:150px" onchange="setViewMonth(this.value)"></select>
@@ -1592,14 +1565,27 @@ window.ND={guardClick:guardClick,icon:icon,icons:ICONS,haptic:haptic,stepper:ste
 <div id="dayEdit" class="modal" onclick="if(event.target===this)closeDayEdit()">
   <div class="sheet">
     <h2 id="dayEditTitle">Günü düzenle</h2>
-    <p class="hint">Bu günün nöbetçilerini elle değiştirebilirsin. Değişiklik yalnız bu güne uygulanır, ayın geri kalanı olduğu gibi kalır.</p>
+    <p class="hint">Bu günün nöbetçilerini değiştir; her seçim hemen kaydedilir. Ayın geri kalanı olduğu gibi kalır.</p>
     <div id="dayEditBody"></div>
     <div id="dayEditMeta" style="display:none"></div>
     <div class="row" style="margin-top:12px">
-      <button class="btn small" onclick="saveDayEdit()">Kaydet</button>
-      <button class="btn ghost small" onclick="closeDayEdit()">Vazgeç</button>
+      <button class="btn small" style="flex:1" onclick="closeDayEdit()">Bitti</button>
       <button class="btn ghost small" onclick="closeDayEdit();fillReqForm(editDay||1);showTab('takas')">Takas iste</button>
     </div>
+  </div>
+</div>
+
+<div id="personSheet" class="modal" onclick="if(event.target===this)closePerson()">
+  <div class="sheet">
+    <div id="personSheetBody"></div>
+    <button class="btn ghost" style="width:100%;margin-top:4px" onclick="closePerson()">Bitti</button>
+  </div>
+</div>
+
+<div id="daySheet" class="modal" onclick="if(event.target===this)closeDaySheet()">
+  <div class="sheet">
+    <div id="daySheetBody"></div>
+    <button class="btn ghost" style="width:100%;margin-top:12px" onclick="closeDaySheet()">Kapat</button>
   </div>
 </div>
 
@@ -1661,6 +1647,321 @@ function showView(v){document.querySelectorAll(".view").forEach(e=>e.classList.r
   if(v!=="app"){document.body.dataset.tab=v;const nt=$("navTitle");if(nt)nt.textContent=VIEW_TITLE[v]||"Nöbet Defteri";}
   $("mainNav").style.display=v==="app"?"flex":"none";
   $("logoutBtn").style.display=(v==="app"||v==="dept")?"inline-block":"none";}
+/* ================= OTOMATİK KAYIT =================
+   Ayarlar, tercihler, izinler ve profil değiştiği anda kaydedilir; ayrı "Kaydet" düğmesi yoktur.
+   Kayıtlar sırayla yapılır (aynı anda iki kayıt birbirinin ayarını ezmesin). */
+const AUTO_ID={month:"month",minGap:"month",bayramDays:"bayram",schedMode:"mode",linkDefault:"link",genDay:"genday",fillPolicy:"fill",
+  leaveProp:"leaveprop",workModel:"work",patternOn:"rhythm",patternOff:"rhythm",minRest:"minrest",wishPri:"wish",partnerMode:"partner",
+  balDN:"balance",balWE:"balance",generalRooms:"rooms",izinInput:"izin",wishInput:"mywish",profName:"profile",profBranch:"profile"};
+const autoT={};let autoQ=Promise.resolve(),autoPending={};
+/* olay yolu dağıtım anında sabitlenir: yeniden çizim öğeyi sayfadan kaldırsa bile kapsayıcı bulunur */
+function autoKeyFor(el,ev){
+  if(!el)return null;
+  if(el.id&&AUTO_ID[el.id])return AUTO_ID[el.id];
+  const path=ev&&ev.composedPath?ev.composedPath():[];
+  for(const n of path){if(n&&n.dataset&&n.dataset.autosave)return n.dataset.autosave;}
+  const box=el.closest&&el.closest("[data-autosave]");return box?box.dataset.autosave:null;
+}
+function autoSave(key,delay){
+  if(!key)return;
+  clearTimeout(autoT[key]);autoPending[key]=1;
+  autoT[key]=setTimeout(()=>{delete autoPending[key];autoQ=autoQ.then(()=>runAuto(key)).catch(e=>console.error("otomatik kayıt",key,e));},delay==null?450:delay);
+}
+function flushAuto(){Object.keys(autoPending).forEach(k=>{clearTimeout(autoT[k]);delete autoPending[k];autoQ=autoQ.then(()=>runAuto(k));});return autoQ;}
+async function runAuto(key){
+  switch(key){
+    case "quota":return saveQuota();
+    case "izin":return saveIzin();
+    case "mywish":return saveWish();
+    case "profile":return saveProfile();
+    case "hbase":return saveHbase();
+    default:return saveGrp(key);
+  }
+}
+document.addEventListener("change",e=>{
+  if(e.target&&e.target.matches&&e.target.matches(".deSel,.deEk")){saveDayEdit({keep:true});return;}
+  const k=autoKeyFor(e.target,e);if(k)autoSave(k);});
+document.addEventListener("click",e=>{
+  const path=e.composedPath?e.composedPath():[];
+  const b=path.find(n=>n&&n.tagName==="BUTTON")||(e.target.closest&&e.target.closest("button"));
+  if(!b||b.dataset.noauto!=null)return;
+  const k=autoKeyFor(b,e);if(k&&!AUTO_ID[b.id])autoSave(k,350);
+});
+document.addEventListener("visibilitychange",()=>{if(document.hidden)flushAuto();});
+window.addEventListener("pagehide",()=>{flushAuto();});
+async function copyInvite(){
+  const c=(dept&&dept.join_code)||"";
+  try{await navigator.clipboard.writeText(c);toast("Davet kodu kopyalandı: "+c);}catch(e){toast("Davet kodu: "+c);}
+}
+/* ---------- sayı alanları: iOS − / + ---------- */
+function enhanceSteppers(root){
+  (root||document).querySelectorAll('.nd-row input[type=number]:not([data-st]),#quotaList input[type=number]:not([data-st])').forEach(inp=>{
+    inp.dataset.st="1";
+    const w=document.createElement("span");w.className="ndstep";
+    inp.parentNode.insertBefore(w,inp);
+    const mk=(d,ic)=>{const b=document.createElement("button");b.type="button";b.className="ndstep__b";b.dataset.noauto="";
+      b.setAttribute("aria-label",d<0?"Azalt":"Artır");b.innerHTML=ND.icon(ic);
+      b.addEventListener("click",ev=>{ev.preventDefault();ev.stopPropagation();if(inp.disabled)return;
+        const min=inp.min!==""?+inp.min:-1e9,max=inp.max!==""?+inp.max:1e9;
+        let v=inp.value===""?Math.max(min,0):(+inp.value+d);v=Math.max(min,Math.min(max,v));
+        if(String(v)===inp.value)return;
+        inp.value=v;ND.haptic(5);
+        inp.dispatchEvent(new Event("input",{bubbles:true}));inp.dispatchEvent(new Event("change",{bubbles:true}));});
+      return b;};
+    w.appendChild(mk(-1,"minus"));w.appendChild(inp);w.appendChild(mk(1,"plus"));
+  });
+}
+let _enhQ=false;
+function scheduleEnhance(){if(_enhQ)return;_enhQ=true;(window.requestAnimationFrame||setTimeout)(()=>{_enhQ=false;try{enhanceSteppers();ND.auto();}catch(e){}});}
+try{new MutationObserver(scheduleEnhance).observe(document.documentElement,{childList:true,subtree:true});}catch(e){}
+
+/* ---------- Tercihler: fırça ile boya ---------- */
+let prefBrush="avoid";
+function setBrush(b){
+  prefBrush=b;
+  document.querySelectorAll("#prefBrush button").forEach(x=>x.setAttribute("aria-pressed",x.dataset.b===b?"true":"false"));
+}
+function paintPref(d){
+  const uid=editingId();if(!canEdit(uid))return false;
+  allPrefs[uid]=allPrefs[uid]||{};
+  const cur=allPrefs[uid][d]||"";
+  let nv=prefBrush;
+  if(prefBrush==="izin")nv=(isAdmin()||cur==="izin")?"izin":"izin_bek";
+  if(cur===nv)return false;
+  if(nv)allPrefs[uid][d]=nv;else delete allPrefs[uid][d];
+  return true;
+}
+let prefPaintT=null;
+function prefPainted(){
+  renderPrefCal();
+  clearTimeout(prefPaintT);
+  prefPaintT=setTimeout(async()=>{
+    const uid=editingId();
+    const {error}=await savePrefsFor(uid);
+    const s=$("prefStatus");if(s){s.style.display="block";s.className=error?"banner err":"banner ok";
+      s.textContent=error?prefsErr(error):"Kaydedildi";setTimeout(()=>s.style.display="none",1600);}
+    syncIzinBox();renderPrefSummary();renderLeaveAdmin();try{renderToday();}catch(e){}
+  },500);
+}
+function bindPrefPaint(){
+  const cal=$("prefCal");if(!cal||cal._paint)return;cal._paint=1;
+  let act=false,last=null;
+  const dayAt=(x,y)=>{const el=document.elementFromPoint(x,y);const c=el&&el.closest&&el.closest(".prefday");return c&&cal.contains(c)?+c.dataset.d:null;};
+  const hit=d=>{if(d==null||d===last)return;last=d;if(paintPref(d)){ND.haptic(4);prefPainted();}};
+  cal.addEventListener("pointerdown",e=>{const c=e.target.closest(".prefday");if(!c)return;act=true;last=null;
+    try{cal.setPointerCapture(e.pointerId);}catch(_){}hit(+c.dataset.d);e.preventDefault();});
+  cal.addEventListener("pointermove",e=>{if(act)hit(dayAt(e.clientX,e.clientY));});
+  const end=()=>{act=false;last=null;};
+  cal.addEventListener("pointerup",end);cal.addEventListener("pointercancel",end);
+}
+
+/* ---------- Takvim: gün paneli alttan açılır ---------- */
+let daySheetCtx="pub";
+function openDaySheet(ctx){
+  daySheetCtx=ctx;
+  const ui=ctx==="draft"?draftUI:pubUI;
+  const html=ctx==="draft"?withView(draft,planAy(),()=>dayPanelHTML(ui.sel,ctx,ui)):dayPanelHTML(ui.sel,ctx,ui);
+  $("daySheetBody").innerHTML=`<div class="dpanel">${html}</div>`;
+  $("daySheet").classList.add("on");
+}
+function closeDaySheet(){const s=$("daySheet");if(s)s.classList.remove("on");}
+
+/* ---------- Kaydırılabilir satır ---------- */
+function makeSwipe(row,leftTxt,rightTxt,onLeft,onRight){
+  const w=document.createElement("div");w.className="nd-swipe";
+  w.innerHTML=`<div class="nd-swipe__act is-left">${ND.icon("check")}${leftTxt}</div><div class="nd-swipe__act is-right">${rightTxt}${ND.icon("x")}</div><div class="nd-swipe__content"></div>`;
+  w.querySelector(".nd-swipe__content").appendChild(row);
+  try{const r=ND.swipeRow(w,{onLeft:()=>{onLeft();setTimeout(()=>r&&r.reset(),600);},onRight:()=>{onRight();setTimeout(()=>r&&r.reset(),600);}});}catch(e){}
+  return w;
+}
+
+/* ---------- büyük başlık: kaydırınca üstte küçük başlık ---------- */
+function syncMiniBar(){
+  const mb=$("miniBar");if(!mb)return;
+  const t=($("navTitle")||{}).textContent||"";
+  const sub=$("tab-kurulum")&&$("tab-kurulum").classList.contains("active")&&$("tab-kurulum").dataset.page!=="root";
+  mb.innerHTML=(sub?`<button class="setback" onclick="setPage('root')">${ND.icon("chev-l")}Ayarlar</button>`:"<span></span>")+`<b>${hEsc(t)}</b><span></span>`;
+}
+window.addEventListener("scroll",()=>{const mb=$("miniBar");if(mb)mb.classList.toggle("on",window.scrollY>48);},{passive:true});
+
+/* ================= SİHİRBAZLAR (tam ekran, bir ekranda tek soru) =================
+   1) Kurulum: yeni ekipte nöbet düzenini sorular sorarak kurar (sonradan Ayarlar'dan değişir).
+   2) Listeyi hazırla: tatiller → kimler / izin onayları → kim kaç nöbet → taslak. */
+let WZ=null;
+function choiceHTML(name,v,on,title,desc){
+  return `<button type="button" class="nd-choice" role="radio" aria-checked="${on?"true":"false"}" onclick="wzPick('${name}','${v}')">
+    <span class="nd-choice__radio">${ND.icon("check")}</span><span class="nd-choice__body"><span class="nd-choice__title">${title}</span>${desc?`<span class="nd-choice__desc">${desc}</span>`:""}</span></button>`;
+}
+function wzPick(name,v){WZ.d[name]=v;wzRender();}
+function weekDemo(duty,rest){const G=["Pzt","Sal","Çar","Per","Cum","Cmt","Paz"];
+  return `<div class="wkdemo">${G.map((g,i)=>`<span class="${duty.includes(i)?"is-duty":rest.includes(i)?"is-rest":""}">${g}<b>${duty.includes(i)?"Nöbet":rest.includes(i)?"İzin":"&nbsp;"}</b></span>`).join("")}</div>`;}
+const SETUP_STEPS=[
+  {t:"Nöbetler nasıl tutuluyor?",r:d=>`<div class="nd-choices">${choiceHTML("kind","24",d.kind==="24","Günlük nöbet (oda listesi)","Her gün belli sayıda kişi nöbetçi. Asistan nöbetleri genelde böyle.")}
+     ${choiceHTML("kind","shift",d.kind==="shift","Vardiyalı","Sabah, akşam, gece gibi saatli vardiyalar (acil, hemşire, sekreter).")}</div>`},
+  {t:"Günde kaç kişi nöbetçi?",skip:d=>d.kind!=="24",r:d=>iosGroup("",[iosRow("Günde nöbetçi sayısı",`<input type="number" id="wz_per" min="1" max="10" value="${d.per}" onchange="WZ.d.per=+this.value">`)],
+     "Kendi odası olan branşları sonra Ayarlar → Odalar'dan ekleyebilirsin.")},
+  {t:"Nöbet kaç saat sürüyor?",skip:d=>d.kind!=="24",r:d=>`<div class="nd-choices">${choiceHTML("dt","24",d.dt==="24","Her gün 24 saat","08:00'de başlar, ertesi sabah 08:00'de biter.")}
+     ${choiceHTML("dt","16",d.dt==="16","Hafta içi 16:00 → 08:00","Hafta sonu ve resmi tatillerde 24 saat.")}
+     ${choiceHTML("dt","17",d.dt==="17","Hafta içi 17:00 → 08:00","Hafta sonu ve resmi tatillerde 24 saat.")}
+     ${d.dt==="custom"?choiceHTML("dt","custom",true,"Şu anki saatleri koru","Ayarlar → Odalar ve nöbet saatleri'nde güne göre girilmiş."):""}</div>
+     <p class="wz__note">Saatler kişi başı saat dengesinde ve telefon takviminde kullanılır.</p>`},
+  {t:"Vardiyaları tanımla",skip:d=>d.kind!=="shift",r:d=>`<p class="wz__sub">Vardiyaların adını, saatini ve kaç kişi gerektiğini kurulumdan sonra <b>Ayarlar → Vardiyalar</b>'dan eklersin. Şimdi diğer soruları tamamlayalım.</p>`},
+  {t:"Nöbetten sonra ne olur?",r:d=>`<div class="nd-choices">${choiceHTML("after","off",d.after==="off","Ertesi gün izinli","Nöbet sonrası mesai yok."+weekDemo([0],[1]))}
+     ${choiceHTML("after","work",d.after==="work","Ertesi gün çalışır","Nöbetten çıkan normal mesaisine devam eder.")}
+     ${choiceHTML("after","all",d.after==="all","Nöbet tüm mesaim","Ayrı gündüz mesaisi yok; sadece nöbet/vardiya var.")}</div>`},
+  {t:"Bazı nöbetler hafta sonuna bağlanıyor mu?",skip:d=>d.after!=="off"||d.kind!=="24",r:d=>`<div class="nd-choices">
+     ${choiceHTML("special","thufri",d.special==="thufri","Evet, Perşembe ve Cuma","Perşembe nöbetçisi Cuma–Pazar, Cuma nöbetçisi Cumartesi–Pazartesi izinli. Bu günler sırayla verilir, ayda en fazla 1."+weekDemo([3],[4,5,6]))}
+     ${choiceHTML("special","none",d.special==="none","Hayır, hepsi aynı","Her nöbetten sonra yalnız ertesi gün izinli.")}
+     ${choiceHTML("special","custom",d.special==="custom","Kendim ayarlayacağım","Kurulumdan sonra Ayarlar → Nöbet sonrası izin ve sıra.")}</div>`},
+  {t:"Cumartesi yarım gün mü?",skip:d=>d.after!=="off"||d.kind!=="24"||d.special==="custom",r:d=>iosGroup("",[
+     iosRow("Cumartesi yarım gün çalışılır",`<input type="checkbox" ${d.sat?"checked":""} onchange="WZ.d.sat=this.checked;wzRender()">`),
+     ...(d.sat?[iosRow("Klinikte kalacak kişi",`<input type="number" min="1" max="30" value="${d.need}" onchange="WZ.d.need=+this.value">`,"nöbetçi dahil")]:[])],
+     d.sat?"Fazla kalanlar sırayla Ek Cumartesi izni alır: o Cumartesi ve ertesi Pazar boş.":"")},
+  {t:"İzinli kişinin nöbet sayısı?",r:d=>`<div class="nd-choices">${choiceHTML("lp","eq",d.lp==="eq","Eşit","İzin günleri nöbet sayısını düşürmez; nöbetler kalan günlere yazılır.")}
+     ${choiceHTML("lp","prop",d.lp==="prop","İzin oranında azalt","Ayın yarısında izinli olan yaklaşık yarı sayıda nöbet tutar; adil pay da buna göre hesaplanır.")}</div>`},
+  {t:"Sen de nöbet tutuyor musun?",r:d=>`<div class="nd-choices">${choiceHTML("me","yes",d.me==="yes","Evet, ben de listedeyim","Kendi nöbetlerini ve tercihlerini de buradan yönetirsin.")}
+     ${choiceHTML("me","no",d.me==="no","Hayır, sadece yönetiyorum","Listeye dahil olmazsın; yalnız hazırlar ve onaylarsın.")}</div>`},
+  {t:"Her şey doğru mu?",btn:"Kurulumu bitir",r:d=>{const R=(a,b)=>iosRow(a,`<span class="nd-row__value">${b}</span>`);return iosGroup("",[
+     R("Nöbet",d.kind==="24"?`Günlük · günde ${d.per} kişi`:"Vardiyalı"),
+     ...(d.kind==="24"?(d.dt==="custom"?[R("Nöbet saatleri","Güne göre (mevcut)")]:[R("Hafta içi",d.dt==="24"?"08:00 → 08:00":`${d.dt}:00 → 08:00`),R("Hafta sonu, tatil","24 saat")]):[]),
+     R("Nöbet sonrası",d.after==="off"?"Ertesi gün izinli":d.after==="work"?"Ertesi gün çalışır":"Nöbet tüm mesai"),
+     ...(d.after==="off"&&d.kind==="24"?[R("Perşembe / Cuma",d.special==="thufri"?"3 gün izin, sırayla":d.special==="none"?"Ertesi gün izinli":"Sonra ayarlanacak")]:[]),
+     ...(d.after==="off"&&d.kind==="24"&&d.special!=="custom"?[R("Cumartesi",d.sat?`Yarım gün · ${d.need} kişi kalır`:"Normal gün")]:[]),
+     R("İzinlinin sayısı",d.lp==="prop"?"İzin oranında":"Eşit"),
+     R("Sen",d.me==="yes"?"Nöbet tutuyorsun":"Sadece yönetiyorsun")],"Hepsi sonradan Ayarlar'dan değiştirilebilir.");}},
+  {t:"Ekibini davet et",btn:"Başla",noBack:1,r:d=>`<p class="wz__sub">Bu kodu ekibinle paylaş. Kayıt olup kodu yazan kişi ekibe katılır.</p>
+     <div class="wz__code">${hEsc((dept&&dept.join_code)||"")}</div>
+     <div class="nd-btn-row"><button class="nd-btn is-tinted" onclick="copyInvite()">${ND.icon("copy")}Kodu kopyala</button>
+     ${navigator.share?`<button class="nd-btn is-tinted" onclick="navigator.share({title:'Nöbet Defteri',text:'Ekibe katılmak için davet kodu: ${hEsc((dept&&dept.join_code)||"")}'}).catch(()=>{})">${ND.icon("share")}Paylaş</button>`:""}</div>`}
+];
+function setupDefaults(){
+  const dt=dutyTimeUI(),c=wrCfg();
+  const dk=dtUniform(dt)&&dt.d[0].start==="08:00"&&dt.d[0].end==="08:00"?"24":(dt.d[0].start==="16:00"&&dt.d[5].start==="08:00"?"16":dt.d[0].start==="17:00"&&dt.d[5].start==="08:00"?"17":"custom");
+  const wm=(dept&&dept.work_model)||"duty_rest";
+  return {kind:isShiftMode()?"shift":"24",per:+($("generalRooms").value||1)||1,dt:dk,
+    after:wm==="duty_work"?"work":wm==="shift_only"?"all":"off",
+    special:c.on&&c.off[3]>=3?"thufri":c.on?"custom":"none",sat:c.on?c.sat.on:false,need:c.sat.need||3,
+    lp:leaveProp()?"prop":"eq",me:onDuty(myProfile)?"yes":"no"};
+}
+function openSetupWizard(){if(!isAdmin())return;WZ={kind:"setup",step:0,d:setupDefaults()};wzOpen();}
+async function setupApply(d){
+  if(d.kind==="shift"!==isShiftMode()){$("schedMode").value=d.kind==="shift"?"shifts":"rooms";modeChanged();await saveGrp("mode");}
+  if(d.kind==="24"){
+    $("generalRooms").value=d.per;await saveGrp("rooms");
+    if(d.dt!=="custom"){dtPreset(d.dt);await saveGrp("duty");}
+  }
+  $("workModel").value=d.after==="off"?"duty_rest":d.after==="work"?"duty_work":"shift_only";await saveGrp("work");
+  if(d.after==="off"&&d.kind==="24"&&d.special!=="custom"){
+    const cur=opts().wr||{};
+    if(d.special==="thufri")wrDraft=wrNorm({...cur,on:true,off:[1,1,1,3,3,1,1],track:[0,0,0,1,1,0,0],max:[0,0,0,1,1,0,0],fz:true,since:cur.since||planAy()});
+    else wrDraft=wrNorm({...cur,on:!!d.sat,off:[1,1,1,1,1,1,1],track:[0,0,0,0,0,0,0],max:[0,0,0,0,0,0,0],since:cur.since||planAy()});
+    const c=wrDraft;c.sat={on:!!d.sat,need:d.need,max:1};
+    await saveGrp("wr");
+  }else if(d.after!=="off"&&wrOn()){wrDraft=wrNorm({...opts().wr,on:false});await saveGrp("wr");}
+  $("leaveProp").value=d.lp==="prop"?"1":"";await saveGrp("leaveprop");
+  const mp=members.find(x=>x.id===me.id);
+  if(mp&&(d.me==="no")!==!!sp(mp).noDuty)await setSP(me.id,"noDuty",d.me==="no");
+  await saveDept({__opts:{setup_done:true}},"Kurulum");
+}
+/* ---------- Listeyi hazırla ---------- */
+const PREP_STEPS=[
+  {t:"Tatil günleri",sub:()=>`${ayAdi(planAy())} içinde resmi tatil ya da bayram olan günlere dokun.`,r:d=>{
+    const {y,m,nDays,firstDow}=monthInfo(planAy());
+    let h=`<div class="cal wzcal">${DAYS_TR.map(x=>`<div class="dh">${x}</div>`).join("")}`;
+    for(let i=0;i<firstDow;i++)h+=`<div class="day empty"></div>`;
+    for(let dd=1;dd<=nDays;dd++)h+=`<button type="button" class="day prefday${d.hol.has(dd)?" holsel":""}${isWknd(y,m,dd)?" wknd":""}" onclick="wzHol(${dd})">${dd}</button>`;
+    return h+`</div><p class="wz__note">${d.hol.size?"Seçili: "+fmtDays([...d.hol].sort((a,b)=>a-b)):"Bu ay resmi tatil yoksa hiçbirini seçme."} Tatil günleri 24 saat sayılır ve ayrıca dengelenir.</p>`;}},
+  {t:"Kimler, hangi günler?",sub:()=>"İzinleri onayla, bu ay kimlerin nöbet tutacağını kontrol et.",r:d=>{
+    const bek=members.filter(p=>leaveDays(p.id,"izin_bek").length);
+    const hic=members.filter(p=>onDuty(p)&&!Object.keys(allPrefs[p.id]||{}).length);
+    let h=hic.length?`<div class="banner info" style="margin:0 0 16px">${hEsc(hic.map(p=>kisaAd(p.name)).join(", "))} tercih girmedi. Girmeyenler için yalnız kurallar uygulanır.</div>`:"";
+    if(bek.length)h+=`<div class="nd-group"><div class="nd-group__label">Onay bekleyen izin</div><div class="nd-list" id="wzApprove"></div><div class="nd-group__foot">Sağa kaydır: onayla · sola: reddet.</div></div>`;
+    h+=iosGroup("Ekip · "+ayAdi(planAy()),members.map(p=>{
+      const lv=leaveDays(p.id,"izin").length,pr=allPrefs[p.id]||{};
+      const av=Object.values(pr).filter(v=>v==="avoid").length,wi=Object.values(pr).filter(v=>v==="yes").length;
+      const bits=[];if(lv)bits.push(lv+" gün izin");if(wi)bits.push(wi+" istiyor");if(av)bits.push(av+" istemiyor");
+      return `<div class="nd-row has-av" data-pid="${p.id}">${avatarHTML(p.id)}<span class="nd-row__body"><span class="nd-row__title">${hEsc(kisaAd(p.name))}</span>
+        <span class="nd-row__sub">${onDuty(p)?(bits.join(" · ")||"Tercih yok"):"Bu ay nöbet tutmuyor"}</span></span>
+        <input type="checkbox" ${onDuty(p)?"checked":""} aria-label="Nöbet tutar" onchange="setSP('${p.id}','noDuty',!this.checked).then(()=>wzRender())"></div>`;}));
+    return h;},mount:()=>{
+      const box=$("wzApprove");if(!box)return;
+      members.filter(p=>leaveDays(p.id,"izin_bek").length).forEach(p=>{
+        const r=document.createElement("div");r.className="nd-row has-av";
+        r.innerHTML=`${avatarHTML(p.id)}<span class="nd-row__body"><span class="nd-row__title">${hEsc(kisaAd(p.name))} · izin</span><span class="nd-row__sub">${fmtDays(leaveDays(p.id,"izin_bek"))}</span></span>
+          <button class="nd-btn is-sm is-filled" onclick="decideLeave('${p.id}',true).then(()=>wzRender())">Onayla</button>`;
+        box.appendChild(makeSwipe(r,"Onayla","Reddet",()=>decideLeave(p.id,true).then(()=>wzRender()),()=>decideLeave(p.id,false).then(()=>wzRender())));});
+    }},
+  {t:"Kim kaç nöbet?",sub:()=>`${ayAdi(planAy())} ayında ${totalSlots()} nöbet yeri var.`,btn:"Taslağı hazırla",r:d=>{
+    const on=members.filter(onDuty),S=totalSlots(),base=on.length?Math.floor(S/on.length):0,ex=on.length?S-base*on.length:0;
+    let h=`<div class="nd-choices">${choiceHTML("count","equal",d.count==="equal","Eşit dağıt (önerilen)",`Herkese ${base}${ex?`, ${ex} kişiye +1 (fazla nöbet sırası ve saat farkına göre)`:""}. İzin oranı ayarın açıksa izinliye daha az.`)}
+      ${choiceHTML("count","keep",d.count==="keep","Yazdığım sayılarla","Ayarlar → Kim kaç nöbet'teki sayılar kullanılır.")}
+      ${choiceHTML("count","manual",d.count==="manual","Şimdi elle belirle","Herkesin sayısını aşağıdan seç.")}</div>`;
+    if(d.count==="manual")h+=`<div class="nd-group" style="margin-top:16px" data-autosave="quota"><div class="nd-list" id="wzQuota"></div><div class="nd-group__foot" id="wzQuotaSum"></div></div>`;
+    return h;},mount:d=>{
+      const box=$("wzQuota");if(!box)return;
+      const on=members.filter(onDuty);
+      if(on.every(p=>!quotaCur(p))){const fs=fairShare();on.forEach(p=>{quotaDraft[p.id]=Math.max(0,fs[p.id]|0);});}
+      on.forEach(p=>{const r=document.createElement("div");r.className="nd-row has-av";
+        r.innerHTML=`${avatarHTML(p.id)}<span class="nd-row__body"><span class="nd-row__title">${hEsc(kisaAd(p.name))}</span></span>
+          <input type="number" min="0" max="31" class="qInp" data-pid="${p.id}" value="${quotaCur(p)}" onchange="quotaSet('${p.id}',+this.value);wzQuotaSum()">`;
+        box.appendChild(r);});
+      wzQuotaSum();
+    }}
+];
+function wzQuotaSum(){const e=$("wzQuotaSum");if(!e)return;const S=totalSlots(),t=members.filter(onDuty).reduce((a,p)=>a+(+quotaCur(p)||0),0);
+  e.innerHTML=t===S?`Toplam ${t} / ${S} — tamam.`:`Toplam ${t} / ${S} — ${t<S?`${S-t} nöbet açıkta kalır, kurallara göre dağıtılır`:`${t-S} fazla; bazı sayılar tutturulamaz`}.`;}
+function wzHol(dd){const h=WZ.d.hol;h.has(dd)?h.delete(dd):h.add(dd);ND.haptic(4);wzRender();}
+function openPrepWizard(){
+  if(!isAdmin()){showTab("cizelge");return;}
+  WZ={kind:"prep",step:0,d:{hol:new Set(parseDays($("bayramDays").value)),count:"equal"}};wzOpen();
+}
+async function prepApply(d){
+  $("bayramDays").value=fmtDays([...d.hol].sort((a,b)=>a-b));await saveGrp("bayram");
+  if(d.count==="equal"){quotaClear();await saveQuota();}
+  else if(d.count==="manual"){await flushAuto();await saveQuota();}
+}
+/* ---------- ortak kabuk ---------- */
+function wzSteps(){return WZ.kind==="setup"?SETUP_STEPS:PREP_STEPS;}
+function wzOpen(){const o=$("wizard");o.classList.add("is-open");document.body.classList.add("wz-on");wzRender();}
+function wzClose(){const o=$("wizard");if(o)o.classList.remove("is-open");document.body.classList.remove("wz-on");
+  const k=WZ&&WZ.kind;WZ=null;
+  if(k==="setup"&&isAdmin()&&dept&&!opts().setup_done)saveDept({__opts:{setup_done:true}},"Kurulum").catch(()=>{});}
+function wzVisible(){const S=wzSteps();return S.map((s,i)=>i).filter(i=>!S[i].skip||!S[i].skip(WZ.d));}
+function wzRender(){
+  if(!WZ)return;
+  const S=wzSteps(),st=S[WZ.step],vis=wzVisible(),pos=vis.indexOf(WZ.step)+1,tot=vis.length;
+  const last=WZ.kind==="setup"?S.length-1:-1;
+  const showP=WZ.step!==last;
+  $("wizard").innerHTML=`<div class="wz__inner">
+    <div class="wz__bar">${WZ.step>0&&!st.noBack?`<button class="nd-iconbtn" onclick="wzBack()" aria-label="Geri">${ND.icon("chev-l")}</button>`:'<span style="width:44px"></span>'}
+      ${showP?`<div class="wz__prog"><span class="nd-steplabel">Adım ${pos} / ${tot-(WZ.kind==="setup"?1:0)}</span><div class="nd-progress" style="--p:${Math.round(pos/(tot-(WZ.kind==="setup"?1:0))*100)}%"><i></i></div></div>`:"<span></span>"}
+      <button class="nd-iconbtn" onclick="wzClose()" aria-label="Kapat">${ND.icon("x")}</button></div>
+    <div class="wz__body"><h1 class="wz__q">${st.t}</h1>${st.sub?`<p class="wz__sub">${st.sub(WZ.d)}</p>`:""}${st.r(WZ.d)}</div>
+    <div class="wz__foot"><button class="btn" style="width:100%" id="wzNext" onclick="wzNext()">${st.btn||"Devam"}</button></div></div>`;
+  if(st.mount)st.mount(WZ.d);
+  try{ND.auto($("wizard"));enhanceSteppers($("wizard"));}catch(e){}
+}
+function wzBack(){const v=wzVisible(),i=v.indexOf(WZ.step);if(i>0){WZ.step=v[i-1];wzRender();}}
+async function wzNext(){
+  const v=wzVisible(),i=v.indexOf(WZ.step),S=wzSteps();
+  const btn=$("wzNext");if(btn){btn.disabled=true;btn.textContent="Kaydediliyor…";}
+  try{
+    if(WZ.kind==="setup"){
+      if(WZ.step===S.length-2){await setupApply(WZ.d);}
+      if(WZ.step===S.length-1){wzClose();showTab("bugun");return;}
+    }else if(i===v.length-1){
+      const d=WZ.d;await prepApply(d);wzClose();showTab("cizelge");generate();return;
+    }
+    WZ.step=v[i+1];wzRender();
+  }catch(e){console.error(e);toast("⚠️ "+(e&&e.message||e),true);wzRender();}
+}
+function maybeAutoSetup(){
+  if(!isAdmin()||!dept)return;
+  if(opts().setup_done||Object.keys(schedulesAll).length)return;
+  if(window.__ndNoWizard)return;
+  openSetupWizard();
+}
+
 /* ================= iOS GEZİNME =================
    Dört sekme: Bugün · Takvim · İstekler (Tercihler | İzin | Takas) · Ayarlar (iOS Ayarlar gibi gruplu liste).
    Eski sekme adları (kurulum, izin, cizelge, takas, profil) aynen çalışır. */
@@ -1685,6 +1986,7 @@ function showTab(t){
   document.querySelectorAll(".isteg button").forEach(b=>b.classList.toggle("on",b.dataset.sub===t));
   if(T.page)setPage(T.page);
   else{const nt=$("navTitle");if(nt)nt.textContent=T.t;}
+  syncMiniBar();
   if(T.sec==="bugun")renderToday();
   try{window.scrollTo(0,0);}catch(e){}
 }
@@ -1703,7 +2005,7 @@ const SET_GROUPS=[
     {k:"kisit",ic:"avoid",ad:"Gün kısıtları"}],
     foot:"Kurallar her listede kesin uygulanır; istekler ancak kurallara uyuyorsa karşılanır."},
   {t:"Hesap",rows:[{k:"profil",ic:"person",ad:"Profilim ve listelerim"},{k:"__cikis",ic:"x",ad:"Çıkış yap",danger:true}]},
-  {t:"Gelişmiş",rows:[{k:"gelismis",ic:"settings",ad:"Devir ve ekran teşhisi"}]}];
+  {t:"Gelişmiş",rows:[{k:"__sihirbaz",ic:"info",ad:"Kurulum sihirbazı",admin:1},{k:"gelismis",ic:"settings",ad:"Devir ve ekran teşhisi"}]}];
 const SET_TITLE=k=>{for(const g of SET_GROUPS)for(const r of g.rows)if(r.k===k)return r.ad;return "Ayarlar";};
 function grpVisible(k){
   const cs=[...document.querySelectorAll(`#tab-kurulum .card[data-grp~="${k}"]`)];
@@ -1712,10 +2014,10 @@ function grpVisible(k){
 function renderSetLanding(){
   const el=$("setLanding");if(!el)return;
   el.innerHTML=SET_GROUPS.map(g=>{
-    const rows=g.rows.filter(r=>r.k.startsWith("__")||grpVisible(r.k));
+    const rows=g.rows.filter(r=>r.k.startsWith("__")?(!r.admin||isAdmin()):grpVisible(r.k));
     if(!rows.length)return "";
     return `<div class="nd-group"><div class="nd-group__label">${g.t}</div><div class="nd-list">`+
-      rows.map(r=>`<button class="nd-row has-icon${r.danger?" is-danger":""}" onclick="${r.k==="__cikis"?"logout()":`setPage('${r.k}')`}">
+      rows.map(r=>`<button class="nd-row has-icon${r.danger?" is-danger":""}" onclick="${r.k==="__cikis"?"logout()":r.k==="__sihirbaz"?"openSetupWizard()":`setPage('${r.k}')`}">
         <span class="nd-row__icon${r.danger?" is-gray":""}">${ND.icon(r.ic)}</span>
         <span class="nd-row__body"><span class="nd-row__title">${r.ad}</span></span>
         ${r.val?`<span class="nd-row__value">${hEsc(r.val())}</span>`:""}
@@ -1733,6 +2035,7 @@ function setPage(k){
     bar.innerHTML=`<button class="setback" onclick="setPage('root')">${ND.icon("chev-l")}Ayarlar</button>`;
     if(nt)nt.textContent=SET_TITLE(k);
   }
+  syncMiniBar();
   try{window.scrollTo(0,0);}catch(e){}
 }
 /* ---------- Bugün ---------- */
@@ -1768,7 +2071,7 @@ function renderToday(){
     h+=`<div class="nd-hero is-quiet"><span class="nd-hero__eyebrow">Sıradaki nöbetin</span>
       <span class="nd-hero__title">${yay?"Yaklaşan nöbetin yok":ayAdi(planAy())+" listesi henüz yayınlanmadı"}</span>
       <span class="nd-hero__sub">${yay?"Yeni liste yayınlanınca burada görünür.":(isAdmin()?"Herkes tercihini girince listeyi hazırla.":"Liste yayınlanınca nöbetlerin burada görünür.")}</span>
-      ${!yay&&isAdmin()?`<div class="nd-btn-row"><button class="nd-btn" onclick="showTab('cizelge')">${ND.icon("duty")}Listeyi hazırla</button></div>`:""}</div>`;
+      ${!yay&&isAdmin()?`<div class="nd-btn-row"><button class="nd-btn" onclick="openPrepWizard()">${ND.icon("duty")}Listeyi hazırla</button></div>`:""}</div>`;
   }
   /* bu ayın üç sayısı */
   const t=new Date(),mkNow=t.getFullYear()+"-"+String(t.getMonth()+1).padStart(2,"0");
@@ -1796,7 +2099,7 @@ function renderToday(){
   if(isAdmin()&&bek)todo.push({ic:"leave",t:`${bek} izin günü onay bekliyor`,go:"showTab('leave')"});
   const gelen=(requests||[]).filter(r=>r.in_id===me.id&&r.status==="bekliyor").length;
   if(gelen)todo.push({ic:"swap",t:`${gelen} takas isteği seni bekliyor`,go:"showTab('takas')"});
-  if(isAdmin()&&!schedulesAll[planAy()])todo.push({ic:"duty",t:`${ayAdi(planAy())} listesini hazırla`,go:"showTab('cizelge')"});
+  if(isAdmin()&&!schedulesAll[planAy()])todo.push({ic:"duty",t:`${ayAdi(planAy())} listesini hazırla`,go:"openPrepWizard()"});
   const myPref=allPrefs[me.id]||{};
   if(!schedulesAll[planAy()]&&!Object.keys(myPref).length)todo.push({ic:"wish",t:`${ayAdi(planAy())} için tercihlerini gir`,go:"showTab('izin')"});
   if(todo.length)h+=`<div class="nd-group"><div class="nd-group__label">Yapılacaklar</div><div class="nd-list">`+
@@ -1981,15 +2284,16 @@ async function openTeam(deptId){
   showView("app");
   await loadAll();
   showTab("bugun");
+  maybeAutoSetup();
 }
 async function createDept(){
   const name=$("newDeptName").value.trim();
   const myName=(me.user_metadata&&me.user_metadata.name)||me.email.split("@")[0];
-  if(!name){alert("Ekip adı yaz");return;}
+  if(!name){toast("Ekip adını yaz",true);return;}
   const {data,error}=await sb.rpc("create_department",{dept_name:name,my_name:myName});
   if(error){$("deptMsg").textContent="⚠️ "+error.message;$("deptMsg").style.display="block";return;}
   await sb.from("memberships").update({pool:$("myBranch").value}).eq("user_id",me.id).eq("dept_id",data.dept_id);
-  alert("Ekip kuruldu! Davet kodun: "+data.join_code);
+  toast("✅ Ekip kuruldu");
   activeDept=data.dept_id;
   await refreshTeamsThenOpen(data.dept_id);
 }
@@ -2033,8 +2337,7 @@ async function loadAll(){
   $("linkDefault").innerHTML=LINK_MODES.map(([k,ad])=>`<option value="${k}">${ad}</option>`).join("");
   $("linkDefault").value=(dept.opts&&dept.opts.link_default)||"off";
   $("leaveProp").value=(dept.opts&&dept.opts.leave_prop)?"1":"";$("leaveProp").disabled=ro;
-  $("saveSettingsBtn").style.display=ro?"none":"inline-block";
-  $("addRoomBtn").style.display=ro?"none":"inline-block";
+  $("addRoomBtn").style.display=ro?"none":"";
   $("genRow").style.display=ro?"none":"block";
   $("devirBtn").style.display=ro?"none":"inline-block";
   $("teamHint").textContent=ro?"Kota ve ayarları yönetici düzenler; bölümünü herkes kendisi seçer.":"Kota yalnızca özel odası olan branşlar için gerekir; genel oda asistanları otomatik dengelenir.";
@@ -2086,13 +2389,13 @@ function renderRooms(){
         ${branchOptionsHTML(r.branch)}</select>
       <input type="number" value="${r.rooms}" min="1" max="5" ${ro?"disabled":""} onchange="roomRows[${i}].rooms=+this.value">
       <select ${ro?"disabled":""} onchange="roomRows[${i}].shared=this.value==='1'">
-        <option value="0" ${!r.shared?"selected":""}>🔒 Kilitli (boşsa boş kalır)</option>
-        <option value="1" ${r.shared?"selected":""}>🔓 Devredilir (boşsa genele açılır)</option>
+        <option value="0" ${!r.shared?"selected":""}>Kilitli (boşsa boş kalır)</option>
+        <option value="1" ${r.shared?"selected":""}>Devredilir (boşsa genele açılır)</option>
       </select>
       ${ro?"":`<button class="btn red small" onclick="roomRows.splice(${i},1);renderRooms()">✕</button>`}`;
     box.appendChild(d);
   });
-  if(!roomRows.length)box.innerHTML='<p class="hint">Henüz özel oda yok — tüm nöbetler genel odalarda.</p>';
+  if(!roomRows.length)box.innerHTML='<p class="hint">Henüz özel oda yok; tüm nöbetler genel odalarda.</p>';
 }
 function addRoomRow(){roomRows.push({branch:BRANCHES[0],rooms:1,shared:false});renderRooms();}
 
@@ -2248,7 +2551,7 @@ function renderDT(){
       <input type="time" value="${t.end}" ${ro?"disabled":""} onchange="dtSet(${i},'end',this.value)">
       <span class="dth${h!==durH(dt.d[0])?" fark":""}">${Math.round(h*10)/10} sa${hm(t.end)<=hm(t.start)?"":" ·<small> aynı gün</small>"}</span></div>`;};
   box.innerHTML=dt.d.map((t,i)=>satir(i,DT_GUN[i],t)).join("")+satir(7,"Resmi tatil / bayram",dt.bay);
-  ["dtPresets","dtSaveBtn"].forEach(id=>{const el=$(id);if(el)el.style.display=ro?"none":"";});
+  ["dtPresets"].forEach(id=>{const el=$(id);if(el)el.style.display=ro?"none":"";});
 }
 function layoutSnap(){
   return {shifts:JSON.parse(JSON.stringify(shiftRows||[])),ovr:JSON.parse(JSON.stringify(ovrRows||[])),
@@ -2362,8 +2665,8 @@ function dpSave(){
 }
 function pickBayram(){
   if(!isAdmin())return;
-  openDayPicker("🌙 Bayram / resmi tatil günleri","Bu günler adalet hesabında ayrı sayılır. Seçtikten sonra 💾 Ayarları Kaydet demeyi unutma.",
-    $("bayramDays").value,arr=>{$("bayramDays").value=fmtDays(arr);renderPrefCal();});
+  openDayPicker("Bayram / resmi tatil günleri","Bu günler saat ve adalet hesabında ayrı sayılır. Seçince hemen kaydedilir.",
+    $("bayramDays").value,arr=>{$("bayramDays").value=fmtDays(arr);renderPrefCal();autoSave("bayram",50);});
 }
 function pickIzin(){
   const uid=editingId();
@@ -2376,7 +2679,7 @@ function pickBlockDays(i){
   const b=blockRows[i];if(!b)return;
   const t=(b.type==="only")?"✅ Sadece bu günlerde tutabilir":"⛔ Tutamayacağı günler";
   openDayPicker(t+" · ayın günleri","Boş bırakırsan kural, seçili haftanın günlerinin tamamı için geçerli olur.",
-    b.days,arr=>{blockRows[i].days=fmtDays(arr);renderBlocks();});
+    b.days,arr=>{blockRows[i].days=fmtDays(arr);renderBlocks();autoSave("blocks",50);});
 }
 
 /* ---------- LİSTE HAZIRLAMA GÜNÜ & GERİ SAYIM ---------- */
@@ -2567,7 +2870,7 @@ function pickPinDays(i){
   const k=members.find(x=>x.id===p.pid);
   openDayPicker("📌 "+(k?k.name:"Sabit atama")+" · hangi günler",
     "Seçtiğin günlerde nöbeti kesin bu kişi tutar; çizelge bu günlere dokunmaz.",
-    p.days,arr=>{pinRows[i].days=fmtDays(arr);renderPins();});
+    p.days,arr=>{pinRows[i].days=fmtDays(arr);renderPins();autoSave("pins",50);});
 }
 /* bir atama elle sabitlenmiş mi? (takvimde 📌 göstermek için) */
 function isPinned(d,e){
@@ -2667,7 +2970,7 @@ function renderQuota(){
   const card=$("quotaCard");if(!card)return;
   card.style.display=isAdmin()?"block":"none";
   if(!isAdmin())return;
-  const box=$("quotaList");box.innerHTML="";
+  const box=$("quotaList");box.innerHTML="";box.className="nd-list";
   const {cap,total}=quotaCaps();
   let sum=0,fixedCount=0;
   members.forEach(p=>{
@@ -2676,21 +2979,11 @@ function renderQuota(){
     if(v>0){sum+=v;fixedCount++;}
     const w=((allPrefs[p.id]||{})._wish)||0;
     const izin=leaveDays(p.id,"izin").length;
-    const d=document.createElement("div");d.className="person";
-    d.innerHTML=`<div class="avatar" style="${brStyle(p.pool)}">${brEmoji(p.pool)}</div>
-      <div class="info">
-        <div class="nm">${p.name}</div>
-        <div class="sub">🙋 talebi: ${w?w+" nöbet":"—"} · en fazla ${cap[p.id]||0} · 🔒 ${izin} izin</div>
-      </div>
-      <div style="display:flex;gap:6px;align-items:flex-end">
-        <label style="display:flex;flex-direction:column;font-size:.68rem;color:var(--ink-soft)">Toplam
-          <input type="number" min="0" max="31" class="qInp" data-pid="${p.id}" value="${v}"
-            style="width:58px;padding:8px" onchange="quotaSet('${p.id}',+this.value)"></label>
-        ${isShiftMode()?`<label style="display:flex;flex-direction:column;font-size:.68rem;color:var(--ink-soft)">🌙 Gece
-          <input type="number" min="0" max="31" placeholder="oto" value="${quotaNightCur(p)}"
-            style="width:58px;padding:8px" onchange="quotaNightSet('${p.id}',this.value)"></label>
-        <div style="font-size:.72rem;min-width:52px;padding-bottom:10px">${quotaNightCur(p)!==""&&v>0?`☀️ ${Math.max(0,v-(+quotaNightCur(p)||0))} gündüz`:""}</div>`:""}
-      </div>`;
+    const d=document.createElement("div");d.className="nd-row has-av qrow";
+    d.innerHTML=`${avatarHTML(p.id)}<span class="nd-row__body"><span class="nd-row__title">${hEsc(kisaAd(p.name))}</span>
+        <span class="nd-row__sub">talep ${w?w:"—"} · en fazla ${cap[p.id]||0} · ${izin} gün izin</span></span>
+      <span class="qctl"><span class="qlbl">Toplam</span><input type="number" min="0" max="31" class="qInp" data-pid="${p.id}" value="${v}" onchange="quotaSet('${p.id}',+this.value)"></span>
+      ${isShiftMode()?`<span class="qctl"><span class="qlbl">Gece${quotaNightCur(p)!==""&&v>0?" · "+Math.max(0,v-(+quotaNightCur(p)||0))+" gündüz":""}</span><input type="number" min="0" max="31" placeholder="oto" value="${quotaNightCur(p)}" onchange="quotaNightSet('${p.id}',this.value)"></span>`:""}`;
     box.appendChild(d);
   });
   const serbest=members.filter(onDuty).length-fixedCount;
@@ -2727,13 +3020,13 @@ function quotaEqual(){
   sirali.forEach(p=>{quotaDraft[p.id]=Math.min(cap[p.id],base);});
   for(const p of sirali){if(kalan<=0)break;if(quotaDraft[p.id]<cap[p.id]){quotaDraft[p.id]++;kalan--;}}
   renderQuota();
-  toast("Eşit dağıtıldı — kaydetmeyi unutma");
+  toast("Eşit dağıtıldı");
 }
 function quotaFromWish(){
   if(!isAdmin())return;
   members.forEach(p=>{quotaDraft[p.id]=Math.max(0,((allPrefs[p.id]||{})._wish)||0);});
   renderQuota();
-  toast("Talepler yazıldı — kontrol edip kaydet");
+  toast("Talepler yazıldı");
 }
 function quotaClear(){
   if(!isAdmin())return;
@@ -2787,7 +3080,7 @@ function wrPreset(){
   c.sat={on:true,need:3,max:1};c.fz=true;if(!c.since)c.since=planAy();
   if($("workModel"))$("workModel").value="duty_rest";
   renderWR();renderWRCounters();
-  toast("Şablon yüklendi — kontrol edip 💾 Kuralları kaydet'e bas");
+  toast("Şablon uygulandı");
 }
 function wrOffText(c,i){
   const k=c.off[i];
@@ -2800,12 +3093,10 @@ function renderWR(){
   const c=wrCfg(),ro=!isAdmin();
   const on=$("wrOnChk");on.checked=c.on;on.disabled=ro;
   $("wrBody").style.opacity=c.on?"1":".55";
-  $("wrDays").innerHTML=WR_GUN.map((g,i)=>`<tr>
-      <td><b>${g}</b><div style="font-size:.62rem;color:var(--ink-soft);font-weight:600">${wrOffText(c,i)}</div></td>
-      <td><input type="number" min="0" max="6" value="${c.off[i]}" ${ro?"disabled":""} onchange="wrSet('off${i}',this.value)"></td>
-      <td><input type="checkbox" ${c.track[i]?"checked":""} ${ro?"disabled":""} onchange="wrSet('track${i}',this.checked)"></td>
-      <td><input type="number" min="0" max="10" value="${c.max[i]}" ${ro?"disabled":""} onchange="wrSet('max${i}',this.value)"></td>
-    </tr>`).join("");
+  const dis=ro?"disabled":"";
+  $("wrDays").innerHTML=WR_GUN.map((g,i)=>iosRow(g+" nöbeti",`<input type="number" min="0" max="6" value="${c.off[i]}" ${dis} onchange="wrSet('off${i}',this.value)">`,wrOffText(c,i))).join("");
+  $("wrTrack").innerHTML=WR_GUN.map((g,i)=>iosRow(g,`<input type="checkbox" ${c.track[i]?"checked":""} ${dis} onchange="wrSet('track${i}',this.checked)">`)).join("");
+  $("wrMax").innerHTML=WR_GUN.map((g,i)=>iosRow(g,`<input type="number" min="0" max="10" value="${c.max[i]}" ${dis} onchange="wrSet('max${i}',this.value)">`)).join("");
   $("wrSatOn").checked=c.sat.on;$("wrSatNeed").value=c.sat.need;$("wrSatMax").value=c.sat.max;
   $("wrFz").checked=c.fz;$("wrSince").value=c.since||"";
   ["wrSatOn","wrSatNeed","wrSatMax","wrFz","wrSince"].forEach(id=>{$(id).disabled=ro;});
@@ -2815,17 +3106,17 @@ function renderWR(){
   const sira=[];for(let i=0;i<7;i++)if(c.track[i])sira.push(WR_GUN[i]+(c.max[i]?` (ayda en fazla ${c.max[i]})`:""));
   const lim=[];for(let i=0;i<7;i++)if(!c.track[i]&&c.max[i])lim.push(`${WR_GUN[i]} ayda en fazla ${c.max[i]}`);
   let txt=ex.length?ex.join(" · ")+".":"Her nöbetin ertesi günü izinli (varsayılan).";
-  if(sira.length)txt+=`<br>⚖️ Sırayla verilen: ${sira.join(", ")}.`;
-  if(lim.length)txt+=`<br>🔢 ${lim.join(", ")}.`;
+  if(sira.length)txt+=`<br>Sırayla verilen: ${sira.join(", ")}.`;
+  if(lim.length)txt+=`<br>${lim.join(", ")}.`;
   if(c.sat.on){
     const rot=wrRotIds().length;
     const perDay=isShiftMode()?1:Math.max(1,+($("generalRooms").value||1));
     let yok=0;for(let w=0;w<5;w++)if(w+c.off[w]>=5)yok+=perDay;
     const kal=rot-yok,ek=Math.max(0,kal-c.sat.need);
-    txt+=`<br>🏖 Cumartesi klinikte nöbetçi dahil <b>${c.sat.need}</b> kişi kalır. Ekip ${rot} kişi: normal bir Cumartesi ${yok} kişi nöbet sonrası izinli, klinikte ${kal} kişi → <b>${ek} kişiye</b> sırayla Ek Cumartesi izni düşer.`;
+    txt+=`<br>Cumartesi klinikte nöbetçi dahil <b>${c.sat.need}</b> kişi kalır. Ekip ${rot} kişi: normal bir Cumartesi ${yok} kişi nöbet sonrası izinli, klinikte ${kal} kişi → <b>${ek} kişiye</b> sırayla Ek Cumartesi izni düşer.`;
   }
-  if(c.fz)txt+="<br>➕ Artık (fazla) nöbet sırayla verilir.";
-  if(!c.on)txt="Kurallar kapalı — liste eskisi gibi hazırlanır. Açmak için yukarıdaki kutuyu işaretle ya da hazır şablonu yükle.";
+  if(c.fz)txt+="<br>Artık (fazla) nöbet sırayla verilir.";
+  if(!c.on)txt="Kurallar kapalı — liste eskisi gibi hazırlanır. Açmak için “Bu kuralları kullan”ı aç ya da hazır şablonu uygula.";
   $("wrExplain").innerHTML=txt;
 }
 function renderWRCounters(){
@@ -2845,7 +3136,7 @@ function renderWRCounters(){
         <div style="font-size:.6rem;color:var(--ink-soft)">başl. ${ro?b:`<input class="wrbase" type="number" min="0" value="${b}" onchange="wrBaseSet('${p.id}','${k.k}',this.value)">`}</div></td>`;
     }).join("")}</tr>`).join("");
   const onceki=prevMonthKey(mk);
-  $("wrCntHint").innerHTML=`Sayılar = <b>başlangıç</b> + ${c.since?ayAdi(c.since):"ilk"} ile ${ayAdi(onceki)} arasında yayınlanan listeler (otomatik). <b>${ayAdi(mk)}</b> listesi hazırlanırken bu sayılar kullanılır: en az kullanan (⬇) önce alır. Uygulamadan önceki dönemi <b>başl.</b> kutusuna yazıp kaydet.`;
+  $("wrCntHint").innerHTML=`Sayılar = <b>başlangıç</b> + ${c.since?ayAdi(c.since):"ilk"} ile ${ayAdi(onceki)} arasında yayınlanan listeler (otomatik). <b>${ayAdi(mk)}</b> listesi hazırlanırken bu sayılar kullanılır: en az kullanan (⬇) önce alır. Uygulamadan önceki dönemi <b>başl.</b> kutusuna yaz (kendiliğinden kaydedilir).`;
 }
 function wrBaseSet(pid,k,v){
   if(!isAdmin())return;
@@ -3036,9 +3327,11 @@ function setFocus(ctx,pid){
   if(ctx==="draft")renderDraftPreview();else renderSchedGrid();
 }
 function selectDay(ctx,d){
+  if(ctx==="draft"?!draft:!schedule)return;
   const ui=ctx==="draft"?draftUI:pubUI;
   ui.sel=d;
   if(ctx==="draft")renderDraftPreview();else renderSchedGrid();
+  openDaySheet(ctx);
 }
 function dayPanelHTML(d,ctx,ui){
   const {y,m}=vInfo();const wd=wdOf(y,m,d);
@@ -3057,8 +3350,8 @@ function dayPanelHTML(d,ctx,ui){
   if(off.length)h+=`<div class="dp-g"><div class="dp-gl">😴 Nöbet<i>ertesi izinli</i></div><div class="dp-ps">${off.map(id=>pChip(id,ui,{cls:" soft"})).join("")}</div></div>`;
   if(iz.length)h+=`<div class="dp-g"><div class="dp-gl">🌴 İzinli</div><div class="dp-ps">${iz.map(id=>pChip(id,ui,{cls:" soft"})).join("")}</div></div>`;
   if(ctx==="pub"){
-    h+=`<div class="dp-act">`+(isAdmin()?`<button class="btn small" onclick="openDayEdit(${d})">✏️ Bu günü düzenle</button>`
-      :`<button class="btn ghost small" onclick="fillReqForm(${d});showTab('takas')">🔁 Bu gün için takas iste</button>`)+`</div>`;
+    h+=`<div class="dp-act">`+(isAdmin()?`<button class="btn small" onclick="closeDaySheet();openDayEdit(${d})">Bu günü düzenle</button>`
+      :`<button class="btn ghost small" onclick="closeDaySheet();fillReqForm(${d});showTab('takas')">Bu gün için takas iste</button>`)+`</div>`;
   }else h+=`<p class="hint" style="margin:6px 0 0">Taslak salt okunur. Yayınladıktan sonra her günü tek tek düzenleyebilirsin.</p>`;
   return h;
 }
@@ -3117,8 +3410,6 @@ function drawSched(wrap,legendEl,view,ctx){
       wrap.appendChild(h);
     }
     wrap.appendChild(cal);
-    const pn=document.createElement("div");pn.className="dpanel";pn.innerHTML=dayPanelHTML(ui.sel,ctx,ui);
-    wrap.appendChild(pn);
     return;
   }
   const sadeceBen=view==="mine";
@@ -3399,55 +3690,75 @@ async function setSP(id,key,val){
 function renderPeople(){
   const list=$("peopleList");list.innerHTML="";
   $("teamCount").textContent=`(${members.length} kişi)`;
-  const admin=isAdmin();
+  list.className="nd-list";
   members.forEach(p=>{
     const own=p.id===me.id;
-    const dedicated=hasOwnRoom(p.pool);
-    const d=document.createElement("div");d.className="person";
-    d.innerHTML=`<div class="avatar" style="${brStyle(p.pool)}">${brEmoji(p.pool)}</div>
-      <div class="info"><div class="nm">${p.name}${own?" (sen)":""} ${p.is_admin?"👑":""}${p.is_test?' <span class="tag" style="background:#FFF4DC;color:#9A6E06">TEST</span>':""}</div>
-      <div class="sub"><span class="tag" style="${brStyle(p.pool)}">${p.pool||"?"}</span> · ${dedicated?"kota "+p.quota:"genel oda · kota oto"} · ertesi gün ${p.works_after?"çalışır":"izinli"}</div></div>
-      ${admin?`<select onchange="updProfile('${p.id}',{pool:this.value})">
-        ${branchOptionsHTML(p.pool)}</select>`:""}
-      ${admin&&dedicated?`<input type="number" value="${p.quota}" min="0" max="15" onchange="updProfile('${p.id}',{quota:+this.value})">`:""}
-      ${admin?`<label><input type="checkbox" ${p.works_after?"checked":""} onchange="updProfile('${p.id}',{works_after:this.checked})">ertesi çalışır</label>`:""}
-      ${admin&&!own?`<button class="del" title="Ekipten çıkar" onclick="removeMember('${p.id}','${(p.name||"").replace(/'/g,"")}')">✕</button>`:""}
-      ${isShiftMode()&&shiftRows.length?`<div class="row" style="width:100%;margin-top:5px">
-        <label>vardiyaları:</label>
-        ${shiftRows.map((s,si)=>s.owner&&s.owner!==p.id?"":`<button class="dchip ${spAllowed(p,si)?"on":""}" ${admin?"":"disabled"} onclick="toggleSP('${p.id}',${si})">${s.owner?"🔒 ":""}${s.name||("V"+(si+1))}</button>`).join("")}
-        <label>toplam</label><input type="number" value="${sp(p).target||0}" min="0" max="31" style="width:54px;padding:6px" ${admin?"":"disabled"} onchange="setSP('${p.id}','target',+this.value)" title="Ayda toplam kaç nöbet · 0 = otomatik dengele">
-        <label>gün arası</label><input type="number" value="${sp(p).gap||0}" min="0" max="5" style="width:54px;padding:6px" ${admin?"":"disabled"} onchange="setSP('${p.id}','gap',+this.value)" title="1 = gün aşırı nöbet">
-      </div>
-      <div class="row" style="width:100%;margin-top:4px">
-        <label class="chk"><input type="checkbox" ${sp(p).noNight?"checked":""} ${admin?"":"disabled"} onchange="setSP('${p.id}','noNight',this.checked)">🌙 gece/akşam nöbeti tutmaz</label>
-        ${ownsPrivate(p.id)?`<label class="chk"><input type="checkbox" ${sp(p).onlyOwn?"checked":""} ${admin?"":"disabled"} onchange="setSP('${p.id}','onlyOwn',this.checked)">🔒 sadece kendi vardiyası</label>`:""}
-        <label>🌙 gece</label><input type="number" value="${sp(p).nExact&&sp(p).nightTarget!=null?sp(p).nightTarget:""}" placeholder="oto" min="0" max="31" style="width:54px;padding:6px" ${admin?"":"disabled"} onchange="setNight('${p.id}',this.value)" title="Kaç tanesi gece nöbeti olacak (tam sayı). Boş = otomatik dengele">
-      </div>`:""}
-      <div class="row" style="width:100%;margin-top:5px">
-        <label class="chk"><input type="checkbox" class="noDutyChk" ${sp(p).noDuty?"checked":""} ${admin?"":"disabled"} onchange="setSP('${p.id}','noDuty',this.checked)">🚫 ${own&&p.is_admin?"Ben nöbet tutmuyorum (sadece yönetiyorum)":"Nöbet tutmaz (listeye dahil değil)"}</label>
-      </div>
-      ${(()=>{const T=linkTeamsOf(p.id);if(!T.length||!onDuty(p))return "";
-        const l=sp(p).link||{},cur=l.mode||"inherit",dv=opts().link_default||"off";
-        const dvAd=(LINK_MODES.find(x=>x[0]===dv)||LINK_MODES[0])[1];
-        return `<div class="row" style="width:100%;margin-top:5px">
-          <label>🔗 Diğer listeleri: <b>${T.map(t=>t.dept_name).join(", ")}</b></label>
-          <select class="linkSel" style="flex:1;min-width:170px" ${admin?"":"disabled"} onchange="setLink('${p.id}','mode',this.value)">
-            <option value="inherit" ${cur==="inherit"?"selected":""}>Ekip varsayılanı (${dvAd})</option>
-            ${LINK_MODES.map(([k,ad])=>`<option value="${k}" ${cur===k?"selected":""}>${ad}</option>`).join("")}
-          </select>
-          ${T.length>1?`<select style="min-width:120px" ${admin?"":"disabled"} onchange="setLink('${p.id}','dept',this.value)">
-            <option value="">Tüm diğer listeleri</option>
-            ${T.map(t=>`<option value="${t.dept_id}" ${l.dept===t.dept_id?"selected":""}>${t.dept_name}</option>`).join("")}</select>`:""}
-        </div>`;})()}`;
-    list.appendChild(d);
+    const b=document.createElement("button");b.type="button";b.className="nd-row has-av";
+    b.onclick=()=>openPerson(p.id);
+    b.innerHTML=`${avatarHTML(p.id)}<span class="nd-row__body"><span class="nd-row__title">${hEsc(p.name)}${own?" (sen)":""}`
+      +`${p.is_admin?' <small class="adm">yönetici</small>':""}${p.is_test?' <small class="tst">test</small>':""}</span>`
+      +`<span class="nd-row__sub">${hEsc(personSub(p))}</span></span>${ND.icon("chev-r","nd-row__chev")}`;
+    list.appendChild(b);
   });
   const db=$("devirBody");db.innerHTML="";
   members.forEach(p=>{
     const tr=document.createElement("tr");
-    tr.innerHTML=`<td>${brEmoji(p.pool)} ${p.name}</td>
+    tr.innerHTML=`<td>${hEsc(p.name)}</td>
       ${["carry_t","carry_w","carry_b"].map(f=>`<td>${isAdmin()?`<input type="number" value="${p[f]}" min="0" style="width:54px;padding:5px" onchange="updProfile('${p.id}',{${f}:+this.value})">`:p[f]}</td>`).join("")}`;
     db.appendChild(tr);
   });
+  if(personSheetId)renderPersonSheet();
+}
+/* ---------- iOS liste yardımcıları ---------- */
+function avatarHTML(pid,big){const c=personColor(pid);return `<span class="ndav${big?" is-lg":""}" style="background:${c.solid}">${hEsc(pCode(pid))}</span>`;}
+function iosRow(title,ctrl,sub,cls){return `<div class="nd-row${cls||""}"><span class="nd-row__body"><span class="nd-row__title">${title}</span>${sub?`<span class="nd-row__sub">${sub}</span>`:""}</span>${ctrl||""}</div>`;}
+function iosGroup(label,rows,foot){return `<div class="nd-group">${label?`<div class="nd-group__label">${label}</div>`:""}<div class="nd-list">${rows.join("")}</div>${foot?`<div class="nd-group__foot">${foot}</div>`:""}</div>`;}
+function personSub(p){
+  const parts=[p.pool||"—"];
+  if(!onDuty(p))parts.push("nöbet tutmaz");
+  else if(isShiftMode()){const t=sp(p).target;parts.push(t?t+" nöbet":"sayı otomatik");}
+  else parts.push(hasOwnRoom(p.pool)?"özel oda · kota "+(p.quota||0):"genel oda");
+  parts.push("ertesi gün "+(p.works_after?"çalışır":"izinli"));
+  if(linkTeamsOf(p.id).length)parts.push("başka listede de");
+  return parts.join(" · ");
+}
+let personSheetId=null;
+function openPerson(pid){personSheetId=pid;renderPersonSheet();$("personSheet").classList.add("on");}
+function closePerson(){personSheetId=null;const s=$("personSheet");if(s)s.classList.remove("on");}
+function renderPersonSheet(){
+  const p=members.find(x=>x.id===personSheetId);if(!p){closePerson();return;}
+  const admin=isAdmin(),own=p.id===me.id,dis=admin?"":"disabled";
+  let h=`<div class="person-head">${avatarHTML(p.id,true)}<b>${hEsc(p.name)}${own?" (sen)":""}</b><span>${hEsc(personSub(p))}</span></div>`;
+  const g1=[iosRow("Birim",`<select class="rowin" ${dis} onchange="updProfile('${p.id}',{pool:this.value})">${branchOptionsHTML(p.pool)}</select>`)];
+  if(hasOwnRoom(p.pool))g1.push(iosRow("Özel oda kotası",`<input type="number" value="${p.quota||0}" min="0" max="15" ${dis} onchange="updProfile('${p.id}',{quota:+this.value})">`,"ayda kaç nöbet"));
+  g1.push(iosRow("Nöbet ertesi gün çalışır",`<input type="checkbox" ${p.works_after?"checked":""} ${dis} onchange="updProfile('${p.id}',{works_after:this.checked})">`,"kapalıysa nöbetten sonraki gün izinli sayılır"));
+  g1.push(iosRow(own&&p.is_admin?"Ben nöbet tutmuyorum":"Nöbet tutmaz",
+    `<input type="checkbox" class="noDutyChk" ${sp(p).noDuty?"checked":""} ${dis} onchange="setSP('${p.id}','noDuty',this.checked)">`,
+    own&&p.is_admin?"Ben nöbet tutmuyorum (sadece yönetiyorum) — listeye dahil olmam":"Nöbet tutmaz (listeye dahil değil)"));
+  h+=iosGroup("Görev",g1);
+  if(isShiftMode()&&shiftRows.length){
+    const chips=shiftRows.map((s,si)=>s.owner&&s.owner!==p.id?"":`<button type="button" class="dchip ${spAllowed(p,si)?"on":""}" ${dis} onclick="toggleSP('${p.id}',${si})">${s.owner?"Özel · ":""}${hEsc(s.name||("V"+(si+1)))}</button>`).join("");
+    const g2=[`<div class="nd-row"><span class="nd-row__body"><span class="nd-row__title">Tutabileceği vardiyalar</span><span class="spchips">${chips}</span></span></div>`,
+      iosRow("Ayda toplam",`<input type="number" value="${sp(p).target||0}" min="0" max="31" ${dis} onchange="setSP('${p.id}','target',+this.value)">`,"0 = otomatik dengele"),
+      iosRow("Gece sayısı",`<input type="number" value="${sp(p).nExact&&sp(p).nightTarget!=null?sp(p).nightTarget:""}" placeholder="oto" min="0" max="31" ${dis} onchange="setNight('${p.id}',this.value)">`,"boş = otomatik"),
+      iosRow("İki nöbet arası",`<input type="number" value="${sp(p).gap||0}" min="0" max="5" ${dis} onchange="setSP('${p.id}','gap',+this.value)">`,"gün · 1 = gün aşırı"),
+      iosRow("Gece / akşam tutmaz",`<input type="checkbox" ${sp(p).noNight?"checked":""} ${dis} onchange="setSP('${p.id}','noNight',this.checked)">`)];
+    if(ownsPrivate(p.id))g2.push(iosRow("Sadece kendi vardiyası",`<input type="checkbox" ${sp(p).onlyOwn?"checked":""} ${dis} onchange="setSP('${p.id}','onlyOwn',this.checked)">`));
+    h+=iosGroup("Vardiya",g2);
+  }
+  const T=linkTeamsOf(p.id);
+  if(T.length&&onDuty(p)){
+    const l=sp(p).link||{},cur=l.mode||"inherit",dv=opts().link_default||"off";
+    const dvAd=(LINK_MODES.find(x=>x[0]===dv)||LINK_MODES[0])[1];
+    const g3=[iosRow("Uyum",`<select class="rowin linkSel" ${dis} onchange="setLink('${p.id}','mode',this.value)">
+        <option value="inherit" ${cur==="inherit"?"selected":""}>Ekip varsayılanı (${dvAd})</option>
+        ${LINK_MODES.map(([k,ad])=>`<option value="${k}" ${cur===k?"selected":""}>${ad}</option>`).join("")}</select>`)];
+    if(T.length>1)g3.push(iosRow("Hangi liste",`<select class="rowin" ${dis} onchange="setLink('${p.id}','dept',this.value)">
+        <option value="">Tüm diğer listeler</option>${T.map(t=>`<option value="${t.dept_id}" ${l.dept===t.dept_id?"selected":""}>${hEsc(t.dept_name)}</option>`).join("")}</select>`));
+    h+=iosGroup("Diğer listeleri: "+hEsc(T.map(t=>t.dept_name).join(", ")),g3);
+  }
+  if(admin&&!own)h+=`<div class="nd-group"><div class="nd-list"><button class="nd-row is-danger" onclick="closePerson();removeMember('${p.id}','${(p.name||"").replace(/'/g,"")}')"><span class="nd-row__body"><span class="nd-row__title">Ekipten çıkar</span><span class="nd-row__sub">Geçmiş ayların kayıtları saklanır</span></span></button></div></div>`;
+  $("personSheetBody").innerHTML=h;
 }
 async function refreshTeamsThenOpen(deptId){
   const {data:rows}=await sb.from("memberships").select("*, departments(id,name,join_code)").eq("user_id",me.id);
@@ -3536,30 +3847,22 @@ function renderLeaveAdmin(){
   const card=$("leaveAdminCard");if(!card)return;
   card.style.display=isAdmin()?"block":"none";
   if(!isAdmin())return;
-  const box=$("leaveAdminList");box.innerHTML="";
+  const box=$("leaveAdminList");box.innerHTML="";box.className="nd-list";
   let bekToplam=0;
   members.forEach(p=>{
     const ok=leaveDays(p.id,"izin"),bek=leaveDays(p.id,"izin_bek");
     bekToplam+=bek.length;
-    const d=document.createElement("div");d.className="person";
-    d.innerHTML=`<div class="avatar" style="${brStyle(p.pool)}">${brEmoji(p.pool)}</div>
-      <div class="info">
-        <div class="nm">${p.name}${bek.length?' <span class="tag" style="background:var(--gold-tint);color:#9A6E06">⏳ '+bek.length+' gün onay bekliyor</span>':""}</div>
-        <div class="daychips">
-          ${ok.length?`<span class="dtag">🔒 onaylı: ${fmtDays(ok)}</span>`:'<span class="dtag">izin yok</span>'}
-          ${bek.length?`<span class="dtag bek">⏳ bekleyen: ${fmtDays(bek)}</span>`:""}
-        </div>
-      </div>
-      <div class="row" style="width:100%;margin-top:6px">
-        <button class="btn ghost small" onclick="editLeaveFor('${p.id}')">📅 Düzenle</button>
-        ${bek.length?`<button class="btn small" onclick="decideLeave('${p.id}',true)">✔ Onayla</button>
-        <button class="btn red small" onclick="decideLeave('${p.id}',false)">✕ Reddet</button>`:""}
-      </div>`;
-    box.appendChild(d);
+    const d=document.createElement("div");d.className="nd-row has-av lvrow";
+    d.innerHTML=`${avatarHTML(p.id)}<span class="nd-row__body"><span class="nd-row__title">${hEsc(p.name)}</span>
+      <span class="nd-row__sub">${ok.length?"İzinli: "+fmtDays(ok):"İzin yok"}${bek.length?` · <b class="bekt">Bekleyen: ${fmtDays(bek)}</b>`:""}</span>
+      <span class="lvact">${bek.length?`<button class="nd-btn is-sm is-filled" onclick="decideLeave('${p.id}',true)">Onayla</button>
+        <button class="nd-btn is-sm is-danger" onclick="decideLeave('${p.id}',false)">Reddet</button>`:""}
+        <button class="nd-btn is-sm is-tinted" onclick="editLeaveFor('${p.id}')">Düzenle</button></span></span>`;
+    if(bek.length)box.appendChild(makeSwipe(d,"Onayla","Reddet",()=>decideLeave(p.id,true),()=>decideLeave(p.id,false)));
+    else box.appendChild(d);
   });
-  const h=document.createElement("p");h.className="hint";h.style.marginTop="8px";
-  h.textContent=bekToplam?`Toplam ${bekToplam} gün onay bekliyor.`:"Bekleyen izin talebi yok ✅";
-  box.appendChild(h);
+  const h=$("leaveAdminFoot");
+  if(h)h.textContent=bekToplam?`Toplam ${bekToplam} gün onay bekliyor. Satırı sağa kaydır: onayla · sola kaydır: reddet.`:"Bekleyen izin talebi yok.";
 }
 async function decideLeave(uid,approve){
   if(!isAdmin())return;
@@ -3599,10 +3902,11 @@ function renderPrefCal(){
     const c=document.createElement("div");const st=pref(uid,d);
     const cls=st==="izin"?"izin":st==="izin_bek"?"bek":st==="avoid"?"no":st==="yes"?"yes":"";
     c.className="day prefday "+cls+(isBay(d)?" bay":isWknd(y,m,d)?" wknd":"");
-    c.textContent=d;
-    if(!isLeaveVal(st))c.onclick=()=>togglePref(d);
+    c.textContent=d;c.dataset.d=d;
+    c.title=st==="izin"?"İzin (onaylı)":st==="izin_bek"?"İzin (onay bekliyor)":st==="avoid"?"İstemiyorum":st==="yes"?"İstiyorum":"";
     cal.appendChild(c);
   }
+  bindPrefPaint();
 }
 let prefSaveTimer=null;
 async function togglePref(d){
@@ -3821,31 +4125,32 @@ function showDraft(){
   $("decideCard").style.display="block";
   const sorunlar=draft.viol||[];
   const durum=draft.exact
-    ?`<div class="banner ok" style="margin:8px 0">✅ İstediğin sayıların ve kuralların <b>hepsi</b> tutturuldu — ${S} nöbetin tamamı dağıtıldı.</div>`
+    ?`<div class="banner ok" style="margin:8px 0">Bütün sayılar ve kurallar tutturuldu — ${S} nöbetin hepsi dağıtıldı${bos?`, ${bos} yer boş`:""}.</div>`
     :(sorunlar.length?`<div class="banner err" style="margin:8px 0"><b>Şunlar tam tutturulamadı:</b><br>${sorunlar.map(v=>"• "+v).join("<br>")}</div>`:"");
-  const oneri=draft.rhythmSuggest?`<div style="margin:6px 0 10px"><button class="btn small" onclick="applyRhythmSuggest()">✅ Düzeni tam oturt</button></div>`:"";
-  $("decideHint").innerHTML=durum+oneri+`Sütunlar: 🙋 kişinin isteği · 🔒 izin günü · ☀️/🌙/🏖 gündüz/gece/hafta sonu adedi · ⏱ toplam saat · <b>Toplam</b> ve <b>🌙 Gece</b> = verilen sayılar.<br>
-    Değiştirmek için <b>Toplam</b> ya da <b>🌙 Gece</b> kutusuna yeni sayıyı yaz, <b>🔄 Sayılarla yeniden hazırla</b>'ya bas. Son karar senindir.<br>
-    Ayda <b>${S}</b> nöbet yeri · dağıtılan <b>${assigned}</b>${bos?` · <span style="color:#C33D2E">boş kalan ${bos}</span>`:" · ✅ boş yok"}`;
+  const oneri=draft.rhythmSuggest?`<div style="margin:6px 0 10px"><button class="btn small" onclick="applyRhythmSuggest()">Düzeni tam oturt</button></div>`:"";
+  $("decideHint").innerHTML=durum+oneri;
+  $("decideFoot").innerHTML=`Sayıyı − / + ile değiştirip <b>Yeniden hazırla</b>'ya bas. <b>Σ</b> = geçmiş aylar dahil saat farkı (+ fazla, − eksik). Son karar senin.`;
   const tb=$("decideBody");tb.innerHTML="";
   const hCum=hourCum(planAy()),hNow=monthHours(planAy(),draft)||{};
   rel.forEach(p=>{
     const hd=((hCum[p.id]||{}).d||0)+((hNow[p.id]||{}).d||0);
     const izin=Object.values(allPrefs[p.id]||{}).filter(v=>v==="izin").length;
     const w=wishOf(p);
-    const tr=document.createElement("tr");
     const dcv=(draft.dc&&draft.dc[p.id])||0, ncv=(draft.nc&&draft.nc[p.id])||0;
     const wev=draft.wec?(draft.wec[p.id]||0):(draft.wk[p.id]||0);
-    tr.innerHTML=`<td>${brEmoji(p.pool)} ${p.name}</td>
-      <td>${w?"🙋"+w:"—"}</td>
-      <td>${izin||"—"}</td>
-      <td>${isShiftMode()?`${dcv}/${ncv}/${wev}`:`—/—/${wev}`}</td>
-      <td>${Math.round((draft.hours&&draft.hours[p.id])||0)}</td>
-      <td style="white-space:nowrap;color:${Math.abs(hd)<0.5?"inherit":hd>0?"#C33D2E":"#1D6FD8"}">${fmtH(hd)}</td>
-      <td><input type="number" class="decInp" data-pid="${p.id}" value="${draft.cnt[p.id]||0}" min="0" max="31" style="width:60px;padding:6px" onchange="updDecideTotal(${S})"></td>
-      <td>${isShiftMode()?`<input type="number" class="decNight" data-pid="${p.id}" value="${ncv}" min="0" max="31" style="width:56px;padding:6px" title="Bu kişi tam olarak kaç gece tutsun">`:"—"}</td>`;
-    tb.appendChild(tr);
+    const bits=[`${Math.round((draft.hours&&draft.hours[p.id])||0)} sa`];
+    if(isShiftMode())bits.push(`${dcv} gündüz`,`${ncv} gece`);
+    bits.push(`${wev} h.sonu`);
+    if(izin)bits.push(`${izin} gün izin`);
+    if(w)bits.push(`istek ${w}`);
+    const r=document.createElement("div");r.className="nd-row has-av decrow";r.dataset.pid=p.id;
+    r.innerHTML=`${avatarHTML(p.id)}<span class="nd-row__body"><span class="nd-row__title decname">${hEsc(p.name)}</span>
+      <span class="nd-row__sub">${bits.join(" · ")} · <span class="decSigma" style="color:${Math.abs(hd)<0.5?"inherit":hd>0?"var(--danger)":"var(--tint)"}">Σ ${fmtH(hd)} sa</span></span>
+      ${isShiftMode()?`<span class="decnight">Gece <input type="number" class="decNight" data-pid="${p.id}" value="${ncv}" min="0" max="31" aria-label="Gece sayısı" onchange="updDecideTotal(${S})"></span>`:""}</span>
+      <input type="number" class="decInp" data-pid="${p.id}" value="${draft.cnt[p.id]||0}" min="0" max="31" aria-label="Nöbet sayısı" onchange="updDecideTotal(${S})">`;
+    tb.appendChild(r);
   });
+  enhanceSteppers(tb);
   updDecideTotal(S);
   const wrBox=$("decideWR");if(wrBox)wrBox.innerHTML=draft.wrOn?wrSummaryHTML(draft,planAy()):"";
   renderDraftPreview();
@@ -3862,11 +4167,14 @@ function updDecideTotal(S){
   let t=0;document.querySelectorAll(".decInp").forEach(i=>t+=(+i.value||0));
   const el=$("decideTotal");
   const fa=fillAll();
-  let msg=`Toplam: ${t} / kapasite: ${S} `;
-  if(fa)msg+=t===S?"✅ tam oturdu":t>S?`⚠️ ${t-S} fazla — sığmayanlar yerleşemez`:`⚠️ ${S-t} eksik — bu politikada boş slot kalamaz, sayıları artır`;
-  else msg+=t>S?`⚠️ ${t-S} fazla — sığmaz`:t===S?"✅ tam":`ℹ️ ${S-t} slot boş kalacak (politika buna izin veriyor)`;
+  let msg=`Toplam ${t} / ${S} nöbet yeri — `;
+  if(fa)msg+=t===S?"tam oturdu.":t>S?`${t-S} fazla; sığmayanlar yerleşemez.`:`${S-t} eksik; bu ayarda boş yer kalamaz, sayıları artır.`;
+  else msg+=t>S?`${t-S} fazla; sığmaz.`:t===S?"tam.":`${S-t} yer boş kalacak (ayarın buna izin veriyor).`;
   el.textContent=msg;
   el.className="banner "+((fa&&t===S)||(!fa&&t<=S)?"ok":"info");
+  let ch=false;if(draft){document.querySelectorAll(".decInp").forEach(i=>{if((+i.value||0)!==(draft.cnt[i.dataset.pid]||0))ch=true;});
+    document.querySelectorAll(".decNight").forEach(i=>{if((+i.value||0)!==((draft.nc&&draft.nc[i.dataset.pid])||0))ch=true;});}
+  const rb=$("redraftBtn");if(rb){rb.classList.toggle("is-filled",ch);rb.classList.toggle("is-tinted",!ch);}
 }
 async function confirmDecide(){
   if(!draft){alert("Önce taslak üret");return;}
@@ -4961,7 +5269,8 @@ function renderDayEdit(){
   }
   $("dayEditMeta").dataset.slots=JSON.stringify(slotlar.map(sl=>({si:sl.si,room:sl.room})));
 }
-async function saveDayEdit(){
+async function saveDayEdit(opt){
+  opt=opt||{};
   if(!isAdmin()||editDay==null||!schedule)return;
   const slotlar=JSON.parse($("dayEditMeta").dataset.slots||"[]");
   const yeni=[];
@@ -4992,7 +5301,7 @@ async function saveDayEdit(){
   const {error}=await sb.from("schedules").update({data:schedule}).eq("dept_id",dept.id).eq("month",ay);
   if(error){toast("⚠️ Kaydedilemedi: "+error.message,true);return;}
   const gun=editDay;
-  closeDayEdit();renderSchedule();
+  if(opt.keep){renderSchedule();renderDayEdit();}else{closeDayEdit();renderSchedule();}
   if(uyar.length)toast(`✅ ${gun}. gün kaydedildi, ama kural uyarısı var:\n`+uyar.slice(0,3).join("\n")+(uyar.length>3?`\n… (+${uyar.length-3})`:""),true);
   else toast(`✅ ${gun}. gün güncellendi (${ayAdi(ay)})`);
 }
@@ -5316,11 +5625,11 @@ function renderHourCard(){
     <p class="hint" style="margin:6px 0 0"><b style="color:#C33D2E">+</b> = adil paydan fazla tuttu, <b style="color:#1D6FD8">−</b> = eksik.
     ${sm?"Vardiya saatleri":"Nöbet saatleri: "+hEsc(dutyRangeText(undefined,undefined,true))} — her ay kendi listesiyle saklanır.
     Yeni ay hazırlanırken uzun nöbetler ve artan nöbetler <b>farkı en düşük</b> olana öncelikle verilir.</p>
-    ${adm?`<details class="hbase"><summary>Başlangıç farkı (uygulamadan önceki dönem)</summary>
+    ${adm?`<details class="hbase" data-autosave="hbase"><summary>Başlangıç farkı (uygulamadan önceki dönem)</summary>
       <p class="hint" style="margin:4px 0">Uygulamayı kullanmaya başlamadan önce biri fazla ya da eksik saat tuttuysa buraya yaz (ör. +24 ya da -16).</p>
       ${ppl.map(p=>`<div class="row" style="margin:4px 0"><label style="flex:1">${hEsc(kisaAd(p.name))}</label>
         <input type="number" class="hbInp" data-pid="${p.id}" value="${hbaseOf(p.id)}" step="1" style="width:80px;padding:6px"></div>`).join("")}
-      <button class="btn small savebtn" style="margin-top:6px" onclick="saveHbase()">💾 Başlangıç farklarını kaydet</button></details>`:""}`;
+      </details>`:""}`;
 }
 async function saveHbase(){
   if(!isAdmin())return;
@@ -5416,11 +5725,11 @@ function yearCsv(){
      only  = sadece diğer listedeki nöbet günlerinde tutsun (kesin)
    Ekip için varsayılan (opts.link_default) + kişiye özel (shift_prefs.link) seçilir. */
 const LINK_MODES=[
-  ["off","Bağımsız — diğer listeye bakma"],
-  ["rest","Aynı saate ve dinlenmeye denk gelmesin"],
-  ["avoid","Çakışmasın — o gün ve nöbet sonrası izin günleri de boş"],
-  ["same","Aynı günlere denk gelsin (mümkün olduğunca)"],
-  ["only","Sadece diğer listedeki nöbet günlerinde (kesin)"]];
+  ["off","Bağımsız"],
+  ["rest","Saatler çakışmasın"],
+  ["avoid","Günler çakışmasın"],
+  ["same","Aynı günlere denk gelsin"],
+  ["only","Sadece o listenin günlerinde"]];
 let otherLists=null;
 function onDuty(p){return !(p&&sp(p).noDuty);}
 function linkModeOf(p){
@@ -6576,10 +6885,11 @@ function renderReqs(){
       <div class="head">${rq.day}. gün: ${outP.name} → ${inP.name}${rq.in_id===me.id?" (sana)":""}</div>
       ${rq.note?`<div class="note">"${rq.note}"</div>`:""}
       ${mine?`<div class="row">
-        <button class="btn small" onclick="acceptReq(${rq.id})">✔ Kabul</button>
-        <button class="btn red small" onclick="rejectReq(${rq.id})">✖ Red</button></div>`
-      :rq.status==="bekliyor"?`<div style="font-size:.72rem;color:var(--ink-soft)">⏳ ${inP.name} yanıtlayacak</div>`:""}`;
-    box.appendChild(d);
+        <button class="btn small" onclick="acceptReq(${rq.id})">Kabul et</button>
+        <button class="btn red small" onclick="rejectReq(${rq.id})">Reddet</button></div>
+        <div class="hint" style="margin:6px 0 0;font-size:13px">Sağa kaydır: kabul · sola kaydır: reddet</div>`
+      :rq.status==="bekliyor"?`<div style="font-size:13px;color:var(--ink-2)">${inP.name} yanıtlayacak</div>`:""}`;
+    box.appendChild(mine?makeSwipe(d,"Kabul","Reddet",()=>acceptReq(rq.id),()=>rejectReq(rq.id)):d);
   });
 }
 async function acceptReq(id){
@@ -6800,23 +7110,25 @@ function renderMyDuties(){
   const box=$("myDuties");if(!box)return;
   const list=myDutyList();
   const myEk=schedule&&schedule.ek?Object.keys(schedule.ek).map(Number).filter(d=>(schedule.ek[d]||[]).includes(me.id)).sort((a,b)=>a-b):[];
-  if(!list.length&&!myEk.length){box.innerHTML='<div class="empty-state">Bu ay sana yazılmış nöbet yok 🎉</div>';return;}
+  box.className="nd-list";
+  if(!list.length&&!myEk.length){box.innerHTML='<div class="nd-row"><span class="nd-row__body"><span class="nd-row__sub">Bu ay sana yazılmış nöbet yok.</span></span></div>';return;}
   box.innerHTML="";
   const {y,m}=vInfo();
   const R=rulesFor(vMonth()),wc=R.cfg;
   const ayK=["Oca","Şub","Mar","Nis","May","Haz","Tem","Ağu","Eyl","Eki","Kas","Ara"][m-1];
-  myEk.forEach(d=>{const el=document.createElement("div");el.className="person";
-    el.innerHTML=`<div class="avatar" style="background:#E8F1FF;color:#2B5A9E">🏖</div>
-      <div class="info"><div class="nm">${d} ${ayK} · Cmt</div><div class="sub">Ek Cumartesi izni · ertesi Pazar da boş</div></div>`;
+  myEk.forEach(d=>{const el=document.createElement("div");el.className="nd-row has-av";
+    el.innerHTML=`<span class="datechip is-ek"><b>${d}</b><span>Cmt</span></span>
+      <span class="nd-row__body"><span class="nd-row__title">Ek Cumartesi izni</span><span class="nd-row__sub">${d} ${ayK} · ertesi Pazar da boş</span></span>`;
     box.appendChild(el);});
   list.forEach((x,i)=>{
     const dow=DAYS_TR[wdOf(y,m,x.d)];
-    const d=document.createElement("div");d.className="person";
+    const d=document.createElement("div");d.className="nd-row has-av";
     const ertesi=dutyEndsNextDay(x)?" (ertesi gün)":"";
-    d.innerHTML=`<div class="avatar" style="${brStyle(myProfile.pool)}">${x.bay?"🌙":x.wknd?"🎉":"🗓"}</div>
-      <div class="info"><div class="nm">${x.d} ${ayK} · ${dow}</div>
-      <div class="sub">${hEsc(x.label)} · ${x.start}–${x.end}${ertesi}${x.bay?" · bayram":x.wknd?" · hafta sonu":""}${wc.on&&wc.off[wdOf(y,m,x.d)]>0&&!R.wa.has(me.id)?` · sonrası izinli: ${wrOffText(wc,wdOf(y,m,x.d)).replace(/ izinli$/,"")}`:""}</div></div>
-      <button class="btn ghost small" style="white-space:nowrap" title="Bu nöbeti Google Takvim'e ekle" onclick="gcalOne(${i})">＋ Google</button>`;
+    const sonra=wc.on&&wc.off[wdOf(y,m,x.d)]>0&&!R.wa.has(me.id)?` · sonrası izinli: ${wrOffText(wc,wdOf(y,m,x.d)).replace(/ izinli$/,"")}`:"";
+    d.innerHTML=`<span class="datechip${x.bay?" is-hol":x.wknd?" is-we":""}"><b>${x.d}</b><span>${dow}</span></span>
+      <span class="nd-row__body"><span class="nd-row__title">${hEsc(x.label)} · ${x.start}–${x.end}${ertesi}</span>
+      <span class="nd-row__sub">${x.d} ${ayK}${x.bay?" · bayram":x.wknd?" · hafta sonu":""}${sonra}</span></span>
+      <button class="nd-btn is-sm is-tinted" title="Bu nöbeti Google Takvim'e ekle" onclick="gcalOne(${i})">＋ Google</button>`;
     box.appendChild(d);
   });
 }
