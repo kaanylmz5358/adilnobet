@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 1024 1024"><defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#14A595"/><stop offset="1" stop-color="#08695F"/></linearGradient>
+<linearGradient id="card" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#EEF7F5"/></linearGradient>
+<mask id="moon"><rect width="1024" height="1024" fill="#000"/><circle cx="516" cy="604" r="150" fill="#fff"/><circle cx="588" cy="546" r="132" fill="#000"/></mask>
+<filter id="sh" x="-20%" y="-20%" width="140%" height="150%"><feDropShadow dx="0" dy="18" stdDeviation="22" flood-color="#03302B" flood-opacity=".28"/></filter></defs>
+<rect width="1024" height="1024" rx="228" fill="url(#g)"/><g filter="url(#sh)"><rect x="222" y="262" width="580" height="560" rx="112" fill="url(#card)"/></g>
+<path d="M222 374a112 112 0 0 1 112-112h356a112 112 0 0 1 112 112v20H222z" fill="#CFEFEA"/>
+<rect x="352" y="196" width="68" height="148" rx="34" fill="#FFFFFF"/><rect x="604" y="196" width="68" height="148" rx="34" fill="#FFFFFF"/>
+<rect x="352" y="196" width="68" height="148" rx="34" fill="none" stroke="#08695F" stroke-opacity=".18" stroke-width="6"/><rect x="604" y="196" width="68" height="148" rx="34" fill="none" stroke="#08695F" stroke-opacity=".18" stroke-width="6"/>
+<rect width="1024" height="1024" fill="#0A7A70" mask="url(#moon)"/><path d="M652 662Q664.32 693.68 696 706Q664.32 718.32 652 750Q639.68 718.32 608 706Q639.68 693.68 652 662z" fill="#E8A312"/></svg>
