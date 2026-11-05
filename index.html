@@ -947,6 +947,23 @@ body.wz-on{overflow:hidden}
 .wzcal button.day{border:0;font:inherit;cursor:pointer;color:var(--ink)}
 .wzcal .holsel{background:var(--holiday)!important;color:#fff!important}
 #wizard .nd-group{margin-bottom:16px}
+.mgrid__bar{display:flex;align-items:center;justify-content:space-between;margin:4px 0 10px}
+.mgrid__bar b{font-size:22px;font-weight:700;font-variant-numeric:tabular-nums}
+.mgrid__bar .nd-iconbtn{width:44px;height:44px;border-radius:50%;border:0;background:var(--surface-2);display:grid;place-items:center;color:var(--ink);cursor:pointer}
+.mgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.mgrid__m{appearance:none;border:2px solid transparent;background:var(--surface);border-radius:14px;min-height:64px;padding:8px 4px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font:inherit;color:var(--ink);cursor:pointer}
+.mgrid__m b{font-size:17px;font-weight:600}
+.mgrid__m span{font-size:11px;line-height:14px;color:var(--ink-2)}
+.mgrid__m.is-pub span{color:var(--tint)}
+.mgrid__m.is-plan{background:var(--tint-soft)}
+.mgrid__m.is-plan span{color:var(--tint);font-weight:600}
+.mgrid__m.is-now b{text-decoration:underline;text-underline-offset:3px}
+.mgrid__m.is-cur{border-color:var(--tint)}
+#monthSheet .sheet{background:var(--bg)}
+.monthbtn{appearance:none;width:100%;display:flex;align-items:center;gap:10px;border:0;background:var(--surface-2);border-radius:12px;min-height:44px;padding:0 14px;margin:0 0 12px;font:inherit;color:var(--ink);cursor:pointer}
+.monthbtn span{color:var(--ink-2)}
+.monthbtn b{flex:1;text-align:left;font-weight:600}
+.monthbtn i{width:8px;height:8px;border-right:2px solid var(--ink-3);border-bottom:2px solid var(--ink-3);transform:rotate(45deg);margin:-4px 4px 0 0}
 .ndadv{margin:8px 0 0}
 .ndadv>summary{list-style:none;cursor:pointer;padding:12px 16px;border-radius:var(--radius-md);background:var(--surface);font-weight:600;display:flex;flex-direction:column;gap:2px;margin-bottom:16px}
 .ndadv>summary::-webkit-details-marker{display:none}
@@ -1234,10 +1251,7 @@ window.ND={guardClick:guardClick,icon:icon,icons:ICONS,haptic:haptic,stepper:ste
   <div class="card" id="myDutiesCard">
     <p class="eyebrow">Nöbet takvimim</p>
     <h2>Nöbetlerim</h2>
-    <div class="row" style="margin-bottom:8px">
-      <label>Ay</label>
-      <select id="viewMonthSel2" style="flex:1;min-width:150px" onchange="setViewMonth(this.value)"></select>
-    </div>
+    <button type="button" class="monthbtn" id="viewMonthBtn2" data-noauto onclick="openViewMonth()"><span>Ay</span><b id="viewMonthLbl2">—</b><i></i></button>
     <div id="myDuties"><div class="empty-state">Çizelge yayınlanınca nöbetlerin burada listelenir.</div></div>
     <div class="row" style="margin-top:12px">
       <button class="btn small" onclick="icsIndir()">Tüm nöbetlerimi takvime ekle (.ics)</button>
@@ -1532,10 +1546,7 @@ window.ND={guardClick:guardClick,icon:icon,icons:ICONS,haptic:haptic,stepper:ste
     <div id="genRow"><p class="hint">Herkes izin/tercih girince yönetici üretir; anında herkeste görünür.</p>
     <button class="btn" style="width:100%" onclick="openPrepWizard()">Listeyi hazırla</button>
     <button class="btn ghost small" style="width:100%;margin-top:8px" onclick="generate()">Doğrudan taslak üret</button></div>
-    <div class="row" style="margin-bottom:10px">
-      <label>Ay</label>
-      <select id="viewMonthSel" style="flex:1;min-width:150px" onchange="setViewMonth(this.value)"></select>
-    </div>
+    <button type="button" class="monthbtn" id="viewMonthBtn" data-noauto onclick="openViewMonth()"><span>Ay</span><b id="viewMonthLbl">—</b><i></i></button>
     <div id="viewMonthBanner"></div>
     <div id="genBanner"></div>
     <div class="seg" id="schedViewRow">
@@ -1946,12 +1957,9 @@ async function setupApply(d){
 }
 /* ---------- Listeyi hazırla ---------- */
 const PREP_STEPS=[
-  {t:"Hangi ayın listesi?",sub:()=>"İstediğin ayı seçebilirsin. Geçmiş ayların listeleri ve izinleri silinmez.",r:d=>{
-    const b=buAy(),L=[b,ayEkle(b,1),ayEkle(b,2)];
-    if(!L.includes(d.mk))L.push(d.mk);
-    return `<div class="nd-choices">${L.map(mk=>choiceHTML("mk",mk,d.mk===mk,ayAdi(mk),ayDurum(mk))).join("")}</div>
-      <div style="margin-top:16px">${iosGroup("",[iosRow("Başka bir ay",`<span class="wzmon"><button type="button" class="ndstep__b" aria-label="Önceki ay" onclick="wzMk(-1)">${ND.icon("chev-l")}</button><b>${ayAdi(d.mk)}</b><button type="button" class="ndstep__b" aria-label="Sonraki ay" onclick="wzMk(1)">${ND.icon("chev-r")}</button></span>`)],
-      schedulesAll[d.mk]?`${ayAdi(d.mk)} için yayınlanmış liste var; yeni listeyi yayınlarsan o geçer, eskisi sürüm geçmişinde kalır.`:"")}</div>`;},
+  {t:"Hangi ayın listesi?",sub:()=>"İstediğin yılın istediğin ayını seç. Geçmiş ayların listeleri ve izinleri silinmez.",r:d=>{
+    if(!d.yr)d.yr=+d.mk.slice(0,4);
+    return monthGridHTML(d.yr,d.mk,"wzPickMk","wzYr")+`<p class="wz__note"><b>Seçilen: ${ayAdi(d.mk)}</b>${ayDurum(d.mk)?" · "+ayDurum(d.mk):""}.${schedulesAll[d.mk]?` Bu ay için yayınlanmış liste var; yeni listeyi yayınlarsan o geçer, eskisi sürüm geçmişinde kalır.`:""}</p>`;},
     after:async d=>{if(d.mk!==planAy()){const ok=await goToMonth(d.mk,{silent:true});if(!ok)throw new Error("Ay değiştirilemedi");d.hol=new Set();d.arf=new Set();}}},
   {t:"Tatil ve arife günleri",sub:()=>`${ayAdi(planAy())} içinde resmi tatil, bayram ya da arife olan günlere dokun.`,r:d=>{
     const {y,m,nDays,firstDow}=monthInfo(planAy());
@@ -2058,7 +2066,9 @@ async function wzApproveAll(){
   for(const p of members)if(pendDays(p.id).length)await decideLeave(p.id,true,{noConfirm:1});
   wzRender();
 }
-function wzMk(k){WZ.d.mk=ayEkle(WZ.d.mk,k);ND.haptic(4);wzRender();}
+function wzMk(k){WZ.d.mk=ayEkle(WZ.d.mk,k);WZ.d.yr=+WZ.d.mk.slice(0,4);ND.haptic(4);wzRender();}
+function wzPickMk(mk){WZ.d.mk=mk;WZ.d.yr=+mk.slice(0,4);ND.haptic(4);wzRender();}
+function wzYr(k){WZ.d.yr=(WZ.d.yr||+WZ.d.mk.slice(0,4))+k;ND.haptic(4);wzRender();}
 function wzHol(dd){const d=WZ.d,a=d.brush==="arf"?d.arf:d.hol,b=d.brush==="arf"?d.hol:d.arf;
   if(a.has(dd))a.delete(dd);else{a.add(dd);b.delete(dd);}ND.haptic(4);wzRender();}
 async function openPrepWizard(){
@@ -5621,7 +5631,9 @@ function renderMonthPickers(){
     const et=ayAdi(mk)+(mk===dept.month?(schedulesAll[mk]?" · hazırlanan ay":" · hazırlanıyor"):"");
     return `<option value="${mk}" ${mk===cur?"selected":""}>${et}</option>`;
   }).join("");
-  ["viewMonthSel","viewMonthSel2"].forEach(id=>{const e=$(id);if(e){e.innerHTML=html;e.value=cur;}});
+  void html;
+  const lbl=ayAdi(cur)+(cur===dept.month?(schedulesAll[cur]?" · hazırlanan ay":" · hazırlanıyor"):schedulesAll[cur]?"":" · liste yok");
+  ["viewMonthLbl","viewMonthLbl2"].forEach(id=>{const e=$(id);if(e)e.textContent=lbl;});
   const b=$("viewMonthBanner");
   if(b){
     if(cur!==dept.month){
@@ -5795,18 +5807,35 @@ function ayDurum(mk){
   if(schedulesAll[mk])t.push("yayınlanmış liste var");
   return t.join(" · ");
 }
+/* ---------- AY IZGARASI: istenen yılın istenen ayı (sınır yok) ---------- */
+const AY_KISA=["Oca","Şub","Mar","Nis","May","Haz","Tem","Ağu","Eyl","Eki","Kas","Ara"];
+function monthGridHTML(y,cur,pickFn,yearFn){
+  const b=buAy(),plan=dept&&dept.month;
+  return `<div class="mgrid__bar"><button type="button" class="nd-iconbtn" aria-label="Önceki yıl" data-noauto onclick="${yearFn}(-1)">${ND.icon("chev-l")}</button><b>${y}</b>
+    <button type="button" class="nd-iconbtn" aria-label="Sonraki yıl" data-noauto onclick="${yearFn}(1)">${ND.icon("chev-r")}</button></div>
+    <div class="mgrid">${AY_KISA.map((a,i)=>{const mk=y+"-"+String(i+1).padStart(2,"0");
+      const t=mk===plan?"hazırlanan":schedulesAll[mk]?"liste var":mk===b?"bu ay":"";
+      return `<button type="button" class="mgrid__m${mk===cur?" is-cur":""}${mk===plan?" is-plan":""}${schedulesAll[mk]?" is-pub":""}${mk===b?" is-now":""}" data-mk="${mk}" data-noauto onclick="${pickFn}('${mk}')"><b>${a}</b><span>${t||"&nbsp;"}</span></button>`;}).join("")}</div>`;
+}
+let mpState=null;
+function openMonthPicker(o){mpState={...o,y:+String(o.cur||buAy()).slice(0,4)};renderMonthPicker();$("monthSheet").classList.add("on");}
+function renderMonthPicker(){if(!mpState)return;
+  $("monthSheetBody").innerHTML=`<div class="person-head"><b>${mpState.title}</b>${mpState.sub?`<span>${mpState.sub}</span>`:""}</div>`+monthGridHTML(mpState.y,mpState.cur,"mpPick","mpYear");}
+function mpYear(k){if(!mpState)return;mpState.y+=k;ND.haptic(4);renderMonthPicker();}
+function mpPick(mk){const o=mpState;closeMonthSheet();if(o&&o.onPick)o.onPick(mk);}
 function openMonthSheet(){
   if(!isAdmin()){toast("Ayı sadece yönetici değiştirebilir.",true);return;}
-  const b=buAy(),list=[];for(let k=-3;k<=12;k++)list.push(ayEkle(b,k));
-  if(dept&&!list.includes(dept.month))list.unshift(dept.month);
-  Object.keys(schedulesAll).forEach(mk=>{if(!list.includes(mk))list.push(mk);});
-  list.sort();
-  $("monthSheetBody").innerHTML=`<div class="person-head"><b>Hangi ayın listesi?</b><span>İstediğin ayı seç. Geçmiş ayların listeleri ve izinleri silinmez.</span></div>
-    <div class="nd-group"><div class="nd-list">${list.map(mk=>`<button class="nd-row" type="button" data-noauto onclick="pickMonth('${mk}')">
-      <span class="nd-row__body"><span class="nd-row__title">${ayAdi(mk)}</span>${ayDurum(mk)?`<span class="nd-row__sub">${ayDurum(mk)}</span>`:""}</span>
-      ${dept&&mk===dept.month?`<span class="nd-row__value" style="color:var(--tint)">${ND.icon("check")}</span>`:""}</button>`).join("")}</div></div>`;
-  $("monthSheet").classList.add("on");
-  const cur=$("monthSheetBody").querySelector(".nd-row .nd-ico");if(cur)cur.closest(".nd-row").scrollIntoView({block:"center"});
+  openMonthPicker({title:"Hangi ayın listesi?",sub:"İstediğin ayı seç. Geçmiş ayların listeleri ve izinleri silinmez.",cur:dept&&dept.month,onPick:pickMonth});
+}
+/* Takvim / Nöbetlerim: istenen ayı görüntüle; listesi olmayan ay için yönetici o ayın hazırlığına geçebilir */
+function openViewMonth(){
+  openMonthPicker({title:"Hangi ay?",sub:isAdmin()?"Listesi olmayan bir ayı seçersen o ayın listesini hazırlamaya geçersin.":"",cur:vMonth(),onPick:viewPick});
+}
+async function viewPick(mk){
+  if(!dept)return;
+  if(schedulesAll[mk]||mk===dept.month||!isAdmin()){await setViewMonth(mk);return;}
+  if(!confirm(`${ayAdi(mk)} için henüz liste yok.\n\nBu ayın listesini hazırlamaya geçilsin mi? (${ayAdi(dept.month)} kayıtlı kalır)`))return;
+  if(await goToMonth(mk))await setViewMonth(mk);
 }
 function closeMonthSheet(){const s=$("monthSheet");if(s)s.classList.remove("on");}
 async function pickMonth(mk){
