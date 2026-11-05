@@ -947,6 +947,12 @@ body.wz-on{overflow:hidden}
 .wzcal button.day{border:0;font:inherit;cursor:pointer;color:var(--ink)}
 .wzcal .holsel{background:var(--holiday)!important;color:#fff!important}
 #wizard .nd-group{margin-bottom:16px}
+.wzmon{display:inline-flex;align-items:center;gap:6px;background:var(--surface-2);border-radius:999px;height:34px}
+.wzmon b{font-weight:600;min-width:104px;text-align:center;font-variant-numeric:tabular-nums}
+#dtTable .nd-row input[type=time],#wizard .nd-row input[type=time]{width:auto;min-width:96px;min-height:34px;padding:4px 10px;border-radius:8px;background:var(--surface-2);border:0;font:inherit;font-variant-numeric:tabular-nums;color:var(--ink);text-align:center}
+#dtTable .dtcalc .nd-row__value{font-variant-numeric:tabular-nums;white-space:nowrap;max-width:none;flex:none}
+#dtTable .dtcalc .nd-row__title{white-space:normal}
+#dtTable .dtcalc{background:var(--surface)}
 /* taslak onay kartı */
 #decideBody .nd-row{align-items:center}
 #decideBody .decname{white-space:normal}
@@ -1222,7 +1228,7 @@ window.ND={guardClick:guardClick,icon:icon,icons:ICONS,haptic:haptic,stepper:ste
   <div id="setBar" class="setbar"></div>
   <div id="setLanding"></div>
   <div class="card ios" id="monthCard" data-grp="ay">
-  <div class="nd-group"><div class=nd-group__label>Hazırlanan ay</div><div class="nd-list"><div class="nd-row"><span class="nd-row__body"><span class="nd-row__title">Ay</span></span><input type="month" id="month" class="rowin"></div><div class="nd-row"><span class="nd-row__body"><span class="nd-row__title">İki nöbet arası en az</span><span class=nd-row__sub>gün (2 = bir gün boşluk)</span></span><input type="number" id="minGap" min="1" max="7"></div><div class="nd-row"><span class="nd-row__body"><span class="nd-row__title">Resmi tatil / bayram</span></span><input type="text" id="bayramDays" class="rowin" placeholder="ör. 15-17,20" inputmode="numeric"></div><button class="nd-row is-action" onclick="pickBayram()"><span class="nd-row__body"><span class="nd-row__title">Bayram günlerini takvimden seç</span></span><span data-icon="calendar"></span></button></div><div class=nd-group__foot>Ay değişince o ayın izinleri, tercihleri ve listesi açılır.</div></div>
+  <div class="nd-group"><div class=nd-group__label>Hazırlanan ay</div><div class="nd-list"><button class="nd-row" type="button" data-noauto onclick="openMonthSheet()"><span class="nd-row__body"><span class="nd-row__title">Ay</span></span><span class="nd-row__value" id="monthLbl">—</span><span data-icon="chev-r"></span></button><input type="hidden" id="month"><div class="nd-row"><span class="nd-row__body"><span class="nd-row__title">İki nöbet arası en az</span><span class=nd-row__sub>gün (2 = bir gün boşluk)</span></span><input type="number" id="minGap" min="1" max="7"></div><div class="nd-row"><span class="nd-row__body"><span class="nd-row__title">Resmi tatil / bayram</span></span><input type="text" id="bayramDays" class="rowin" placeholder="ör. 15-17,20" inputmode="numeric"></div><button class="nd-row is-action" onclick="pickBayram()"><span class="nd-row__body"><span class="nd-row__title">Bayram günlerini takvimden seç</span></span><span data-icon="calendar"></span></button></div><div class=nd-group__foot>Ay değişince o ayın izinleri, tercihleri ve listesi açılır.</div></div>
   <div class="nd-group"><div class=nd-group__label>Liste</div><div class="nd-list"><div class="nd-row"><span class="nd-row__body"><span class="nd-row__title">Liste tipi</span></span><select id="schedMode" onchange="modeChanged()" class="rowin">
         <option value="rooms">Oda tabanlı</option>
         <option value="shifts">Vardiya tabanlı</option></select></div><div class="nd-row"><span class="nd-row__body"><span class="nd-row__title">Diğer listelerle uyum</span></span><select id="linkDefault" class="rowin"></select></div><div class="nd-row"><span class="nd-row__body"><span class="nd-row__title">Çalışma düzeni</span></span><select id="workModel" class="rowin">
@@ -1320,14 +1326,14 @@ window.ND={guardClick:guardClick,icon:icon,icons:ICONS,haptic:haptic,stepper:ste
   <div class="nd-group" data-autosave="rooms"><div class="nd-group__label">Özel odalar</div><div class="nd-list roomlist"><div id="roomList"></div>
     <button class="nd-row is-action" id="addRoomBtn" onclick="addRoomRow()"><span class="nd-row__body"><span class="nd-row__title">Özel oda ekle</span></span><span data-icon="plus"></span></button></div>
     <div class="nd-group__foot">Özel oda eklenen branş kendi listesi gibi çalışır: kilitli oda o branş nöbette değilse boş kalır, devredilen oda boşsa genel listeye açılır.</div></div>
-  <div class="nd-group" data-autosave="duty"><div class="nd-group__label">Nöbet saatleri · hangi gün kaç saat</div>
-    <div class="dtpre" id="dtPresets">
-      <button class="dchip" onclick="dtPreset('24')">Hepsi 24 saat</button>
-      <button class="dchip" onclick="dtPreset('16')">Hafta içi 16→08</button>
-      <button class="dchip" onclick="dtPreset('17')">Hafta içi 17→08</button>
+  <div class="nd-group" data-autosave="duty"><div class="nd-group__label">Nöbet saatleri</div>
+    <div class="seg" id="dtMode">
+      <button data-m="mesai" onclick="dtSetMode('mesai')">Mesaiden sonra</button>
+      <button data-m="24" onclick="dtSetMode('24')">Her gün 24 saat</button>
+      <button data-m="custom" onclick="dtSetMode('custom')">Güne göre</button>
     </div>
     <div class="nd-list"><div id="dtTable"></div></div>
-    <div class="nd-group__foot">Saat dengesi, telefon takvimi ve Google Takvim bu saatlerle hesaplanır. Bitiş başlangıçtan önce ya da eşitse nöbet ertesi gün biter. Tatil = resmi tatil / bayram.</div></div>
+    <div class="nd-group__foot" id="dtFoot"></div></div>
 </div>
   <div class="card" id="shiftCard" style="display:none" data-grp="vardiya">
     <p class="eyebrow">Vardiya ayarları</p>
@@ -1583,6 +1589,12 @@ window.ND={guardClick:guardClick,icon:icon,icons:ICONS,haptic:haptic,stepper:ste
   </div>
 </div>
 
+<div id="monthSheet" class="modal" onclick="if(event.target===this)closeMonthSheet()">
+  <div class="sheet">
+    <div id="monthSheetBody"></div>
+    <button class="btn ghost" style="width:100%;margin-top:4px" onclick="closeMonthSheet()">Vazgeç</button>
+  </div>
+</div>
 <div id="personSheet" class="modal" onclick="if(event.target===this)closePerson()">
   <div class="sheet">
     <div id="personSheetBody"></div>
@@ -1658,7 +1670,7 @@ function showView(v){document.querySelectorAll(".view").forEach(e=>e.classList.r
 /* ================= OTOMATİK KAYIT =================
    Ayarlar, tercihler, izinler ve profil değiştiği anda kaydedilir; ayrı "Kaydet" düğmesi yoktur.
    Kayıtlar sırayla yapılır (aynı anda iki kayıt birbirinin ayarını ezmesin). */
-const AUTO_ID={month:"month",minGap:"month",bayramDays:"bayram",schedMode:"mode",linkDefault:"link",genDay:"genday",fillPolicy:"fill",
+const AUTO_ID={minGap:"month",bayramDays:"bayram",schedMode:"mode",linkDefault:"link",genDay:"genday",fillPolicy:"fill",
   leaveProp:"leaveprop",workModel:"work",patternOn:"rhythm",patternOff:"rhythm",minRest:"minrest",wishPri:"wish",partnerMode:"partner",
   balDN:"balance",balWE:"balance",generalRooms:"rooms",izinInput:"izin",wishInput:"mywish",profName:"profile",profBranch:"profile"};
 const autoT={};let autoQ=Promise.resolve(),autoPending={};
@@ -1808,11 +1820,16 @@ const SETUP_STEPS=[
      ${choiceHTML("kind","shift",d.kind==="shift","Vardiyalı","Sabah, akşam, gece gibi saatli vardiyalar (acil, hemşire, sekreter).")}</div>`},
   {t:"Günde kaç kişi nöbetçi?",skip:d=>d.kind!=="24",r:d=>iosGroup("",[iosRow("Günde nöbetçi sayısı",`<input type="number" id="wz_per" min="1" max="10" value="${d.per}" onchange="WZ.d.per=+this.value">`)],
      "Kendi odası olan branşları sonra Ayarlar → Odalar'dan ekleyebilirsin.")},
-  {t:"Nöbet kaç saat sürüyor?",skip:d=>d.kind!=="24",r:d=>`<div class="nd-choices">${choiceHTML("dt","24",d.dt==="24","Her gün 24 saat","08:00'de başlar, ertesi sabah 08:00'de biter.")}
-     ${choiceHTML("dt","16",d.dt==="16","Hafta içi 16:00 → 08:00","Hafta sonu ve resmi tatillerde 24 saat.")}
-     ${choiceHTML("dt","17",d.dt==="17","Hafta içi 17:00 → 08:00","Hafta sonu ve resmi tatillerde 24 saat.")}
-     ${d.dt==="custom"?choiceHTML("dt","custom",true,"Şu anki saatleri koru","Ayarlar → Odalar ve nöbet saatleri'nde güne göre girilmiş."):""}</div>
-     <p class="wz__note">Saatler kişi başı saat dengesinde ve telefon takviminde kullanılır.</p>`},
+  {t:"Nöbet saatleri",skip:d=>d.kind!=="24",ok:d=>d.dt==="mesai"?msErr(d.ms):"",r:d=>{
+     const tm=(f)=>`<input type="time" value="${d.ms[f]}" onchange="WZ.d.ms.${f}=this.value;wzRender()">`;
+     let h=`<div class="nd-choices">${choiceHTML("dt","mesai",d.dt==="mesai","Hafta içi mesaiden sonra başlar","Ertesi sabah mesai başlayınca biter. Hafta sonu ve resmi tatillerde 24 saat.")}
+     ${choiceHTML("dt","24",d.dt==="24","Her gün 24 saat","Her gün aynı saatte devredilir.")}
+     ${d.dt==="custom"?choiceHTML("dt","custom",true,"Şu anki saatleri koru","Ayarlar → Odalar ve nöbet saatleri'nde güne göre girilmiş."):""}</div>`;
+     if(d.dt==="mesai"){const e=msErr(d.ms);
+       h+=`<div style="margin-top:16px">${iosGroup("Mesai saatlerin",[iosRow("Mesai başlar",tm("start")),iosRow("Mesai biter",tm("end"))],
+         e?`<span style="color:var(--danger)">${e}</span>`:msSummary(d.ms)+" Hafta sonu ve tatil "+d.ms.start+"'de başlar, 24 saat.")}</div>`;}
+     if(d.dt==="24")h+=`<div style="margin-top:16px">${iosGroup("",[iosRow("Nöbet değişim saati",tm("start"))],"Nöbet her gün bu saatte devredilir.")}</div>`;
+     return h+`<p class="wz__note">Cumartesi yarım gün mesai varsa Ayarlar → Odalar ve nöbet saatleri'nden ekleyebilirsin.</p>`;}},
   {t:"Vardiyaları tanımla",skip:d=>d.kind!=="shift",r:d=>`<p class="wz__sub">Vardiyaların adını, saatini ve kaç kişi gerektiğini kurulumdan sonra <b>Ayarlar → Vardiyalar</b>'dan eklersin. Şimdi diğer soruları tamamlayalım.</p>`},
   {t:"Nöbetten sonra ne olur?",r:d=>`<div class="nd-choices">${choiceHTML("after","off",d.after==="off","Ertesi gün izinli","Nöbet sonrası mesai yok."+weekDemo([0],[1]))}
      ${choiceHTML("after","work",d.after==="work","Ertesi gün çalışır","Nöbetten çıkan normal mesaisine devam eder.")}
@@ -1831,7 +1848,8 @@ const SETUP_STEPS=[
      ${choiceHTML("me","no",d.me==="no","Hayır, sadece yönetiyorum","Listeye dahil olmazsın; yalnız hazırlar ve onaylarsın.")}</div>`},
   {t:"Her şey doğru mu?",btn:"Kurulumu bitir",r:d=>{const R=(a,b)=>iosRow(a,`<span class="nd-row__value">${b}</span>`);return iosGroup("",[
      R("Nöbet",d.kind==="24"?`Günlük · günde ${d.per} kişi`:"Vardiyalı"),
-     ...(d.kind==="24"?(d.dt==="custom"?[R("Nöbet saatleri","Güne göre (mevcut)")]:[R("Hafta içi",d.dt==="24"?"08:00 → 08:00":`${d.dt}:00 → 08:00`),R("Hafta sonu, tatil","24 saat")]):[]),
+     ...(d.kind==="24"?(d.dt==="custom"?[R("Nöbet saatleri","Güne göre (mevcut)")]:d.dt==="24"?[R("Nöbet saatleri",`Her gün 24 saat · ${d.ms.start}`)]
+        :[R("Mesai",`${d.ms.start} – ${d.ms.end}`),R("Hafta içi nöbet",`${d.ms.end} → ${d.ms.start}`),R("Hafta sonu, tatil",`24 saat · ${d.ms.start}`)]):[]),
      R("Nöbet sonrası",d.after==="off"?"Ertesi gün izinli":d.after==="work"?"Ertesi gün çalışır":"Nöbet tüm mesai"),
      ...(d.after==="off"&&d.kind==="24"?[R("Perşembe / Cuma",d.special==="thufri"?"3 gün izin, sırayla":d.special==="none"?"Ertesi gün izinli":"Sonra ayarlanacak")]:[]),
      ...(d.after==="off"&&d.kind==="24"&&d.special!=="custom"?[R("Cumartesi",d.sat?`Yarım gün · ${d.need} kişi kalır`:"Normal gün")]:[]),
@@ -1844,9 +1862,9 @@ const SETUP_STEPS=[
 ];
 function setupDefaults(){
   const dt=dutyTimeUI(),c=wrCfg();
-  const dk=dtUniform(dt)&&dt.d[0].start==="08:00"&&dt.d[0].end==="08:00"?"24":(dt.d[0].start==="16:00"&&dt.d[5].start==="08:00"?"16":dt.d[0].start==="17:00"&&dt.d[5].start==="08:00"?"17":"custom");
+  const dk=dt.mode;
   const wm=(dept&&dept.work_model)||"duty_rest";
-  return {kind:isShiftMode()?"shift":"24",per:+($("generalRooms").value||1)||1,dt:dk,
+  return {kind:isShiftMode()?"shift":"24",per:+($("generalRooms").value||1)||1,dt:dk,ms:{...dt.ms},
     after:wm==="duty_work"?"work":wm==="shift_only"?"all":"off",
     special:c.on&&c.off[3]>=3?"thufri":c.on?"custom":"none",sat:c.on?c.sat.on:false,need:c.sat.need||3,
     lp:leaveProp()?"prop":"eq",me:onDuty(myProfile)?"yes":"no"};
@@ -1856,7 +1874,7 @@ async function setupApply(d){
   if(d.kind==="shift"!==isShiftMode()){$("schedMode").value=d.kind==="shift"?"shifts":"rooms";modeChanged();await saveGrp("mode");}
   if(d.kind==="24"){
     $("generalRooms").value=d.per;await saveGrp("rooms");
-    if(d.dt!=="custom"){dtPreset(d.dt);await saveGrp("duty");}
+    if(d.dt!=="custom"){dtRows=dtBuild(d.dt,d.ms);renderDT();await saveGrp("duty");}
   }
   $("workModel").value=d.after==="off"?"duty_rest":d.after==="work"?"duty_work":"shift_only";await saveGrp("work");
   if(d.after==="off"&&d.kind==="24"&&d.special!=="custom"){
@@ -1873,6 +1891,13 @@ async function setupApply(d){
 }
 /* ---------- Listeyi hazırla ---------- */
 const PREP_STEPS=[
+  {t:"Hangi ayın listesi?",sub:()=>"İstediğin ayı seçebilirsin. Geçmiş ayların listeleri ve izinleri silinmez.",r:d=>{
+    const b=buAy(),L=[b,ayEkle(b,1),ayEkle(b,2)];
+    if(!L.includes(d.mk))L.push(d.mk);
+    return `<div class="nd-choices">${L.map(mk=>choiceHTML("mk",mk,d.mk===mk,ayAdi(mk),ayDurum(mk))).join("")}</div>
+      <div style="margin-top:16px">${iosGroup("",[iosRow("Başka bir ay",`<span class="wzmon"><button type="button" class="ndstep__b" aria-label="Önceki ay" onclick="wzMk(-1)">${ND.icon("chev-l")}</button><b>${ayAdi(d.mk)}</b><button type="button" class="ndstep__b" aria-label="Sonraki ay" onclick="wzMk(1)">${ND.icon("chev-r")}</button></span>`)],
+      schedulesAll[d.mk]?`${ayAdi(d.mk)} için yayınlanmış liste var; yeni listeyi yayınlarsan o geçer, eskisi sürüm geçmişinde kalır.`:"")}</div>`;},
+    after:async d=>{if(d.mk!==planAy()){const ok=await goToMonth(d.mk,{silent:true});if(!ok)throw new Error("Ay değiştirilemedi");d.hol=new Set();}}},
   {t:"Tatil günleri",sub:()=>`${ayAdi(planAy())} içinde resmi tatil ya da bayram olan günlere dokun.`,r:d=>{
     const {y,m,nDays,firstDow}=monthInfo(planAy());
     let h=`<div class="cal wzcal">${DAYS_TR.map(x=>`<div class="dh">${x}</div>`).join("")}`;
@@ -1918,10 +1943,12 @@ const PREP_STEPS=[
 ];
 function wzQuotaSum(){const e=$("wzQuotaSum");if(!e)return;const S=totalSlots(),t=members.filter(onDuty).reduce((a,p)=>a+(+quotaCur(p)||0),0);
   e.innerHTML=t===S?`Toplam ${t} / ${S} — tamam.`:`Toplam ${t} / ${S} — ${t<S?`${S-t} nöbet açıkta kalır, kurallara göre dağıtılır`:`${t-S} fazla; bazı sayılar tutturulamaz`}.`;}
+function wzMk(k){WZ.d.mk=ayEkle(WZ.d.mk,k);ND.haptic(4);wzRender();}
 function wzHol(dd){const h=WZ.d.hol;h.has(dd)?h.delete(dd):h.add(dd);ND.haptic(4);wzRender();}
 function openPrepWizard(){
   if(!isAdmin()){showTab("cizelge");return;}
-  WZ={kind:"prep",step:0,d:{hol:new Set(parseDays($("bayramDays").value)),count:"equal"}};wzOpen();
+  const b=buAy(),mk=planAy()<b?ayEkle(b,1):planAy();     // geçmişte kalmış ay seçili olmasın
+  WZ={kind:"prep",step:0,d:{mk,hol:new Set(parseDays($("bayramDays").value)),count:"equal"}};wzOpen();
 }
 async function prepApply(d){
   $("bayramDays").value=fmtDays([...d.hol].sort((a,b)=>a-b));await saveGrp("bayram");
@@ -1952,6 +1979,7 @@ function wzRender(){
 function wzBack(){const v=wzVisible(),i=v.indexOf(WZ.step);if(i>0){WZ.step=v[i-1];wzRender();}}
 async function wzNext(){
   const v=wzVisible(),i=v.indexOf(WZ.step),S=wzSteps();
+  if(S[WZ.step].ok){const e=S[WZ.step].ok(WZ.d);if(e){toast("⚠️ "+e,true);return;}}
   const btn=$("wzNext");if(btn){btn.disabled=true;btn.textContent="Kaydediliyor…";}
   try{
     if(WZ.kind==="setup"){
@@ -1960,6 +1988,7 @@ async function wzNext(){
     }else if(i===v.length-1){
       const d=WZ.d;await prepApply(d);wzClose();showTab("cizelge");generate();return;
     }
+    if(S[WZ.step].after)await S[WZ.step].after(WZ.d);
     WZ.step=v[i+1];wzRender();
   }catch(e){console.error(e);toast("⚠️ "+(e&&e.message||e),true);wzRender();}
 }
@@ -2328,7 +2357,8 @@ async function loadAll(){
   members=(mem||[]).map(r=>({...r,id:r.user_id}));
   myProfile=members.find(x=>x.id===me.id)||myProfile;
   const mt=myTeams.find(x=>x.dept_id===did); if(mt&&myProfile)mt.is_admin=myProfile.is_admin;
-  $("month").value=dept.month;$("minGap").value=dept.min_gap;$("bayramDays").value=dept.bayram||"";
+  $("month").value=dept.month;$("minGap").value=dept.min_gap;
+  if($("monthLbl"))$("monthLbl").textContent=ayAdi(dept.month);$("bayramDays").value=dept.bayram||"";
   $("generalRooms").value=dept.general_rooms!=null?dept.general_rooms:2;
   roomRows=Object.entries(branchRooms()).map(([b,v])=>({branch:b,rooms:v.rooms,shared:!!v.shared}));
   shiftRows=(dept.shifts||[]).map(s=>({name:s.name,start:s.start,end:s.end,count:s.count,days:(s.days||[1,1,1,1,1,1,1]).slice(),rest:s.rest||0,owner:s.owner||null,mesai:!!s.mesai}));
@@ -2523,13 +2553,55 @@ function effShift(si,d,pid){
 const DT_GUN=["Pazartesi","Salı","Çarşamba","Perşembe","Cuma","Cumartesi","Pazar"];
 let dtRows=null;
 function hhPad(t){const m=String(t||"").match(/^(\d{1,2}):(\d{2})/);return m?String(Math.min(24,+m[1])).padStart(2,"0")+":"+m[2]:null;}
+/* Nöbet saatleri üç biçimde kurulur:
+   mesai  : hafta içi nöbet mesai bitince başlar, ertesi sabah mesai başlayınca biter; hafta sonu ve tatil 24 saat
+            (Cumartesi yarım gün mesai varsa Cumartesi nöbeti o mesai bitince başlar)
+   24     : her gün 24 saat, aynı saatte devir
+   custom : her gün için ayrı saat
+   Hesaplar her zaman d[0..6] + bay satırlarını kullanır; mode/ms yalnızca nasıl kurulduğunu hatırlar. */
+const DT_MS={start:"08:00",end:"17:00",sat:false,satEnd:"13:00"};
 function dtNorm(o){
   o=o||{};
   const one=(x,def)=>({start:hhPad(x&&x.start)||def.start,end:hhPad(x&&x.end)||def.end});
   const base=one(o,{start:"08:00",end:"08:00"});
   const d=[];for(let i=0;i<7;i++)d.push(one(o.d&&o.d[i],base));
   const bay=one(o.bay,o.d?d[6]:base);
-  return {start:d[0].start,end:d[0].end,d,bay};
+  const r={start:d[0].start,end:d[0].end,d,bay};
+  const mi=o.ms||{};
+  r.ms={start:hhPad(mi.start)||DT_MS.start,end:hhPad(mi.end)||DT_MS.end,sat:!!mi.sat,satEnd:hhPad(mi.satEnd)||DT_MS.satEnd};
+  r.mode=["mesai","24","custom"].includes(o.mode)?o.mode:dtGuessMode(r);
+  if(!o.ms){                        // eski kayıt: mesai saatlerini satırlardan çıkar
+    if(r.mode==="mesai"){r.ms.start=d[6].start;r.ms.end=d[0].start;r.ms.sat=d[5].start!==d[6].start;if(r.ms.sat)r.ms.satEnd=d[5].start;}
+    else if(r.mode==="24")r.ms.start=d[0].start;
+  }
+  return r;
+}
+function dtGuessMode(r){
+  const k=t=>t.start+"|"+t.end,wd=r.d.slice(0,5),sun=r.d[6],sat=r.d[5];
+  if(dtUniform(r)&&r.d[0].start===r.d[0].end)return "24";
+  if(sun.start!==sun.end||k(r.bay)!==k(sun))return "custom";
+  if(!wd.every(t=>k(t)===k(wd[0]))||wd[0].end!==sun.start||hm(wd[0].start)<=hm(wd[0].end))return "custom";
+  if(!(k(sat)===k(sun)||(sat.end===sun.start&&hm(sat.start)>hm(sun.start))))return "custom";
+  return "mesai";
+}
+function dtBuild(mode,ms){
+  ms={...DT_MS,...(ms||{})};
+  const T=(a,b)=>({start:a,end:b});
+  if(mode==="24"){const t=T(ms.start,ms.start);return dtNorm({mode,ms,d:[t,t,t,t,t,t,t],bay:t});}
+  const wd=T(ms.end,ms.start),we=T(ms.start,ms.start),sat=ms.sat?T(ms.satEnd,ms.start):we;
+  return dtNorm({mode:"mesai",ms,d:[wd,wd,wd,wd,wd,sat,we],bay:we});
+}
+/* mesai saatleri geçerli mi? hata metni ya da "" */
+function msErr(ms){
+  if(hm(ms.end)<=hm(ms.start))return "Mesai bitişi başlangıçtan sonra olmalı.";
+  if(ms.sat&&(hm(ms.satEnd)<=hm(ms.start)))return "Cumartesi mesai bitişi mesai başlangıcından sonra olmalı.";
+  return "";
+}
+function msSummary(ms,kisa){
+  const h=t=>Math.round(durH(t)*10)/10;
+  const wd={start:ms.end,end:ms.start};
+  return kisa?`Hafta içi ${ms.end} → ${ms.start} (${h(wd)} sa)`:
+    `Hafta içi nöbet ${ms.end}'de başlar, ertesi gün ${ms.start}'de biter (${h(wd)} saat).`;
 }
 function durH(t){const x=(hm(t.end)-hm(t.start)+24)%24;return x>1e-9?x:24;}
 function dutyFor(dt,y,m,d,bays){return (bays&&bays.has(d))?dt.bay:dt.d[wdOf(y,m,d)];}
@@ -2537,13 +2609,30 @@ function dtUniform(dt){const k=t=>t.start+"|"+t.end;return dt.d.every(t=>k(t)===
 function dutyTimeUI(){return JSON.parse(JSON.stringify(dtRows||dtNorm(dept&&dept.opts&&dept.opts.duty_time)));}
 function dtPreset(k){
   if(!isAdmin())return;
-  const t=(a,b)=>({start:a,end:b});
-  const we=t("08:00","08:00");
-  const wd=k==="16"?t("16:00","08:00"):k==="17"?t("17:00","08:00"):t("08:00","08:00");
-  dtRows=dtNorm({d:[wd,wd,wd,wd,wd,we,we],bay:we});renderDT();
+  const ms=(dtRows||dtNorm(opts().duty_time)).ms;
+  dtRows=k==="24"?dtBuild("24",{...ms,start:"08:00"}):dtBuild("mesai",{...ms,start:"08:00",end:k+":00",sat:false});
+  renderDT();
+}
+function dtSetMode(m){
+  if(!isAdmin())return;
+  const cur=dtRows||dtNorm(opts().duty_time);
+  if(m==="custom"){dtRows=JSON.parse(JSON.stringify(cur));dtRows.mode="custom";}
+  else dtRows=dtBuild(m,cur.ms);
+  renderDT();
+}
+function dtMs(f,v){
+  if(!isAdmin())return;
+  const cur=dtRows||dtNorm(opts().duty_time);
+  const ms={...cur.ms};
+  if(f==="sat")ms.sat=!!v;else{const x=hhPad(v);if(!x){renderDT();return;}ms[f]=x;}
+  const e=cur.mode==="mesai"?msErr(ms):"";
+  if(e){toast("⚠️ "+e,true);renderDT();return;}
+  dtRows=dtBuild(cur.mode==="24"?"24":"mesai",ms);
+  renderDT();
 }
 function dtSet(i,f,v){
-  if(!dtRows)dtRows=dtNorm();
+  if(!dtRows)dtRows=dtNorm(opts().duty_time);
+  dtRows.mode="custom";
   const r=i===7?dtRows.bay:dtRows.d[i];
   const x=hhPad(v);if(x)r[f]=x;
   dtRows.start=dtRows.d[0].start;dtRows.end=dtRows.d[0].end;
@@ -2551,15 +2640,33 @@ function dtSet(i,f,v){
 }
 function renderDT(){
   const box=$("dtTable");if(!box)return;
-  const dt=dtRows||dtNorm();const ro=!isAdmin();
-  const satir=(i,ad,t)=>{const h=durH(t);
-    return `<div class="dtrow"><span class="dtl" title="${ad}">${i===7?"Tatil":DAYS_TR[i]}</span>
-      <input type="time" value="${t.start}" ${ro?"disabled":""} onchange="dtSet(${i},'start',this.value)">
-      <span class="dta">→</span>
-      <input type="time" value="${t.end}" ${ro?"disabled":""} onchange="dtSet(${i},'end',this.value)">
-      <span class="dth${h!==durH(dt.d[0])?" fark":""}">${Math.round(h*10)/10} sa${hm(t.end)<=hm(t.start)?"":" ·<small> aynı gün</small>"}</span></div>`;};
-  box.innerHTML=dt.d.map((t,i)=>satir(i,DT_GUN[i],t)).join("")+satir(7,"Resmi tatil / bayram",dt.bay);
-  ["dtPresets"].forEach(id=>{const el=$(id);if(el)el.style.display=ro?"none":"";});
+  const dt=dtRows||dtNorm(opts().duty_time);const ro=!isAdmin(),dis=ro?"disabled":"";
+  const md=$("dtMode");
+  if(md){md.querySelectorAll("button").forEach(b=>b.classList.toggle("on",b.dataset.m===dt.mode));md.style.display=ro?"none":"";}
+  const hs=t=>Math.round(durH(t)*10)/10+" sa";
+  const tm=(f,v)=>`<input type="time" class="dtin" value="${v}" ${dis} onchange="dtMs('${f}',this.value)">`;
+  const calc=(ad,t)=>`<div class="nd-row dtcalc"><span class="nd-row__body"><span class="nd-row__title">${ad}</span></span><span class="nd-row__value">${t.start} → ${t.end} · ${hs(t)}</span></div>`;
+  const foot=$("dtFoot");
+  if(dt.mode==="mesai"){
+    const ms=dt.ms;
+    box.innerHTML=iosRow("Mesai başlar",tm("start",ms.start))+iosRow("Mesai biter",tm("end",ms.end))
+      +iosRow("Cumartesi yarım gün mesai",`<input type="checkbox" ${ms.sat?"checked":""} ${dis} onchange="dtMs('sat',this.checked)">`,"açıksa Cumartesi nöbeti mesai bitince başlar")
+      +(ms.sat?iosRow("Cumartesi mesai biter",tm("satEnd",ms.satEnd)):"")
+      +calc("Hafta içi nöbet",dt.d[0])+(ms.sat?calc("Cumartesi nöbeti",dt.d[5]):"")+calc(ms.sat?"Pazar ve tatil":"Hafta sonu ve tatil",dt.d[6]);
+    if(foot)foot.innerHTML="Hafta içi nöbet mesai bitince başlar, ertesi sabah mesai başlayınca biter. Hafta sonu ve resmi tatillerde 24 saattir. Saat dengesi, telefon ve Google Takvim bu saatlerle hesaplanır.";
+  }else if(dt.mode==="24"){
+    box.innerHTML=iosRow("Nöbet değişim saati",tm("start",dt.ms.start),"her gün bu saatte devredilir")+calc("Her gün",dt.d[0]);
+    if(foot)foot.innerHTML="Her gün 24 saat. Saat dengesi, telefon ve Google Takvim bu saatlerle hesaplanır.";
+  }else{
+    const satir=(i,ad,t)=>{const h=durH(t);
+      return `<div class="dtrow"><span class="dtl" title="${ad}">${i===7?"Tatil":DAYS_TR[i]}</span>
+        <input type="time" value="${t.start}" ${dis} onchange="dtSet(${i},'start',this.value)">
+        <span class="dta">→</span>
+        <input type="time" value="${t.end}" ${dis} onchange="dtSet(${i},'end',this.value)">
+        <span class="dth${h!==durH(dt.d[0])?" fark":""}">${Math.round(h*10)/10} sa${hm(t.end)<=hm(t.start)?"":" ·<small> aynı gün</small>"}</span></div>`;};
+    box.innerHTML=dt.d.map((t,i)=>satir(i,DT_GUN[i],t)).join("")+satir(7,"Resmi tatil / bayram",dt.bay);
+    if(foot)foot.innerHTML="Her günün saatini ayrı gir. Bitiş başlangıçtan önce ya da eşitse nöbet ertesi gün biter. Tatil = resmi tatil / bayram. Saat dengesi, telefon ve Google Takvim bu saatlerle hesaplanır.";
+  }
 }
 function layoutSnap(){
   return {shifts:JSON.parse(JSON.stringify(shiftRows||[])),ovr:JSON.parse(JSON.stringify(ovrRows||[])),
@@ -5345,6 +5452,58 @@ function ayAdi(key){
   if(p.length<2)return key||"";
   const mi=parseInt(p[1],10)-1;
   return (MONTHS_TR[mi]||p[1])+" "+p[0];
+}
+/* ---------- HAZIRLANAN AYI SEÇ ----------
+   İstenen herhangi bir ay açılabilir. Geçmiş ayların listeleri, izinleri ve takasları olduğu gibi kalır.
+   Ay değişince eski ayın gün numarasına bağlı ayarları (bayram günleri, sabit atamalar) yeni aya taşınmaz. */
+function buAy(){const n=new Date();return n.getFullYear()+"-"+String(n.getMonth()+1).padStart(2,"0");}
+function ayEkle(mk,k){const [y,m]=String(mk).split("-").map(Number);const d=new Date(y,m-1+k,1);return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");}
+function ayDurum(mk){
+  const b=buAy();const t=[];
+  if(mk===b)t.push("bu ay");else if(mk===ayEkle(b,1))t.push("gelecek ay");
+  if(dept&&mk===dept.month)t.push("şu an hazırlanan");
+  if(schedulesAll[mk])t.push("yayınlanmış liste var");
+  return t.join(" · ");
+}
+function openMonthSheet(){
+  if(!isAdmin()){toast("Ayı sadece yönetici değiştirebilir.",true);return;}
+  const b=buAy(),list=[];for(let k=-3;k<=12;k++)list.push(ayEkle(b,k));
+  if(dept&&!list.includes(dept.month))list.unshift(dept.month);
+  Object.keys(schedulesAll).forEach(mk=>{if(!list.includes(mk))list.push(mk);});
+  list.sort();
+  $("monthSheetBody").innerHTML=`<div class="person-head"><b>Hangi ayın listesi?</b><span>İstediğin ayı seç. Geçmiş ayların listeleri ve izinleri silinmez.</span></div>
+    <div class="nd-group"><div class="nd-list">${list.map(mk=>`<button class="nd-row" type="button" data-noauto onclick="pickMonth('${mk}')">
+      <span class="nd-row__body"><span class="nd-row__title">${ayAdi(mk)}</span>${ayDurum(mk)?`<span class="nd-row__sub">${ayDurum(mk)}</span>`:""}</span>
+      ${dept&&mk===dept.month?`<span class="nd-row__value" style="color:var(--tint)">${ND.icon("check")}</span>`:""}</button>`).join("")}</div></div>`;
+  $("monthSheet").classList.add("on");
+  const cur=$("monthSheetBody").querySelector(".nd-row .nd-ico");if(cur)cur.closest(".nd-row").scrollIntoView({block:"center"});
+}
+function closeMonthSheet(){const s=$("monthSheet");if(s)s.classList.remove("on");}
+async function pickMonth(mk){
+  closeMonthSheet();
+  if(!dept||mk===dept.month)return;
+  let msg=`${ayAdi(mk)} listesine geçilsin mi?\n\n${ayAdi(dept.month)} listesi, izinleri ve takasları olduğu gibi kalır; istediğinde geri dönebilirsin. Ayın belirli günlerine bağlı ayarlar (bayram günleri, sabit atamalar, tarihli gün kuralları) yeni aya taşınmaz.`;
+  if(schedulesAll[mk])msg+=`\n\n${ayAdi(mk)} için yayınlanmış bir liste var; yeniden yayınlarsan yenisi geçer (eskisi sürüm geçmişinde durur).`;
+  if(!confirm(msg))return;
+  await goToMonth(mk);
+}
+async function goToMonth(mk,cfg){
+  cfg=cfg||{};
+  if(!isAdmin()||!dept||!/^\d{4}-\d{2}$/.test(mk))return false;
+  if(mk===dept.month)return true;
+  const eski=dept.month;
+  const patch={month:mk,bayram:""};
+  const o={...(dept.opts||{})};
+  if(Array.isArray(o.pins)&&o.pins.length)o.pins=[];            // gün numarasına bağlı: yeni aya taşınmaz
+  if(Array.isArray(o.blocks))o.blocks=o.blocks.filter(b=>!parseDays(b.days).length);   // ayın belirli günlerine bağlı kurallar taşınmaz; haftanın günü kuralları kalır
+  patch.opts=o;
+  await stampRulesBeforeChange();
+  const {error}=await sb.from("departments").update(patch).eq("id",dept.id);
+  if(error){toast("⚠️ Ay değiştirilemedi: "+error.message,true);return false;}
+  viewMonth=null;
+  await loadAll();
+  if(!cfg.silent)toast(`✅ ${ayAdi(mk)} açıldı. ${ayAdi(eski)} kayıtlı duruyor.`);
+  return true;
 }
 function sonrakiAy(key){
   const p=String(key||"").split("-");
