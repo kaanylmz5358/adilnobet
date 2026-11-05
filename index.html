@@ -432,7 +432,7 @@ details.adv[open]>summary::before{content:"▾ "}
   <div class="card" id="wrCard">
     <p class="eyebrow">Ay başı kurulum · izin kuralları</p>
     <h2>🗓 Nöbet sonrası izin & sıra kuralları</h2>
-    <p class="hint">24 saat nöbet tutan ekipler için: nöbetten sonra kaç gün izinli olunacağını, hangi günlerin (ör. Perşembe, Cuma) <b>sırayla</b> verileceğini ve Cumartesi yarım gün iznini buradan ayarla. Program bu kuralları <b>kesin</b> uygular; kimin kaç kez kullandığını aylar boyunca sayar ve sırası gelene verir. Kapalıyken liste eskisi gibi hazırlanır.</p>
+    <p class="hint">24 saat nöbet tutan ekipler için: nöbetten sonra kaç gün izinli olunacağını, hangi günlerin (ör. Perşembe, Cuma) <b>sırayla</b> verileceğini ve Cumartesi yarım gün iznini buradan ayarla. Program bu kuralları <b>kesin</b> uygular; kimin kaç kez kullandığını aylar boyunca sayar ve sırası gelene verir. Kapalıyken liste eskisi gibi hazırlanır. Kurallar kayıtlı kalır, her ay aynen kullanılır; değiştirdiğinde yalnız bundan sonraki listeler etkilenir.</p>
     <div class="row">
       <label class="chk"><input type="checkbox" id="wrOnChk" onchange="wrSet('on',this.checked)"> <b>Bu kuralları kullan</b></label>
       <button class="btn ghost small savebtn" onclick="wrPreset()">🏥 Hazır şablon (Perşembe/Cuma 3 gün + Cumartesi yarım gün)</button>
@@ -487,7 +487,7 @@ details.adv[open]>summary::before{content:"▾ "}
       <label class="chk"><input type="checkbox" id="clrRules"> 🎛 Gün kuralları</label>
       <label class="chk"><input type="checkbox" id="clrTargets"> 📊 Nöbet sayıları</label>
     </div>
-    <p class="hint" style="margin:6px 0 0">Vardiyalar, ekip, dinlenme ve denge ayarları her hâlükârda kalır. İzinler ve tercihler zaten aya özeldir, yeni ay boş başlar.</p>
+    <p class="hint" style="margin:6px 0 0">Vardiyalar, ekip, dinlenme, denge ve <b>izin / sıra kuralları</b> her hâlükârda kalır. İzinler ve tercihler aya özeldir, yeni ay boş başlar. Kuralları sonradan değiştirirsen geçmiş aylar kendi kurallarıyla saklandığı için sayaçları ve özetleri değişmez.</p>
     <button class="btn gold small" style="margin-top:12px" id="closeMonthBtn" onclick="closeMonthGo()">🔒 Bu ayı kapat ve yeni aya geç</button>
   </div>
   <div class="card" id="roomCard">
@@ -1898,6 +1898,7 @@ async function saveDept(patch,label,cfg){
   cfg=cfg||{};
   if(!isAdmin()){toast("Bu ayarı sadece yönetici değiştirebilir.",true);return false;}
   if(!dept){toast("Ekip yüklenmedi.",true);return false;}
+  if((patch.__opts&&patch.__opts.wr)||patch.work_model||patch.opts)await stampRulesBeforeChange();
   const body={...patch};
   let touchesOpts=false;
   if(body.__opts){
@@ -1992,6 +1993,7 @@ async function saveSettings(){
     bal_we:$("balWE").checked,gen_day:genDay(),min_rest_h:minRestH(),wish_pri:$("wishPri").value,
     blocks:blockRows.filter(b=>b.pid),
     pins:pinRows.filter(p=>p.pid&&parseDays(p.days).length)}};
+  await stampRulesBeforeChange();
   let {error}=await sb.from("departments").update(withOpts).eq("id",dept.id);
   if(error&&/opts/i.test(error.message||"")){
     // veritabanında "opts" sütunu henüz yoksa: kalan ayarları kaydet, kullanıcıyı uyar
@@ -2124,6 +2126,7 @@ async function removeMember(id,name){
   alert(name+" ekipten çıkarıldı ✅");
 }
 async function updProfile(id,patch){
+  if(patch&&"works_after" in patch)await stampRulesBeforeChange();
   const {error}=await sb.from("memberships").update(patch).eq("user_id",id).eq("dept_id",dept.id);
   if(error)alert("⚠️ Yetki yok veya hata: "+error.message);
   await loadAll();
@@ -2666,6 +2669,8 @@ function computeRooms(){
 async function saveSchedule(best){
   best.bayram=$("bayramDays").value||"";
   best.month=dept.month;
+  await stampRulesBeforeChange();       // eski aylar kuralsızsa önce mühürle
+  best.rules=rulesSnapshot();           // bu ayın kuralları listenin içinde saklanır
   viewMonth=null;                       // yeni yayınlanan aya dön
   const {error}=await sb.from("schedules").upsert({dept_id:dept.id,month:dept.month,data:best});
   if(error){alert("⚠️ "+error.message);return;}
@@ -3646,7 +3651,7 @@ function recalcSchedule(){
   }
   schedule.cnt=cnt;schedule.hours=hours;schedule.night=night;schedule.wk=wk;schedule.bay=bay;
   schedule.dc=dc;schedule.nc=nc;schedule.wec=wec;schedule.wdc=wdc;
-  if(wrOn()&&wrCfg().sat.on)schedule.ek=wrRefreshEk(schedule,vMonth());
+  {const rc=schedule.rules&&schedule.rules.wr?wrNorm(schedule.rules.wr):wrCfg();if(rc.on&&rc.sat.on)schedule.ek=wrRefreshEk(schedule,vMonth());}
 }
 
 /* ---------- AY GEÇİŞİ / ARŞİV ---------- */
@@ -3714,12 +3719,37 @@ async function closeMonthGo(){
    yayınlanmış listeler + onaylı izinler. Böylece takas, elle düzenleme ya da
    geçmiş ayda yapılan değişiklik özetlere kendiliğinden yansır. */
 let prefsAll={};
-/* nöbet sonrası kaç gün izinli (kişi "ertesi gün çalışır" ise 0) */
-function personOffK(p,wd,cfg){
-  if(p&&p.works_after)return 0;
-  cfg=cfg||wrCfg();
-  if(cfg.on)return cfg.off[wd];
-  return ((dept&&dept.work_model)==="duty_rest")?1:0;
+/* ---------- AYIN KURALLARI (yayınlandığı andaki hâli) ----------
+   Kurallar ekip ayarında kalıcıdır ve her yeni aya aynen taşınır. Bir liste yayınlanınca
+   o ayın kuralları listenin içine de yazılır; sonradan kural değişirse geçmiş ayların
+   sayaçları ve nöbet ertesi izin hesapları değişmez, eski kurallarla hesaplanır. */
+function rulesSnapshot(){
+  const c=wrNorm(opts().wr);
+  return {v:1,at:new Date().toISOString(),work_model:(dept&&dept.work_model)||"shift_only",
+    wr:{on:c.on,off:c.off.slice(),track:c.track.slice(),max:c.max.slice(),sat:{...c.sat},fz:c.fz},
+    wa:members.filter(p=>p.works_after).map(p=>p.id)};
+}
+function rulesFor(mk){
+  const s=schedulesAll[mk];
+  if(s&&s.rules&&s.rules.wr)return {cfg:wrNorm(s.rules.wr),wm:s.rules.work_model,wa:new Set(s.rules.wa||[]),snap:true};
+  return {cfg:wrCfg(),wm:(dept&&dept.work_model)||"shift_only",wa:new Set(members.filter(p=>p.works_after).map(p=>p.id)),snap:false};
+}
+/* Kural değişmeden hemen önce: kuralı kayıtlı olmayan yayınlı ayları ESKİ kurallarla mühürle */
+async function stampRulesBeforeChange(){
+  if(!dept)return;
+  const snap=rulesSnapshot();
+  for(const mk of Object.keys(schedulesAll)){
+    const sc=schedulesAll[mk];if(!sc||sc.rules)continue;
+    sc.rules=snap;
+    await sb.from("schedules").update({data:sc}).eq("dept_id",dept.id).eq("month",mk);
+  }
+}
+/* nöbet sonrası kaç gün izinli (kişi "ertesi gün çalışır" ise 0); R = rulesFor(ay) */
+function personOffK(p,wd,R){
+  R=R||rulesFor(planAy());
+  if(p&&R.wa.has(p.id))return 0;
+  if(R.cfg.on)return R.cfg.off[wd];
+  return R.wm==="duty_rest"?1:0;
 }
 /* bir günün iş günü olup olmadığı (Pazar ve resmi tatil hariç; Cumartesi yalnız yarım gün açıksa) */
 function isWorkDay(y,m,d,bays,cfg){
@@ -3735,7 +3765,7 @@ function monthBays(mk){
 }
 /* Bir ayın kişi başı tam dökümü */
 function monthLedger(mk){
-  const cfg=wrCfg();
+  const R=rulesFor(mk),cfg=R.cfg;
   const {y,m,nDays}=monthInfo(mk);
   const sch=schedulesAll[mk]||null,pr=prefsAll[mk]||{};
   const bays=monthBays(mk);
@@ -3760,13 +3790,13 @@ function monthLedger(mk){
   for(const pid in pr){if(!out[pid])continue;
     for(const k in pr[pid])if(/^\d+$/.test(k)&&+k>=1&&+k<=nDays&&pr[pid][k]==="izin")out[pid].izin++;}
   /* nöbet sonrası izinli iş günleri (önceki ayın son nöbetlerinden taşanlar dahil) */
-  const pk=prevMonthKey(mk),ps=schedulesAll[pk],pi=monthInfo(pk);
+  const pk=prevMonthKey(mk),ps=schedulesAll[pk],pi=monthInfo(pk),RP=rulesFor(pk);
   members.forEach(p=>{
     const off=new Set();
-    const add=(x,wd)=>{const k=personOffK(p,wd,cfg);for(let j=1;j<=k;j++){const dd=x+j;if(dd>=1&&dd<=nDays)off.add(dd);}};
-    (dutyDays[p.id]||new Set()).forEach(x=>add(x,wdOf(y,m,x)));
+    const add=(x,wd,RR)=>{const k=personOffK(p,wd,RR);for(let j=1;j<=k;j++){const dd=x+j;if(dd>=1&&dd<=nDays)off.add(dd);}};
+    (dutyDays[p.id]||new Set()).forEach(x=>add(x,wdOf(y,m,x),R));
     if(ps&&ps.asg)for(let x=Math.max(1,pi.nDays-7);x<=pi.nDays;x++)
-      if((ps.asg[x]||[]).some(e=>e&&e.id===p.id))add(x-pi.nDays,wdOf(pi.y,pi.m,x));
+      if((ps.asg[x]||[]).some(e=>e&&e.id===p.id))add(x-pi.nDays,wdOf(pi.y,pi.m,x),RP);
     const izinG=pr[p.id]||{};
     off.forEach(dd=>{
       if(!isWorkDay(y,m,dd,bays,cfg))return;
@@ -4090,14 +4120,15 @@ function wrPrevEffects(mk,cfg,restDays){
   const pk=prevMonthKey(mk),ps=schedulesAll[pk];
   if(!ps||!ps.asg)return res;
   const pi=monthInfo(pk);
+  const RP=rulesFor(pk),pc=RP.snap?RP.cfg:cfg;   // önceki ayın nöbeti, o ayın kurallarına göre izin doğurur
   const add=(o,pid,d)=>{(o[pid]=o[pid]||new Set()).add(d);};
   for(let d=Math.max(1,pi.nDays-7);d<=pi.nDays;d++){
     const wd=wdOf(pi.y,pi.m,d);
     for(const e of (ps.asg[d]||[])){
       if(!e)continue;
-      const kb=Math.max(restDays||0,cfg.on?cfg.off[wd]:0);
+      const kb=Math.max(restDays||0,pc.on?pc.off[wd]:0);
       for(let j=1;j<=kb;j++){const nd=d+j-pi.nDays;if(nd>=1)add(res.block,e.id,nd);}
-      if(cfg.on)for(let j=1;j<=cfg.off[wd];j++){const nd=d+j-pi.nDays;if(nd>=1)add(res.absent,e.id,nd);}
+      if(cfg.on&&!RP.wa.has(e.id))for(let j=1;j<=(pc.on?pc.off[wd]:(RP.wm==="duty_rest"?1:0));j++){const nd=d+j-pi.nDays;if(nd>=1)add(res.absent,e.id,nd);}
     }
   }
   /* önceki ayın son günü Cumartesi ve ek izinliyse ertesi Pazar (bu ayın 1'i) nöbet yazılmaz */
@@ -4205,7 +4236,7 @@ function wrContext(slots,E,cap,y,m,nDays,bays){
 
 /* Kural denetimi (yayınlı/elle düzenlenmiş listeler için): ihlal mesajları */
 function wrAudit(sch,mk,opt){
-  const cfg=wrCfg(),out=[];
+  const cfg=sch&&sch.rules&&sch.rules.wr?wrNorm(sch.rules.wr):wrCfg(),out=[];
   if(!cfg.on||!sch||!sch.asg)return out;
   const {y,m,nDays}=monthInfo(mk);
   const nm=id=>(members.find(p=>p.id===id)||{}).name||"?";
@@ -4244,7 +4275,7 @@ function wrAudit(sch,mk,opt){
 /* Elle düzenleme / takas sonrası Ek Cumartesi izinlerini yeniden hesapla.
    Hâlâ geçerli olan izinler korunur, yönetici elle seçtiyse (ekManual) dokunulmaz. */
 function wrRefreshEk(sch,mk){
-  const cfg=wrCfg();
+  const cfg=sch&&sch.rules&&sch.rules.wr?wrNorm(sch.rules.wr):wrCfg();
   if(!cfg.on||!cfg.sat.on||!sch||!sch.asg)return (sch&&sch.ek)||null;
   const {y,m,nDays}=monthInfo(mk);
   const n=members.length,idx={};members.forEach((p,i)=>{idx[p.id]=i;});
