@@ -947,12 +947,53 @@ body.wz-on{overflow:hidden}
 .wzcal button.day{border:0;font:inherit;cursor:pointer;color:var(--ink)}
 .wzcal .holsel{background:var(--holiday)!important;color:#fff!important}
 #wizard .nd-group{margin-bottom:16px}
+.ndadv{margin:8px 0 0}
+.ndadv>summary{list-style:none;cursor:pointer;padding:12px 16px;border-radius:var(--radius-md);background:var(--surface);font-weight:600;display:flex;flex-direction:column;gap:2px;margin-bottom:16px}
+.ndadv>summary::-webkit-details-marker{display:none}
+.ndadv>summary span{font-weight:400;font-size:13px;color:var(--ink-2)}
+.ndadv[open]>summary{color:var(--tint)}
+.wrcnt__k{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.wrc{font-size:13px;line-height:18px;background:var(--surface-2);border-radius:8px;padding:2px 8px;color:var(--ink-2);display:inline-flex;align-items:center;gap:4px}
+.wrc b{color:var(--ink);font-variant-numeric:tabular-nums}
+.wrc.is-low{background:var(--tint-soft);color:var(--tint)}
+.wrc small{font-size:11px}
+.wrc input.wrbase{width:46px;min-height:26px;padding:0 4px;border-radius:6px;border:0;background:var(--surface);text-align:center;font:inherit}
+.wrsub{padding-left:32px;background:var(--surface)}
+.wrsp.is-open{background:var(--surface-2)}
+.wzpeople{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 10px;margin:0 -2px 6px;scrollbar-width:none}
+.wzpeople::-webkit-scrollbar{display:none}
+.wzp{appearance:none;border:2px solid transparent;background:var(--surface);border-radius:14px;padding:8px 8px 6px;min-width:68px;display:flex;flex-direction:column;align-items:center;gap:4px;font:inherit;font-size:12px;font-weight:600;color:var(--ink);cursor:pointer;position:relative;flex:none}
+.wzp.on{border-color:var(--tint)}
+.wzp.off{opacity:.5}
+.wzp i{position:absolute;top:4px;right:6px;font-style:normal;font-size:10px;background:var(--tint);color:var(--on-tint);border-radius:999px;padding:0 5px;line-height:15px}
+.wzb{grid-template-columns:repeat(3,minmax(0,1fr));margin-bottom:10px}
+.wzpc .prefday{border:1.5px solid transparent}
+#prefBrush{grid-template-columns:repeat(3,minmax(0,1fr))}
+.nd-brush .is-must{color:var(--tint)}
+.nd-brush .is-never{color:var(--ink)}
+.prefday.must{background:var(--tint)!important;border-color:var(--tint)!important;color:var(--on-tint)!important}
+.prefday.never{background:var(--ink-2)!important;border-color:var(--ink-2)!important;color:#fff!important;text-decoration:line-through}
+.prefday.bekk{border-style:dashed!important;border-width:2px!important;opacity:.75}
+.prefday.must.bekk{background:var(--tint-soft)!important;color:var(--tint)!important}
+.prefday.never.bekk{background:var(--surface-2)!important;color:var(--ink-2)!important}
+.wzcal .arfsel{background:var(--holiday-soft)!important;color:var(--ink)!important;box-shadow:inset 0 0 0 2px var(--holiday)}
+.wzbrush{margin-bottom:10px}
+.cal .day.arf{background:var(--holiday-soft)}
+.dayrow.arf{background:var(--holiday-soft)}
 .wzmon{display:inline-flex;align-items:center;gap:6px;background:var(--surface-2);border-radius:999px;height:34px}
 .wzmon b{font-weight:600;min-width:104px;text-align:center;font-variant-numeric:tabular-nums}
 #dtTable .nd-row input[type=time],#wizard .nd-row input[type=time]{width:auto;min-width:96px;min-height:34px;padding:4px 10px;border-radius:8px;background:var(--surface-2);border:0;font:inherit;font-variant-numeric:tabular-nums;color:var(--ink);text-align:center}
 #dtTable .dtcalc .nd-row__value{font-variant-numeric:tabular-nums;white-space:nowrap;max-width:none;flex:none}
 #dtTable .dtcalc .nd-row__title{white-space:normal}
 #dtTable .dtcalc{background:var(--surface)}
+#dtTable .dtex{flex-direction:column;align-items:stretch;gap:8px;padding-top:10px;padding-bottom:10px}
+.dtex__days{display:flex;flex-wrap:wrap;gap:6px}
+.dtchip{appearance:none;border:0;font:inherit;font-size:14px;font-weight:600;min-width:46px;height:32px;padding:0 10px;border-radius:999px;background:var(--surface-2);color:var(--ink);cursor:pointer}
+.dtchip.on{background:var(--tint);color:var(--on-tint)}
+.dtex__t{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:15px;color:var(--ink-2)}
+.dtex__t input[type=time]{min-width:92px!important}
+.dtex__del{appearance:none;border:0;background:transparent;color:var(--ink-3);width:34px;height:34px;display:grid;place-items:center;margin-left:auto;cursor:pointer}
+#dtTable .dtsep{font-size:13px;line-height:18px;color:var(--ink-2);text-transform:uppercase;letter-spacing:.02em;padding:14px 16px 6px;background:var(--bg)}
 /* taslak onay kartı */
 #decideBody .nd-row{align-items:center}
 #decideBody .decname{white-space:normal}
@@ -1228,15 +1269,19 @@ window.ND={guardClick:guardClick,icon:icon,icons:ICONS,haptic:haptic,stepper:ste
   <div id="setBar" class="setbar"></div>
   <div id="setLanding"></div>
   <div class="card ios" id="monthCard" data-grp="ay">
-  <div class="nd-group"><div class=nd-group__label>Hazırlanan ay</div><div class="nd-list"><button class="nd-row" type="button" data-noauto onclick="openMonthSheet()"><span class="nd-row__body"><span class="nd-row__title">Ay</span></span><span class="nd-row__value" id="monthLbl">—</span><span data-icon="chev-r"></span></button><input type="hidden" id="month"><div class="nd-row"><span class="nd-row__body"><span class="nd-row__title">İki nöbet arası en az</span><span class=nd-row__sub>gün (2 = bir gün boşluk)</span></span><input type="number" id="minGap" min="1" max="7"></div><div class="nd-row"><span class="nd-row__body"><span class="nd-row__title">Resmi tatil / bayram</span></span><input type="text" id="bayramDays" class="rowin" placeholder="ör. 15-17,20" inputmode="numeric"></div><button class="nd-row is-action" onclick="pickBayram()"><span class="nd-row__body"><span class="nd-row__title">Bayram günlerini takvimden seç</span></span><span data-icon="calendar"></span></button></div><div class=nd-group__foot>Ay değişince o ayın izinleri, tercihleri ve listesi açılır.</div></div>
-  <div class="nd-group"><div class=nd-group__label>Liste</div><div class="nd-list"><div class="nd-row"><span class="nd-row__body"><span class="nd-row__title">Liste tipi</span></span><select id="schedMode" onchange="modeChanged()" class="rowin">
-        <option value="rooms">Oda tabanlı</option>
-        <option value="shifts">Vardiya tabanlı</option></select></div><div class="nd-row"><span class="nd-row__body"><span class="nd-row__title">Diğer listelerle uyum</span></span><select id="linkDefault" class="rowin"></select></div><div class="nd-row"><span class="nd-row__body"><span class="nd-row__title">Çalışma düzeni</span></span><select id="workModel" class="rowin">
+  <div class="nd-group"><div class=nd-group__label>Hazırlanan ay</div><div class="nd-list"><button class="nd-row" type="button" data-noauto onclick="openMonthSheet()"><span class="nd-row__body"><span class="nd-row__title">Ay</span></span><span class="nd-row__value" id="monthLbl">—</span><span data-icon="chev-r"></span></button><input type="hidden" id="month"><div class="nd-row"><span class="nd-row__body"><span class="nd-row__title">Resmi tatil / bayram</span></span><input type="text" id="bayramDays" class="rowin" placeholder="ör. 15-17,20" inputmode="numeric"></div><button class="nd-row is-action" onclick="pickBayram()"><span class="nd-row__body"><span class="nd-row__title">Bayram günlerini takvimden seç</span></span><span data-icon="calendar"></span></button><div class="nd-row"><span class="nd-row__body"><span class="nd-row__title">Arife günleri</span><span class=nd-row__sub>nöbet öğlen başlar</span></span><input type="text" id="arifeDays" class="rowin" placeholder="ör. 19" inputmode="numeric"></div><button class="nd-row is-action" onclick="pickArife()"><span class="nd-row__body"><span class="nd-row__title">Arife günlerini takvimden seç</span></span><span data-icon="calendar"></span></button></div><div class=nd-group__foot>Ay değişince o ayın izinleri, tercihleri ve listesi açılır.</div></div>
+  <div class="nd-group"><div class=nd-group__label>Nöbet düzeni</div><div class="nd-list"><div class="nd-row"><span class="nd-row__body"><span class="nd-row__title">Çalışma düzeni</span></span><select id="workModel" class="rowin">
         <option value="shift_only">Nöbet = tüm mesai</option>
         <option value="duty_rest">Mesai + nöbet, ertesi gün izinli</option>
-        <option value="duty_work">Mesai + nöbet, ertesi gün çalışır</option></select></div><div class="nd-row"><span class="nd-row__body"><span class="nd-row__title">İzinlinin nöbet sayısı</span></span><select id="leaveProp" class="rowin">
+        <option value="duty_work">Mesai + nöbet, ertesi gün çalışır</option></select></div><div class="nd-row" id="afterNextRow"><span class="nd-row__body"><span class="nd-row__title">Ertesi gün tatilse</span></span><select id="afterNext" class="rowin">
+        <option value="">Sadece ertesi gün</option>
+        <option value="1">İlk mesai günü izinli</option></select></div><div class="nd-row"><span class="nd-row__body"><span class="nd-row__title">İki nöbet arası en az</span><span class=nd-row__sub>gün (2 = bir gün boşluk)</span></span><input type="number" id="minGap" min="1" max="7"></div><div class="nd-row"><span class="nd-row__body"><span class="nd-row__title">İzinlinin nöbet sayısı</span></span><select id="leaveProp" class="rowin">
         <option value="">Eşit</option>
-        <option value="1">İzin oranında azalt</option></select></div></div><div class=nd-group__foot>Biri başka bir listede de nöbet tutuyorsa (ör. kat + acil) bu listedeki nöbetleri ona göre ayarlanır. “Oranında azalt”: ayın yarısında izinli olana yaklaşık yarı sayıda nöbet yazılır.</div></div>
+        <option value="1">İzin oranında azalt</option></select></div></div><div class=nd-group__foot>“İzin oranında azalt”: ayın yarısında izinli olana yaklaşık yarı sayıda nöbet yazılır.</div></div>
+  <details class="ndadv"><summary>Gelişmiş ayarlar <span>liste tipi, diğer listeler, dağıtım, ritim</span></summary>
+  <div class="nd-group"><div class=nd-group__label>Liste</div><div class="nd-list"><div class="nd-row"><span class="nd-row__body"><span class="nd-row__title">Liste tipi</span></span><select id="schedMode" onchange="modeChanged()" class="rowin">
+        <option value="rooms">Oda tabanlı</option>
+        <option value="shifts">Vardiya tabanlı</option></select></div><div class="nd-row"><span class="nd-row__body"><span class="nd-row__title">Diğer listelerle uyum</span></span><select id="linkDefault" class="rowin"></select></div></div><div class=nd-group__foot>Biri başka bir listede de nöbet tutuyorsa (ör. kat + acil) bu listedeki nöbetleri ona göre ayarlanır.</div></div>
   <div class="nd-group"><div class=nd-group__label>Dağıtım</div><div class="nd-list"><div class="nd-row"><span class="nd-row__body"><span class="nd-row__title">Boş nöbet yeri</span></span><select id="fillPolicy" class="rowin">
         <option value="fill_all">Hepsini doldur</option>
         <option value="by_capacity">Sayılara göre (boş kalabilir)</option></select></div><div class="nd-row"><span class="nd-row__body"><span class="nd-row__title">İstenen günler</span></span><select id="wishPri" class="rowin">
@@ -1247,6 +1292,7 @@ window.ND={guardClick:guardClick,icon:icon,icons:ICONS,haptic:haptic,stepper:ste
         <option value="off">Fark etmez</option>
         <option value="fixed">Mümkünse sabit eş</option></select></div><div class="nd-row"><span class="nd-row__body"><span class="nd-row__title">Gece–gündüz sayısını eşitle</span></span><input type="checkbox" id="balDN" checked></div><div class="nd-row"><span class="nd-row__body"><span class="nd-row__title">Hafta içi–sonu sayısını eşitle</span></span><input type="checkbox" id="balWE" checked></div></div><div class=nd-group__foot>Yüksek öncelikte herkesin istediği günler, aya düzgün yayılmaktan ve hafta sonu dengesinden önce gelir.</div></div>
   <div class="nd-group"><div class=nd-group__label>Ritim ve dinlenme</div><div class="nd-list"><div class="nd-row"><span class="nd-row__body"><span class="nd-row__title">Üst üste çalışılan gün</span><span class=nd-row__sub>0 = kapalı</span></span><input type="number" id="patternOn" min="0" max="7" value="0"></div><div class="nd-row"><span class="nd-row__body"><span class="nd-row__title">Ardından dinlenme</span><span class=nd-row__sub>gün</span></span><input type="number" id="patternOff" min="0" max="7" value="0"></div><div class="nd-row"><span class="nd-row__body"><span class="nd-row__title">İki vardiya arası en az</span><span class=nd-row__sub>saat · 0 = kapalı</span></span><input type="number" id="minRest" min="0" max="24" value="8"></div><div class="nd-row"><span class="nd-row__body"><span class="nd-row__title">Liste hazırlama günü</span><span class=nd-row__sub>her ayın bu gününde sonraki ay hazırlanır</span></span><input type="number" id="genDay" min="1" max="28" value="25"></div></div><div class=nd-group__foot>Örnek: 2 ve 2 → herkes 2 gün çalışır, 2 gün dinlenir. En iyi sonuç için “Kim kaç nöbet” sayılarını 0 bırak.</div></div>
+  </details>
 </div>
   <div class="card" id="quotaCard" style="display:none" data-grp="sayi" data-autosave="quota">
     <p class="eyebrow">Ay başı kurulum · 2/2 · kararı yönetici verir</p>
@@ -1303,12 +1349,10 @@ window.ND={guardClick:guardClick,icon:icon,icons:ICONS,haptic:haptic,stepper:ste
   <div class="card ios" id="wrCard" data-grp="wr" data-autosave="wr">
   <div class="nd-group"><div class="nd-list"><div class="nd-row"><span class="nd-row__body"><span class="nd-row__title">Bu kuralları kullan</span></span><input type="checkbox" id="wrOnChk" onchange="wrSet('on',this.checked)"></div><button class="nd-row is-action" id="wrPresetRow" onclick="wrPreset()"><span class="nd-row__body"><span class="nd-row__title">Hazır şablonu uygula</span><span class="nd-row__sub">Perşembe/Cuma sonrası 3 gün izin, Cumartesi yarım gün</span></span></button></div><div class=nd-group__foot>24 saat nöbet tutan ekipler için. Kurallar kesin uygulanır; kimin kaç kez kullandığı aylar boyunca sayılır, sırası gelene verilir.</div></div>
   <div id="wrBody">
-    <div class="nd-group"><div class="nd-group__label">Nöbetten sonra kaç gün izinli</div><div class="nd-list" id="wrDays"></div>
-      <div class="nd-group__foot">Bu günlerde o kişiye nöbet yazılmaz. 1 = yalnız nöbet ertesi gün.</div></div>
-    <div class="nd-group"><div class="nd-group__label">Sırayla verilen günler</div><div class="nd-list" id="wrTrack"></div>
-      <div class="nd-group__foot">Açık günün nöbeti, kimin kaç kez tuttuğuna göre aylar boyunca sırayla verilir.</div></div>
-    <div class="nd-group"><div class="nd-group__label">Bir kişiye ayda en fazla</div><div class="nd-list" id="wrMax"></div>
-      <div class="nd-group__foot">0 = sınır yok.</div></div>
+    <div class="nd-group"><div class="nd-group__label">Nöbet sonrası</div><div class="nd-list" id="wrDays"></div>
+      <div class="nd-group__foot">İzinli günlerde o kişiye nöbet yazılmaz ve mesaiye gelmez.</div></div>
+    <div class="nd-group"><div class="nd-group__label">Özel günler</div><div class="nd-list" id="wrSpecial"></div>
+      <div class="nd-group__foot">Örn. Perşembe nöbeti 3 gün izin doğurur. “Sırayla” açıksa o günün nöbeti, kimin kaç kez tuttuğuna göre aylar boyunca dağıtılır.</div></div>
     <div id="wrExplain" class="banner info" style="margin:-8px 0 24px">—</div>
     <div class="nd-group"><div class=nd-group__label>Cumartesi yarım gün</div><div class="nd-list"><div class="nd-row"><span class="nd-row__body"><span class="nd-row__title">Cumartesi yarım gün</span></span><input type="checkbox" id="wrSatOn" onchange="wrSet('satOn',this.checked)"></div><div class="nd-row"><span class="nd-row__body"><span class="nd-row__title">Klinikte kalacak kişi</span><span class=nd-row__sub>nöbetçi dahil</span></span><input type="number" id="wrSatNeed" min="1" max="50" onchange="wrSet('satNeed',this.value)"></div><div class="nd-row"><span class="nd-row__body"><span class="nd-row__title">Ek Cumartesi izni ayda en fazla</span><span class=nd-row__sub>kez</span></span><input type="number" id="wrSatMax" min="0" max="10" onchange="wrSet('satMax',this.value)"></div></div><div class=nd-group__foot>Fazla kalanlar sırayla Ek Cumartesi izni alır: o Cumartesi ve ertesi Pazar nöbet yazılmaz. Resmi tatile denk gelen Cumartesilerde verilmez.</div></div>
     <div class="nd-group"><div class=nd-group__label>Sıra</div><div class="nd-list"><div class="nd-row"><span class="nd-row__body"><span class="nd-row__title">Fazla nöbeti sırayla ver</span><span class=nd-row__sub>31 gün ÷ 6 kişi gibi bölünmeyen nöbet en az tutmuş olana</span></span><input type="checkbox" id="wrFz" onchange="wrSet('fz',this.checked)"></div><div class="nd-row"><span class="nd-row__body"><span class="nd-row__title">Sayaçların başlangıç ayı</span></span><input type="month" id="wrSince" class="rowin" onchange="wrSet('since',this.value)"></div></div></div>
@@ -1318,7 +1362,8 @@ window.ND={guardClick:guardClick,icon:icon,icons:ICONS,haptic:haptic,stepper:ste
     <p class="eyebrow">Aylar arası adalet · otomatik</p>
     <h2>Sıra sayaçları</h2>
     <p class="hint" id="wrCntHint">—</p>
-    <div class="tblwrap"><table><thead id="wrCntHead"></thead><tbody id="wrCntBody"></tbody></table></div>
+    <div class="nd-group" style="margin:0"><div class="nd-list" id="wrCntBody"></div></div>
+    <button type="button" class="nd-btn is-plain" id="wrCntEditBtn" data-noauto style="width:100%;margin-top:6px" onclick="wrCntEdit=!wrCntEdit;renderWRCounters()">Başlangıç sayılarını düzenle</button>
     
   </div>
   <div class="card ios" id="roomCard" data-grp="oda">
@@ -1405,21 +1450,26 @@ window.ND={guardClick:guardClick,icon:icon,icons:ICONS,haptic:haptic,stepper:ste
   </div>
   <div class="card ios" id="prefCard">
   <div id="asRow" style="display:none;margin-bottom:10px">
-      <label>Kimin adına giriyorum?</label>
+      <label>Kimin günlerini düzenliyorsun?</label>
       <select id="asPerson" onchange="renderPrefCal();syncIzinBox()" style="width:100%"></select>
     </div>
   <div class="nd-brush" id="prefBrush" role="radiogroup" aria-label="Fırça">
     <button class="is-avoid" data-b="avoid" aria-pressed="true" onclick="setBrush('avoid')"><span data-icon="avoid"></span>İstemiyorum</button>
     <button class="is-wish" data-b="yes" aria-pressed="false" onclick="setBrush('yes')"><span data-icon="wish"></span>İstiyorum</button>
+    <button class="is-must" data-b="must" aria-pressed="false" onclick="setBrush('must')"><span data-icon="lock"></span>Kesin nöbet</button>
+    <button class="is-never" data-b="never" aria-pressed="false" onclick="setBrush('never')"><span data-icon="off-duty"></span>Nöbet yok</button>
     <button class="is-leave" data-b="izin" aria-pressed="false" onclick="setBrush('izin')"><span data-icon="leave"></span>İzin</button>
     <button class="is-erase" data-b="" aria-pressed="false" onclick="setBrush('')"><span data-icon="x"></span>Sil</button>
   </div>
-  <p class="hint" style="margin:8px 4px 8px">Fırçayı seç, günlere dokun ya da parmağını üzerlerinde gezdir. Değişiklikler hemen kaydedilir.</p>
+  <p class="hint" style="margin:8px 4px 8px">Fırçayı seç, günlere dokun ya da parmağını üzerlerinde gezdir; hemen kaydedilir. <b>İstiyorum / İstemiyorum</b> dilektir, liste mümkün olduğunca uyar. <b>Kesin nöbet</b>, <b>Nöbet yok</b> ve <b>İzin</b> yönetici onayıyla kesinleşir.</p>
   <div class="cal" id="prefCal"></div>
   <div class="legend">
     <span><span class="dot" style="background:var(--danger-soft);border:1px solid var(--danger)"></span>İstemiyorum</span>
     <span><span class="dot" style="background:var(--tint-soft);border:1px solid var(--tint)"></span>İstiyorum</span>
+    <span><span class="dot" style="background:var(--tint);border:1px solid var(--tint)"></span>Kesin nöbet</span>
+    <span><span class="dot" style="background:var(--ink-2);border:1px solid var(--ink-2)"></span>Nöbet yok</span>
     <span><span class="dot" style="background:var(--leave-soft);border:1px solid var(--leave)"></span>İzin</span>
+    <span><span class="dot" style="border:1.5px dashed var(--ink-3)"></span>onay bekliyor</span>
   </div>
   <div id="prefStatus" class="banner ok" style="display:none">Kaydedildi</div>
 </div>
@@ -1670,7 +1720,7 @@ function showView(v){document.querySelectorAll(".view").forEach(e=>e.classList.r
 /* ================= OTOMATİK KAYIT =================
    Ayarlar, tercihler, izinler ve profil değiştiği anda kaydedilir; ayrı "Kaydet" düğmesi yoktur.
    Kayıtlar sırayla yapılır (aynı anda iki kayıt birbirinin ayarını ezmesin). */
-const AUTO_ID={minGap:"month",bayramDays:"bayram",schedMode:"mode",linkDefault:"link",genDay:"genday",fillPolicy:"fill",
+const AUTO_ID={minGap:"month",arifeDays:"arife",afterNext:"afternext",bayramDays:"bayram",schedMode:"mode",linkDefault:"link",genDay:"genday",fillPolicy:"fill",
   leaveProp:"leaveprop",workModel:"work",patternOn:"rhythm",patternOff:"rhythm",minRest:"minrest",wishPri:"wish",partnerMode:"partner",
   balDN:"balance",balWE:"balance",generalRooms:"rooms",izinInput:"izin",wishInput:"mywish",profName:"profile",profBranch:"profile"};
 const autoT={};let autoQ=Promise.resolve(),autoPending={};
@@ -1747,6 +1797,7 @@ function paintPref(d){
   const cur=allPrefs[uid][d]||"";
   let nv=prefBrush;
   if(prefBrush==="izin")nv=(isAdmin()||cur==="izin")?"izin":"izin_bek";
+  if(prefBrush==="must"||prefBrush==="never")nv=(isAdmin()||cur===prefBrush)?prefBrush:prefBrush+"_bek";
   if(cur===nv)return false;
   if(nv)allPrefs[uid][d]=nv;else delete allPrefs[uid][d];
   return true;
@@ -1821,19 +1872,22 @@ const SETUP_STEPS=[
   {t:"Günde kaç kişi nöbetçi?",skip:d=>d.kind!=="24",r:d=>iosGroup("",[iosRow("Günde nöbetçi sayısı",`<input type="number" id="wz_per" min="1" max="10" value="${d.per}" onchange="WZ.d.per=+this.value">`)],
      "Kendi odası olan branşları sonra Ayarlar → Odalar'dan ekleyebilirsin.")},
   {t:"Nöbet saatleri",skip:d=>d.kind!=="24",ok:d=>d.dt==="mesai"?msErr(d.ms):"",r:d=>{
-     const tm=(f)=>`<input type="time" value="${d.ms[f]}" onchange="WZ.d.ms.${f}=this.value;wzRender()">`;
+     const tm=(f)=>`<input type="time" value="${d.ms[f]||d.ms.start}" onchange="WZ.d.ms.${f}=this.value;wzRender()">`;
      let h=`<div class="nd-choices">${choiceHTML("dt","mesai",d.dt==="mesai","Hafta içi mesaiden sonra başlar","Ertesi sabah mesai başlayınca biter. Hafta sonu ve resmi tatillerde 24 saat.")}
      ${choiceHTML("dt","24",d.dt==="24","Her gün 24 saat","Her gün aynı saatte devredilir.")}
      ${d.dt==="custom"?choiceHTML("dt","custom",true,"Şu anki saatleri koru","Ayarlar → Odalar ve nöbet saatleri'nde güne göre girilmiş."):""}</div>`;
      if(d.dt==="mesai"){const e=msErr(d.ms);
-       h+=`<div style="margin-top:16px">${iosGroup("Mesai saatlerin",[iosRow("Mesai başlar",tm("start")),iosRow("Mesai biter",tm("end"))],
-         e?`<span style="color:var(--danger)">${e}</span>`:msSummary(d.ms)+" Hafta sonu ve tatil "+d.ms.start+"'de başlar, 24 saat.")}</div>`;}
-     if(d.dt==="24")h+=`<div style="margin-top:16px">${iosGroup("",[iosRow("Nöbet değişim saati",tm("start"))],"Nöbet her gün bu saatte devredilir.")}</div>`;
+       h+=`<div style="margin-top:16px">${iosGroup("Mesai saatlerin",[iosRow("Mesai başlar",tm("start")),iosRow("Mesai biter",tm("end")),iosRow("Hafta sonu ve tatil devri",tm("we"),d.ms.we&&d.ms.we!==d.ms.start?"hafta içinden farklı":"hafta içiyle aynı")],
+         e?`<span style="color:var(--danger)">${e}</span>`:msSummary(d.ms)+` Hafta sonu ve tatil nöbeti ${d.ms.we||d.ms.start}'da devredilir.`)}</div>`;}
+     if(d.dt==="24")h+=`<div style="margin-top:16px">${iosGroup("",[iosRow("Hafta içi devir",tm("start")),iosRow("Hafta sonu ve tatil devri",tm("we"))],"Her nöbet ertesi günün devir saatinde biter.")}</div>`;
      return h+`<p class="wz__note">Cumartesi yarım gün mesai varsa Ayarlar → Odalar ve nöbet saatleri'nden ekleyebilirsin.</p>`;}},
   {t:"Vardiyaları tanımla",skip:d=>d.kind!=="shift",r:d=>`<p class="wz__sub">Vardiyaların adını, saatini ve kaç kişi gerektiğini kurulumdan sonra <b>Ayarlar → Vardiyalar</b>'dan eklersin. Şimdi diğer soruları tamamlayalım.</p>`},
   {t:"Nöbetten sonra ne olur?",r:d=>`<div class="nd-choices">${choiceHTML("after","off",d.after==="off","Ertesi gün izinli","Nöbet sonrası mesai yok."+weekDemo([0],[1]))}
      ${choiceHTML("after","work",d.after==="work","Ertesi gün çalışır","Nöbetten çıkan normal mesaisine devam eder.")}
      ${choiceHTML("after","all",d.after==="all","Nöbet tüm mesaim","Ayrı gündüz mesaisi yok; sadece nöbet/vardiya var.")}</div>`},
+  {t:"Ertesi gün hafta sonu ya da tatilse?",skip:d=>d.after!=="off",r:d=>`<p class="wz__sub">Ör. Cumartesi nöbetinin ertesi günü Pazar; zaten mesai yok.</p><div class="nd-choices">
+     ${choiceHTML("nx","1",d.nx==="1","İlk mesai günü de izinli","Cumartesi nöbetçisi Pazartesi gelmez; bayram öncesi nöbetçi bayramdan sonraki ilk iş günü gelmez.")}
+     ${choiceHTML("nx","",d.nx==="","Sadece ertesi gün sayılır","Cumartesi nöbetçisi Pazartesi normal çalışır.")}</div>`},
   {t:"Bazı nöbetler hafta sonuna bağlanıyor mu?",skip:d=>d.after!=="off"||d.kind!=="24",r:d=>`<div class="nd-choices">
      ${choiceHTML("special","thufri",d.special==="thufri","Evet, Perşembe ve Cuma","Perşembe nöbetçisi Cuma–Pazar, Cuma nöbetçisi Cumartesi–Pazartesi izinli. Bu günler sırayla verilir, ayda en fazla 1."+weekDemo([3],[4,5,6]))}
      ${choiceHTML("special","none",d.special==="none","Hayır, hepsi aynı","Her nöbetten sonra yalnız ertesi gün izinli.")}
@@ -1848,9 +1902,9 @@ const SETUP_STEPS=[
      ${choiceHTML("me","no",d.me==="no","Hayır, sadece yönetiyorum","Listeye dahil olmazsın; yalnız hazırlar ve onaylarsın.")}</div>`},
   {t:"Her şey doğru mu?",btn:"Kurulumu bitir",r:d=>{const R=(a,b)=>iosRow(a,`<span class="nd-row__value">${b}</span>`);return iosGroup("",[
      R("Nöbet",d.kind==="24"?`Günlük · günde ${d.per} kişi`:"Vardiyalı"),
-     ...(d.kind==="24"?(d.dt==="custom"?[R("Nöbet saatleri","Güne göre (mevcut)")]:d.dt==="24"?[R("Nöbet saatleri",`Her gün 24 saat · ${d.ms.start}`)]
-        :[R("Mesai",`${d.ms.start} – ${d.ms.end}`),R("Hafta içi nöbet",`${d.ms.end} → ${d.ms.start}`),R("Hafta sonu, tatil",`24 saat · ${d.ms.start}`)]):[]),
-     R("Nöbet sonrası",d.after==="off"?"Ertesi gün izinli":d.after==="work"?"Ertesi gün çalışır":"Nöbet tüm mesai"),
+     ...(d.kind==="24"?(d.dt==="custom"?[R("Nöbet saatleri","Güne göre (mevcut)")]:d.dt==="24"?[R("Nöbet saatleri",`24 saat · devir ${d.ms.start}`+(d.ms.we&&d.ms.we!==d.ms.start?`, hafta sonu ${d.ms.we}`:""))]
+        :[R("Mesai",`${d.ms.start} – ${d.ms.end}`),R("Hafta içi nöbet",`${d.ms.end} → ${d.ms.start}`),R("Hafta sonu, tatil devri",d.ms.we||d.ms.start)]):[]),
+     R("Nöbet sonrası",d.after==="off"?(d.nx==="1"?"Ertesi gün + ilk mesai günü":"Ertesi gün izinli"):d.after==="work"?"Ertesi gün çalışır":"Nöbet tüm mesai"),
      ...(d.after==="off"&&d.kind==="24"?[R("Perşembe / Cuma",d.special==="thufri"?"3 gün izin, sırayla":d.special==="none"?"Ertesi gün izinli":"Sonra ayarlanacak")]:[]),
      ...(d.after==="off"&&d.kind==="24"&&d.special!=="custom"?[R("Cumartesi",d.sat?`Yarım gün · ${d.need} kişi kalır`:"Normal gün")]:[]),
      R("İzinlinin sayısı",d.lp==="prop"?"İzin oranında":"Eşit"),
@@ -1867,7 +1921,7 @@ function setupDefaults(){
   return {kind:isShiftMode()?"shift":"24",per:+($("generalRooms").value||1)||1,dt:dk,ms:{...dt.ms},
     after:wm==="duty_work"?"work":wm==="shift_only"?"all":"off",
     special:c.on&&c.off[3]>=3?"thufri":c.on?"custom":"none",sat:c.on?c.sat.on:false,need:c.sat.need||3,
-    lp:leaveProp()?"prop":"eq",me:onDuty(myProfile)?"yes":"no"};
+    lp:leaveProp()?"prop":"eq",me:onDuty(myProfile)?"yes":"no",nx:afterNext()?"1":""};
 }
 function openSetupWizard(){if(!isAdmin())return;WZ={kind:"setup",step:0,d:setupDefaults()};wzOpen();}
 async function setupApply(d){
@@ -1885,6 +1939,7 @@ async function setupApply(d){
     await saveGrp("wr");
   }else if(d.after!=="off"&&wrOn()){wrDraft=wrNorm({...opts().wr,on:false});await saveGrp("wr");}
   $("leaveProp").value=d.lp==="prop"?"1":"";await saveGrp("leaveprop");
+  if(d.after==="off"&&$("afterNext")&&($("afterNext").value==="1")!==(d.nx==="1")){$("afterNext").value=d.nx;await saveGrp("afternext");}
   const mp=members.find(x=>x.id===me.id);
   if(mp&&(d.me==="no")!==!!sp(mp).noDuty)await setSP(me.id,"noDuty",d.me==="no");
   await saveDept({__opts:{setup_done:true}},"Kurulum");
@@ -1897,36 +1952,53 @@ const PREP_STEPS=[
     return `<div class="nd-choices">${L.map(mk=>choiceHTML("mk",mk,d.mk===mk,ayAdi(mk),ayDurum(mk))).join("")}</div>
       <div style="margin-top:16px">${iosGroup("",[iosRow("Başka bir ay",`<span class="wzmon"><button type="button" class="ndstep__b" aria-label="Önceki ay" onclick="wzMk(-1)">${ND.icon("chev-l")}</button><b>${ayAdi(d.mk)}</b><button type="button" class="ndstep__b" aria-label="Sonraki ay" onclick="wzMk(1)">${ND.icon("chev-r")}</button></span>`)],
       schedulesAll[d.mk]?`${ayAdi(d.mk)} için yayınlanmış liste var; yeni listeyi yayınlarsan o geçer, eskisi sürüm geçmişinde kalır.`:"")}</div>`;},
-    after:async d=>{if(d.mk!==planAy()){const ok=await goToMonth(d.mk,{silent:true});if(!ok)throw new Error("Ay değiştirilemedi");d.hol=new Set();}}},
-  {t:"Tatil günleri",sub:()=>`${ayAdi(planAy())} içinde resmi tatil ya da bayram olan günlere dokun.`,r:d=>{
+    after:async d=>{if(d.mk!==planAy()){const ok=await goToMonth(d.mk,{silent:true});if(!ok)throw new Error("Ay değiştirilemedi");d.hol=new Set();d.arf=new Set();}}},
+  {t:"Tatil ve arife günleri",sub:()=>`${ayAdi(planAy())} içinde resmi tatil, bayram ya da arife olan günlere dokun.`,r:d=>{
     const {y,m,nDays,firstDow}=monthInfo(planAy());
-    let h=`<div class="cal wzcal">${DAYS_TR.map(x=>`<div class="dh">${x}</div>`).join("")}`;
+    let h=`<div class="seg wzbrush">${[["hol","Resmi tatil"],["arf","Arife (yarım gün)"]].map(([k,t])=>`<button type="button" class="${d.brush===k?"on":""}" onclick="WZ.d.brush='${k}';wzRender()">${t}</button>`).join("")}</div>
+      <div class="cal wzcal">${DAYS_TR.map(x=>`<div class="dh">${x}</div>`).join("")}`;
     for(let i=0;i<firstDow;i++)h+=`<div class="day empty"></div>`;
-    for(let dd=1;dd<=nDays;dd++)h+=`<button type="button" class="day prefday${d.hol.has(dd)?" holsel":""}${isWknd(y,m,dd)?" wknd":""}" onclick="wzHol(${dd})">${dd}</button>`;
-    return h+`</div><p class="wz__note">${d.hol.size?"Seçili: "+fmtDays([...d.hol].sort((a,b)=>a-b)):"Bu ay resmi tatil yoksa hiçbirini seçme."} Tatil günleri 24 saat sayılır ve ayrıca dengelenir.</p>`;}},
-  {t:"Kimler, hangi günler?",sub:()=>"İzinleri onayla, bu ay kimlerin nöbet tutacağını kontrol et.",r:d=>{
-    const bek=members.filter(p=>leaveDays(p.id,"izin_bek").length);
-    const hic=members.filter(p=>onDuty(p)&&!Object.keys(allPrefs[p.id]||{}).length);
-    let h=hic.length?`<div class="banner info" style="margin:0 0 16px">${hEsc(hic.map(p=>kisaAd(p.name)).join(", "))} tercih girmedi. Girmeyenler için yalnız kurallar uygulanır.</div>`:"";
-    if(bek.length)h+=`<div class="nd-group"><div class="nd-group__label">Onay bekleyen izin</div><div class="nd-list" id="wzApprove"></div><div class="nd-group__foot">Sağa kaydır: onayla · sola: reddet.</div></div>`;
-    h+=iosGroup("Ekip · "+ayAdi(planAy()),members.map(p=>{
-      const lv=leaveDays(p.id,"izin").length,pr=allPrefs[p.id]||{};
-      const av=Object.values(pr).filter(v=>v==="avoid").length,wi=Object.values(pr).filter(v=>v==="yes").length;
-      const bits=[];if(lv)bits.push(lv+" gün izin");if(wi)bits.push(wi+" istiyor");if(av)bits.push(av+" istemiyor");
-      return `<div class="nd-row has-av" data-pid="${p.id}">${avatarHTML(p.id)}<span class="nd-row__body"><span class="nd-row__title">${hEsc(kisaAd(p.name))}</span>
-        <span class="nd-row__sub">${onDuty(p)?(bits.join(" · ")||"Tercih yok"):"Bu ay nöbet tutmuyor"}</span></span>
-        <input type="checkbox" ${onDuty(p)?"checked":""} aria-label="Nöbet tutar" onchange="setSP('${p.id}','noDuty',!this.checked).then(()=>wzRender())"></div>`;}));
-    return h;},mount:()=>{
+    for(let dd=1;dd<=nDays;dd++)h+=`<button type="button" class="day prefday${d.hol.has(dd)?" holsel":d.arf.has(dd)?" arfsel":""}${isWknd(y,m,dd)?" wknd":""}" onclick="wzHol(${dd})">${dd}</button>`;
+    const dt=dutyTimeUI(),bs=withArf(new Set(d.hol),fmtDays([...d.arf]));
+    const arfT=[...d.arf].filter(x=>isArfDuty(dt,y,m,x,bs)).sort((a,b)=>a-b);
+    return h+`</div><p class="wz__note">${d.hol.size?"Tatil: "+fmtDays([...d.hol].sort((a,b)=>a-b))+". ":"Bu ay resmi tatil yoksa hiçbirini seçme. "}${d.arf.size?"Arife: "+fmtDays([...d.arf].sort((a,b)=>a-b))+(arfT.length?` — nöbet ${dt.arf.start}'te başlar.`:" (hafta sonuna denk geldiği için nöbet saati değişmez).")+" ":""}Tatil günleri ayrıca dengelenir; arifede nöbet daha uzun sürer ve saat dengesine öyle girer.</p>`;}},
+  {t:"Onay bekleyen istekler",skip:d=>!pendCount()&&!d.sawPend,sub:()=>"İzin, kesin nöbet ve nöbet yok istekleri. Onaylanınca liste bunlara kesin uyar.",r:d=>{
+    d.sawPend=true;
+    const L=members.filter(p=>pendDays(p.id).length);
+    if(!L.length)return `<div class="banner ok" style="margin:0">Bekleyen istek kalmadı.</div>`;
+    const sim=wzSimIssues();
+    return (sim.length?`<div class="banner err" style="margin:0 0 14px"><b>Hepsi onaylanırsa tutmayan günler:</b><br>${sim.slice(0,5).map(hEsc).join("<br>")}</div>`:"")+`<div class="nd-group"><div class="nd-list" id="wzApprove"></div><div class="nd-group__foot">Sağa kaydır: onayla · sola: reddet. Değiştirmek için sonraki adımda kişinin günlerini boyayabilirsin.</div></div>
+      <div class="nd-btn-row"><button class="nd-btn is-tinted" onclick="wzApproveAll()">Hepsini onayla</button></div>`;},
+    mount:()=>{
       const box=$("wzApprove");if(!box)return;
-      members.filter(p=>leaveDays(p.id,"izin_bek").length).forEach(p=>{
-        const r=document.createElement("div");r.className="nd-row has-av";
-        r.innerHTML=`${avatarHTML(p.id)}<span class="nd-row__body"><span class="nd-row__title">${hEsc(kisaAd(p.name))} · izin</span><span class="nd-row__sub">${fmtDays(leaveDays(p.id,"izin_bek"))}</span></span>
-          <button class="nd-btn is-sm is-filled" onclick="decideLeave('${p.id}',true).then(()=>wzRender())">Onayla</button>`;
-        box.appendChild(makeSwipe(r,"Onayla","Reddet",()=>decideLeave(p.id,true).then(()=>wzRender()),()=>decideLeave(p.id,false).then(()=>wzRender())));});
+      members.filter(p=>pendDays(p.id).length).forEach(p=>{
+        const r=document.createElement("div");r.className="nd-row has-av";r.dataset.pid=p.id;
+        r.innerHTML=`${avatarHTML(p.id)}<span class="nd-row__body"><span class="nd-row__title">${hEsc(kisaAd(p.name))}</span><span class="nd-row__sub">${hEsc(pendText(p.id))}</span></span>
+          <button class="nd-btn is-sm is-filled" onclick="decideLeave('${p.id}',true,{noConfirm:1}).then(()=>wzRender())">Onayla</button>`;
+        box.appendChild(makeSwipe(r,"Onayla","Reddet",()=>decideLeave(p.id,true,{noConfirm:1}).then(()=>wzRender()),()=>decideLeave(p.id,false,{noConfirm:1}).then(()=>wzRender())));});
     }},
+  {t:"Kişilerin günleri",sub:()=>"Kişiye dokun, fırçayı seç, günleri işaretle. Dilekler mümkün olduğunca, kesin günler mutlaka uygulanır.",r:d=>{
+    if(!d.pid||!members.some(p=>p.id===d.pid))d.pid=(members.find(onDuty)||members[0]||{}).id;
+    const p=members.find(x=>x.id===d.pid)||{};
+    const {y,m,nDays,firstDow}=monthInfo(planAy());
+    const hic=members.filter(x=>onDuty(x)&&!Object.keys(allPrefs[x.id]||{}).filter(k=>/^\d+$/.test(k)).length);
+    let h=planIssuesHTML()+`<div class="wzpeople">${members.map(x=>{const n=Object.keys(allPrefs[x.id]||{}).filter(k=>/^\d+$/.test(k)).length;
+      return `<button type="button" class="wzp${x.id===d.pid?" on":""}${onDuty(x)?"":" off"}" onclick="WZ.d.pid='${x.id}';wzRender()">${avatarHTML(x.id)}<span>${hEsc(kisaAd(x.name))}</span>${n?`<i>${n}</i>`:""}</button>`;}).join("")}</div>`;
+    const B=[["yes","İstiyor","is-wish","wish"],["avoid","İstemiyor","is-avoid","avoid"],["must","Kesin nöbet","is-must","lock"],["never","Nöbet yok","is-never","off-duty"],["izin","İzin","is-leave","leave"],["","Sil","is-erase","x"]];
+    h+=`<div class="nd-brush wzb">${B.map(([k,t,c,ic])=>`<button type="button" class="${c}" aria-pressed="${d.brush2===k?"true":"false"}" onclick="WZ.d.brush2='${k}';wzRender()">${ND.icon(ic)}${t}</button>`).join("")}</div>`;
+    h+=`<div class="cal wzcal wzpc">${DAYS_TR.map(x=>`<div class="dh">${x}</div>`).join("")}`;
+    for(let i=0;i<firstDow;i++)h+=`<div class="day empty"></div>`;
+    const bs=bayramSet();
+    for(let dd=1;dd<=nDays;dd++){const st=pref(d.pid,dd);
+      const cls=st==="izin"?"izin":st==="izin_bek"?"bek":st==="avoid"?"no":st==="yes"?"yes":st==="must"?"must":st==="must_bek"?"must bekk":st==="never"?"never":st==="never_bek"?"never bekk":"";
+      h+=`<button type="button" class="day prefday ${cls}${bs.has(dd)?" bay":isWknd(y,m,dd)?" wknd":""}" onclick="wzPaint(${dd})">${dd}</button>`;}
+    h+=`</div>`;
+    h+=`<div style="margin-top:14px">${iosGroup("",[iosRow("Bu ay nöbet tutar",`<input type="checkbox" ${onDuty(p)?"checked":""} aria-label="Nöbet tutar" onchange="setSP('${p.id}','noDuty',!this.checked).then(()=>wzRender())">`,hEsc(p.name||""))],
+      hic.length?`${hEsc(hic.map(x=>kisaAd(x.name)).join(", "))} için hiçbir gün işaretlenmedi; onlara yalnız kurallar uygulanır.`:"")}</div>`;
+    return h;}},
   {t:"Kim kaç nöbet?",sub:()=>`${ayAdi(planAy())} ayında ${totalSlots()} nöbet yeri var.`,btn:"Taslağı hazırla",r:d=>{
     const on=members.filter(onDuty),S=totalSlots(),base=on.length?Math.floor(S/on.length):0,ex=on.length?S-base*on.length:0;
-    let h=`<div class="nd-choices">${choiceHTML("count","equal",d.count==="equal","Eşit dağıt (önerilen)",`Herkese ${base}${ex?`, ${ex} kişiye +1 (fazla nöbet sırası ve saat farkına göre)`:""}. İzin oranı ayarın açıksa izinliye daha az.`)}
+    let h=planIssuesHTML()+`<div class="nd-choices">${choiceHTML("count","equal",d.count==="equal","Eşit dağıt (önerilen)",`Herkese ${base}${ex?`, ${ex} kişiye +1 (fazla nöbet sırası ve saat farkına göre)`:""}. İzin oranı ayarın açıksa izinliye daha az.`)}
       ${choiceHTML("count","keep",d.count==="keep","Yazdığım sayılarla","Ayarlar → Kim kaç nöbet'teki sayılar kullanılır.")}
       ${choiceHTML("count","manual",d.count==="manual","Şimdi elle belirle","Herkesin sayısını aşağıdan seç.")}</div>`;
     if(d.count==="manual")h+=`<div class="nd-group" style="margin-top:16px" data-autosave="quota"><div class="nd-list" id="wzQuota"></div><div class="nd-group__foot" id="wzQuotaSum"></div></div>`;
@@ -1943,22 +2015,71 @@ const PREP_STEPS=[
 ];
 function wzQuotaSum(){const e=$("wzQuotaSum");if(!e)return;const S=totalSlots(),t=members.filter(onDuty).reduce((a,p)=>a+(+quotaCur(p)||0),0);
   e.innerHTML=t===S?`Toplam ${t} / ${S} — tamam.`:`Toplam ${t} / ${S} — ${t<S?`${S-t} nöbet açıkta kalır, kurallara göre dağıtılır`:`${t-S} fazla; bazı sayılar tutturulamaz`}.`;}
+/* Liste üretmeden önce: imkânsız günleri göster (onaylı izin / nöbet yok / kesin nöbet çakışmaları) */
+function planIssues(){
+  if(isShiftMode())return [];
+  const {y,m,nDays}=monthInfo(planAy()),need=+($("generalRooms").value||1)||1,gap=Math.max(1,+$("minGap").value||1);
+  const staff=generalStaff(),out=[];
+  const v=(p,d)=>pref(p.id,d);
+  for(let d=1;d<=nDays;d++){
+    const ok=staff.filter(p=>!["izin","never"].includes(v(p,d)));
+    const must=staff.filter(p=>v(p,d)==="must");
+    if(ok.length<need)out.push(`${d}. gün nöbet tutabilecek ${ok.length} kişi var (gereken ${need}).`);
+    else if(ok.length===need&&need===1){const p=ok[0];
+      for(let k=1;k<gap;k++)for(const dd of [d-k,d+k])if(dd>=1&&dd<=nDays&&v(p,dd)==="must")out.push(`${d}. gün yalnız ${kisaAd(p.name)} uygun ama ${dd}. günde kesin nöbeti var; iki nöbet arası kuralı bozulacak.`);}
+    if(must.length>need)out.push(`${d}. güne ${must.length} kişi kesin nöbet istiyor (${must.map(p=>kisaAd(p.name)).join(", ")}), yer ${need}.`);
+  }
+  staff.forEach(p=>{const ds=[];for(let d=1;d<=nDays;d++)if(v(p,d)==="must")ds.push(d);
+    for(let i=1;i<ds.length;i++)if(ds[i]-ds[i-1]<gap)out.push(`${kisaAd(p.name)}: ${ds[i-1]} ve ${ds[i]}. günler kesin nöbet; iki nöbet arası en az ${gap} gün olmalı.`);});
+  return [...new Set(out)];
+}
+function planIssuesHTML(){const L=planIssues();if(!L.length)return "";
+  return `<div class="banner err" style="margin:0 0 14px"><b>Dikkat, bu günler tutmuyor:</b><br>${L.slice(0,6).map(hEsc).join("<br>")}${L.length>6?`<br>… ${L.length-6} tane daha`:""}<br><span style="font-weight:400">Bir isteği değiştir ya da reddet; değiştirmezsen liste en yakın çözümü yazar ve ihlali gösterir.</span></div>`;}
+/* sihirbazda kişinin gününü boya (yönetici: doğrudan onaylı) */
+const wzSaveT={};
+function wzPaint(dd){
+  const d=WZ.d,uid=d.pid;if(!uid||!isAdmin())return;
+  allPrefs[uid]=allPrefs[uid]||{};
+  const cur=allPrefs[uid][dd]||"",nv=d.brush2;
+  if(!nv||cur===nv)delete allPrefs[uid][dd];else allPrefs[uid][dd]=nv;
+  ND.haptic(4);wzRender();
+  clearTimeout(wzSaveT[uid]);
+  wzSaveT[uid]=setTimeout(()=>{delete wzSaveT[uid];savePrefsFor(uid).then(({error})=>{if(error)toast(prefsErr(error),true);});},400);
+}
+async function wzFlushPrefs(){
+  for(const uid of Object.keys(wzSaveT)){clearTimeout(wzSaveT[uid]);delete wzSaveT[uid];const {error}=await savePrefsFor(uid);if(error)toast(prefsErr(error),true);}
+}
+/* bekleyenler onaylanmış gibi say, sorunları bul */
+function wzSimIssues(){
+  const keep={};members.forEach(p=>{keep[p.id]=allPrefs[p.id];const o={...(allPrefs[p.id]||{})};pendDays(p.id).forEach(x=>o[x.d]=x.k);allPrefs[p.id]=o;});
+  try{return planIssues();}finally{members.forEach(p=>{allPrefs[p.id]=keep[p.id];});}
+}
+async function wzApproveAll(){
+  for(const p of members)if(pendDays(p.id).length)await decideLeave(p.id,true,{noConfirm:1});
+  wzRender();
+}
 function wzMk(k){WZ.d.mk=ayEkle(WZ.d.mk,k);ND.haptic(4);wzRender();}
-function wzHol(dd){const h=WZ.d.hol;h.has(dd)?h.delete(dd):h.add(dd);ND.haptic(4);wzRender();}
-function openPrepWizard(){
+function wzHol(dd){const d=WZ.d,a=d.brush==="arf"?d.arf:d.hol,b=d.brush==="arf"?d.hol:d.arf;
+  if(a.has(dd))a.delete(dd);else{a.add(dd);b.delete(dd);}ND.haptic(4);wzRender();}
+async function openPrepWizard(){
   if(!isAdmin()){showTab("cizelge");return;}
+  try{await loadAll();}catch(e){}                          // üyelerin son girdiği istekler de görünsün
   const b=buAy(),mk=planAy()<b?ayEkle(b,1):planAy();     // geçmişte kalmış ay seçili olmasın
-  WZ={kind:"prep",step:0,d:{mk,hol:new Set(parseDays($("bayramDays").value)),count:"equal"}};wzOpen();
+  WZ={kind:"prep",step:0,d:{mk,hol:new Set(parseDays($("bayramDays").value)),arf:new Set(parseDays(arifeStr())),brush:"hol",brush2:"yes",count:"equal"}};wzOpen();
 }
 async function prepApply(d){
+  await wzFlushPrefs();
   $("bayramDays").value=fmtDays([...d.hol].sort((a,b)=>a-b));await saveGrp("bayram");
-  if(d.count==="equal"){quotaClear();await saveQuota();}
+  $("arifeDays").value=fmtDays([...d.arf].sort((a,b)=>a-b));await saveGrp("arife");
+  if(d.count==="equal"){members.forEach(p=>{quotaDraft[p.id]=0;quotaNightDraft[p.id]="";});await saveQuota();}
   else if(d.count==="manual"){await flushAuto();await saveQuota();}
 }
 /* ---------- ortak kabuk ---------- */
 function wzSteps(){return WZ.kind==="setup"?SETUP_STEPS:PREP_STEPS;}
 function wzOpen(){const o=$("wizard");o.classList.add("is-open");document.body.classList.add("wz-on");wzRender();}
 function wzClose(){const o=$("wizard");if(o)o.classList.remove("is-open");document.body.classList.remove("wz-on");
+  if(WZ&&WZ.kind==="prep")wzFlushPrefs();
+  try{renderPrefCal();renderPrefSummary();renderLeaveAdmin();renderToday();}catch(e){}
   const k=WZ&&WZ.kind;WZ=null;
   if(k==="setup"&&isAdmin()&&dept&&!opts().setup_done)saveDept({__opts:{setup_done:true}},"Kurulum").catch(()=>{});}
 function wzVisible(){const S=wzSteps();return S.map((s,i)=>i).filter(i=>!S[i].skip||!S[i].skip(WZ.d));}
@@ -1989,6 +2110,7 @@ async function wzNext(){
       const d=WZ.d;await prepApply(d);wzClose();showTab("cizelge");generate();return;
     }
     if(S[WZ.step].after)await S[WZ.step].after(WZ.d);
+    if(WZ.kind==="prep")await wzFlushPrefs();
     WZ.step=v[i+1];wzRender();
   }catch(e){console.error(e);toast("⚠️ "+(e&&e.message||e),true);wzRender();}
 }
@@ -2094,8 +2216,7 @@ function renderToday(){
   let h="";
   if(nx){
     const R=rulesFor(nx.mk),wd=wdOf(nx.y,nx.m,nx.d);
-    const off=(R.cfg.on&&R.cfg.off[wd]>0&&!R.wa.has(me.id))?wrOffText(R.cfg,wd).replace(/ izinli$/,"")
-      :(!R.cfg.on&&R.wm==="duty_rest"&&!R.wa.has(me.id))?"ertesi gün":"";
+    const off=(!R.wa.has(me.id)&&(R.cfg.on||R.wm==="duty_rest"))?offDaysText(R,nx.y,nx.m,nx.d,monthBays(nx.mk)):"";
     const ile=nx.ile.map(id=>kisaAd(nameOfId(id)));
     h+=`<div class="nd-hero"><span class="nd-hero__eyebrow">Sıradaki nöbetin · ${relTxt(gunFark(nx.date))}</span>
       <span class="nd-hero__title">${GUN_UZUN[wd]}, ${nx.d} ${MONTHS_TR[nx.m-1]}</span>
@@ -2132,8 +2253,8 @@ function renderToday(){
   h+=`<div class="tsec">Önümüzdeki 7 gün</div><div class="strip">${strip}</div>`;
   /* yapılacaklar */
   const todo=[];
-  const bek=Object.entries(allPrefs||{}).reduce((a,[uid,dd])=>a+Object.values(dd||{}).filter(v=>v==="izin_bek").length,0);
-  if(isAdmin()&&bek)todo.push({ic:"leave",t:`${bek} izin günü onay bekliyor`,go:"showTab('leave')"});
+  const bek=pendCount();
+  if(isAdmin()&&bek)todo.push({ic:"leave",t:`${bek} gün onay bekliyor (izin / kesin gün)`,go:"showTab('leave')"});
   const gelen=(requests||[]).filter(r=>r.in_id===me.id&&r.status==="bekliyor").length;
   if(gelen)todo.push({ic:"swap",t:`${gelen} takas isteği seni bekliyor`,go:"showTab('takas')"});
   if(isAdmin()&&!schedulesAll[planAy()])todo.push({ic:"duty",t:`${ayAdi(planAy())} listesini hazırla`,go:"openPrepWizard()"});
@@ -2174,22 +2295,43 @@ function vMonth(){return viewMonth||(dept&&dept.month)||$("month").value;}
 function vInfo(){return monthInfo(vMonth());}
 function planAy(){return (dept&&dept.month)||$("month").value;}
 function vBaySet(){
-  if(schedule&&schedule.bayram!=null)return new Set(parseDays(schedule.bayram));
+  if(schedule&&schedule.bayram!=null)return withArf(new Set(parseDays(schedule.bayram)),schedule.arife);
   return bayramSet();
 }
 function vIsBay(d){return vBaySet().has(d);}
 function isWknd(y,m,d){const w=new Date(y,m-1,d).getDay();return w===0||w===6;}
 function isFri(y,m,d){return new Date(y,m-1,d).getDay()===5;}
-function bayramSet(){return new Set(parseDays($("bayramDays").value));}
+function bayramSet(){return withArf(new Set(parseDays($("bayramDays").value)),arifeStr());}
 function isBay(d){return bayramSet().has(d);}
 function pref(uid,d){return (allPrefs[uid]||{})[d]||"";}
+/* Gün işaretleri: yes = istiyorum, avoid = istemiyorum (dilek) · must = kesin nöbet, never = nöbet yok, izin
+   (kesin olanlar yönetici onayıyla geçerli olur; "_bek" = onay bekliyor) */
+const PREF_BEK={izin_bek:"izin",must_bek:"must",never_bek:"never"};
+const PREF_AD={izin:"İzin",must:"Kesin nöbet",never:"Nöbet yok"};
+function pendDays(uid){return Object.entries(allPrefs[uid]||{}).filter(([d,v])=>/^\d+$/.test(d)&&PREF_BEK[v])
+  .map(([d,v])=>({d:+d,k:PREF_BEK[v]})).sort((a,b)=>a.d-b.d);}
+function prefGroups(uid,vals){const g={};Object.entries(allPrefs[uid]||{}).forEach(([d,v])=>{if(/^\d+$/.test(d)&&vals.includes(v))(g[v]=g[v]||[]).push(+d);});
+  Object.values(g).forEach(a=>a.sort((x,y)=>x-y));return g;}
+function pendText(uid){const g={};pendDays(uid).forEach(x=>(g[x.k]=g[x.k]||[]).push(x.d));
+  return ["izin","must","never"].filter(k=>g[k]).map(k=>PREF_AD[k]+" "+fmtDays(g[k])).join(" · ");}
+function pendCount(){return members.reduce((a,p)=>a+pendDays(p.id).length,0);}
+/* çözücünün gördüğü tercih: onaylı "nöbet yok" izin gibi engeller (ama izin sayılmaz);
+   onaylı "kesin nöbet" sabit atama olur; onay bekleyen kesin günler dilek gibi değerlendirilir */
+function solvePref(v){return v==="never"?"izin":(v==="must"||v==="must_bek")?"yes":v==="never_bek"?"avoid":(v||"");}
+function spref(uid,d){return solvePref(pref(uid,d));}
+function effPins(){
+  const out=(pinRows||[]).slice();
+  members.forEach(p=>{const ds=Object.entries(allPrefs[p.id]||{}).filter(([d,v])=>v==="must"&&/^\d+$/.test(d)).map(([d])=>+d);
+    if(ds.length)out.push({pid:p.id,days:fmtDays(ds),si:"",must:true});});
+  return out;
+}
 function testMembers(){return members.filter(p=>p.is_test);}
 function editingId(){
   const sel=$("asPerson");
   if(sel&&sel.value&&isAdmin())return sel.value;
   return me.id;
 }
-function canEdit(uid){return uid===me.id||(isAdmin()&&(members.find(p=>p.id===uid)||{}).is_test);}
+function canEdit(uid){return uid===me.id||(isAdmin()&&members.some(p=>p.id===uid));}
 function isAdmin(){return myProfile&&myProfile.is_admin;}
 function branchRooms(){return dept&&dept.branch_rooms?dept.branch_rooms:{};}
 function hasOwnRoom(branch){return !!branchRooms()[branch];}
@@ -2358,7 +2500,9 @@ async function loadAll(){
   myProfile=members.find(x=>x.id===me.id)||myProfile;
   const mt=myTeams.find(x=>x.dept_id===did); if(mt&&myProfile)mt.is_admin=myProfile.is_admin;
   $("month").value=dept.month;$("minGap").value=dept.min_gap;
-  if($("monthLbl"))$("monthLbl").textContent=ayAdi(dept.month);$("bayramDays").value=dept.bayram||"";
+  if($("monthLbl"))$("monthLbl").textContent=ayAdi(dept.month);
+  if($("arifeDays"))$("arifeDays").value=(dept.opts&&dept.opts.arife)||"";
+  if($("afterNext"))$("afterNext").value=(dept.opts&&dept.opts.after_next)?"1":"";$("bayramDays").value=dept.bayram||"";
   $("generalRooms").value=dept.general_rooms!=null?dept.general_rooms:2;
   roomRows=Object.entries(branchRooms()).map(([b,v])=>({branch:b,rooms:v.rooms,shared:!!v.shared}));
   shiftRows=(dept.shifts||[]).map(s=>({name:s.name,start:s.start,end:s.end,count:s.count,days:(s.days||[1,1,1,1,1,1,1]).slice(),rest:s.rest||0,owner:s.owner||null,mesai:!!s.mesai}));
@@ -2559,7 +2703,17 @@ function hhPad(t){const m=String(t||"").match(/^(\d{1,2}):(\d{2})/);return m?Str
    24     : her gün 24 saat, aynı saatte devir
    custom : her gün için ayrı saat
    Hesaplar her zaman d[0..6] + bay satırlarını kullanır; mode/ms yalnızca nasıl kurulduğunu hatırlar. */
-const DT_MS={start:"08:00",end:"17:00",sat:false,satEnd:"13:00"};
+/* ---------- NÖBET SAATLERİ ----------
+   mesai  : iş günü nöbeti mesai bitince başlar; hafta sonu / resmi tatil nöbeti "hafta sonu devir" saatinde başlar.
+            Her nöbet ertesi günün devir saatinde biter: ertesi gün iş günüyse mesai başlangıcında,
+            hafta sonu / tatilse hafta sonu devir saatinde. (Cuma 17:00 → Cmt 09:00, Pazar 09:00 → Pzt 08:00)
+            Cumartesi yarım gün mesai varsa Cumartesi nöbeti o mesai bitince başlar; arife günü mesai öğlen biter.
+   24     : iş günü devri bir saatte, hafta sonu / tatil devri başka saatte olabilir.
+   custom : her gün için ayrı saat (eski düzen).
+   d[0..6] + bay satırları mesai/24'te tatilsiz örnek haftadır (özet ve eski kayıtlar için). */
+const DT_MS={start:"08:00",end:"17:00",we:"",sat:false,satEnd:"13:00",arfEnd:"13:00"};
+/* sabit tarihli resmi tatiller — ay sonundaki nöbetin ertesi aya devri için (dini bayramlar ay içinde elle işaretlenir) */
+const TR_SABIT_TATIL=["01-01","04-23","05-01","05-19","07-15","08-30","10-29"];
 function dtNorm(o){
   o=o||{};
   const one=(x,def)=>({start:hhPad(x&&x.start)||def.start,end:hhPad(x&&x.end)||def.end});
@@ -2568,11 +2722,22 @@ function dtNorm(o){
   const bay=one(o.bay,o.d?d[6]:base);
   const r={start:d[0].start,end:d[0].end,d,bay};
   const mi=o.ms||{};
-  r.ms={start:hhPad(mi.start)||DT_MS.start,end:hhPad(mi.end)||DT_MS.end,sat:!!mi.sat,satEnd:hhPad(mi.satEnd)||DT_MS.satEnd};
+  r.ms={start:hhPad(mi.start)||DT_MS.start,end:hhPad(mi.end)||DT_MS.end,we:hhPad(mi.we)||"",sat:!!mi.sat,
+    satEnd:hhPad(mi.satEnd)||DT_MS.satEnd,arfEnd:hhPad(mi.arfEnd)||DT_MS.arfEnd};
   r.mode=["mesai","24","custom"].includes(o.mode)?o.mode:dtGuessMode(r);
   if(!o.ms){                        // eski kayıt: mesai saatlerini satırlardan çıkar
     if(r.mode==="mesai"){r.ms.start=d[6].start;r.ms.end=d[0].start;r.ms.sat=d[5].start!==d[6].start;if(r.ms.sat)r.ms.satEnd=d[5].start;}
     else if(r.mode==="24")r.ms.start=d[0].start;
+  }
+  if(r.ms.we===r.ms.start)r.ms.we="";
+  /* bazı hafta içi günlerde mesai farklı: [{w:[Pzt..Paz 0/1], start, end}] — sonraki satır öncekini ezer */
+  r.ms.ex=Array.isArray(mi.ex)?mi.ex.map(e=>({w:[0,1,2,3,4,5,6].map(i=>e&&e.w&&e.w[i]&&i<5?1:0),
+    start:hhPad(e&&e.start)||r.ms.start,end:hhPad(e&&e.end)||r.ms.end})):[];
+  if(r.mode==="custom")r.arf=one(o.arf,{start:r.ms.arfEnd,end:d[0].end});
+  else{                              // örnek hafta (tatilsiz)
+    for(let i=0;i<7;i++)r.d[i]=spanT(r,kindOf(r,i,false,false),kindOf(r,(i+1)%7,false,false),i,(i+1)%7);
+    r.bay=spanT(r,"off","work",6,0);r.arf=spanT(r,r.mode==="mesai"?"arf":"work","work",0,1);
+    r.start=r.d[0].start;r.end=r.d[0].end;
   }
   return r;
 }
@@ -2584,39 +2749,83 @@ function dtGuessMode(r){
   if(!(k(sat)===k(sun)||(sat.end===sun.start&&hm(sat.start)>hm(sun.start))))return "custom";
   return "mesai";
 }
-function dtBuild(mode,ms){
-  ms={...DT_MS,...(ms||{})};
-  const T=(a,b)=>({start:a,end:b});
-  if(mode==="24"){const t=T(ms.start,ms.start);return dtNorm({mode,ms,d:[t,t,t,t,t,t,t],bay:t});}
-  const wd=T(ms.end,ms.start),we=T(ms.start,ms.start),sat=ms.sat?T(ms.satEnd,ms.start):we;
-  return dtNorm({mode:"mesai",ms,d:[wd,wd,wd,wd,wd,sat,we],bay:we});
+/* günün türü: off = hafta sonu/tatil (mesai yok), work = iş günü, sat = Cumartesi yarım gün, arf = arife, sarf = Cumartesi arife */
+function kindOf(dt,wd,hol,arf){
+  if(hol||wd===6)return "off";
+  if(dt.mode==="24")return wd===5?"off":"work";
+  if(wd===5)return dt.ms.sat?(arf?"sarf":"sat"):"off";
+  return arf?"arf":"work";
 }
+/* o hafta içi günün mesaisi (istisna varsa onun saatleri) */
+function msFor(dt,wd){let r={start:dt.ms.start,end:dt.ms.end};
+  if(dt.mode==="mesai")for(const e of (dt.ms.ex||[]))if(e.w[wd])r={start:e.start,end:e.end};return r;}
+function dayKind(dt,y,m,d,bays){
+  const nD=new Date(y,m,0).getDate();
+  if(d<1||d>nD){const x=new Date(y,m-1,d);
+    const k=String(x.getMonth()+1).padStart(2,"0")+"-"+String(x.getDate()).padStart(2,"0");
+    return kindOf(dt,(x.getDay()+6)%7,TR_SABIT_TATIL.includes(k),false);}
+  return kindOf(dt,wdOf(y,m,d),!!(bays&&bays.has(d)),!!(bays&&bays.arf&&bays.arf.has(d)));
+}
+function weH(dt){return dt.ms.we||dt.ms.start;}
+function kindStart(dt,k,wd){
+  const ms=dt.ms,min=(a,b)=>hm(a)<hm(b)?a:b;
+  if(k==="off")return weH(dt);
+  if(dt.mode==="24")return ms.start;
+  if(k==="sat")return ms.satEnd;
+  if(k==="arf")return min(ms.arfEnd,msFor(dt,wd).end);
+  if(k==="sarf")return min(ms.arfEnd,ms.satEnd);
+  return msFor(dt,wd).end;
+}
+/* ertesi sabah devir saati: ertesi gün hafta sonu/tatilse hafta sonu devri, iş günüyse o günün mesai başlangıcı */
+function kindMorning(dt,kn,wdn){if(kn==="off")return weH(dt);if(dt.mode==="24"||kn==="sat"||kn==="sarf")return dt.ms.start;return msFor(dt,wdn).start;}
+/* k gününün (haftanın wd. günü) nöbeti, ertesi gün kn türündeyken: başlar, ertesi gün biter (h saat) */
+function spanT(dt,k,kn,wd,wdn){const start=kindStart(dt,k,wd||0),end=kindMorning(dt,kn,wdn==null?0:wdn);return {start,end,h:24+hm(end)-hm(start)};}
+function dtBuild(mode,ms){return dtNorm({mode,ms:{...DT_MS,...(ms||{})}});}
 /* mesai saatleri geçerli mi? hata metni ya da "" */
 function msErr(ms){
   if(hm(ms.end)<=hm(ms.start))return "Mesai bitişi başlangıçtan sonra olmalı.";
   if(ms.sat&&(hm(ms.satEnd)<=hm(ms.start)))return "Cumartesi mesai bitişi mesai başlangıcından sonra olmalı.";
+  if(hm(ms.arfEnd||"13:00")<=hm(ms.start))return "Arife mesai bitişi mesai başlangıcından sonra olmalı.";
+  for(const e of (ms.ex||[]))if(e.w.some(Boolean)&&hm(e.end)<=hm(e.start))return "Farklı mesai gününde bitiş başlangıçtan sonra olmalı.";
   return "";
 }
-function msSummary(ms,kisa){
-  const h=t=>Math.round(durH(t)*10)/10;
-  const wd={start:ms.end,end:ms.start};
-  return kisa?`Hafta içi ${ms.end} → ${ms.start} (${h(wd)} sa)`:
-    `Hafta içi nöbet ${ms.end}'de başlar, ertesi gün ${ms.start}'de biter (${h(wd)} saat).`;
+function msSummary(ms){
+  const wd={start:ms.end,end:ms.start},h=Math.round(durH(wd)*10)/10;
+  return `Hafta içi nöbet ${ms.end}'de başlar, ertesi gün ${ms.start}'de biter (${h} saat).`;
 }
-function durH(t){const x=(hm(t.end)-hm(t.start)+24)%24;return x>1e-9?x:24;}
-function dutyFor(dt,y,m,d,bays){return (bays&&bays.has(d))?dt.bay:dt.d[wdOf(y,m,d)];}
+function durH(t){if(t&&t.h!=null)return t.h;const x=(hm(t.end)-hm(t.start)+24)%24;return x>1e-9?x:24;}
+function endsNextDay(t){return t.h!=null?true:hm(t.end)<=hm(t.start);}
+/* bays: resmi tatil günleri; bays.arf: arife günleri */
+function dutyFor(dt,y,m,d,bays){
+  if(dt.mode==="mesai"||dt.mode==="24"){const w=x=>(new Date(y,m-1,x).getDay()+6)%7;
+    return spanT(dt,dayKind(dt,y,m,d,bays),dayKind(dt,y,m,d+1,bays),w(d),w(d+1));}
+  if(bays&&bays.has(d))return dt.bay;
+  const t=dt.d[wdOf(y,m,d)];
+  if(bays&&bays.arf&&bays.arf.has(d)&&dt.arf&&durH(dt.arf)>durH(t))return dt.arf;
+  return t;
+}
+/* arife günü nöbeti normalden farklı başlıyor mu? */
+function isArfDuty(dt,y,m,d,bays){
+  if(dt.mode==="mesai"){const k=dayKind(dt,y,m,d,bays),wd=wdOf(y,m,d);return (k==="arf"||k==="sarf")&&kindStart(dt,k,wd)!==kindStart(dt,k==="sarf"?"sat":"work",wd);}
+  if(dt.mode==="24")return false;
+  const t=dutyFor(dt,y,m,d,bays);return !!(bays&&bays.arf&&bays.arf.has(d)&&!bays.has(d)&&t===dt.arf);
+}
+function withArf(set,str){set.arf=new Set(parseDays(str||""));return set;}
+function arifeStr(){const e=$("arifeDays");return e?e.value:(opts().arife||"");}
+function vIsArf(d){const b=vBaySet();return !b.has(d)&&!!(b.arf&&b.arf.has(d));}
 function dtUniform(dt){const k=t=>t.start+"|"+t.end;return dt.d.every(t=>k(t)===k(dt.d[0]))&&k(dt.bay)===k(dt.d[0]);}
 function dutyTimeUI(){return JSON.parse(JSON.stringify(dtRows||dtNorm(dept&&dept.opts&&dept.opts.duty_time)));}
 function dtPreset(k){
   if(!isAdmin())return;
   const ms=(dtRows||dtNorm(opts().duty_time)).ms;
-  dtRows=k==="24"?dtBuild("24",{...ms,start:"08:00"}):dtBuild("mesai",{...ms,start:"08:00",end:k+":00",sat:false});
+  dtRows=k==="24"?dtBuild("24",{...ms,start:"08:00",we:""}):dtBuild("mesai",{...ms,start:"08:00",end:k+":00",sat:false,we:""});
   renderDT();
 }
 function dtSetMode(m){
   if(!isAdmin())return;
   const cur=dtRows||dtNorm(opts().duty_time);
-  if(m==="custom"){dtRows=JSON.parse(JSON.stringify(cur));dtRows.mode="custom";}
+  if(m==="custom"){const c=t=>({start:t.start,end:t.end});
+    dtRows=dtNorm({mode:"custom",ms:cur.ms,d:cur.d.map(c),bay:c(cur.bay),arf:c(cur.arf)});}
   else dtRows=dtBuild(m,cur.ms);
   renderDT();
 }
@@ -2625,18 +2834,62 @@ function dtMs(f,v){
   const cur=dtRows||dtNorm(opts().duty_time);
   const ms={...cur.ms};
   if(f==="sat")ms.sat=!!v;else{const x=hhPad(v);if(!x){renderDT();return;}ms[f]=x;}
+  if(ms.we===ms.start)ms.we="";
   const e=cur.mode==="mesai"?msErr(ms):"";
   if(e){toast("⚠️ "+e,true);renderDT();return;}
   dtRows=dtBuild(cur.mode==="24"?"24":"mesai",ms);
   renderDT();
 }
+/* farklı mesai günleri */
+function dtEx(i,f,v){
+  if(!isAdmin())return;
+  const cur=dtRows||dtNorm(opts().duty_time);const ms=JSON.parse(JSON.stringify(cur.ms));
+  const e=ms.ex[i];if(!e)return;
+  if(f==="w"){e.w[v]=e.w[v]?0:1;ND.haptic(4);}
+  else{const x=hhPad(v);if(!x){renderDT();return;}e[f]=x;}
+  const er=msErr(ms);if(er){toast("⚠️ "+er,true);renderDT();return;}
+  dtRows=dtBuild("mesai",ms);renderDT();
+}
+function dtExAdd(){
+  if(!isAdmin())return;
+  const cur=dtRows||dtNorm(opts().duty_time);const ms=JSON.parse(JSON.stringify(cur.ms));
+  const used=new Set();ms.ex.forEach(e=>e.w.forEach((x,i)=>{if(x)used.add(i);}));
+  const w=[0,0,0,0,0,0,0];w[used.has(4)?[0,1,2,3].find(i=>!used.has(i))??4:4]=1;   // önce Cuma
+  ms.ex.push({w,start:ms.start,end:ms.end});
+  dtRows=dtBuild("mesai",ms);renderDT();
+}
+function dtExDel(i){
+  if(!isAdmin())return;
+  const cur=dtRows||dtNorm(opts().duty_time);const ms=JSON.parse(JSON.stringify(cur.ms));
+  ms.ex.splice(i,1);dtRows=dtBuild("mesai",ms);renderDT();
+}
+/* Güne göre: seçili günlere tek seferde saat ver */
+let dtBulk=new Set();
+function dtBulkTog(i){dtBulk.has(i)?dtBulk.delete(i):dtBulk.add(i);ND.haptic(4);renderDT();}
+function dtBulkApply(){
+  if(!isAdmin())return;
+  if(!dtBulk.size){toast("Önce günleri seç",true);return;}
+  const a=hhPad($("dtBulkS").value),b=hhPad($("dtBulkE").value);if(!a||!b){toast("Saatleri gir",true);return;}
+  if(!dtRows||dtRows.mode!=="custom")dtSetMode("custom");
+  dtBulk.forEach(i=>{const r=i===7?dtRows.bay:i===8?dtRows.arf:dtRows.d[i];r.start=a;r.end=b;});
+  dtRows.start=dtRows.d[0].start;dtRows.end=dtRows.d[0].end;
+  dtBulk=new Set();renderDT();
+}
 function dtSet(i,f,v){
   if(!dtRows)dtRows=dtNorm(opts().duty_time);
-  dtRows.mode="custom";
-  const r=i===7?dtRows.bay:dtRows.d[i];
+  if(dtRows.mode!=="custom"){const c=t=>({start:t.start,end:t.end});
+    dtRows=dtNorm({mode:"custom",ms:dtRows.ms,d:dtRows.d.map(c),bay:c(dtRows.bay),arf:c(dtRows.arf)});}
+  const r=i===7?dtRows.bay:i===8?dtRows.arf:dtRows.d[i];
   const x=hhPad(v);if(x)r[f]=x;
   dtRows.start=dtRows.d[0].start;dtRows.end=dtRows.d[0].end;
   renderDT();
+}
+/* örnek haftayı aynı saatli gün gruplarına böl: Hafta içi / Cuma / Hafta sonu … */
+function dtWeekGroups(dt){
+  const key=t=>t.start+"|"+t.end,out=[];let a=0;
+  const ad=(a,b)=>a===0&&b===4?"Hafta içi":a===5&&b===6?"Hafta sonu":a===0&&b===6?"Her gün":b>a?DAYS_TR[a]+"–"+DAYS_TR[b]:DAYS_TR[a];
+  for(let i=1;i<=7;i++)if(i===7||key(dt.d[i])!==key(dt.d[a])){out.push({ad:ad(a,i-1),t:dt.d[a]});a=i;}
+  return out;
 }
 function renderDT(){
   const box=$("dtTable");if(!box)return;
@@ -2644,28 +2897,47 @@ function renderDT(){
   const md=$("dtMode");
   if(md){md.querySelectorAll("button").forEach(b=>b.classList.toggle("on",b.dataset.m===dt.mode));md.style.display=ro?"none":"";}
   const hs=t=>Math.round(durH(t)*10)/10+" sa";
-  const tm=(f,v)=>`<input type="time" class="dtin" value="${v}" ${dis} onchange="dtMs('${f}',this.value)">`;
+  const tm=(f,v)=>`<input type="time" class="dtin" data-f="${f}" value="${v}" ${dis} onchange="dtMs('${f}',this.value)">`;
   const calc=(ad,t)=>`<div class="nd-row dtcalc"><span class="nd-row__body"><span class="nd-row__title">${ad}</span></span><span class="nd-row__value">${t.start} → ${t.end} · ${hs(t)}</span></div>`;
+  const sep=t=>`<div class="dtsep">${t}</div>`;
   const foot=$("dtFoot");
-  if(dt.mode==="mesai"){
-    const ms=dt.ms;
-    box.innerHTML=iosRow("Mesai başlar",tm("start",ms.start))+iosRow("Mesai biter",tm("end",ms.end))
-      +iosRow("Cumartesi yarım gün mesai",`<input type="checkbox" ${ms.sat?"checked":""} ${dis} onchange="dtMs('sat',this.checked)">`,"açıksa Cumartesi nöbeti mesai bitince başlar")
-      +(ms.sat?iosRow("Cumartesi mesai biter",tm("satEnd",ms.satEnd)):"")
-      +calc("Hafta içi nöbet",dt.d[0])+(ms.sat?calc("Cumartesi nöbeti",dt.d[5]):"")+calc(ms.sat?"Pazar ve tatil":"Hafta sonu ve tatil",dt.d[6]);
-    if(foot)foot.innerHTML="Hafta içi nöbet mesai bitince başlar, ertesi sabah mesai başlayınca biter. Hafta sonu ve resmi tatillerde 24 saattir. Saat dengesi, telefon ve Google Takvim bu saatlerle hesaplanır.";
-  }else if(dt.mode==="24"){
-    box.innerHTML=iosRow("Nöbet değişim saati",tm("start",dt.ms.start),"her gün bu saatte devredilir")+calc("Her gün",dt.d[0]);
-    if(foot)foot.innerHTML="Her gün 24 saat. Saat dengesi, telefon ve Google Takvim bu saatlerle hesaplanır.";
+  if(dt.mode==="mesai"||dt.mode==="24"){
+    const ms=dt.ms,m24=dt.mode==="24";
+    let h=m24?iosRow("Hafta içi nöbet devri",tm("start",ms.start))
+      :iosRow("Mesai başlar",tm("start",ms.start),"hafta içi her gün")+iosRow("Mesai biter",tm("end",ms.end),"hafta içi her gün");
+    if(!m24){
+      ms.ex.forEach((e,i)=>{
+        h+=`<div class="nd-row dtex"><div class="dtex__days">${[0,1,2,3,4].map(w=>`<button type="button" class="dtchip${e.w[w]?" on":""}" ${dis} aria-pressed="${e.w[w]?"true":"false"}" onclick="dtEx(${i},'w',${w})">${DAYS_TR[w]}</button>`).join("")}</div>
+          <div class="dtex__t"><span>Mesai</span><input type="time" class="dtin" value="${e.start}" ${dis} onchange="dtEx(${i},'start',this.value)"><span>–</span><input type="time" class="dtin" value="${e.end}" ${dis} onchange="dtEx(${i},'end',this.value)">
+          <button type="button" class="dtex__del" ${dis} aria-label="Sil" onclick="dtExDel(${i})">${ND.icon("x")}</button></div></div>`;});
+      if(!ro)h+=`<button type="button" class="nd-row is-action" onclick="dtExAdd()"><span class="nd-row__body"><span class="nd-row__title">Bazı günlerde mesai farklı</span><span class="nd-row__sub">günleri seç, saati bir kez gir (ör. Cuma 08:00–16:00)</span></span><span class="nd-row__value">${ND.icon("plus")}</span></button>`;
+    }
+    h+=iosRow("Hafta sonu ve tatil devri",tm("we",weH(dt)),ms.we?"hafta içinden farklı":"hafta içiyle aynı");
+    if(!m24){
+      h+=iosRow("Cumartesi yarım gün mesai",`<input type="checkbox" ${ms.sat?"checked":""} ${dis} onchange="dtMs('sat',this.checked)">`,"açıksa Cumartesi nöbeti mesai bitince başlar")
+        +(ms.sat?iosRow("Cumartesi mesai biter",tm("satEnd",ms.satEnd)):"")
+        +iosRow("Arife günü mesai biter",tm("arfEnd",ms.arfEnd),"bayram öncesi yarım gün");
+    }
+    h+=sep("Buna göre nöbetler");
+    dtWeekGroups(dt).forEach(g=>{h+=calc(g.ad,g.t);});
+    h+=calc("Resmi tatil",dt.bay);
+    if(ms.we)h+=calc("Tatilden önceki gün",spanT(dt,"work","off",0,1));
+    if(!m24)h+=calc("Arife",dt.arf);
+    box.innerHTML=h;
+    if(foot)foot.innerHTML=m24?"Her nöbet ertesi günün devir saatinde biter: ertesi gün iş günüyse hafta içi devrinde, hafta sonu ya da tatilse hafta sonu devrinde."
+      :"Hafta içi nöbet mesai bitince başlar. Her nöbet ertesi günün devir saatinde biter: ertesi gün iş günüyse mesai başlangıcında, hafta sonu ya da tatilse hafta sonu devrinde. Saat dengesi, telefon ve Google Takvim bu saatlerle hesaplanır.";
   }else{
     const satir=(i,ad,t)=>{const h=durH(t);
-      return `<div class="dtrow"><span class="dtl" title="${ad}">${i===7?"Tatil":DAYS_TR[i]}</span>
+      return `<div class="dtrow"><span class="dtl" title="${ad}">${i===7?"Tatil":i===8?"Arife":DAYS_TR[i]}</span>
         <input type="time" value="${t.start}" ${dis} onchange="dtSet(${i},'start',this.value)">
         <span class="dta">→</span>
         <input type="time" value="${t.end}" ${dis} onchange="dtSet(${i},'end',this.value)">
         <span class="dth${h!==durH(dt.d[0])?" fark":""}">${Math.round(h*10)/10} sa${hm(t.end)<=hm(t.start)?"":" ·<small> aynı gün</small>"}</span></div>`;};
-    box.innerHTML=dt.d.map((t,i)=>satir(i,DT_GUN[i],t)).join("")+satir(7,"Resmi tatil / bayram",dt.bay);
-    if(foot)foot.innerHTML="Her günün saatini ayrı gir. Bitiş başlangıçtan önce ya da eşitse nöbet ertesi gün biter. Tatil = resmi tatil / bayram. Saat dengesi, telefon ve Google Takvim bu saatlerle hesaplanır.";
+    const bulk=ro?"":`<div class="nd-row dtex dtbulk"><div class="dtex__days">${[0,1,2,3,4,5,6,7,8].map(i=>`<button type="button" class="dtchip${dtBulk.has(i)?" on":""}" data-noauto onclick="dtBulkTog(${i})">${i===7?"Tatil":i===8?"Arife":DAYS_TR[i]}</button>`).join("")}</div>
+      <div class="dtex__t"><span>Seçili günler</span><input type="time" id="dtBulkS" class="dtin" data-noauto value="${dtBulk.size?(i=>i===7?dt.bay:i===8?dt.arf:dt.d[i])([...dtBulk][0]).start:"17:00"}"><span>→</span><input type="time" id="dtBulkE" class="dtin" data-noauto value="${dtBulk.size?(i=>i===7?dt.bay:i===8?dt.arf:dt.d[i])([...dtBulk][0]).end:"08:00"}">
+      <button type="button" class="nd-btn is-sm is-filled" onclick="dtBulkApply()">Uygula</button></div></div>`;
+    box.innerHTML=bulk+dt.d.map((t,i)=>satir(i,DT_GUN[i],t)).join("")+satir(7,"Resmi tatil / bayram",dt.bay)+satir(8,"Arife (yarım gün)",dt.arf);
+    if(foot)foot.innerHTML="Üstten birkaç günü seçip saatini bir kerede verebilir ya da her günü ayrı değiştirebilirsin. Bitiş başlangıçtan önce ya da eşitse nöbet ertesi gün biter. Arife satırı yalnız arife olarak işaretlenen günlerde, normalden uzunsa kullanılır. Saat dengesi, telefon ve Google Takvim bu saatlerle hesaplanır.";
   }
 }
 function layoutSnap(){
@@ -2782,6 +3054,11 @@ function pickBayram(){
   if(!isAdmin())return;
   openDayPicker("Bayram / resmi tatil günleri","Bu günler saat ve adalet hesabında ayrı sayılır. Seçince hemen kaydedilir.",
     $("bayramDays").value,arr=>{$("bayramDays").value=fmtDays(arr);renderPrefCal();autoSave("bayram",50);});
+}
+function pickArife(){
+  if(!isAdmin())return;
+  openDayPicker("Arife (yarım gün)","Bayram öncesi yarım günler: mesai öğlen biter, nöbet o saatte başlar. Seçince hemen kaydedilir.",
+    $("arifeDays").value,arr=>{$("arifeDays").value=fmtDays(arr);autoSave("arife",50);});
 }
 function pickIzin(){
   const uid=editingId();
@@ -2989,7 +3266,8 @@ function pickPinDays(i){
 }
 /* bir atama elle sabitlenmiş mi? (takvimde 📌 göstermek için) */
 function isPinned(d,e){
-  return pinRows.some(p=>p.pid===e.id&&parseDays(p.days).indexOf(d)>=0
+  const P=(!schedule||vMonth()===planAy())?effPins():pinRows;
+  return P.some(p=>p.pid===e.id&&parseDays(p.days).indexOf(d)>=0
     &&(p.si==null||p.si===""||(e.s!=null&&+p.si===e.s)));
 }
 
@@ -3168,11 +3446,32 @@ async function saveQuota(){
   quotaDraft={};quotaNightDraft={};
   if(!hata)await markQuotaMonth();
   if(hata)toast("⚠️ Kaydedilemedi: "+hata,true);
-  else toast(n?`✅ ${n} kişinin nöbet sayısı kaydedildi`:"Değişiklik yok");
+  else if(n)toast(`✅ ${n} kişinin nöbet sayısı kaydedildi`);
   renderQuota();renderPeople();
 }
 
 /* ---------- NÖBET SONRASI İZİN & SIRA KURALLARI: ayar kartı ---------- */
+/* "normal" nöbet sonrası izin = günlerin çoğunda geçerli olan değer; farklı olanlar "özel gün" */
+let wrOpen=-1,wrAdding=false;
+function wrDefaultOff(c){const f={};c.off.forEach(v=>f[v]=(f[v]||0)+1);return +Object.keys(f).sort((a,b)=>f[b]-f[a]||a-b)[0];}
+function wrIsSpecial(c,i,dflt){return c.off[i]!==dflt||!!c.track[i]||c.max[i]>0;}
+function wrSetDefault(v){
+  if(!isAdmin()){renderWR();return;}
+  const c=wrDraft=wrDraft||wrNorm(opts().wr),d0=wrDefaultOff(c),nv=Math.max(0,Math.min(6,Math.round(+v)||0));
+  for(let i=0;i<7;i++)if(!wrIsSpecial(c,i,d0))c.off[i]=nv;
+  renderWR();renderWRCounters();
+}
+function wrSpecialAdd(i){
+  if(!isAdmin())return;
+  const c=wrDraft=wrDraft||wrNorm(opts().wr),d0=wrDefaultOff(c);
+  c.off[i]=Math.max(d0+1,c.off[i]);c.track[i]=1;c.max[i]=c.max[i]||1;
+  wrOpen=i;wrAdding=false;renderWR();renderWRCounters();
+}
+function wrSpecialDel(i){
+  if(!isAdmin())return;
+  const c=wrDraft=wrDraft||wrNorm(opts().wr),d0=wrDefaultOff(c);
+  c.off[i]=d0;c.track[i]=0;c.max[i]=0;wrOpen=-1;renderWR();renderWRCounters();
+}
 function wrSet(k,v){
   if(!isAdmin()){renderWR();return;}
   const c=wrDraft=wrDraft||wrNorm(opts().wr);
@@ -3209,9 +3508,23 @@ function renderWR(){
   const on=$("wrOnChk");on.checked=c.on;on.disabled=ro;
   $("wrBody").style.opacity=c.on?"1":".55";
   const dis=ro?"disabled":"";
-  $("wrDays").innerHTML=WR_GUN.map((g,i)=>iosRow(g+" nöbeti",`<input type="number" min="0" max="6" value="${c.off[i]}" ${dis} onchange="wrSet('off${i}',this.value)">`,wrOffText(c,i))).join("");
-  $("wrTrack").innerHTML=WR_GUN.map((g,i)=>iosRow(g,`<input type="checkbox" ${c.track[i]?"checked":""} ${dis} onchange="wrSet('track${i}',this.checked)">`)).join("");
-  $("wrMax").innerHTML=WR_GUN.map((g,i)=>iosRow(g,`<input type="number" min="0" max="10" value="${c.max[i]}" ${dis} onchange="wrSet('max${i}',this.value)">`)).join("");
+  const dflt=wrDefaultOff(c);
+  $("wrDays").innerHTML=iosRow("Nöbetten sonra izinli",`<input type="number" min="0" max="6" value="${dflt}" ${dis} aria-label="Gün" onchange="wrSetDefault(this.value)">`,
+    dflt===0?"ertesi gün çalışır":dflt===1?"yalnız ertesi gün":dflt+" gün");
+  const sp=[0,1,2,3,4,5,6].filter(i=>wrIsSpecial(c,i,dflt));
+  let h=sp.map(i=>{const open=wrOpen===i;
+    const bits=[wrOffText(c,i),c.track[i]?"sırayla":"",c.max[i]?`ayda en fazla ${c.max[i]}`:""].filter(Boolean).join(" · ");
+    return `<button type="button" class="nd-row wrsp${open?" is-open":""}" data-noauto onclick="wrOpen=wrOpen===${i}?-1:${i};renderWR()"><span class="nd-row__body"><span class="nd-row__title">${WR_GUN[i]} nöbeti</span><span class="nd-row__sub">${bits}</span></span><span data-icon="${open?"chev-l":"chev-r"}"></span></button>`
+      +(open?iosRow("İzinli gün",`<input type="number" min="0" max="6" value="${c.off[i]}" ${dis} onchange="wrSet('off${i}',this.value)">`,"",(" wrsub"))
+        +iosRow("Sırayla ver",`<input type="checkbox" ${c.track[i]?"checked":""} ${dis} onchange="wrSet('track${i}',this.checked)">`,"kim kaç kez tuttuysa ona göre",(" wrsub"))
+        +iosRow("Ayda en fazla",`<input type="number" min="0" max="10" value="${c.max[i]}" ${dis} onchange="wrSet('max${i}',this.value)">`,"0 = sınır yok",(" wrsub"))
+        +(ro?"":`<button type="button" class="nd-row is-action is-danger wrsub" onclick="wrSpecialDel(${i})"><span class="nd-row__body"><span class="nd-row__title">Özel günü kaldır</span></span></button>`):"");}).join("");
+  const free=[0,1,2,3,4,5,6].filter(i=>!sp.includes(i));
+  if(!ro&&free.length)h+=wrAdding?`<div class="nd-row dtex"><div class="nd-row__sub">Hangi günün nöbeti farklı?</div><div class="dtex__days">${free.map(i=>`<button type="button" class="dtchip" onclick="wrSpecialAdd(${i})">${DAYS_TR[i]}</button>`).join("")}</div></div>`
+    :`<button type="button" class="nd-row is-action" data-noauto onclick="wrAdding=true;renderWR()"><span class="nd-row__body"><span class="nd-row__title">Özel gün ekle</span></span><span class="nd-row__value">${ND.icon("plus")}</span></button>`;
+  if(!h)h=`<div class="nd-row"><span class="nd-row__body"><span class="nd-row__sub">Özel gün yok; her nöbet aynı.</span></span></div>`;
+  $("wrSpecial").innerHTML=h;
+  try{ND.auto($("wrSpecial"));}catch(e){}
   $("wrSatOn").checked=c.sat.on;$("wrSatNeed").value=c.sat.need;$("wrSatMax").value=c.sat.max;
   $("wrFz").checked=c.fz;$("wrSince").value=c.since||"";
   ["wrSatOn","wrSatNeed","wrSatMax","wrFz","wrSince"].forEach(id=>{$(id).disabled=ro;});
@@ -3234,6 +3547,7 @@ function renderWR(){
   if(!c.on)txt="Kurallar kapalı — liste eskisi gibi hazırlanır. Açmak için “Bu kuralları kullan”ı aç ya da hazır şablonu uygula.";
   $("wrExplain").innerHTML=txt;
 }
+let wrCntEdit=false;
 function renderWRCounters(){
   const card=$("wrCntCard");if(!card)return;
   const c=wrCfg(),keys=wrKeys(c);
@@ -3244,12 +3558,13 @@ function renderWRCounters(){
   const cur=schedulesAll[mk]?wrMonthStats(schedulesAll[mk],mk):null;
   const rot=members.filter(p=>wrRotIds().indexOf(p.id)>=0);
   const mins={};keys.forEach(k=>{mins[k.k]=Math.min(...rot.map(p=>+(cum[p.id]||{})[k.k]||0));});
-  $("wrCntHead").innerHTML=`<tr><th>Kişi</th>${keys.map(k=>`<th>${k.kisa}</th>`).join("")}</tr>`;
-  $("wrCntBody").innerHTML=rot.map(p=>`<tr><td>${brEmoji(p.pool)} ${p.name}</td>${keys.map(k=>{
-      const t=+(cum[p.id]||{})[k.k]||0,b=+((c.base[p.id]||{})[k.k])||0,bu=cur?(+(cur[p.id]||{})[k.k]||0):null;
-      return `<td><b style="color:var(--teal-deep)">${t}</b>${t===mins[k.k]&&rot.length>1?" ⬇":""}${bu?`<span style="font-size:.62rem;color:var(--ink-soft)"> +${bu} bu ay</span>`:""}
-        <div style="font-size:.6rem;color:var(--ink-soft)">başl. ${ro?b:`<input class="wrbase" type="number" min="0" value="${b}" onchange="wrBaseSet('${p.id}','${k.k}',this.value)">`}</div></td>`;
-    }).join("")}</tr>`).join("");
+  const ed=wrCntEdit&&!ro;
+  $("wrCntBody").innerHTML=rot.map(p=>`<div class="nd-row has-av wrcnt">${avatarHTML(p.id)}<span class="nd-row__body"><span class="nd-row__title">${hEsc(kisaAd(p.name))}</span>
+      <span class="wrcnt__k">${keys.map(k=>{
+      const t=+(cum[p.id]||{})[k.k]||0,b=+((c.base[p.id]||{})[k.k])||0,bu=cur?(+(cur[p.id]||{})[k.k]||0):null,low=t===mins[k.k]&&rot.length>1;
+      return `<span class="wrc${low?" is-low":""}">${k.kisa} <b>${t}</b>${low?" ⬇":""}${bu?`<small> +${bu}</small>`:""}${ed?`<input class="wrbase" data-st="x" type="number" min="0" value="${b}" aria-label="${k.kisa} başlangıç" onchange="wrBaseSet('${p.id}','${k.k}',this.value)">`:""}</span>`;
+    }).join("")}</span></span></div>`).join("");
+  const eb=$("wrCntEditBtn");if(eb){eb.style.display=ro?"none":"";eb.textContent=ed?"Bitti":"Başlangıç sayılarını düzenle";}
   const onceki=prevMonthKey(mk);
   $("wrCntHint").innerHTML=`Sayılar = <b>başlangıç</b> + ${c.since?ayAdi(c.since):"ilk"} ile ${ayAdi(onceki)} arasında yayınlanan listeler (otomatik). <b>${ayAdi(mk)}</b> listesi hazırlanırken bu sayılar kullanılır: en az kullanan (⬇) önce alır. Uygulamadan önceki dönemi <b>başl.</b> kutusuna yaz (kendiliğinden kaydedilir).`;
 }
@@ -3334,12 +3649,20 @@ function slotLabel(e){
 function dutyRangeText(sch,d,kisa){
   const dt=schDuty(sch);
   const f=kisa?(t=>kSaat(t.start)+"→"+kSaat(t.end)+" ("+Math.round(durH(t)*10)/10+" sa)")
-    :(t=>t.start+"–"+t.end+(hm(t.end)<=hm(t.start)?" (ertesi gün)":""));
+    :(t=>t.start+"–"+t.end+(endsNextDay(t)?" (ertesi gün)":""));
   if(d!=null){const {y,m}=vInfo();return f(dutyFor(dt,y,m,d,vBaySet()));}
-  if(dtUniform(dt))return f(dt.d[0]);
+  const sc=sch||schedule;
+  const arfDays=parseDays(sc&&sc.bayram!=null?sc.arife:arifeStr());
+  let arfTxt="";
+  if(arfDays.length){const {y,m}=vInfo();const bs=vBaySet();
+    const uz=arfDays.filter(d=>isArfDuty(dt,y,m,d,bs)),gr={};
+    uz.forEach(d=>{const k=f(dutyFor(dt,y,m,d,bs));(gr[k]=gr[k]||[]).push(d);});
+    arfTxt=Object.keys(gr).map(k=>" · Arife ("+fmtDays(gr[k])+") "+k).join("");}
+  if(dt.mode!=="custom"&&dt.ms.we)arfTxt=" · Tatilden önceki gün "+f(spanT(dt,"work","off",0,1))+arfTxt;
+  if(dtUniform(dt))return f(dt.d[0])+arfTxt;
   const seg=[];let a=0;
   for(let i=1;i<=7;i++)if(i===7||f(dt.d[i])!==f(dt.d[a])){seg.push((i-1>a?DAYS_TR[a]+"–"+DAYS_TR[i-1]:DAYS_TR[a])+" "+f(dt.d[a]));a=i;}
-  return seg.join(" · ")+" · Resmi tatil "+f(dt.bay);
+  return seg.join(" · ")+" · Resmi tatil "+f(dt.bay)+arfTxt;
 }
 /* bir günün nöbetçileri, vardiya / oda gruplarına ayrılmış; eksik (boş kalan) yer sayısıyla */
 function dayGroups(d){
@@ -3378,19 +3701,18 @@ function dayEkIds(d){return ((schedule&&schedule.ek)||{})[d]||[];}
 /* o gün nöbet ertesi izinli olanlar (önceki günlerin nöbetinden; ay başında önceki ayın son günleri de) */
 function dayOffIds(d,isDraft){
   const mk=vMonth();
-  const cur=()=>({cfg:wrCfg(),wm:(dept&&dept.work_model)||"shift_only",wa:new Set(members.filter(p=>p.works_after).map(p=>p.id))});
-  const R=isDraft?cur():rulesFor(mk);
+  const R=isDraft?curRules():rulesFor(mk);
   if(!R.cfg.on&&R.wm!=="duty_rest")return [];
   const {y,m}=vInfo();const res=new Set();
   for(let j=1;j<=6;j++){
-    let L,wd,Rr=R;const dd=d-j;
-    if(dd>=1){L=entryList(dd);wd=wdOf(y,m,dd);}
+    let L,Rr=R,ky=y,km=m,kx=d-j,kb=vBaySet();const dd=d-j;
+    if(dd>=1){L=entryList(dd);}
     else{
       const pk=prevMonthKey(mk),ps=schedulesAll[pk];if(!ps||!ps.asg)continue;
       const pi=monthInfo(pk),pd=pi.nDays+dd;if(pd<1)continue;
-      L=ps.asg[pd]||[];wd=wdOf(pi.y,pi.m,pd);Rr=rulesFor(pk);
+      L=ps.asg[pd]||[];Rr=rulesFor(pk);ky=pi.y;km=pi.m;kx=pd;kb=monthBays(pk);
     }
-    L.forEach(e=>{const p=members.find(x=>x.id===e.id);if(p&&personOffK(p,wd,Rr)>=j)res.add(e.id);});
+    L.forEach(e=>{const p=members.find(x=>x.id===e.id);if(p&&personOffKD(p,Rr,ky,km,kx,kb)>=j)res.add(e.id);});
   }
   entryList(d).forEach(e=>res.delete(e.id));
   return [...res];
@@ -3450,7 +3772,7 @@ function selectDay(ctx,d){
 }
 function dayPanelHTML(d,ctx,ui){
   const {y,m}=vInfo();const wd=wdOf(y,m,d);
-  const tag=vIsBay(d)?"Resmi tatil":wd>=5?"Hafta sonu":"";
+  const tag=vIsBay(d)?"Resmi tatil":vIsArf(d)?"Arife (yarım gün)":wd>=5?"Hafta sonu":"";
   const g=dayGroups(d);
   const sm=schedule.mode==="shifts";
   let h=`<div class="dp-h"><b>${d} ${MONTHS_TR[m-1]} ${GUN_TR[wd]}</b>${tag?`<span class="dp-tag">${tag}</span>`:""}</div>`;
@@ -3493,7 +3815,7 @@ function drawSched(wrap,legendEl,view,ctx){
       const c=document.createElement("div");
       const ids=kimde(d);
       const mine=entryList(d).some(e=>e.id===me.id);
-      c.className="day click"+(vIsBay(d)?" bay":isWknd(y,m,d)?" wknd":"")+(d===buAy?" today":"")+(mine?" mine":"")
+      c.className="day click"+(vIsBay(d)?" bay":vIsArf(d)?" arf":isWknd(y,m,d)?" wknd":"")+(d===buAy?" today":"")+(mine?" mine":"")
         +(d===ui.sel?" sel":"")+(ui.focus?(ids.includes(ui.focus)?" hit":" fade"):"");
       let g=dayGroups(d);
       if(schedule.mode==="shifts"&&schShifts().length>1){        // vardiya satırları her kutuda aynı sırada dursun
@@ -3545,7 +3867,7 @@ function drawSched(wrap,legendEl,view,ctx){
     yazildi++;
     const r=document.createElement("div");
     const ids=kimde(d);
-    r.className="dayrow"+(vIsBay(d)?" bay":isWknd(y,m,d)?" wknd":"")+(d===buAy?" today":"")
+    r.className="dayrow"+(vIsBay(d)?" bay":vIsArf(d)?" arf":isWknd(y,m,d)?" wknd":"")+(d===buAy?" today":"")
       +(ui.focus&&!sadeceBen?(ids.includes(ui.focus)?" hit":" fade"):"");
     const tek=!sm&&g.length===1&&!g[0].ad;     // tek tip oda: grup başlığına gerek yok
     let html="";
@@ -3655,7 +3977,7 @@ async function saveDept(patch,label,cfg){
   cfg=cfg||{};
   if(!isAdmin()){toast("Bu ayarı sadece yönetici değiştirebilir.",true);return false;}
   if(!dept){toast("Ekip yüklenmedi.",true);return false;}
-  if((patch.__opts&&(patch.__opts.wr||patch.__opts.duty_time||"leave_prop" in patch.__opts))||patch.work_model||patch.opts
+  if((patch.__opts&&(patch.__opts.wr||patch.__opts.duty_time||"leave_prop" in patch.__opts||"after_next" in patch.__opts))||patch.work_model||patch.opts
     ||patch.shifts||patch.shift_overrides||patch.general_rooms!=null||patch.branch_rooms||patch.sched_mode||patch.month)await stampRulesBeforeChange();
   const body={...patch};
   let touchesOpts=false;
@@ -3692,6 +4014,9 @@ function saveGrp(key){
     case "bayram":
       return saveDept({bayram:$("bayramDays").value},"Bayram günleri",
         {after:()=>{renderPrefCal();renderSchedule();renderCountdown();}});
+    case "arife":
+      $("arifeDays").value=fmtDays(parseDays($("arifeDays").value));
+      return saveDept({__opts:{arife:$("arifeDays").value}},"Arife günleri",{after:()=>{renderSchedule();}});
     case "wish":
       return saveDept({__opts:{wish_pri:$("wishPri").value}},"İstenen günler önceliği");
     case "minrest":
@@ -3706,6 +4031,8 @@ function saveGrp(key){
       return saveDept({work_model:$("workModel").value},"Çalışma düzeni",{after:updateShapeHint});
     case "rhythm":
       return saveDept({pattern_on:+$("patternOn").value||0,pattern_off:+$("patternOff").value||0},"Ritim kuralı");
+    case "afternext":
+      return saveDept({__opts:{after_next:$("afterNext").value==="1"}},"Nöbet ertesi izin",{after:()=>{renderWR();if(schedule)renderSchedule();renderToday&&renderToday();}});
     case "leaveprop":
       return saveDept({__opts:{leave_prop:$("leaveProp").value==="1"}},"İzinlinin nöbet sayısı",{after:renderQuota});
     case "link":
@@ -3965,11 +4292,12 @@ function renderLeaveAdmin(){
   const box=$("leaveAdminList");box.innerHTML="";box.className="nd-list";
   let bekToplam=0;
   members.forEach(p=>{
-    const ok=leaveDays(p.id,"izin"),bek=leaveDays(p.id,"izin_bek");
+    const ok=leaveDays(p.id,"izin"),bek=pendDays(p.id),g=prefGroups(p.id,["must","never"]);
     bekToplam+=bek.length;
+    const okTxt=[ok.length?"İzinli: "+fmtDays(ok):"İzin yok",g.must?"Kesin nöbet: "+fmtDays(g.must):"",g.never?"Nöbet yok: "+fmtDays(g.never):""].filter(Boolean).join(" · ");
     const d=document.createElement("div");d.className="nd-row has-av lvrow";
     d.innerHTML=`${avatarHTML(p.id)}<span class="nd-row__body"><span class="nd-row__title">${hEsc(p.name)}</span>
-      <span class="nd-row__sub">${ok.length?"İzinli: "+fmtDays(ok):"İzin yok"}${bek.length?` · <b class="bekt">Bekleyen: ${fmtDays(bek)}</b>`:""}</span>
+      <span class="nd-row__sub">${okTxt}${bek.length?` · <b class="bekt">Bekleyen: ${pendText(p.id)}</b>`:""}</span>
       <span class="lvact">${bek.length?`<button class="nd-btn is-sm is-filled" onclick="decideLeave('${p.id}',true)">Onayla</button>
         <button class="nd-btn is-sm is-danger" onclick="decideLeave('${p.id}',false)">Reddet</button>`:""}
         <button class="nd-btn is-sm is-tinted" onclick="editLeaveFor('${p.id}')">Düzenle</button></span></span>`;
@@ -3977,22 +4305,24 @@ function renderLeaveAdmin(){
     else box.appendChild(d);
   });
   const h=$("leaveAdminFoot");
-  if(h)h.textContent=bekToplam?`Toplam ${bekToplam} gün onay bekliyor. Satırı sağa kaydır: onayla · sola kaydır: reddet.`:"Bekleyen izin talebi yok.";
+  if(h)h.textContent=bekToplam?`Toplam ${bekToplam} gün onay bekliyor (izin, kesin nöbet, nöbet yok). Satırı sağa kaydır: onayla · sola kaydır: reddet. Düzenle ile kişinin bütün günlerini değiştirebilirsin.`:"Onay bekleyen istek yok.";
 }
-async function decideLeave(uid,approve){
+async function decideLeave(uid,approve,opt){
   if(!isAdmin())return;
-  const bek=leaveDays(uid,"izin_bek");
+  const bek=pendDays(uid);
   if(!bek.length)return;
   const p=members.find(x=>x.id===uid)||{};
-  if(!confirm(`${p.name}: ${fmtDays(bek)}\n\n${approve?"Bu izinler ONAYLANSIN mı? (o günlere nöbet yazılmaz)":"Bu izin talebi REDDEDİLSİN mi? (günler silinir)"}`))return;
+  if(!(opt&&opt.noConfirm)&&!confirm(`${p.name}: ${pendText(uid)}\n\n${approve?"ONAYLANSIN mı? Liste bu günlere kesin uyar.":"REDDEDİLSİN mi? (günler silinir)"}`))return;
   allPrefs[uid]=allPrefs[uid]||{};
-  bek.forEach(d=>{if(approve)allPrefs[uid][d]="izin";else delete allPrefs[uid][d];});
+  bek.forEach(x=>{if(approve)allPrefs[uid][x.d]=x.k;else delete allPrefs[uid][x.d];});
   const {error}=await savePrefsFor(uid);
   if(error){alert(prefsErr(error));return;}
   renderLeaveAdmin();renderPrefCal();renderPrefSummary();syncIzinBox();
 }
 function editLeaveFor(uid){
   if(!isAdmin())return;
+  if($("asPerson")){renderAsPerson();$("asPerson").value=uid;showTab("izin");renderPrefCal();syncIzinBox();
+    toast("Fırçayı seçip "+kisaAd((members.find(x=>x.id===uid)||{}).name||"")+" için günleri boya");return;}
   const p=members.find(x=>x.id===uid)||{};
   const cur=leaveDays(uid,"izin").concat(leaveDays(uid,"izin_bek"));
   openDayPicker("🏖 "+(p.name||"")+" · izin günleri",
@@ -4015,10 +4345,11 @@ function renderPrefCal(){
   for(let i=0;i<firstDow;i++){const e=document.createElement("div");e.className="day empty";cal.appendChild(e);}
   for(let d=1;d<=nDays;d++){
     const c=document.createElement("div");const st=pref(uid,d);
-    const cls=st==="izin"?"izin":st==="izin_bek"?"bek":st==="avoid"?"no":st==="yes"?"yes":"";
+    const cls=st==="izin"?"izin":st==="izin_bek"?"bek":st==="avoid"?"no":st==="yes"?"yes":st==="must"?"must":st==="must_bek"?"must bekk":st==="never"?"never":st==="never_bek"?"never bekk":"";
     c.className="day prefday "+cls+(isBay(d)?" bay":isWknd(y,m,d)?" wknd":"");
     c.textContent=d;c.dataset.d=d;
-    c.title=st==="izin"?"İzin (onaylı)":st==="izin_bek"?"İzin (onay bekliyor)":st==="avoid"?"İstemiyorum":st==="yes"?"İstiyorum":"";
+    c.title=st==="izin"?"İzin (onaylı)":st==="izin_bek"?"İzin (onay bekliyor)":st==="avoid"?"İstemiyorum":st==="yes"?"İstiyorum"
+      :st==="must"?"Kesin nöbet (onaylı)":st==="must_bek"?"Kesin nöbet (onay bekliyor)":st==="never"?"Nöbet yok (onaylı)":st==="never_bek"?"Nöbet yok (onay bekliyor)":"";
     cal.appendChild(c);
   }
   bindPrefPaint();
@@ -4069,6 +4400,7 @@ async function saveShape(){
   setTimeout(()=>s.style.display="none",2200);
 }
 function updateShapeHint(){
+  {const r=$("afterNextRow"),w=$("workModel");if(r&&w)r.style.display=w.value==="duty_rest"?"":"none";}
   const wm=(dept&&dept.work_model)||"shift_only";
   const el=$("shapeHint");if(!el)return;
   if(wm==="shift_only")el.textContent="Bu ekipte nöbet/vardiya = tüm mesain. Uzun tatil için 'ortası boş' seçebilirsin; ritim kuralı açıksa 2+2 gibi bloklar otomatik oluşur ve boş günlerin kümelenir.";
@@ -4091,18 +4423,15 @@ function longestFree(pid){
   return best;
 }
 function renderPrefSummary(){
-  const box=$("prefSummary");box.innerHTML="";
+  const box=$("prefSummary");if(!box)return;box.innerHTML="";box.className="nd-list";
   members.forEach(p=>{
-    const days=allPrefs[p.id]||{};
-    const izin=Object.values(days).filter(v=>v==="izin").length;
-    const bek=Object.values(days).filter(v=>v==="izin_bek").length;
-    const no=Object.values(days).filter(v=>v==="avoid").length;
-    const yes=Object.values(days).filter(v=>v==="yes").length;
-    const w=wishOf(p);
-    const d=document.createElement("div");d.className="person";
-    d.innerHTML=`<div class="avatar" style="${brStyle(p.pool)}">${brEmoji(p.pool)}</div>
-      <div class="info"><div class="nm">${p.name}</div>
-      <div class="sub">🔒 ${izin} izin${bek?" · ⏳ "+bek+" onay bekliyor":""} · 🚫 ${no} istemediği · ⭐ ${yes} istediği · 🙋 ${w?w+" nöbet istiyor":"otomatik"} ${izin+bek+no+yes+w===0?"· ⏳ henüz girmedi":""}</div></div>`;
+    const v=Object.values(allPrefs[p.id]||{}),c=k=>v.filter(x=>x===k).length;
+    const bek=pendDays(p.id).length,w=wishOf(p);
+    const bits=[c("izin")?c("izin")+" gün izin":"",c("must")?c("must")+" kesin nöbet":"",c("never")?c("never")+" nöbet yok":"",
+      c("yes")?c("yes")+" istiyor":"",c("avoid")?c("avoid")+" istemiyor":"",w?w+" nöbet istiyor":"",bek?bek+" gün onay bekliyor":""].filter(Boolean);
+    const d=document.createElement("div");d.className="nd-row has-av";
+    d.innerHTML=`${avatarHTML(p.id)}<span class="nd-row__body"><span class="nd-row__title">${hEsc(p.name)}</span>
+      <span class="nd-row__sub">${bits.length?bits.join(" · "):"Henüz bir şey girmedi"}</span></span>`;
     box.appendChild(d);
   });
 }
@@ -4369,7 +4698,7 @@ function computeRooms(){
             for(let off=0;off<nDays&&!ok;off++){
               for(const cand of [d0+off,d0-off]){
                 if(cand<1||cand>nDays)continue;
-                const pv=pref(p.id,cand);
+                const pv=spref(p.id,cand);
                 if(pv==="izin")continue;
                 if(!dayOK(p.id,cand))continue;
                 if(pv==="avoid"&&!allowAvoid)continue;
@@ -4398,7 +4727,7 @@ function computeRooms(){
           if(tg>0&&cnt[p.id]>=tg)return false;
           if(!fa&&tg===0)return false;
           if(!tg&&fa&&share[p.id]&&cnt[p.id]>=share[p.id]+3)return false;
-          if(pref(p.id,d)==="izin")return false;
+          if(spref(p.id,d)==="izin")return false;
           if(!dayOK(p.id,d))return false;
           if(onDay(d,p.id))return false;
           if(gapClash(d,p.id))return false;
@@ -4406,7 +4735,7 @@ function computeRooms(){
         if(!elig.length){
           if(!fa)continue;
           const relax=gen.filter(p=>{
-            if(pref(p.id,d)==="izin")return false;
+            if(spref(p.id,d)==="izin")return false;
             if(!dayOK(p.id,d))return false;
             if(onDay(d,p.id))return false;
             return true;});
@@ -4422,8 +4751,8 @@ function computeRooms(){
           if(tg>0)w+=(cnt[p.id]/tg)*25;
           if(isWknd(y,m,d))w+=(wk[p.id]+p.carry_w)*(bWE?12:6);
           if(bays.has(d))w+=(bay[p.id]+p.carry_b)*14;
-          if(pref(p.id,d)==="yes")w-=8;
-          if(pref(p.id,d)==="avoid")w+=12;
+          if(spref(p.id,d)==="yes")w-=8;
+          if(spref(p.id,d)==="avoid")w+=12;
           if(!tg&&share[p.id])w+=Math.max(0,cnt[p.id]-share[p.id])*35;
           w+=mateCost(d,p);
           w+=shapeW(p,d,nDays);
@@ -4437,8 +4766,8 @@ function computeRooms(){
     let prefMiss=0;
     members.forEach(p=>{for(let d=1;d<=nDays;d++){
       const on=onDay(d,p.id);
-      if(pref(p.id,d)==="yes"&&!on)prefMiss++;
-      if(pref(p.id,d)==="avoid"&&on)prefMiss+=3;
+      if(spref(p.id,d)==="yes"&&!on)prefMiss++;
+      if(spref(p.id,d)==="avoid"&&on)prefMiss+=3;
     }});
     let pairPen=0;
     if(pm==="rotate"){members.forEach(p=>{Object.values(PR[p.id]).forEach(v=>{if(v>1)pairPen+=(v-1)*(v-1);});});}
@@ -4453,6 +4782,7 @@ function computeRooms(){
 }
 async function saveSchedule(best){
   best.bayram=$("bayramDays").value||"";
+  best.arife=arifeStr()||"";
   best.month=dept.month;
   if(!best.lay)best.lay=layoutSnap();
   best.fair=fairSnap(best,dept.month);
@@ -4535,7 +4865,7 @@ function onlyIVOK(pid,d,iv,y,m){
 /* Bir kişi bu slota KURAL GEREĞİ girebilir mi? (atamadan bağımsız) */
 function slotEligible(p,s,y,m,nDays){
   if(!onDuty(p))return false;                 // "nöbet tutmaz" (ör. sadece listeyi yöneten)
-  if(pref(p.id,s.d)==="izin")return false;
+  if(spref(p.id,s.d)==="izin")return false;
   if(isShiftMode()){
     const sh=shiftRows[s.si]||{};
     if(sh.owner){if(sh.owner!==p.id)return false;}
@@ -4663,7 +4993,7 @@ function makeEvaluator(slots,ctxd){
   /* İstenen günlere öncelik: yüksekken ⭐ günler, aya düzgün yayılma ve
      hafta sonu dengesinden daha ağır basar. */
   const wp=ctxd.wishPri||"normal";
-  const wishW=wp==="high"?150:wp==="off"?0:12;
+  const wishW=wp==="high"?150:wp==="off"?0:40;
   const shapeW2=wp==="high"?0.4:2;
   const balW=wp==="high"?0.25:1;
   const n=members.length,S=slots.length;
@@ -4674,7 +5004,7 @@ function makeEvaluator(slots,ctxd){
   const nightWant=ctxd.nightWant||members.map(()=>null);
   const prefOf=members.map(p=>{
     const a=new Uint8Array(nDays+2),src=allPrefs[p.id]||{};
-    for(let d=1;d<=nDays;d++){const v=src[d];a[d]=v==="yes"?2:v==="avoid"?3:0;}
+    for(let d=1;d<=nDays;d++){const v=solvePref(src[d]);a[d]=v==="yes"?2:v==="avoid"?3:0;}
     return a;});
   const shapeOf=members.map(p=>{const a=new Int16Array(nDays+2);
     for(let d=1;d<=nDays;d++)a[d]=shapeW(p,d,nDays);return a;});
@@ -4761,7 +5091,7 @@ function makeEvaluator(slots,ctxd){
         for(let d=1;d<=nDays;d++){
           if(!dOn[d])continue;
           const wd=W.dIdx[d];cw[wd]++;
-          const k=W.off[wd];
+          const k=W.wa&&W.wa[p]?0:(W.offK?W.offK[d]:W.off[wd]);
           for(let j=1;j<=k&&d+j<=nDays;j++)if(dOn[d+j])wrOffV++;
         }
         cntW.push(cw);
@@ -4846,7 +5176,7 @@ function wishRepair(slots,E,A,locked,evalFn){
   let varMi=false;
   for(let p=0;p<n;p++){
     const src=allPrefs[members[p].id]||{},w=[];
-    for(const k in src)if(src[k]==="yes"){const d=+k;if(d>0)w.push(d);}
+    for(const k in src)if(solvePref(src[k])==="yes"){const d=+k;if(d>0)w.push(d);}
     wishOfP.push(w);
     if(w.length)varMi=true;
   }
@@ -5007,7 +5337,7 @@ function rhythmBuild(slots,E,IV,A0,locked,wanted,isFixed,cap,evalFn,ctx){
       const can=elig[p][dd]&&(ss>0?ss<patOn:rr>=patOff);
       if(can){c++;ss++;rr=0;}else if(ss>0){ss=0;rr=1;}else rr++;}
     return c;};
-  const prefOf=members.map(p=>allPrefs[p.id]||{});
+  const prefOf=members.map(p=>{const s0=allPrefs[p.id]||{},o={};for(const k in s0)o[k]=solvePref(s0[k]);return o;});
   const T0=Date.now(),BUDGET=ctx.budget||1500;
   const cands=[];let tries=0;
   while(Date.now()-T0<BUDGET&&tries<400&&!(tries>=30&&!cands.length)){
@@ -5493,7 +5823,7 @@ async function goToMonth(mk,cfg){
   if(mk===dept.month)return true;
   const eski=dept.month;
   const patch={month:mk,bayram:""};
-  const o={...(dept.opts||{})};
+  const o={...(dept.opts||{}),arife:""};
   if(Array.isArray(o.pins)&&o.pins.length)o.pins=[];            // gün numarasına bağlı: yeni aya taşınmaz
   if(Array.isArray(o.blocks))o.blocks=o.blocks.filter(b=>!parseDays(b.days).length);   // ayın belirli günlerine bağlı kurallar taşınmaz; haftanın günü kuralları kalır
   patch.opts=o;
@@ -5540,7 +5870,7 @@ async function closeMonthGo(){
   const o={...(dept.opts||{})};
   if($("clrPins").checked)o.pins=[];
   if($("clrRules").checked)o.blocks=[];
-  if($("clrBayram").checked)patch.bayram="";
+  if($("clrBayram").checked){patch.bayram="";o.arife="";}
   patch.opts=o;
   await stampRulesBeforeChange();        // kapanan ayın kuralları ve vardiya/oda düzeni o aya mühürlenir
   const {error}=await sb.from("departments").update(patch).eq("id",dept.id);
@@ -5571,12 +5901,13 @@ function rulesSnapshot(){
   const c=wrNorm(opts().wr);
   return {v:1,at:new Date().toISOString(),work_model:(dept&&dept.work_model)||"shift_only",
     wr:{on:c.on,off:c.off.slice(),track:c.track.slice(),max:c.max.slice(),sat:{...c.sat},fz:c.fz},
+    nx:!!opts().after_next,
     wa:members.filter(p=>p.works_after).map(p=>p.id)};
 }
 function rulesFor(mk){
   const s=schedulesAll[mk];
-  if(s&&s.rules&&s.rules.wr)return {cfg:wrNorm(s.rules.wr),wm:s.rules.work_model,wa:new Set(s.rules.wa||[]),snap:true};
-  return {cfg:wrCfg(),wm:(dept&&dept.work_model)||"shift_only",wa:new Set(members.filter(p=>p.works_after).map(p=>p.id)),snap:false};
+  if(s&&s.rules&&s.rules.wr)return {cfg:wrNorm(s.rules.wr),wm:s.rules.work_model,wa:new Set(s.rules.wa||[]),nx:!!s.rules.nx,snap:true};
+  return curRules();
 }
 /* Kural değişmeden hemen önce: kuralı kayıtlı olmayan yayınlı ayları ESKİ kurallarla mühürle */
 async function stampRulesBeforeChange(){
@@ -5592,6 +5923,32 @@ async function stampRulesBeforeChange(){
     if(ch)await sb.from("schedules").update({data:sc}).eq("dept_id",dept.id).eq("month",mk);
   }
 }
+function curRules(){return {cfg:wrCfg(),wm:(dept&&dept.work_model)||"shift_only",wa:new Set(members.filter(p=>p.works_after).map(p=>p.id)),
+  nx:afterNext(),snap:false};}
+function afterNext(){const e=$("afterNext");return e?e.value==="1":!!opts().after_next;}
+/* mesai günü mü? Ay dışındaki günler (ertesi ay) için sabit tarihli resmi tatillere bakılır */
+function isWorkDayX(R,y,m,d,bays){
+  const nD=new Date(y,m,0).getDate();
+  if(d>=1&&d<=nD)return isWorkDay(y,m,d,bays,R.cfg);
+  const t=new Date(y,m-1,d),w=(t.getDay()+6)%7;
+  if(w===6||(w===5&&!(R.cfg.on&&R.cfg.sat.on)))return false;
+  return !TR_SABIT_TATIL.includes(String(t.getMonth()+1).padStart(2,"0")+"-"+String(t.getDate()).padStart(2,"0"));
+}
+/* x günündeki nöbetten sonra kaç gün izinli (kişiden bağımsız).
+   "İlk mesai günü izinli" (R.nx) açıksa ve izin günlerinin hiçbiri mesai günü değilse
+   (ör. Cumartesi nöbeti → Pazar), izin ilk mesai gününe (Pazartesi) kadar uzar. */
+function offKDay(R,y,m,x,bays){
+  let k=R.cfg.on?R.cfg.off[wdOf(y,m,x)]:(R.wm==="duty_rest"?1:0);
+  if(k>0&&R.nx){
+    let any=false;for(let j=1;j<=k&&!any;j++)if(isWorkDayX(R,y,m,x+j,bays))any=true;
+    if(!any){let j=k+1;while(j<k+8&&!isWorkDayX(R,y,m,x+j,bays))j++;k=j;}
+  }
+  return k;
+}
+function personOffKD(p,R,y,m,x,bays){return (p&&R.wa.has(p.id))?0:offKDay(R,y,m,x,bays);}
+/* nöbet sonrası izinli günlerin adları: "Cuma, Cumartesi, Pazar" */
+function offDaysText(R,y,m,x,bays){const k=offKDay(R,y,m,x,bays);if(!k)return "";
+  const ds=[];for(let j=1;j<=k;j++)ds.push(WR_GUN[(wdOf(y,m,x)+j)%7]);return ds.join(", ");}
 /* nöbet sonrası kaç gün izinli (kişi "ertesi gün çalışır" ise 0); R = rulesFor(ay) */
 function personOffK(p,wd,R){
   R=R||rulesFor(planAy());
@@ -5608,7 +5965,7 @@ function isWorkDay(y,m,d,bays,cfg){
 }
 function monthBays(mk){
   const sc=schedulesAll[mk];
-  if(sc&&sc.bayram!=null)return new Set(parseDays(sc.bayram));
+  if(sc&&sc.bayram!=null)return withArf(new Set(parseDays(sc.bayram)),sc.arife);
   return mk===planAy()?bayramSet():new Set();
 }
 /* Bir ayın kişi başı tam dökümü */
@@ -5642,10 +5999,10 @@ function monthLedger(mk){
   const pk=prevMonthKey(mk),ps=schedulesAll[pk],pi=monthInfo(pk),RP=rulesFor(pk);
   Object.keys(out).map(id=>members.find(x=>x.id===id)||{id}).forEach(p=>{
     const off=new Set();
-    const add=(x,wd,RR)=>{const k=personOffK(p,wd,RR);for(let j=1;j<=k;j++){const dd=x+j;if(dd>=1&&dd<=nDays)off.add(dd);}};
-    (dutyDays[p.id]||new Set()).forEach(x=>add(x,wdOf(y,m,x),R));
-    if(ps&&ps.asg)for(let x=Math.max(1,pi.nDays-7);x<=pi.nDays;x++)
-      if((ps.asg[x]||[]).some(e=>e&&e.id===p.id))add(x-pi.nDays,wdOf(pi.y,pi.m,x),RP);
+    const add=(x,k)=>{for(let j=1;j<=k;j++){const dd=x+j;if(dd>=1&&dd<=nDays)off.add(dd);}};
+    (dutyDays[p.id]||new Set()).forEach(x=>add(x,personOffKD(p,R,y,m,x,bays)));
+    if(ps&&ps.asg){const pb=monthBays(pk);for(let x=Math.max(1,pi.nDays-7);x<=pi.nDays;x++)
+      if((ps.asg[x]||[]).some(e=>e&&e.id===p.id))add(x-pi.nDays,personOffKD(p,RP,pi.y,pi.m,x,pb));}
     const izinG=pr[p.id]||{};
     off.forEach(dd=>{
       if(!isWorkDay(y,m,dd,bays,cfg))return;
@@ -6137,14 +6494,15 @@ function wrPrevEffects(mk,cfg,restDays){
   if(!ps||!ps.asg)return res;
   const pi=monthInfo(pk);
   const RP=rulesFor(pk),pc=RP.snap?RP.cfg:cfg;   // önceki ayın nöbeti, o ayın kurallarına göre izin doğurur
+  const RX={cfg:pc,wm:RP.wm,wa:RP.wa,nx:RP.nx},pb=monthBays(pk);
   const add=(o,pid,d)=>{(o[pid]=o[pid]||new Set()).add(d);};
   for(let d=Math.max(1,pi.nDays-7);d<=pi.nDays;d++){
-    const wd=wdOf(pi.y,pi.m,d);
+    const kk=offKDay(RX,pi.y,pi.m,d,pb);
     for(const e of (ps.asg[d]||[])){
       if(!e)continue;
-      const kb=Math.max(restDays||0,pc.on?pc.off[wd]:0);
+      const kb=Math.max(restDays||0,(pc.on||RX.nx)&&!RP.wa.has(e.id)?kk:0);
       for(let j=1;j<=kb;j++){const nd=d+j-pi.nDays;if(nd>=1)add(res.block,e.id,nd);}
-      if(cfg.on&&!RP.wa.has(e.id))for(let j=1;j<=(pc.on?pc.off[wd]:(RP.wm==="duty_rest"?1:0));j++){const nd=d+j-pi.nDays;if(nd>=1)add(res.absent,e.id,nd);}
+      if((cfg.on||RX.nx)&&!RP.wa.has(e.id))for(let j=1;j<=kk;j++){const nd=d+j-pi.nDays;if(nd>=1)add(res.absent,e.id,nd);}
     }
   }
   /* önceki ayın son günü Cumartesi ve ek izinliyse ertesi Pazar (bu ayın 1'i) nöbet yazılmaz */
@@ -6164,7 +6522,7 @@ function wrEkSolve(W,dayOn,n,nDays,keep){
     for(const p of W.rot){
       if(S0.absent[p])continue;
       let off=false;
-      if(!(W.wa&&W.wa[p]))for(let x=Math.max(1,d-6);x<d&&!off;x++)if(dayOn[p][x]&&x+W.off[W.dIdx[x]]>=d)off=true;
+      if(!(W.wa&&W.wa[p]))for(let x=Math.max(1,d-6);x<d&&!off;x++)if(dayOn[p][x]&&x+(W.offK?W.offK[x]:W.off[W.dIdx[x]])>=d)off=true;
       if(off)continue;
       pr++;
       if(dayOn[p][d])continue;
@@ -6220,8 +6578,8 @@ function wrEkSolve(W,dayOn,n,nDays,keep){
 }
 /* Çözücü için kural bağlamı (kapalıysa null) */
 function wrContext(slots,E,cap,y,m,nDays,bays){
-  const cfg=wrCfg();
-  if(!cfg.on)return null;
+  const cfg=wrCfg(),R0=curRules();
+  if(!cfg.on&&!(R0.nx&&R0.wm==="duty_rest"))return null;
   const n=members.length;
   const idx={};members.forEach((p,i)=>{idx[p.id]=i;});
   const rotIds=wrRotIds();
@@ -6246,7 +6604,8 @@ function wrContext(slots,E,cap,y,m,nDays,bays){
   }
   const tie=members.map(()=>Math.random());
   const wa=Uint8Array.from(members.map(p=>p.works_after?1:0));
-  return {cfg,wa,off:cfg.off,track:cfg.track,max:cfg.max,dIdx,rot,cumW,cumEk,cumFz,sats,
+  const offK=new Int8Array(nDays+2);for(let d=1;d<=nDays;d++)offK[d]=offKDay(R0,y,m,d,bays);
+  return {cfg,wa,off:cfg.off,offK,track:cfg.track,max:cfg.max,dIdx,rot,cumW,cumEk,cumFz,sats,
     satNeed:cfg.sat.need,ekMax:cfg.sat.max,fz:cfg.fz,tie};
 }
 
@@ -6255,6 +6614,8 @@ function wrAudit(sch,mk,opt){
   const cfg=sch&&sch.rules&&sch.rules.wr?wrNorm(sch.rules.wr):wrCfg(),out=[];
   if(!cfg.on||!sch||!sch.asg)return out;
   const {y,m,nDays}=monthInfo(mk);
+  const RA=sch.rules&&sch.rules.wr?{cfg,wm:sch.rules.work_model,wa:new Set(sch.rules.wa||[]),nx:!!sch.rules.nx}:curRules();
+  const ab=withArf(new Set(parseDays(sch.bayram!=null?sch.bayram:($("bayramDays").value||""))),sch.bayram!=null?sch.arife:arifeStr());
   const nm=id=>(members.find(p=>p.id===id)||{}).name||"?";
   const daysOf={};
   for(let d=1;d<=nDays;d++)for(const e of (sch.asg[d]||[])){if(!e)continue;
@@ -6265,7 +6626,7 @@ function wrAudit(sch,mk,opt){
     for(let i=0;i<ds.length;i++){
       const d=ds[i],wd=wdOf(y,m,d);cw[wd]++;
       if(pe.block[pid]&&pe.block[pid].has(d))out.push(`⚠️ ${nm(pid)}: ${d}. gün önceki ayın son nöbetinden sonraki izin gününe denk geliyor.`);
-      const k=cfg.off[wd];
+      const k=RA.wa.has(pid)?0:offKDay(RA,y,m,d,ab);
       for(let j=i+1;j<ds.length&&ds[j]<=d+k;j++)
         out.push(`⚠️ ${nm(pid)}: ${d}. gün ${WR_GUN[wd]} nöbetinden sonra ${ds[j]}. gün izinli olmalı ama nöbet yazılmış.`);
     }
@@ -6280,7 +6641,7 @@ function wrAudit(sch,mk,opt){
         const on=dd=>(sch.asg[dd]||[]).some(e=>e&&e.id===pid);
         if(on(d)||on(d+1))out.push(`⚠️ ${nm(pid)}: ${d}. gün Ek Cumartesi izinli ama ${on(d)?"Cumartesi":"Pazar"} nöbeti var.`);
         const pw=members.find(p=>p.id===pid);
-        let off=false;if(!(pw&&pw.works_after))for(let x=Math.max(1,d-6);x<d&&!off;x++)if(on(x)&&x+cfg.off[wdOf(y,m,x)]>=d)off=true;
+        let off=false;if(!(pw&&pw.works_after))for(let x=Math.max(1,d-6);x<d&&!off;x++)if(on(x)&&x+offKDay(RA,y,m,x,ab)>=d)off=true;
         if(off)out.push(`⚠️ ${nm(pid)}: ${d}. gün zaten nöbet sonrası izinli — Ek Cumartesi izni boşa gidiyor.`);
       }}
     if(cfg.sat.max>0)for(const pid in ekc)if(ekc[pid]>cfg.sat.max)
@@ -6301,7 +6662,7 @@ function wrRefreshEk(sch,mk){
   const dIdx=new Int8Array(nDays+2);for(let d=1;d<=nDays;d++)dIdx[d]=wdOf(y,m,d);
   const cum=wrCum(mk,cfg);
   const pe=wrPrevEffects(mk,cfg,0);
-  const bays=new Set(parseDays(sch.bayram!=null?sch.bayram:($("bayramDays").value||"")));
+  const bays=withArf(new Set(parseDays(sch.bayram!=null?sch.bayram:($("bayramDays").value||""))),sch.bayram!=null?sch.arife:arifeStr());
   const usePrefs=mk===planAy();
   const manual=sch.ekManual||{};
   const pre=new Int16Array(n),out={};
@@ -6317,7 +6678,9 @@ function wrRefreshEk(sch,mk){
       if(usePrefs&&linkAbsent(p.id,d))ab[i]=1;});
     sats.push({d,absent:ab});
   }
-  const W={off:cfg.off,dIdx,rot,cumEk:members.map(p=>+((cum[p.id]||{}).ek)||0),sats,
+  const RE=sch.rules&&sch.rules.wr?{cfg,wm:sch.rules.work_model,wa:new Set(sch.rules.wa||[]),nx:!!sch.rules.nx}:curRules();
+  const offK=new Int8Array(nDays+2);for(let d=1;d<=nDays;d++)offK[d]=offKDay(RE,y,m,d,bays);
+  const W={off:cfg.off,offK,dIdx,rot,cumEk:members.map(p=>+((cum[p.id]||{}).ek)||0),sats,
     satNeed:cfg.sat.need,ekMax:cfg.sat.max,tie:members.map(()=>Math.random()),pre,
     wa:Uint8Array.from(members.map(p=>p.works_after?1:0))};
   const keep={};
@@ -6397,7 +6760,7 @@ function solveSchedule(){
 
   /* --- 0. aşama: yöneticinin elle sabitlediği günler --- */
   const pIdx={};members.forEach((p,i)=>{pIdx[p.id]=i;});
-  (pinRows||[]).forEach(pin=>{
+  effPins().forEach(pin=>{
     const pi=pIdx[pin.pid];
     if(pi==null)return;
     const ad=members[pi].name;
@@ -6409,8 +6772,9 @@ function solveSchedule(){
         if(pin.si!=null&&pin.si!==""&&slots[s2].si!==+pin.si)continue;
         hedef=s2;break;
       }
-      if(hedef<0){viol.push(`⚠️ ${ad}: ${d}. gün sabitlenemedi — o gün boş nöbet yeri kalmadı.`);return;}
-      if(!E[hedef][pi])viol.push(`⚠️ ${ad} ${d}. güne elle sabitlendi ama o gün kurallarına uymuyor (izin / gün kısıtı). Sabit atama üstün geldi.`);
+      if(hedef<0){viol.push(`⚠️ ${ad}: ${d}. gün ${pin.must?"kesin nöbet günü":"sabit atama"} yerleşemedi — o gün boş nöbet yeri kalmadı.`);return;}
+      if(!E[hedef][pi])viol.push(pin.must?`⚠️ ${ad}: ${d}. gün onaylı kesin nöbet günü ama o gün kurallarına uymuyor (izin / gün kısıtı). Kesin gün üstün geldi.`
+        :`⚠️ ${ad} ${d}. güne elle sabitlendi ama o gün kurallarına uymuyor (izin / gün kısıtı). Sabit atama üstün geldi.`);
       A[hedef]=pi;load[pi]++;locked[hedef]=1;
     });
   });
@@ -6677,7 +7041,7 @@ function computeShifts(){
     ONLY[p.id]=om;
     const src=allPrefs[p.id]||{},a=new Uint8Array(nDays+2),w=new Int16Array(nDays+2);
     for(let d=1;d<=nDays;d++){
-      const v=src[d];a[d]=v==="izin"?1:v==="yes"?2:v==="avoid"?3:0;
+      const v=solvePref(src[d]);a[d]=v==="izin"?1:v==="yes"?2:v==="avoid"?3:0;
       w[d]=shapeW(p,d,nDays);
     }
     PRF[p.id]=a;SHW[p.id]=w;
@@ -7067,6 +7431,7 @@ async function acceptReq(id){
   let reason="";
   if(!entry)reason="nöbet bulunamadı";
   else if(pref(me.id,rq.day)==="izin")reason="izinlisin";
+  else if(pref(me.id,rq.day)==="never")reason="o gün nöbet tutamazsın (onaylı)";
   else if(entryList(rq.day).some(e=>e.id===me.id))reason="zaten nöbetçisin";
   else if(isPinned(rq.day,entry)){
     reason="bu gün yönetici tarafından sabitlenmiş (📌)";
@@ -7213,11 +7578,11 @@ async function purgeTests(){
 }
 function renderAsPerson(){
   const row=$("asRow");
-  const tests=testMembers();
-  if(!isAdmin()||!tests.length){row.style.display="none";$("asPerson").innerHTML="";return;}
+  const others=members.filter(p=>p.id!==me.id);
+  if(!isAdmin()||!others.length){row.style.display="none";$("asPerson").innerHTML="";return;}
   row.style.display="block";
   const cur=$("asPerson").value;
-  const opts=[{id:me.id,name:(myProfile.name||"Ben")+" (ben)"}].concat(tests.map(p=>({id:p.id,name:p.name})));
+  const opts=[{id:me.id,name:(myProfile.name||"Ben")+" (ben)"}].concat(others.map(p=>({id:p.id,name:p.name+(pendDays(p.id).length?" · onay bekliyor":"")})));
   $("asPerson").innerHTML=opts.map(o=>`<option value="${o.id}" ${cur===o.id?"selected":""}>${o.name}</option>`).join("");
 }
 
@@ -7256,23 +7621,23 @@ function myDutyList(){
   const ekip=(dept&&dept.name)||"";
   for(let d=1;d<=nDays;d++){
     entryList(d).filter(x=>x.id===me.id).forEach(e=>{        // aynı gün iki vardiya da olabilir
-      let start,end,label,key,baslik;
+      let start,end,label,key,baslik,nd;
       if(schedule.mode==="shifts"){
         const es=schEff(e.s,d,me.id);
         start=hh5(es.start)||"08:00";end=hh5(es.end)||"16:00";
         label=es.name||"Vardiya";key="s"+e.s;
         baslik="Nöbet · "+label+(ekip?" · "+ekip:"");
       }else{
-        const t=schDutyDay(d);start=t.start;end=t.end;
+        const t=schDutyDay(d);start=t.start;end=t.end;nd=endsNextDay(t);
         label=(!e.r||e.r==="G")?"Nöbet":e.r.slice(2)+" odası";key=e.r||"G";
         baslik="Nöbet"+(label!=="Nöbet"?" · "+label:"")+(ekip?" · "+ekip:"");
       }
-      out.push({d,y,m,start,end,label,key,baslik,wknd:isWknd(y,m,d),bay:vIsBay(d)});
+      out.push({d,y,m,start,end,label,key,baslik,wknd:isWknd(y,m,d),bay:vIsBay(d),nd});
     });
   }
   return out;
 }
-function dutyEndsNextDay(x){return hm(x.end)<=hm(x.start);}
+function dutyEndsNextDay(x){return x.nd!=null?x.nd:hm(x.end)<=hm(x.start);}
 function renderMyDuties(){
   const box=$("myDuties");if(!box)return;
   const list=myDutyList();
@@ -7291,7 +7656,8 @@ function renderMyDuties(){
     const dow=DAYS_TR[wdOf(y,m,x.d)];
     const d=document.createElement("div");d.className="nd-row has-av";
     const ertesi=dutyEndsNextDay(x)?" (ertesi gün)":"";
-    const sonra=wc.on&&wc.off[wdOf(y,m,x.d)]>0&&!R.wa.has(me.id)?` · sonrası izinli: ${wrOffText(wc,wdOf(y,m,x.d)).replace(/ izinli$/,"")}`:"";
+    const ot=(wc.on||R.nx)&&!R.wa.has(me.id)?offDaysText(R,y,m,x.d,vBaySet()):"";
+    const sonra=ot?` · sonrası izinli: ${ot}`:"";
     d.innerHTML=`<span class="datechip${x.bay?" is-hol":x.wknd?" is-we":""}"><b>${x.d}</b><span>${dow}</span></span>
       <span class="nd-row__body"><span class="nd-row__title">${hEsc(x.label)} · ${x.start}–${x.end}${ertesi}</span>
       <span class="nd-row__sub">${x.d} ${ayK}${x.bay?" · bayram":x.wknd?" · hafta sonu":""}${sonra}</span></span>
