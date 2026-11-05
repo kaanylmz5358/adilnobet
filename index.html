@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="tr" data-theme="light">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -289,28 +289,679 @@ details.hbase{margin-top:8px}details.hbase summary{font-size:.74rem;font-weight:
   .day,.chip-p{-webkit-print-color-adjust:exact;print-color-adjust:exact}
 }
 </style>
+<style id="ndTokens">
+:root,[data-theme="light"]{--bg:#F2F2F7;--surface:#FFFFFF;--surface-2:#E9E9EF;--surface-3:#DCDCE3;--separator:#D1D1D6;--ink:#111114;--ink-2:#5F5F66;--ink-3:#8E8E93;--tint:#0A7A70;--on-tint:#FFFFFF;--tint-soft:#E3F5F2;--tint-ink:#086A61;--hero:#0A7A70;--on-hero:#FFFFFF;--seg-thumb:#FFFFFF;--leave:#A84B00;--leave-soft:#FFEBD6;--ek:#3048B8;--ek-soft:#E3E8FF;--rest:#5F5F66;--rest-soft:#ECEEF0;--holiday:#8A5A00;--holiday-soft:#FFF4D6;--danger:#C4161C;--danger-soft:#FDE7E7;--success:#0A7A70;--weekend:#F7F7FA;--scrim:rgba(0,0,0,0.32);--glass:rgba(255,255,255,0.72);--p1:#D5F2EE;--p1-ink:#0B5F57;--p2:#FFE1DA;--p2-ink:#9E2F1D;--p3:#E2E6FF;--p3-ink:#2E3C9E;--p4:#FFEDC2;--p4-ink:#7A5200;--p5:#F6DFF5;--p5-ink:#7D2A7A;--p6:#DCF2D9;--p6-ink:#2C6A22;--p7:#D9EEFF;--p7-ink:#0F5A8F;--p8:#FFDDE8;--p8-ink:#9A1F4D;--shadow-float:0 8px 24px rgba(17,17,20,0.12), 0 1px 3px rgba(17,17,20,0.08);--shadow-sheet:0 -6px 30px rgba(17,17,20,0.16);--shadow-lift:0 12px 28px rgba(17,17,20,0.22);--shadow-thumb:0 3px 8px rgba(0,0,0,0.12), 0 0 0 0.5px rgba(0,0,0,0.04)}
+:root{--space-1:4px;--space-2:8px;--space-3:12px;--space-4:16px;--space-5:20px;--space-6:24px;--space-8:32px;--radius-xs:6px;--radius-sm:10px;--radius-md:16px;--radius-lg:24px;--radius-full:999px;--hit-min:44px;--row-h:52px;--tabbar-h:62px;--cell-h:64px;--content-max:560px;--font-sans:-apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;--font-rounded:ui-rounded, "SF Pro Rounded", -apple-system, system-ui, "Segoe UI", Roboto, sans-serif}
+.large-title{font-family:var(--font-sans);font-size:34px;line-height:41px;font-weight:700;letter-spacing:0.01em}
+.title-1{font-family:var(--font-sans);font-size:28px;line-height:34px;font-weight:700}
+.title-2{font-family:var(--font-sans);font-size:22px;line-height:28px;font-weight:700}
+.title-3{font-family:var(--font-sans);font-size:20px;line-height:25px;font-weight:600}
+.headline{font-family:var(--font-sans);font-size:17px;line-height:22px;font-weight:600}
+.nav-title{font-family:var(--font-sans);font-size:17px;line-height:22px;font-weight:600}
+.body{font-family:var(--font-sans);font-size:17px;line-height:22px;font-weight:400}
+.callout{font-family:var(--font-sans);font-size:16px;line-height:21px;font-weight:400}
+.subhead{font-family:var(--font-sans);font-size:15px;line-height:20px;font-weight:400}
+.footnote{font-family:var(--font-sans);font-size:13px;line-height:18px;font-weight:400}
+.section-label{font-family:var(--font-sans);font-size:13px;line-height:18px;font-weight:400;letter-spacing:0.02em}
+.caption{font-family:var(--font-sans);font-size:12px;line-height:16px;font-weight:400}
+.caption-2{font-family:var(--font-sans);font-size:11px;line-height:13px;font-weight:600;letter-spacing:0.01em}
+.day-number{font-family:var(--font-rounded);font-size:16px;line-height:20px;font-weight:600}
+.big-number{font-family:var(--font-rounded);font-size:40px;line-height:44px;font-weight:700}
+
+</style>
+<style id="ndBundle">
+/* Nöbet Defteri — bileşen stilleri. Renk, boşluk, köşe ve gölge değerleri tokens.json'dan gelir (var(--…)).
+   Hareket burada tanımlıdır (tokens.json'da hareket ailesi yok). Yazı boyutları tip stillerinin (large-title, body…) birebir aynısıdır. */
+:root{
+  --ease-out:cubic-bezier(.2,.8,.2,1);
+  --ease-spring:cubic-bezier(.32,.72,0,1);
+  --dur-1:160ms; --dur-2:280ms; --dur-3:420ms;
+  --hair:0.5px;
+}
+@media (prefers-reduced-motion:reduce){:root{--dur-1:1ms;--dur-2:1ms;--dur-3:1ms}}
+
+/* ---------- zemin ---------- */
+.nd-screen{background:var(--bg);color:var(--ink);font-family:var(--font-sans);font-size:17px;line-height:22px;
+  -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;-webkit-tap-highlight-color:transparent;
+  font-variant-numeric:tabular-nums;min-height:100%}
+.nd-screen *{box-sizing:border-box}
+.nd-pad{padding-left:max(var(--space-4),env(safe-area-inset-left,0px));padding-right:max(var(--space-4),env(safe-area-inset-right,0px))}
+.nd-ico{width:22px;height:22px;flex:none;display:inline-block;vertical-align:middle}
+.nd-ico.is-sm{width:16px;height:16px}.nd-ico.is-lg{width:28px;height:28px}
+:where(.nd-screen) :focus-visible{outline:2px solid var(--tint);outline-offset:2px;border-radius:8px}
+
+/* ---------- buton ---------- */
+.nd-btn{appearance:none;border:0;margin:0;font:inherit;font-size:17px;line-height:22px;font-weight:600;
+  display:inline-flex;align-items:center;justify-content:center;gap:var(--space-2);
+  min-height:var(--hit-min);padding:0 var(--space-5);border-radius:var(--radius-full);cursor:pointer;
+  background:var(--surface-2);color:var(--ink);text-decoration:none;white-space:nowrap;
+  transition:transform var(--dur-1) var(--ease-out),opacity var(--dur-1) var(--ease-out),background var(--dur-2) var(--ease-out);
+  -webkit-user-select:none;user-select:none;touch-action:manipulation}
+.nd-btn:active{transform:scale(.97);opacity:.82}
+.nd-btn.is-filled{background:var(--tint);color:var(--on-tint)}
+.nd-btn.is-tinted{background:var(--tint-soft);color:var(--tint-ink)}
+.nd-btn.is-plain{background:transparent;color:var(--tint);padding:0 var(--space-2);font-weight:400}
+.nd-btn.is-plain.is-strong{font-weight:600}
+.nd-btn.is-danger{background:var(--danger-soft);color:var(--danger)}
+.nd-btn.is-danger.is-filled{background:var(--danger);color:#fff}
+.nd-btn.is-lg{width:100%;min-height:52px;font-size:17px}
+.nd-btn.is-sm{min-height:32px;padding:0 var(--space-3);font-size:15px;line-height:20px}
+.nd-btn[disabled],.nd-btn.is-disabled{background:var(--surface-2);color:var(--ink-3);cursor:default;transform:none;opacity:1}
+.nd-btn .nd-ico{width:20px;height:20px}
+.nd-btn-row{display:flex;gap:var(--space-2);flex-wrap:wrap}
+.nd-btn-row>.nd-btn{flex:1 1 0}
+
+/* ---------- gruplu liste (iOS Ayarlar düzeni) ---------- */
+.nd-group{display:flex;flex-direction:column;gap:6px;margin:0 0 var(--space-6)}
+.nd-group__label{font-size:13px;line-height:18px;letter-spacing:.02em;text-transform:uppercase;color:var(--ink-2);padding:0 var(--space-4)}
+.nd-group__foot{font-size:13px;line-height:18px;color:var(--ink-2);padding:0 var(--space-4)}
+.nd-list{background:var(--surface);border-radius:var(--radius-md);overflow:hidden;margin:0;padding:0;list-style:none}
+.nd-row{position:relative;display:flex;align-items:center;gap:var(--space-3);min-height:var(--hit-min);
+  padding:11px var(--space-4);background:var(--surface);color:var(--ink);text-align:left;width:100%;
+  border:0;font:inherit;font-size:17px;line-height:22px;transition:background var(--dur-1) var(--ease-out)}
+button.nd-row,a.nd-row,.nd-row.is-tap{cursor:pointer;text-decoration:none}
+button.nd-row:active,a.nd-row:active,.nd-row.is-tap:active{background:var(--surface-2)}
+.nd-row+.nd-row::before{content:"";position:absolute;top:0;right:0;left:var(--space-4);height:var(--hair);background:var(--separator)}
+.nd-row.has-icon+.nd-row::before,.nd-row+.nd-row.has-icon::before{left:calc(var(--space-4) + 30px + var(--space-3))}
+.nd-row__icon{width:30px;height:30px;border-radius:8px;display:grid;place-items:center;flex:none;background:var(--tint);color:var(--on-tint)}
+.nd-row__icon .nd-ico{width:18px;height:18px}
+.nd-row__icon.is-leave{background:var(--leave);color:var(--surface)}
+.nd-row__icon.is-ek{background:var(--ek);color:var(--surface)}
+.nd-row__icon.is-holiday{background:var(--holiday);color:var(--surface)}
+.nd-row__icon.is-gray{background:var(--ink-2);color:var(--surface)}
+.nd-row__icon.is-danger{background:var(--danger);color:var(--surface)}
+.nd-row__body{flex:1;min-width:0;display:flex;flex-direction:column}
+.nd-row__title{overflow-wrap:anywhere}
+.nd-row__sub{font-size:15px;line-height:20px;color:var(--ink-2)}
+.nd-row__value{color:var(--ink-2);text-align:right;flex:none;max-width:52%;overflow-wrap:anywhere}
+.nd-row__chev{color:var(--ink-3);width:14px;height:14px;flex:none;margin-right:-4px}
+.nd-row.is-danger .nd-row__title{color:var(--danger)}
+.nd-row.is-action .nd-row__title{color:var(--tint)}
+.nd-row.is-selected .nd-row__check{opacity:1}
+.nd-row__check{color:var(--tint);opacity:0;width:20px;height:20px;flex:none}
+.nd-row[aria-disabled="true"]{opacity:.5}
+
+/* ---------- anahtar (switch) ---------- */
+.nd-switch{appearance:none;-webkit-appearance:none;margin:0;flex:none;position:relative;width:51px;height:31px;border-radius:var(--radius-full);
+  background:var(--surface-3);cursor:pointer;transition:background var(--dur-2) var(--ease-out)}
+.nd-switch::after{content:"";position:absolute;top:2px;left:2px;width:27px;height:27px;border-radius:50%;background:#fff;
+  box-shadow:var(--shadow-thumb);transition:transform var(--dur-2) var(--ease-spring),width var(--dur-1) var(--ease-out)}
+.nd-switch:active::after{width:32px}
+.nd-switch:checked{background:var(--tint)}
+.nd-switch:checked::after{transform:translateX(20px)}
+.nd-switch:checked:active::after{transform:translateX(15px)}
+.nd-switch:disabled{opacity:.45;cursor:default}
+
+/* ---------- sayaç (stepper) ---------- */
+.nd-stepper{display:inline-flex;align-items:center;flex:none;background:var(--surface-2);border-radius:var(--radius-full);height:34px}
+.nd-stepper button{appearance:none;border:0;background:transparent;color:var(--ink);width:44px;height:34px;display:grid;place-items:center;
+  cursor:pointer;border-radius:var(--radius-full);touch-action:manipulation;transition:background var(--dur-1) var(--ease-out)}
+.nd-stepper button:active{background:var(--surface-3)}
+.nd-stepper button:disabled{color:var(--ink-3);cursor:default;background:transparent}
+.nd-stepper output{min-width:34px;text-align:center;font-weight:600;font-size:17px;font-family:var(--font-rounded);font-variant-numeric:tabular-nums}
+.nd-stepper .nd-ico{width:18px;height:18px}
+.nd-stepper output.bump{animation:nd-bump var(--dur-2) var(--ease-spring)}
+@keyframes nd-bump{40%{transform:scale(1.22)}}
+
+/* ---------- segment kontrol ---------- */
+.nd-seg{position:relative;display:grid;grid-auto-flow:column;grid-auto-columns:1fr;background:var(--surface-2);border-radius:10px;padding:2px;min-height:34px;
+  --n:2;--i:0}
+.nd-seg__thumb{position:absolute;top:2px;bottom:2px;left:2px;width:calc((100% - 4px)/var(--n));border-radius:8px;background:var(--seg-thumb);
+  box-shadow:var(--shadow-thumb);transform:translateX(calc(var(--i)*100%));transition:transform var(--dur-2) var(--ease-spring)}
+.nd-seg button{position:relative;z-index:1;appearance:none;border:0;background:transparent;color:var(--ink);font:inherit;font-size:14px;line-height:18px;
+  font-weight:500;padding:6px 8px;cursor:pointer;border-radius:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nd-seg button[aria-selected="true"]{font-weight:600}
+
+/* ---------- gezinme çubuğu ---------- */
+.nd-nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--bg);transition:background var(--dur-2) var(--ease-out)}
+.nd-nav__bar{height:44px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:var(--space-2)}
+.nd-nav__bar>:last-child{justify-self:end}
+.nd-nav__title{font-size:17px;line-height:22px;font-weight:600;opacity:0;transform:translateY(4px);transition:opacity var(--dur-1) var(--ease-out),transform var(--dur-1) var(--ease-out);white-space:nowrap}
+.nd-nav__back{appearance:none;border:0;background:none;color:var(--tint);font:inherit;font-size:17px;display:inline-flex;align-items:center;gap:2px;
+  min-height:var(--hit-min);padding:0 8px 0 0;margin-left:-8px;cursor:pointer;justify-self:start}
+.nd-nav__back .nd-ico{width:26px;height:26px}
+.nd-nav__large{font-size:34px;line-height:41px;font-weight:700;letter-spacing:.01em;padding:2px 0 var(--space-2);
+  transition:opacity var(--dur-1) var(--ease-out)}
+.nd-nav__sub{font-size:15px;line-height:20px;color:var(--ink-2);margin-top:-6px;padding-bottom:var(--space-2)}
+.nd-nav.is-scrolled{background:var(--glass);-webkit-backdrop-filter:blur(20px) saturate(180%);backdrop-filter:blur(20px) saturate(180%);
+  box-shadow:0 var(--hair) 0 var(--separator)}
+.nd-nav.is-scrolled .nd-nav__title{opacity:1;transform:none}
+
+/* ---------- yüzen sekme çubuğu ---------- */
+.nd-tabbar{position:fixed;z-index:30;left:max(var(--space-4),env(safe-area-inset-left,0px));right:max(var(--space-4),env(safe-area-inset-right,0px));
+  bottom:calc(10px + env(safe-area-inset-bottom,0px));height:var(--tabbar-h);border-radius:var(--radius-full);
+  background:var(--glass);-webkit-backdrop-filter:blur(24px) saturate(180%);backdrop-filter:blur(24px) saturate(180%);
+  box-shadow:var(--shadow-float);display:grid;grid-auto-flow:column;grid-auto-columns:1fr;padding:5px;max-width:var(--content-max);margin:0 auto}
+.nd-tabbar button{appearance:none;border:0;background:transparent;color:var(--ink-2);font:inherit;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:2px;border-radius:var(--radius-full);cursor:pointer;position:relative;transition:color var(--dur-1) var(--ease-out),background var(--dur-2) var(--ease-out)}
+.nd-tabbar button span{font-size:11px;line-height:13px;font-weight:600;letter-spacing:.01em}
+.nd-tabbar button .nd-ico{width:24px;height:24px}
+.nd-tabbar button[aria-selected="true"]{color:var(--tint);background:var(--tint-soft)}
+.nd-tabbar .nd-dot{position:absolute;top:6px;left:calc(50% + 8px);min-width:16px;height:16px;border-radius:8px;background:var(--danger);color:#fff;
+  font-size:11px;line-height:16px;font-weight:700;padding:0 4px}
+
+/* ---------- alttan açılan panel (sheet) ---------- */
+.nd-scrim{position:fixed;inset:0;z-index:40;background:var(--scrim);opacity:0;pointer-events:none;transition:opacity var(--dur-3) var(--ease-spring)}
+.nd-scrim.is-open{opacity:1;pointer-events:auto}
+.nd-sheet{position:fixed;z-index:41;left:0;right:0;bottom:0;max-width:640px;margin:0 auto;height:var(--sheet-h,55%);max-height:calc(100% - 44px);
+  background:var(--bg);border-radius:var(--radius-lg) var(--radius-lg) 0 0;box-shadow:var(--shadow-sheet);display:flex;flex-direction:column;
+  transform:translateY(105%);transition:transform var(--dur-3) var(--ease-spring),height var(--dur-3) var(--ease-spring);
+  padding-bottom:env(safe-area-inset-bottom,0px);touch-action:none}
+.nd-sheet.is-open{transform:translateY(var(--drag,0px))}
+.nd-sheet.is-dragging{transition:none}
+.nd-sheet.is-large{--sheet-h:calc(100% - 44px)}
+.nd-sheet__grab{flex:none;height:22px;display:grid;place-items:center;cursor:grab}
+.nd-sheet__grab::before{content:"";width:36px;height:5px;border-radius:3px;background:var(--ink-3);opacity:.55}
+.nd-sheet__head{flex:none;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:0 var(--space-4) var(--space-2)}
+.nd-sheet__head>:last-child{justify-self:end}
+.nd-sheet__title{font-size:17px;line-height:22px;font-weight:600;text-align:center}
+.nd-sheet__body{flex:1;overflow:auto;padding:var(--space-2) var(--space-4) var(--space-6);touch-action:pan-y;overscroll-behavior:contain}
+
+/* ---------- takvim ---------- */
+.nd-cal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
+.nd-cal__dow{font-size:12px;line-height:16px;font-weight:600;color:var(--ink-2);text-align:center;padding:4px 0}
+.nd-cal__dow.is-we{color:var(--ink-2)}
+.nd-day{appearance:none;border:0;font:inherit;position:relative;min-height:var(--cell-h);border-radius:var(--radius-sm);background:var(--surface);
+  color:var(--ink);padding:4px 3px 3px;display:flex;flex-direction:column;align-items:stretch;gap:2px;cursor:pointer;min-width:0;text-align:center;
+  transition:transform var(--dur-1) var(--ease-out),box-shadow var(--dur-1) var(--ease-out)}
+.nd-day:active{transform:scale(.95)}
+.nd-day__n{font-family:var(--font-rounded);font-size:16px;line-height:20px;font-weight:600;align-self:center;min-width:26px;height:24px;
+  border-radius:12px;display:grid;place-items:center;padding:0 4px}
+.nd-day.is-weekend{background:var(--weekend)}
+.nd-day.is-weekend .nd-day__n{color:var(--ink-2)}
+.nd-day.is-today .nd-day__n{background:var(--tint);color:var(--on-tint)}
+.nd-day.is-mine{background:var(--tint-soft);color:var(--tint-ink)}
+.nd-day.is-mine .nd-day__n{color:var(--tint-ink)}
+.nd-day.is-leave{background:var(--leave-soft);color:var(--leave)}
+.nd-day.is-leave .nd-day__n{color:var(--leave)}
+.nd-day.is-ek{background:var(--ek-soft);color:var(--ek)}
+.nd-day.is-ek .nd-day__n{color:var(--ek)}
+.nd-day.is-rest{background:repeating-linear-gradient(135deg,var(--rest-soft) 0 6px,var(--surface) 6px 9px);color:var(--rest)}
+.nd-day.is-rest .nd-day__n{color:var(--rest)}
+.nd-day.is-wish{box-shadow:inset 0 0 0 2px var(--tint)}
+.nd-day.is-avoid{box-shadow:inset 0 0 0 2px var(--danger)}
+.nd-day.is-selected{box-shadow:0 0 0 2px var(--tint)}
+.nd-day.is-out{background:transparent;opacity:.35;pointer-events:none}
+.nd-day.is-empty{background:transparent;pointer-events:none}
+.nd-day.is-drop-ok{box-shadow:inset 0 0 0 2px var(--tint);background:var(--tint-soft)}
+.nd-day.is-drop-bad{box-shadow:inset 0 0 0 2px var(--danger);background:var(--danger-soft)}
+.nd-day__flag{position:absolute;top:4px;right:4px;width:6px;height:6px;border-radius:50%;background:var(--holiday)}
+.nd-day__mark{position:absolute;top:3px;left:4px;color:currentColor}
+.nd-day__mark .nd-ico{width:12px;height:12px}
+.nd-day__tag{font-size:10px;line-height:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nd-chip{display:block;border-radius:var(--radius-xs);padding:2px 3px;font-size:11px;line-height:13px;font-weight:600;white-space:nowrap;overflow:hidden;
+  text-overflow:ellipsis;background:var(--p1);color:var(--p1-ink);min-width:0}
+.nd-chip.is-me{box-shadow:inset 0 0 0 1.5px currentColor}
+.nd-chip.is-lifted{box-shadow:var(--shadow-lift);transform:scale(1.08)}
+.p1{--pc:var(--p1);--pci:var(--p1-ink)}.p2{--pc:var(--p2);--pci:var(--p2-ink)}.p3{--pc:var(--p3);--pci:var(--p3-ink)}.p4{--pc:var(--p4);--pci:var(--p4-ink)}
+.p5{--pc:var(--p5);--pci:var(--p5-ink)}.p6{--pc:var(--p6);--pci:var(--p6-ink)}.p7{--pc:var(--p7);--pci:var(--p7-ink)}.p8{--pc:var(--p8);--pci:var(--p8-ink)}
+.nd-chip[class*=" p"],.nd-chip[class^="p"]{background:var(--pc);color:var(--pci)}
+.nd-calhead{display:flex;align-items:center;justify-content:space-between;gap:var(--space-2);padding:var(--space-2) 0}
+.nd-calhead__title{font-size:20px;line-height:25px;font-weight:600}
+.nd-calhead__nav{display:flex;gap:4px}
+.nd-iconbtn{appearance:none;border:0;background:transparent;color:var(--tint);width:var(--hit-min);height:var(--hit-min);border-radius:50%;display:grid;
+  place-items:center;cursor:pointer;transition:background var(--dur-1) var(--ease-out)}
+.nd-iconbtn:active{background:var(--surface-2)}
+.nd-iconbtn.is-fill{background:var(--surface-2);width:36px;height:36px}
+.nd-calwrap{overflow:hidden;touch-action:pan-y}
+.nd-caltrack{display:flex;will-change:transform}
+.nd-caltrack>*{flex:0 0 100%;min-width:0}
+.nd-caltrack.is-anim{transition:transform var(--dur-3) var(--ease-spring)}
+
+/* ---------- rozet / durum ---------- */
+.nd-badge{display:inline-flex;align-items:center;gap:4px;font-size:12px;line-height:16px;font-weight:600;padding:3px 9px 3px 7px;border-radius:var(--radius-full);
+  background:var(--surface-2);color:var(--ink-2);white-space:nowrap}
+.nd-badge .nd-ico{width:14px;height:14px}
+.nd-badge.is-duty{background:var(--tint-soft);color:var(--tint-ink)}
+.nd-badge.is-leave{background:var(--leave-soft);color:var(--leave)}
+.nd-badge.is-rest{background:var(--rest-soft);color:var(--rest)}
+.nd-badge.is-ek{background:var(--ek-soft);color:var(--ek)}
+.nd-badge.is-holiday{background:var(--holiday-soft);color:var(--holiday)}
+.nd-badge.is-avoid,.nd-badge.is-danger{background:var(--danger-soft);color:var(--danger)}
+.nd-badge.is-wish{background:var(--tint-soft);color:var(--tint-ink)}
+.nd-badges{display:flex;flex-wrap:wrap;gap:6px}
+
+/* ---------- avatar ---------- */
+.nd-avatar{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;flex:none;background:var(--pc,var(--p1));color:var(--pci,var(--p1-ink));
+  font-family:var(--font-rounded);font-size:14px;line-height:1;font-weight:700;letter-spacing:.02em}
+.nd-avatar.is-sm{width:28px;height:28px;font-size:12px}
+.nd-avatar.is-lg{width:56px;height:56px;font-size:20px}
+.nd-avatars{display:flex}.nd-avatars>.nd-avatar{box-shadow:0 0 0 2px var(--surface)}.nd-avatars>.nd-avatar+.nd-avatar{margin-left:-8px}
+
+/* ---------- kaydırılabilir satır ---------- */
+.nd-swipe{position:relative;overflow:hidden;background:var(--surface)}
+.nd-swipe+.nd-swipe::before{content:"";position:absolute;z-index:2;top:0;right:0;left:var(--space-4);height:var(--hair);background:var(--separator)}
+.nd-swipe__act{position:absolute;top:0;bottom:0;display:flex;align-items:center;padding:0 var(--space-5);font-weight:600;font-size:15px;gap:6px;color:#fff}
+.nd-swipe__act.is-left{left:0;background:var(--tint);color:var(--on-tint)}
+.nd-swipe__act.is-right{right:0;background:var(--danger)}
+.nd-swipe__content{position:relative;z-index:1;background:var(--surface);transform:translateX(var(--x,0px));touch-action:pan-y}
+.nd-swipe.is-anim .nd-swipe__content{transition:transform var(--dur-2) var(--ease-spring)}
+.nd-swipe__content>.nd-row{background:transparent}
+
+/* ---------- sıradaki nöbet kartı (defter çizgili) ---------- */
+.nd-hero{position:relative;overflow:hidden;border-radius:var(--radius-lg);padding:var(--space-5);background:var(--hero);color:var(--on-hero);
+  display:flex;flex-direction:column;gap:var(--space-3)}
+.nd-hero::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.10;
+  background:repeating-linear-gradient(to bottom,transparent 0 23px,currentColor 23px 24px)}
+.nd-hero::after{content:"";position:absolute;top:0;bottom:0;left:var(--space-3);width:1px;background:currentColor;opacity:.18}
+.nd-hero>*{position:relative}
+.nd-hero__eyebrow{font-size:13px;line-height:18px;letter-spacing:.02em;text-transform:uppercase;font-weight:600;opacity:.85}
+.nd-hero__title{font-size:28px;line-height:34px;font-weight:700}
+.nd-hero__sub{font-size:16px;line-height:21px;opacity:.9}
+.nd-hero .nd-btn{background:rgba(255,255,255,.18);color:inherit}
+.nd-hero .nd-btn.is-solid{background:var(--surface);color:var(--tint-ink)}
+.nd-hero__off{display:flex;flex-wrap:wrap;gap:6px}
+.nd-hero__off span{font-size:12px;line-height:16px;font-weight:600;padding:3px 9px;border-radius:var(--radius-full);background:rgba(255,255,255,.18)}
+
+/* ---------- seçenek kartı (ilk kurulum soruları) ---------- */
+.nd-choice{appearance:none;font:inherit;text-align:left;width:100%;display:flex;gap:var(--space-3);align-items:flex-start;padding:var(--space-4);
+  border-radius:var(--radius-md);background:var(--surface);color:var(--ink);border:2px solid transparent;cursor:pointer;
+  transition:border-color var(--dur-2) var(--ease-out),transform var(--dur-1) var(--ease-out)}
+.nd-choice:active{transform:scale(.98)}
+.nd-choice[aria-checked="true"]{border-color:var(--tint)}
+.nd-choice__body{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.nd-choice__title{font-weight:600}
+.nd-choice__desc{font-size:15px;line-height:20px;color:var(--ink-2)}
+.nd-choice__radio{width:24px;height:24px;border-radius:50%;flex:none;border:2px solid var(--separator);display:grid;place-items:center;color:var(--on-tint);margin-top:1px;
+  transition:background var(--dur-2) var(--ease-out),border-color var(--dur-2) var(--ease-out)}
+.nd-choice__radio .nd-ico{width:14px;height:14px;opacity:0}
+.nd-choice[aria-checked="true"] .nd-choice__radio{background:var(--tint);border-color:var(--tint)}
+.nd-choice[aria-checked="true"] .nd-choice__radio .nd-ico{opacity:1}
+.nd-choices{display:flex;flex-direction:column;gap:var(--space-2)}
+
+/* ---------- hafta şeridi (kuralın etkisini gösteren mini önizleme) ---------- */
+.nd-week{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;margin-top:var(--space-2)}
+.nd-week>div{border-radius:8px;background:var(--surface-2);padding:6px 2px;text-align:center;font-size:11px;line-height:13px;font-weight:600;color:var(--ink-2);
+  display:flex;flex-direction:column;gap:3px;align-items:center}
+.nd-week>div b{font-size:10px;font-weight:600;opacity:.9}
+.nd-week>.is-duty{background:var(--tint);color:var(--on-tint)}
+.nd-week>.is-rest{background:repeating-linear-gradient(135deg,var(--rest-soft) 0 5px,var(--surface) 5px 8px);color:var(--rest)}
+.nd-week>.is-ek{background:var(--ek-soft);color:var(--ek)}
+
+/* ---------- bildirim / bilgi kutusu ---------- */
+.nd-banner{display:flex;gap:var(--space-3);align-items:flex-start;padding:var(--space-3) var(--space-4);border-radius:var(--radius-md);background:var(--tint-soft);color:var(--tint-ink);
+  font-size:15px;line-height:20px}
+.nd-banner .nd-ico{width:20px;height:20px;margin-top:0}
+.nd-banner.is-warn{background:var(--holiday-soft);color:var(--holiday)}
+.nd-banner.is-danger{background:var(--danger-soft);color:var(--danger)}
+.nd-banner.is-gray{background:var(--surface);color:var(--ink-2)}
+.nd-banner b{color:inherit}
+.nd-toast{position:fixed;z-index:60;left:50%;top:calc(10px + env(safe-area-inset-top,0px));transform:translate(-50%,-140%);display:flex;align-items:center;gap:var(--space-2);
+  padding:10px 18px;border-radius:var(--radius-full);background:var(--glass);-webkit-backdrop-filter:blur(24px) saturate(180%);backdrop-filter:blur(24px) saturate(180%);
+  box-shadow:var(--shadow-float);font-size:15px;line-height:20px;font-weight:600;color:var(--ink);transition:transform var(--dur-3) var(--ease-spring);max-width:calc(100% - 32px)}
+.nd-toast.is-on{transform:translate(-50%,0)}
+.nd-toast .nd-ico{color:var(--tint);width:20px;height:20px}
+
+/* ---------- sihirbaz ilerlemesi ---------- */
+.nd-progress{height:4px;border-radius:2px;background:var(--surface-2);overflow:hidden}
+.nd-progress>i{display:block;height:100%;width:var(--p,0%);background:var(--tint);border-radius:2px;transition:width var(--dur-3) var(--ease-spring)}
+.nd-steplabel{font-size:13px;line-height:18px;color:var(--ink-2);font-weight:600}
+
+/* ---------- metin alanı ---------- */
+.nd-input{appearance:none;width:100%;font:inherit;font-size:17px;line-height:22px;color:var(--ink);background:var(--surface);border:0;border-radius:var(--radius-md);
+  padding:14px var(--space-4);min-height:52px;outline:none;box-shadow:inset 0 0 0 1px transparent;transition:box-shadow var(--dur-1) var(--ease-out)}
+.nd-input::placeholder{color:var(--ink-3)}
+.nd-input:focus{box-shadow:inset 0 0 0 2px var(--tint)}
+
+/* ---------- boş durum ---------- */
+.nd-empty{display:flex;flex-direction:column;align-items:center;text-align:center;gap:var(--space-2);padding:var(--space-8) var(--space-5);color:var(--ink-2)}
+.nd-empty__icon{width:56px;height:56px;border-radius:50%;background:var(--surface-2);display:grid;place-items:center;color:var(--ink-2);margin-bottom:var(--space-2)}
+.nd-empty__title{font-size:17px;line-height:22px;font-weight:600;color:var(--ink)}
+
+/* ---------- istatistik satırı ---------- */
+.nd-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--space-2)}
+.nd-stat{background:var(--surface);border-radius:var(--radius-md);padding:var(--space-3);display:flex;flex-direction:column;gap:2px}
+.nd-stat b{font-family:var(--font-rounded);font-size:28px;line-height:32px;font-weight:700}
+.nd-stat span{font-size:13px;line-height:18px;color:var(--ink-2)}
+
+/* ---------- fırça (tercih boyama) ---------- */
+.nd-brush{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.nd-brush button{appearance:none;border:2px solid transparent;font:inherit;background:var(--surface);border-radius:var(--radius-sm);padding:8px 4px;display:flex;flex-direction:column;
+  align-items:center;gap:3px;font-size:12px;line-height:16px;font-weight:600;color:var(--ink-2);cursor:pointer;transition:border-color var(--dur-1) var(--ease-out)}
+.nd-brush button .nd-ico{width:20px;height:20px}
+.nd-brush button[aria-pressed="true"]{border-color:currentColor}
+.nd-brush .is-wish{color:var(--tint-ink)}.nd-brush .is-avoid{color:var(--danger)}.nd-brush .is-leave{color:var(--leave)}.nd-brush .is-erase{color:var(--ink-2)}
+
+</style>
+<style id="ndTheme">
+/* ===== Nöbet Defteri iOS teması: eski bileşenler tasarım sisteminin dilinde =====
+   Renk/boşluk/köşe değerleri tasarım sistemi değişkenlerinden gelir. Şimdilik yalnız açık tema. */
+:root{
+  --teal:var(--tint);--teal-deep:var(--tint);--teal-dark:var(--tint-ink);--teal-tint:var(--tint-soft);--teal-glow:rgba(10,122,112,.18);
+  --coral:var(--danger);--coral-tint:var(--danger-soft);--gold:#B07A00;--gold-tint:var(--holiday-soft);
+  --ink-soft:var(--ink-2);--card:var(--surface);--wknd:#FBF5EA;--line:var(--separator);
+  --sh-sm:none;--sh-md:none;color-scheme:light}
+html,body{background:var(--bg)}
+body{font-family:var(--font-sans);font-size:17px;line-height:22px;color:var(--ink);-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;font-variant-numeric:tabular-nums}
+#phone{max-width:var(--content-max)}
+/* büyük başlık */
+header.ndhdr{background:var(--bg);color:var(--ink);border-radius:0;box-shadow:none;overflow:visible;
+  padding:calc(8px + env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) 2px max(16px,env(safe-area-inset-left))}
+header.ndhdr::before{display:none}
+.ndhdr__top{display:flex;align-items:center;gap:8px;min-height:24px}
+.ndhdr__team{flex:1;min-width:0;font-size:15px;line-height:20px;color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ndhdr__title{font-size:34px;line-height:41px;font-weight:700;letter-spacing:.01em;margin:0 0 4px}
+#logoutBtn{display:none!important}
+.cdown{margin:6px 0 4px;background:var(--tint-soft);color:var(--tint-ink);border:0;border-radius:12px;padding:10px 12px;font-size:15px;line-height:20px;font-weight:500}
+.cdown.hot{background:var(--holiday-soft);color:var(--holiday)}
+main{padding:8px max(16px,env(safe-area-inset-right)) 120px max(16px,env(safe-area-inset-left))}
+/* kart = gruplu yüzey */
+.card{background:var(--surface);border:0;border-radius:var(--radius-md);box-shadow:none;padding:16px;margin-bottom:24px}
+.card h2{font-size:20px;line-height:25px;font-weight:600;letter-spacing:0;margin-bottom:4px}
+.sheet h2{font-size:20px;line-height:25px;font-weight:600}
+.eyebrow{font-size:13px;line-height:18px;font-weight:400;letter-spacing:.02em;text-transform:uppercase;color:var(--ink-2);margin-bottom:2px}
+.hint{font-size:15px;line-height:20px;color:var(--ink-2);margin-bottom:12px}
+label{font-size:15px;line-height:20px;font-weight:500;color:var(--ink)}
+label.chk{font-size:15px;font-weight:500;color:var(--ink);gap:8px}
+/* alanlar: 17px (iPhone'da odaklanınca sayfa büyümez) */
+input,select,textarea{font-family:inherit;font-size:17px;line-height:22px;background:var(--surface-2);border:0;border-radius:10px;
+  padding:10px 12px;min-height:44px;color:var(--ink)}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--tint);outline-offset:1px;border-color:transparent}
+input::placeholder,textarea::placeholder{color:var(--ink-3)}
+input[type=number]{width:78px}
+select{-webkit-appearance:none;appearance:none;padding-right:34px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%238E8E93' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 12px center}
+input:disabled,select:disabled{opacity:.5}
+/* onay kutusu = iOS anahtarı */
+input[type=checkbox]{-webkit-appearance:none;appearance:none;width:51px;height:31px;min-height:0;flex:none;border-radius:999px;padding:0;margin:0;
+  background:var(--surface-3);position:relative;cursor:pointer;transition:background var(--dur-2) var(--ease-out);vertical-align:middle}
+input[type=checkbox]::before{content:"";position:absolute;top:2px;left:2px;width:27px;height:27px;border-radius:50%;background:#fff;
+  box-shadow:0 3px 8px rgba(0,0,0,.15),0 0 0 .5px rgba(0,0,0,.04);transition:transform var(--dur-2) var(--ease-spring)}
+input[type=checkbox]:checked{background:var(--tint)}
+input[type=checkbox]:checked::before{transform:translateX(20px)}
+td input[type=checkbox],.dchip input[type=checkbox]{width:40px;height:24px}
+td input[type=checkbox]::before,.dchip input[type=checkbox]::before{width:20px;height:20px}
+td input[type=checkbox]:checked::before,.dchip input[type=checkbox]:checked::before{transform:translateX(16px)}
+input[type=radio]{accent-color:var(--tint);width:22px;height:22px;min-height:0}
+/* düğmeler */
+.btn{background:var(--tint);color:var(--on-tint);border:0;border-radius:var(--radius-full);min-height:50px;padding:0 22px;
+  font-size:17px;line-height:22px;font-weight:600;box-shadow:none;display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  transition:transform var(--dur-1) var(--ease-out),opacity var(--dur-1) var(--ease-out)}
+.btn:active{transform:scale(.97);opacity:.85}
+.btn.small{min-height:36px;padding:0 15px;font-size:15px;line-height:20px;border-radius:var(--radius-full)}
+.btn.ghost,.btn.gold{background:var(--tint-soft);color:var(--tint-ink);border:0;box-shadow:none}
+.btn.red{background:var(--danger-soft);color:var(--danger);border:0}
+.savebtn{min-height:36px}
+.switchlink{color:var(--tint);text-decoration:none;font-weight:500;font-size:15px}
+/* satırlar, etiketler */
+.person{border-bottom:.5px solid var(--separator);padding:12px 0}
+.person .nm{font-size:17px;font-weight:600}
+.person .sub{font-size:13px;line-height:18px;color:var(--ink-2)}
+.avatar{border-radius:50%}
+.tag{font-size:12px;font-weight:600;border-radius:6px;padding:2px 8px}
+.roomrow,.shiftrow{border-bottom:.5px solid var(--separator)}
+.dchip{font-size:13px;font-weight:600;padding:6px 10px;border-radius:8px;border:0;background:var(--surface-2);color:var(--ink)}
+.dchip.on{background:var(--tint-soft);color:var(--tint-ink);border:0}
+.codebox{background:var(--surface-2);border:0;border-radius:12px;font-family:var(--font-rounded);color:var(--ink)}
+.stats{gap:8px}
+.stat{background:var(--surface);border:0;box-shadow:none;border-radius:var(--radius-md);padding:12px 8px}
+.stat .v{font-family:var(--font-rounded);font-size:28px;line-height:32px;font-weight:700;color:var(--ink)}
+.stat .v.bad{color:var(--danger)}
+.stat .l{font-size:12px;font-weight:500;letter-spacing:.01em;text-transform:none;color:var(--ink-2)}
+/* uyarı şeritleri */
+.banner{border-radius:12px;padding:12px 14px;font-size:15px;line-height:20px;font-weight:500;border:0}
+.banner.ok{background:var(--tint-soft);color:var(--tint-ink)}
+.banner.err{background:var(--danger-soft);color:var(--danger)}
+.banner.info{background:var(--holiday-soft);color:var(--holiday)}
+/* tablolar */
+table{font-size:14px}
+th{font-size:12px;font-weight:600;letter-spacing:.02em;color:var(--ink-2);border-bottom:.5px solid var(--separator);padding:8px 4px;white-space:nowrap}
+#yearTot td,#yearTbl td,#decideBody td{white-space:nowrap}
+td{border-bottom:.5px solid var(--separator);padding:10px 4px}
+.bar{background:var(--surface-2)}.bar i{background:var(--tint)}
+/* segment (iOS) */
+.seg{background:var(--surface-2);border-radius:9px;padding:2px;gap:0;margin-bottom:16px}
+.seg button{font-size:13px;line-height:18px;font-weight:600;color:var(--ink);border-radius:7px;padding:6px 4px;min-height:32px}
+.seg button.on{background:#fff;color:var(--ink);box-shadow:0 3px 8px rgba(0,0,0,.12),0 0 0 .5px rgba(0,0,0,.04)}
+/* İstek takası ve izin durumları */
+.req{background:var(--surface);border:0;border-radius:var(--radius-md);padding:14px}
+.st{font-size:12px;font-weight:600;border-radius:6px}
+.st.bekliyor{background:var(--holiday-soft);color:var(--holiday)}
+.st.kabul{background:var(--tint-soft);color:var(--tint-ink)}
+.st.red{background:var(--danger-soft);color:var(--danger)}
+#aiOut,#aiAnswer{background:var(--surface-2);font-size:15px;line-height:21px}
+details.adv{border-top:.5px solid var(--separator)}
+details.adv>summary{font-size:15px;font-weight:600;color:var(--tint)}
+/* alttan panel */
+.modal{background:var(--scrim)}
+.modal.on .sheet{animation:ndUp var(--dur-3) var(--ease-spring)}
+@keyframes ndUp{from{transform:translateY(40%);opacity:.4}to{transform:none;opacity:1}}
+.sheet{background:var(--surface);max-width:var(--content-max);border-radius:var(--radius-lg) var(--radius-lg) 0 0;box-shadow:var(--shadow-sheet);padding-top:8px}
+.sheet::before{content:"";display:block;width:36px;height:5px;border-radius:3px;background:var(--surface-3);margin:2px auto 14px}
+/* bildirim kapsülü */
+.toast{border:0;border-radius:16px;box-shadow:var(--shadow-float);font-size:15px;line-height:20px;font-weight:500;padding:12px 16px}
+.toast.ok{background:var(--glass);-webkit-backdrop-filter:blur(20px) saturate(180%);backdrop-filter:blur(20px) saturate(180%);color:var(--ink);border:0}
+.toast.err{background:var(--danger-soft);color:var(--danger);border:0}
+/* sekme çubuğu */
+#mainNav.nd-tabbar{width:auto;transform:none;border:0}
+#mainNav.nd-tabbar button{flex:1 1 0;min-width:0;padding:0;font-size:inherit}
+#mainNav.nd-tabbar button.active{background:var(--tint-soft);color:var(--tint)}
+/* Ayarlar: alt sayfa düzeni */
+.setbar{margin:-4px 0 8px}
+.setback{appearance:none;border:0;background:none;font:inherit;font-size:17px;color:var(--tint);display:inline-flex;align-items:center;gap:2px;
+  padding:6px 4px 6px 0;min-height:44px;cursor:pointer}
+.setback .nd-ico{width:24px;height:24px;margin-left:-6px}
+#tab-kurulum .card.pg-hide,#tab-kurulum[data-page="root"] .card[data-grp]{display:none!important}
+body:not([data-tab="bugun"]) #cdown{display:none!important}
+.nd-hero .nd-btn-row{flex-wrap:nowrap}
+.nd-hero .nd-btn-row .nd-btn{min-width:0;padding:0 12px}
+#tab-kurulum:not([data-page="root"]) #setLanding{display:none}
+.nd-row.is-danger .nd-row__title{color:var(--danger)}
+/* İstekler segmenti */
+.isteg{margin-bottom:16px}
+/* takvim */
+.dh{background:none;color:var(--ink-2);font-size:12px;font-weight:600;border-radius:0;padding:2px 0}
+.day{border:1px solid transparent;background:var(--bg);border-radius:10px}
+.day.wknd{background:#FBF3E4;border-color:transparent}
+.day.wknd .num{color:#8A5A00}
+.day.bay{background:var(--holiday-soft);border-color:#E8C873}
+.day.bay .num::after{content:""}
+.day.today{outline:2px solid var(--tint);outline-offset:-2px}
+.day.sel{border-color:var(--ink);box-shadow:0 0 0 1px var(--ink)}
+.day.empty{background:none}
+.cal.dense{margin:12px -8px 0}
+.day .bosgun{background:var(--danger-soft);color:var(--danger)}
+.dpanel{border:0;background:var(--bg);box-shadow:none}
+.dp-tag{background:var(--holiday-soft);color:var(--holiday)}
+.dayrow{border-bottom:.5px solid var(--separator)}
+.dayrow.wknd{background:#FBF3E4}
+.dayrow.bay{background:var(--holiday-soft)}
+.dayrow.today{outline:2px solid var(--tint)}
+.dayrow .dn b{font-family:var(--font-rounded);font-size:20px}
+.wsep{color:var(--ink-2);font-size:12px;font-weight:600}
+button.lgd{border:0;background:var(--surface-2);font-size:13px;min-height:32px}
+button.lgd.on{background:var(--ink);color:#fff}
+button.lgd.me:not(.on){box-shadow:inset 0 0 0 1.5px var(--tint)}
+.lgd-hint{font-size:12px;line-height:16px;color:var(--ink-2)}
+.prefday.yes{background:var(--tint-soft);border-color:var(--tint)}
+.prefday.no{background:var(--danger-soft);border-color:var(--danger)}
+.prefday.izin{background:var(--surface-2);border-color:transparent;color:var(--ink-3)}
+.draftbox{border-color:#E0B64C;background:#FFFCF3}
+.dtrow .dth{background:var(--tint-soft);color:var(--tint-ink)}
+.dtrow .dth.fark{background:var(--holiday-soft);color:var(--holiday)}
+.verbox{background:var(--bg);border:0}
+#schedWrap.slide-l{animation:ndSlideL var(--dur-3) var(--ease-spring)}
+#schedWrap.slide-r{animation:ndSlideR var(--dur-3) var(--ease-spring)}
+@keyframes ndSlideL{from{transform:translateX(30%);opacity:0}to{transform:none;opacity:1}}
+@keyframes ndSlideR{from{transform:translateX(-30%);opacity:0}to{transform:none;opacity:1}}
+/* Bugün */
+#todayWrap .nd-hero{margin-bottom:24px}
+.nd-hero.is-quiet{background:var(--surface);color:var(--ink)}
+.nd-hero.is-quiet .nd-hero__eyebrow,.nd-hero.is-quiet .nd-hero__sub{color:var(--ink-2)}
+.nd-hero.is-quiet .nd-btn{background:var(--tint);color:var(--on-tint)}
+.nd-hero.is-quiet::before{opacity:.05}.nd-hero.is-quiet::after{opacity:.08}
+.tsec{font-size:20px;line-height:25px;font-weight:600;margin:0 0 10px}
+#todayWrap .nd-stats{margin-bottom:24px}
+.nd-stat b.is-pos{color:var(--danger)}.nd-stat b.is-neg{color:var(--ek)}
+.strip{display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x mandatory;margin:0 -16px 24px;padding:0 16px 4px;scrollbar-width:none}
+.strip::-webkit-scrollbar{display:none}
+.strip__d{appearance:none;border:0;font:inherit;flex:0 0 72px;scroll-snap-align:start;background:var(--surface);border-radius:14px;padding:8px 6px;
+  display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;color:var(--ink);min-width:0}
+.strip__d:active{transform:scale(.96)}
+.strip__w{font-size:12px;line-height:16px;font-weight:600;color:var(--ink-2)}
+.strip__n{font-family:var(--font-rounded);font-size:20px;line-height:24px;font-weight:700}
+.strip__c{display:flex;flex-wrap:wrap;gap:2px;justify-content:center;min-height:20px}
+.strip__c i{font-style:normal;color:var(--ink-3);font-size:13px}
+.strip__d.is-today{box-shadow:inset 0 0 0 2px var(--tint)}
+.strip__d.is-mine{background:var(--tint-soft)}
+#myDutiesCard .person .btn{min-height:32px}
+/* giriş ekranları */
+.center{margin:24px auto}
+.center h2{font-size:28px;line-height:34px;font-weight:700}
+
+</style>
+<script id="ndJs">
+/* @ds-bundle: {"format":4,"namespace":"ND","components":[{"name":"Button"},{"name":"GroupedList"},{"name":"Switch"},{"name":"Stepper"},{"name":"Segmented"},{"name":"NavBar"},{"name":"TabBar"},{"name":"Sheet"},{"name":"Calendar"},{"name":"StatusBadge"},{"name":"Avatar"},{"name":"SwipeRow"},{"name":"NextDutyCard"},{"name":"ChoiceCard"},{"name":"WeekStrip"},{"name":"Banner"},{"name":"Toast"},{"name":"Progress"},{"name":"TextField"},{"name":"EmptyState"},{"name":"Stats"},{"name":"PreferenceBrush"}]} */
+/* Nöbet Defteri etkileşimleri: bağımlılık yok, düz JS. window.ND altında. */
+(function(){
+var ICONS={"home":"<path d=\"M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8\" /> <path d=\"M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z\" />","calendar":"<path d=\"M8 2v4\" /> <path d=\"M16 2v4\" /> <rect width=\"18\" height=\"18\" x=\"3\" y=\"4\" rx=\"2\" /> <path d=\"M3 10h18\" /> <path d=\"M8 14h.01\" /> <path d=\"M12 14h.01\" /> <path d=\"M16 14h.01\" /> <path d=\"M8 18h.01\" /> <path d=\"M12 18h.01\" /> <path d=\"M16 18h.01\" />","inbox":"<polyline points=\"22 12 16 12 14 15 10 15 8 12 2 12\" /> <path d=\"M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z\" />","settings":"<path d=\"M20 7h-9\" /> <path d=\"M14 17H5\" /> <circle cx=\"17\" cy=\"17\" r=\"3\" /> <circle cx=\"7\" cy=\"7\" r=\"3\" />","people":"<path d=\"M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2\" /> <circle cx=\"9\" cy=\"7\" r=\"4\" /> <path d=\"M22 21v-2a4 4 0 0 0-3-3.87\" /> <path d=\"M16 3.13a4 4 0 0 1 0 7.75\" />","person":"<circle cx=\"12\" cy=\"8\" r=\"5\" /> <path d=\"M20 21a8 8 0 0 0-16 0\" />","duty":"<path d=\"M11 2v2\" /> <path d=\"M5 2v2\" /> <path d=\"M5 3H4a2 2 0 0 0-2 2v4a6 6 0 0 0 12 0V5a2 2 0 0 0-2-2h-1\" /> <path d=\"M8 15a6 6 0 0 0 12 0v-3\" /> <circle cx=\"20\" cy=\"10\" r=\"2\" />","leave":"<path d=\"M13 8c0-2.76-2.46-5-5.5-5S2 5.24 2 8h2l1-1 1 1h4\" /> <path d=\"M13 7.14A5.82 5.82 0 0 1 16.5 6c3.04 0 5.5 2.24 5.5 5h-3l-1-1-1 1h-3\" /> <path d=\"M5.89 9.71c-2.15 2.15-2.3 5.47-.35 7.43l4.24-4.25.7-.7.71-.71 2.12-2.12c-1.95-1.96-5.27-1.8-7.42.35\" /> <path d=\"M11 15.5c.5 2.5-.17 4.5-1 6.5h4c2-5.5-.5-12-1-14\" />","rest":"<path d=\"M2 20v-8a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v8\" /> <path d=\"M4 10V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v4\" /> <path d=\"M12 4v6\" /> <path d=\"M2 18h20\" />","halfday":"<circle cx=\"12\" cy=\"12\" r=\"4\" /> <path d=\"M12 2v2\" /> <path d=\"M12 20v2\" /> <path d=\"m4.93 4.93 1.41 1.41\" /> <path d=\"m17.66 17.66 1.41 1.41\" /> <path d=\"M2 12h2\" /> <path d=\"M20 12h2\" /> <path d=\"m6.34 17.66-1.41 1.41\" /> <path d=\"m19.07 4.93-1.41 1.41\" />","holiday":"<path d=\"M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z\" /> <line x1=\"4\" x2=\"4\" y1=\"22\" y2=\"15\" />","wish":"<path d=\"M7 10v12\" /> <path d=\"M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2a3.13 3.13 0 0 1 3 3.88Z\" />","avoid":"<path d=\"M17 14V2\" /> <path d=\"M9 18.12 10 14H4.17a2 2 0 0 1-1.92-2.56l2.33-8A2 2 0 0 1 6.5 2H20a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2.76a2 2 0 0 0-1.79 1.11L12 22a3.13 3.13 0 0 1-3-3.88Z\" />","swap":"<path d=\"M8 3 4 7l4 4\" /> <path d=\"M4 7h16\" /> <path d=\"m16 21 4-4-4-4\" /> <path d=\"M20 17H4\" />","link":"<path d=\"M9 17H7A5 5 0 0 1 7 7h2\" /> <path d=\"M15 7h2a5 5 0 1 1 0 10h-2\" /> <line x1=\"8\" x2=\"16\" y1=\"12\" y2=\"12\" />","off-duty":"<path d=\"M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2\" /> <circle cx=\"9\" cy=\"7\" r=\"4\" /> <line x1=\"17\" x2=\"22\" y1=\"8\" y2=\"13\" /> <line x1=\"22\" x2=\"17\" y1=\"8\" y2=\"13\" />","fair":"<path d=\"m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z\" /> <path d=\"m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z\" /> <path d=\"M7 21h10\" /> <path d=\"M12 3v18\" /> <path d=\"M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2\" />","chart":"<path d=\"M3 3v16a2 2 0 0 0 2 2h16\" /> <path d=\"M18 17V9\" /> <path d=\"M13 17V5\" /> <path d=\"M8 17v-3\" />","share":"<path d=\"M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8\" /> <polyline points=\"16 6 12 2 8 6\" /> <line x1=\"12\" x2=\"12\" y1=\"2\" y2=\"15\" />","add-cal":"<path d=\"M8 2v4\" /> <path d=\"M16 2v4\" /> <path d=\"M21 13V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h8\" /> <path d=\"M3 10h18\" /> <path d=\"M16 19h6\" /> <path d=\"M19 16v6\" />","bell":"<path d=\"M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9\" /> <path d=\"M10.3 21a1.94 1.94 0 0 0 3.4 0\" />","file":"<path d=\"M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z\" /> <path d=\"M14 2v4a2 2 0 0 0 2 2h4\" /> <path d=\"M10 9H8\" /> <path d=\"M16 13H8\" /> <path d=\"M16 17H8\" />","download":"<path d=\"M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4\" /> <polyline points=\"7 10 12 15 17 10\" /> <line x1=\"12\" x2=\"12\" y1=\"15\" y2=\"3\" />","check":"<path d=\"M20 6 9 17l-5-5\" />","x":"<path d=\"M18 6 6 18\" /> <path d=\"m6 6 12 12\" />","plus":"<path d=\"M5 12h14\" /> <path d=\"M12 5v14\" />","minus":"<path d=\"M5 12h14\" />","chev-r":"<path d=\"m9 18 6-6-6-6\" />","chev-l":"<path d=\"m15 18-6-6 6-6\" />","grip":"<circle cx=\"9\" cy=\"12\" r=\"1\" /> <circle cx=\"9\" cy=\"5\" r=\"1\" /> <circle cx=\"9\" cy=\"19\" r=\"1\" /> <circle cx=\"15\" cy=\"12\" r=\"1\" /> <circle cx=\"15\" cy=\"5\" r=\"1\" /> <circle cx=\"15\" cy=\"19\" r=\"1\" />","more":"<circle cx=\"12\" cy=\"12\" r=\"1\" /> <circle cx=\"19\" cy=\"12\" r=\"1\" /> <circle cx=\"5\" cy=\"12\" r=\"1\" />","info":"<circle cx=\"12\" cy=\"12\" r=\"10\" /> <path d=\"M12 16v-4\" /> <path d=\"M12 8h.01\" />","alert":"<path d=\"m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3\" /> <path d=\"M12 9v4\" /> <path d=\"M12 17h.01\" />","ok":"<circle cx=\"12\" cy=\"12\" r=\"10\" /> <path d=\"m9 12 2 2 4-4\" />","undo":"<path d=\"M9 14 4 9l5-5\" /> <path d=\"M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5a5.5 5.5 0 0 1-5.5 5.5H11\" />","search":"<circle cx=\"11\" cy=\"11\" r=\"8\" /> <path d=\"m21 21-4.3-4.3\" />","lock":"<rect width=\"18\" height=\"11\" x=\"3\" y=\"11\" rx=\"2\" ry=\"2\" /> <path d=\"M7 11V7a5 5 0 0 1 10 0v4\" />","copy":"<rect width=\"14\" height=\"14\" x=\"8\" y=\"8\" rx=\"2\" ry=\"2\" /> <path d=\"M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2\" />","qr":"<rect width=\"5\" height=\"5\" x=\"3\" y=\"3\" rx=\"1\" /> <rect width=\"5\" height=\"5\" x=\"16\" y=\"3\" rx=\"1\" /> <rect width=\"5\" height=\"5\" x=\"3\" y=\"16\" rx=\"1\" /> <path d=\"M21 16h-3a2 2 0 0 0-2 2v3\" /> <path d=\"M21 21v.01\" /> <path d=\"M12 7v3a2 2 0 0 1-2 2H7\" /> <path d=\"M3 12h.01\" /> <path d=\"M12 3h.01\" /> <path d=\"M12 16v.01\" /> <path d=\"M16 12h1\" /> <path d=\"M21 12v.01\" /> <path d=\"M12 21v-1\" />","clock":"<circle cx=\"12\" cy=\"12\" r=\"10\" /> <polyline points=\"12 6 12 12 16.5 12\" />"};
+function icon(n,cls){var p=ICONS[n]||"";return '<svg class="nd-ico'+(cls?" "+cls:"")+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+p+'</svg>';}
+function haptic(ms){try{if(navigator.vibrate)navigator.vibrate(ms||8);}catch(e){}}
+function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
+function on(el,ev,fn,o){el.addEventListener(ev,fn,o||{passive:true});}
+/* sürüklemeden sonra gelen tıklamayı yut (kaydırma bir dokunuş sayılmasın) */
+function guardClick(el){if(el._ndGuard)return;el._ndGuard=1;el.addEventListener("click",function(e){if(Date.now()-(el._noClick||0)<450){e.stopPropagation();e.preventDefault();}},true);}
+
+/* Sayaç: <div class="nd-stepper" data-nd="stepper" data-min="0" data-max="9" data-value="3"> */
+function stepper(root,opt){
+  opt=opt||{};
+  var min=+(opt.min!=null?opt.min:root.dataset.min||0),max=+(opt.max!=null?opt.max:root.dataset.max||99);
+  var v=+(opt.value!=null?opt.value:root.dataset.value||0),fmt=opt.format||function(x){return String(x);};
+  if(!root.querySelector("output"))root.innerHTML='<button type="button" aria-label="Azalt">'+icon("minus")+'</button><output aria-live="polite"></output><button type="button" aria-label="Artır">'+icon("plus")+'</button>';
+  var b=root.querySelectorAll("button"),out=root.querySelector("output"),t=null,iv=null;
+  function render(){out.textContent=fmt(v);b[0].disabled=v<=min;b[1].disabled=v>=max;root.dataset.value=v;}
+  function step(d){var n=clamp(v+d,min,max);if(n===v)return;v=n;render();out.classList.remove("bump");void out.offsetWidth;out.classList.add("bump");haptic(6);
+    if(opt.onChange)opt.onChange(v);root.dispatchEvent(new CustomEvent("nd-change",{detail:v}));}
+  function stop(){clearTimeout(t);clearInterval(iv);t=iv=null;}
+  [[b[0],-1],[b[1],1]].forEach(function(x){
+    x[0].addEventListener("pointerdown",function(e){e.preventDefault();step(x[1]);t=setTimeout(function(){iv=setInterval(function(){step(x[1]);},90);},420);});
+    ["pointerup","pointerleave","pointercancel"].forEach(function(ev){x[0].addEventListener(ev,stop);});
+    x[0].addEventListener("keydown",function(e){if(e.key==="Enter"||e.key===" "){e.preventDefault();step(x[1]);}});
+  });
+  render();
+  return {get value(){return v;},set:function(n){v=clamp(n,min,max);render();}};
+}
+
+/* Segment: <div class="nd-seg" data-nd="seg"><i class="nd-seg__thumb"></i><button>..</button>…</div> */
+function segmented(root,onChange){
+  var btns=[].slice.call(root.querySelectorAll("button"));
+  if(!root.querySelector(".nd-seg__thumb"))root.insertAdjacentHTML("afterbegin",'<i class="nd-seg__thumb"></i>');
+  root.setAttribute("role","tablist");root.style.setProperty("--n",btns.length);
+  function sel(i,fire){btns.forEach(function(b,k){b.setAttribute("role","tab");b.setAttribute("aria-selected",k===i?"true":"false");});
+    root.style.setProperty("--i",i);if(fire){haptic(5);if(onChange)onChange(i,btns[i]);root.dispatchEvent(new CustomEvent("nd-change",{detail:i}));}}
+  btns.forEach(function(b,i){b.type="button";b.addEventListener("click",function(){sel(i,true);});});
+  var start=btns.findIndex(function(b){return b.getAttribute("aria-selected")==="true";});
+  sel(start<0?0:start,false);
+  return {select:function(i){sel(i,true);}};
+}
+
+/* Alttan açılan panel: orta ve büyük yükseklik, tutamaçtan sürükle, aşağı çekip kapat. */
+function sheet(el,scrim,opt){
+  opt=opt||{};
+  var grab=el.querySelector(".nd-sheet__grab"),head=el.querySelector(".nd-sheet__head"),body=el.querySelector(".nd-sheet__body");
+  var y0=0,t0=0,dy=0,drag=false,large=false;
+  function setLarge(b){large=b;el.classList.toggle("is-large",b);}
+  function open(det){setLarge(det==="large");el.style.setProperty("--drag","0px");scrim&&scrim.classList.add("is-open");el.classList.add("is-open");el.setAttribute("aria-hidden","false");haptic(8);}
+  function close(){el.classList.remove("is-open");scrim&&scrim.classList.remove("is-open");el.setAttribute("aria-hidden","true");el.style.setProperty("--drag","0px");if(opt.onClose)opt.onClose();}
+  function down(e){if(e.target.closest("button,input,select,a"))return;drag=true;y0=e.clientY;t0=Date.now();dy=0;el.classList.add("is-dragging");
+    (e.target.setPointerCapture&&e.target.setPointerCapture(e.pointerId));}
+  function move(e){if(!drag)return;dy=e.clientY-y0;var d=dy<0?(large?dy*0.15:dy*0.6):dy;el.style.setProperty("--drag",d+"px");}
+  function up(){if(!drag)return;drag=false;el.classList.remove("is-dragging");var v=dy/Math.max(1,Date.now()-t0);
+    el.style.setProperty("--drag","0px");
+    if(dy>120||v>0.6){if(large&&dy<260&&v<1.2)setLarge(false);else close();}
+    else if(dy<-60||v<-0.5)setLarge(true);}
+  [grab,head].forEach(function(h){if(!h)return;h.addEventListener("pointerdown",down);h.addEventListener("pointermove",move);h.addEventListener("pointerup",up);h.addEventListener("pointercancel",up);});
+  if(grab)grab.addEventListener("click",function(){if(Math.abs(dy)<4)setLarge(!large);});
+  if(body)body.addEventListener("scroll",function(){if(body.scrollTop>40&&!large)setLarge(true);},{passive:true});
+  if(scrim)scrim.addEventListener("click",close);
+  document.addEventListener("keydown",function(e){if(e.key==="Escape"&&el.classList.contains("is-open"))close();});
+  return {open:open,close:close,setLarge:setLarge};
+}
+
+/* Kaydırılabilir satır: sağa çek = sol eylem (ör. Kabul), sola çek = sağ eylem (ör. Reddet). */
+function swipeRow(el,opt){
+  opt=opt||{};
+  var c=el.querySelector(".nd-swipe__content"),x0=0,y0=0,dx=0,active=false,locked=null,W=0;guardClick(el);
+  function set(x){c.style.setProperty("--x",x+"px");}
+  on(c,"pointerdown",function(e){active=true;locked=null;x0=e.clientX;y0=e.clientY;dx=0;W=el.offsetWidth;el.classList.remove("is-anim");});
+  on(c,"pointermove",function(e){if(!active)return;var mx=e.clientX-x0,my=e.clientY-y0;
+    if(locked===null&&(Math.abs(mx)>8||Math.abs(my)>8))locked=Math.abs(mx)>Math.abs(my)?"x":"y";
+    if(locked!=="x")return;dx=mx;if(dx>0&&!opt.onLeft)dx=dx*0.2;if(dx<0&&!opt.onRight)dx=dx*0.2;set(dx);
+    var past=Math.abs(dx)>W*0.35;if(past!==el._past){el._past=past;if(past)haptic(10);}});
+  function end(){if(!active)return;active=false;el.classList.add("is-anim");if(locked==="x"&&Math.abs(dx)>6)el._noClick=Date.now();
+    if(locked==="x"&&dx>W*0.35&&opt.onLeft){set(W);setTimeout(function(){opt.onLeft(el);},180);}
+    else if(locked==="x"&&dx<-W*0.35&&opt.onRight){set(-W);setTimeout(function(){opt.onRight(el);},180);}
+    else set(0);}
+  on(c,"pointerup",end);on(c,"pointercancel",end);
+  return {reset:function(){el.classList.add("is-anim");set(0);}};
+}
+
+/* Ay kaydırma: wrap içinde .nd-caltrack (önceki | bu | sonraki). Parmakla sürükle, bırakınca yay gibi oturur. */
+function swipeMonths(wrap,opt){
+  var tr=wrap.querySelector(".nd-caltrack"),x0=0,y0=0,dx=0,act=false,lock=null,W=0;guardClick(wrap);
+  function pos(x,anim){tr.classList.toggle("is-anim",!!anim);tr.style.transform="translateX(calc(-100% + "+x+"px))";}
+  pos(0);
+  on(wrap,"pointerdown",function(e){if(e.target.closest("[data-drag]"))return;act=true;lock=null;x0=e.clientX;y0=e.clientY;dx=0;W=wrap.offsetWidth;});
+  on(wrap,"pointermove",function(e){if(!act)return;var mx=e.clientX-x0,my=e.clientY-y0;
+    if(lock===null&&(Math.abs(mx)>10||Math.abs(my)>10))lock=Math.abs(mx)>Math.abs(my)*1.2?"x":"y";if(lock!=="x")return;dx=mx;pos(dx);});
+  function end(){if(!act)return;act=false;if(lock!=="x"){return;}if(Math.abs(dx)>6)wrap._noClick=Date.now();
+    var go=Math.abs(dx)>W*0.22?(dx<0?1:-1):0;
+    if(!go){pos(0,true);return;}
+    pos(go>0?-W:W,true);haptic(6);
+    setTimeout(function(){if(opt&&opt.onChange)opt.onChange(go);pos(0,false);},380);}
+  on(wrap,"pointerup",end);on(wrap,"pointercancel",end);
+  return {go:function(d){W=wrap.offsetWidth;pos(d>0?-W:W,true);setTimeout(function(){if(opt&&opt.onChange)opt.onChange(d);pos(0,false);},380);}};
+}
+
+/* Büyük başlık: kaydırınca gezinme çubuğu buzlu cama döner ve küçük başlık görünür. */
+function largeTitle(scroller,nav){
+  var big=nav.querySelector(".nd-nav__large");
+  function f(){var y=scroller===window?window.scrollY:scroller.scrollTop;nav.classList.toggle("is-scrolled",y>(big?big.offsetHeight-6:4));}
+  (scroller===window?window:scroller).addEventListener("scroll",f,{passive:true});f();
+}
+
+/* Kısa bildirim (üstten kayan kapsül) */
+var toastEl=null,toastT=null;
+function toast(msg,ic){
+  if(!toastEl){toastEl=document.createElement("div");toastEl.className="nd-toast";toastEl.setAttribute("role","status");document.body.appendChild(toastEl);}
+  toastEl.innerHTML=icon(ic||"ok")+"<span></span>";toastEl.querySelector("span").textContent=msg;
+  requestAnimationFrame(function(){toastEl.classList.add("is-on");});haptic(10);
+  clearTimeout(toastT);toastT=setTimeout(function(){toastEl.classList.remove("is-on");},2400);
+}
+
+/* data-nd ile otomatik başlat */
+function auto(root){
+  root=root||document;
+  [].forEach.call(root.querySelectorAll('[data-nd="stepper"]'),function(e){if(!e._nd)e._nd=stepper(e);});
+  [].forEach.call(root.querySelectorAll('[data-nd="seg"]'),function(e){if(!e._nd)e._nd=segmented(e);});
+  [].forEach.call(root.querySelectorAll("[data-icon]"),function(e){if(!e._nd){e._nd=1;e.insertAdjacentHTML("afterbegin",icon(e.dataset.icon,e.dataset.iconClass));}});
+}
+window.ND={guardClick:guardClick,icon:icon,icons:ICONS,haptic:haptic,stepper:stepper,segmented:segmented,sheet:sheet,swipeRow:swipeRow,swipeMonths:swipeMonths,largeTitle:largeTitle,toast:toast,auto:auto};
+})();
+
+</script>
 </head>
 <body>
 <div id="phone">
-<header>
-  <div class="brand">
-    <div class="logo">📒</div>
-    <div><h1>Nöbet<em>Defteri</em></h1><p id="subTitle">Nöbetin kolay ve adil hali 💚</p></div>
-    <span class="vtag" id="logoutBtn" onclick="logout()" style="display:none">ÇIKIŞ</span>
+<header class="ndhdr">
+  <div class="ndhdr__top">
+    <span class="ndhdr__team" id="subTitle">Nöbetin kolay ve adil hali</span>
+    <span class="vtag" id="logoutBtn" onclick="logout()" style="display:none">Çıkış</span>
   </div>
+  <h1 class="ndhdr__title" id="navTitle">Nöbet Defteri</h1>
   <div class="cdown" id="cdown" style="display:none"></div>
-  <svg class="ekg" viewBox="0 0 400 34" preserveAspectRatio="none"><path d="M0 20 H60 L72 20 82 6 92 30 100 20 H160 L172 20 182 4 192 31 200 20 H260 L272 20 282 7 292 29 300 20 H400"/></svg>
 </header>
 <main>
 
 <div id="view-config" class="view">
-  <div class="card center"><h2>⚙️ Kurulum gerekli</h2>
+  <div class="card center"><h2>Kurulum gerekli</h2>
   <p class="hint">Dosyanın üstündeki SUPABASE_URL ve SUPABASE_KEY alanlarını doldur.</p></div>
 </div>
 
 <div id="view-auth" class="view">
   <div class="card center">
-    <h2 id="authTitle">👋 Giriş yap</h2>
+    <h2 id="authTitle">Giriş yap</h2>
     <p class="hint">Herkes kendi hesabıyla girer; kimse kimsenin isteğine dokunamaz.</p>
     <input type="text" id="authName" placeholder="Ad Soyad (ör. Dr. Kaan Yılmaz)" style="display:none">
     <input type="email" id="authEmail" placeholder="E-posta">
@@ -324,7 +975,7 @@ details.hbase{margin-top:8px}details.hbase summary{font-size:.74rem;font-weight:
 
 <div id="view-forgot" class="view">
   <div class="card center">
-    <h2>🔑 Şifremi unuttum</h2>
+    <h2>Şifremi unuttum</h2>
     <p class="hint">Kayıtlı e-postanı yaz; sana yeni şifre belirleme linki gönderelim.</p>
     <input type="email" id="forgotEmail" placeholder="E-posta">
     <button class="btn" onclick="sendReset()" id="forgotBtn">Sıfırlama linki gönder</button>
@@ -335,7 +986,7 @@ details.hbase{margin-top:8px}details.hbase summary{font-size:.74rem;font-weight:
 
 <div id="view-reset" class="view">
   <div class="card center">
-    <h2>🔒 Yeni şifre belirle</h2>
+    <h2>Yeni şifre belirle</h2>
     <p class="hint">Yeni şifreni iki kez yaz (en az 6 karakter).</p>
     <input type="password" id="newPass1" placeholder="Yeni şifre">
     <input type="password" id="newPass2" placeholder="Yeni şifre (tekrar)">
@@ -348,13 +999,13 @@ details.hbase{margin-top:8px}details.hbase summary{font-size:.74rem;font-weight:
 <div id="view-teams" class="view">
   <div class="card">
     <p class="eyebrow">Listelerim</p>
-    <h2>📋 Nöbet listelerim</h2>
+    <h2>Nöbet listelerim</h2>
     <p class="hint">Hangi listeyi açmak istersin? Birden fazla listede olabilirsin (ör. bölüm nöbeti + kat nöbeti).</p>
     <div id="teamList"></div>
   </div>
   <div class="card">
     <p class="eyebrow">Yeni</p>
-    <h2>➕ Başka listeye katıl / kur</h2>
+    <h2>Başka listeye katıl / kur</h2>
     <button class="btn ghost" style="width:100%" onclick="showView('dept')">Davet kodu gir veya yeni liste kur</button>
   </div>
 </div>
@@ -364,18 +1015,18 @@ details.hbase{margin-top:8px}details.hbase summary{font-size:.74rem;font-weight:
     <span class="switchlink" onclick="showView('teams')">← Listelerime dön</span>
   </div>
   <div class="card center">
-    <h2>🎓 Bölümün</h2>
+    <h2>Bölümün</h2>
     <p class="hint">Asistanlığını yaptığın branşı seç — nöbet hesabı buna göre yapılır.</p>
     <select id="myBranch"></select>
   </div>
   <div class="card center">
-    <h2>🏥 Ekibe katıl</h2>
+    <h2>Ekibe katıl</h2>
     <p class="hint">Planlayıcının paylaştığı 6 haneli kodu gir.</p>
     <input type="text" id="joinCode" placeholder="Davet kodu (ör. A3F9K2)" style="text-transform:uppercase">
     <button class="btn" onclick="joinDept()">Katıl</button>
   </div>
   <div class="card center">
-    <h2>➕ Yeni ekip kur</h2>
+    <h2>Yeni ekip kur</h2>
     <p class="hint">Kuran kişi yönetici (planlayıcı) olur.</p>
     <input type="text" id="newDeptName" placeholder="Ekip adı (ör. X Hastanesi Nöbet Listesi)">
     <button class="btn gold" onclick="createDept()">Ekip Kur</button>
@@ -385,130 +1036,237 @@ details.hbase{margin-top:8px}details.hbase summary{font-size:.74rem;font-weight:
 
 <div id="view-app" class="view">
 
-<section id="tab-kurulum" class="tab active">
-  <div class="card" id="inviteCard" style="display:none">
-    <p class="eyebrow">Davet</p>
-    <h2>📣 Ekibi davet et</h2>
-    <p class="hint">Bu kodu gruba at — herkes kayıt olup bu kodla katılsın, kendi bölümünü kendisi seçer.</p>
-    <div class="codebox" id="inviteCode">——————</div>
+<section id="tab-bugun" class="tab active">
+  <div id="todayWrap"></div>
+  <div class="card" id="myDutiesCard">
+    <p class="eyebrow">Nöbet takvimim</p>
+    <h2>Nöbetlerim</h2>
+    <div class="row" style="margin-bottom:8px">
+      <label>Ay</label>
+      <select id="viewMonthSel2" style="flex:1;min-width:150px" onchange="setViewMonth(this.value)"></select>
+    </div>
+    <div id="myDuties"><div class="empty-state">Çizelge yayınlanınca nöbetlerin burada listelenir.</div></div>
+    <div class="row" style="margin-top:12px">
+      <button class="btn small" onclick="icsIndir()">Tüm nöbetlerimi takvime ekle (.ics)</button>
+    </div>
+    <p class="hint" style="margin-top:8px"><b>iPhone / Outlook:</b> inen dosyaya dokun → <b>Tümünü ekle</b>.<br>
+      <b>Google Takvim:</b> her nöbetin yanındaki <b>＋ Google</b> tek tek ekler. Hepsini birden eklemek için bilgisayarda calendar.google.com → ⚙️ Ayarlar → <b>İçe ve dışa aktar</b> → bu .ics dosyasını seç.<br>
+      Saatler Türkiye saatiyle yazılır; gece yarısını geçen nöbet ertesi gün biter. Liste sonradan değişirse eski kaydı takviminden silip yeniden ekle.</p>
   </div>
-  <div class="card">
+</section>
+
+<section id="tab-leave" class="tab">
+  <div class="seg isteg" role="tablist">
+    <button data-sub="izin" onclick="showTab('izin')">Tercihler</button>
+    <button data-sub="leave" onclick="showTab('leave')">İzin</button>
+    <button data-sub="takas" onclick="showTab('takas')">Takas</button>
+  </div>
+  <div class="card" id="leaveAdminCard" style="display:none">
+    <p class="eyebrow">Yönetici onayı</p>
+    <h2>İzin talepleri & onay</h2>
+    <p class="hint">Herkesin girdiği izin günleri burada görünür. <b>⏳ bekleyen</b> izinler onaylanana kadar geçerli değildir. Dilediğin kişinin iznini takvimden doğrudan ekleyip silebilirsin.</p>
+    <div id="leaveAdminList"></div>
+  </div>
+  <div class="card" id="myLeaveCard">
+    <p class="eyebrow">Kesin engel</p>
+    <h2>İzinlerim</h2>
+    <p class="hint">Takvimden seç ya da yaz: tek gün <b>12</b>, aralık <b>12-16</b>, karışık <b>12-16,20</b>. İzinlerin <b>yönetici onayından sonra</b> geçerli olur — onaylanana kadar ⏳ bekler ve nöbet yazılmasını engellemez.</p>
+    <div class="row">
+      <input type="text" id="izinInput" placeholder="ör. 12-16,20" style="flex:1;min-width:100px">
+      <button class="btn ghost small" onclick="pickIzin()">Takvim</button>
+      <button class="btn small" onclick="saveIzin()">Kaydet</button>
+    </div>
+    <div id="izinBek" class="banner info" style="display:none"></div>
+    <div id="izinStatus" class="banner ok" style="display:none"></div>
+  </div>
+</section>
+
+<section id="tab-kurulum" class="tab" data-page="root">
+  <div id="setBar" class="setbar"></div>
+  <div id="setLanding"></div>
+  <div class="card" id="monthCard" data-grp="ay">
     <p class="eyebrow">Ay başı kurulum · 1/2</p>
-    <h2>📅 Ay, kurallar & bayram</h2>
+    <h2>Ay, kurallar & bayram</h2>
     <div class="row">
       <input type="month" id="month">
       <label>Min ara</label><input type="number" id="minGap" min="1" max="7">
-      <button class="btn small savebtn" title="Sadece bu ayarı kaydet" onclick="saveGrp('month')">💾</button>
+      <button class="btn small savebtn" title="Sadece bu ayarı kaydet" onclick="saveGrp('month')">Kaydet</button>
     </div>
     <p class="hint" style="margin:5px 0 0">Ay değiştirince sayfa o ayın izin/tercih ve çizelge verisiyle yenilenir.</p>
     <div class="row" style="margin-top:10px">
-      <label>🌙 Bayram</label>
+      <label>Bayram</label>
       <input type="text" id="bayramDays" placeholder="ör. 15-17,20" style="flex:1;min-width:100px">
-      <button class="btn ghost small" onclick="pickBayram()">📅 Takvim</button>
-      <button class="btn small savebtn" title="Sadece bu ayarı kaydet" onclick="saveGrp('bayram')">💾</button>
+      <button class="btn ghost small" onclick="pickBayram()">Takvim</button>
+      <button class="btn small savebtn" title="Sadece bu ayarı kaydet" onclick="saveGrp('bayram')">Kaydet</button>
     </div>
     <p class="hint" style="margin:5px 0 0">Yazarak da girebilirsin: tek gün <b>15</b>, aralık <b>15-17</b>, karışık <b>15-17,23</b>.</p>
     <div class="row" style="margin-top:10px">
-      <label>📋 Liste tipi</label>
+      <label>Liste tipi</label>
       <select id="schedMode" onchange="modeChanged()" style="flex:1;min-width:180px">
         <option value="rooms">🚪 Oda tabanlı (asistan nöbeti)</option>
         <option value="shifts">⏰ Vardiya tabanlı (acil / icap / kat)</option>
       </select>
-      <button class="btn small savebtn" title="Sadece bu ayarı kaydet" onclick="saveGrp('mode')">💾</button>
+      <button class="btn small savebtn" title="Sadece bu ayarı kaydet" onclick="saveGrp('mode')">Kaydet</button>
     </div>
     <div class="row" style="margin-top:10px">
-      <label>🔗 Diğer listelerle uyum</label>
+      <label>Diğer listelerle uyum</label>
       <select id="linkDefault" style="flex:1;min-width:180px"></select>
-      <button class="btn small savebtn" title="Sadece bu ayarı kaydet" onclick="saveGrp('link')">💾</button>
+      <button class="btn small savebtn" title="Sadece bu ayarı kaydet" onclick="saveGrp('link')">Kaydet</button>
     </div>
     <p class="hint" style="margin:5px 0 0">Ekipten biri başka bir listede de nöbet tutuyorsa (ör. kat + acil), bu listedeki nöbetleri ona göre ayarlanır: çakışmasın, aynı günlere denk gelsin ya da sadece o günlerde tutsun. Burası ekip için varsayılan; <b>Ekip</b> kartından kişiye özel de seçebilirsin. Diğer listenin o ay için yayınlanmış olması gerekir.</p>
     <details class="adv">
-    <summary>⚙️ Gelişmiş ayarlar — çoğu ekip için dokunmaya gerek yok</summary>
+    <summary>Gelişmiş ayarlar — çoğu ekip için dokunmaya gerek yok</summary>
     <div class="row" style="margin-top:10px">
-      <label>📆 Liste hazırlama günü</label>
+      <label>Liste hazırlama günü</label>
       <input type="number" id="genDay" min="1" max="28" value="25">
-      <button class="btn small savebtn" title="Sadece bu ayarı kaydet" onclick="saveGrp('genday')">💾</button>
+      <button class="btn small savebtn" title="Sadece bu ayarı kaydet" onclick="saveGrp('genday')">Kaydet</button>
       <span style="font-size:.72rem;color:var(--ink-soft)">· her ayın bu gününde sonraki ayın listesi hazırlanır</span>
     </div>
     <div class="row" style="margin-top:10px">
-      <label>🎯 Doluluk politikası</label>
+      <label>Doluluk politikası</label>
       <select id="fillPolicy" style="flex:1;min-width:180px">
         <option value="fill_all">Tüm oda/vardiyaları doldur (boş bırakma)</option>
         <option value="by_capacity">İstenen nöbet sayısına göre dağıt (bazı slotlar boş kalabilir)</option>
       </select>
-      <button class="btn small savebtn" title="Sadece bu ayarı kaydet" onclick="saveGrp('fill')">💾</button>
+      <button class="btn small savebtn" title="Sadece bu ayarı kaydet" onclick="saveGrp('fill')">Kaydet</button>
     </div>
     <div class="row" style="margin-top:10px">
-      <label>🏖 İzinlinin nöbet sayısı</label>
+      <label>İzinlinin nöbet sayısı</label>
       <select id="leaveProp" style="flex:1;min-width:180px">
         <option value="">Eşit — izin günleri sayıyı düşürmez</option>
         <option value="1">İzin günü oranında azalt</option>
       </select>
-      <button class="btn small savebtn" title="Sadece bu ayarı kaydet" onclick="saveGrp('leaveprop')">💾</button>
+      <button class="btn small savebtn" title="Sadece bu ayarı kaydet" onclick="saveGrp('leaveprop')">Kaydet</button>
     </div>
     <p class="hint" style="margin:5px 0 0">"Oranında azalt" seçilirse ayın yarısında izinli olan kişiye yaklaşık yarı sayıda nöbet yazılır, kalanı diğerlerine eşit dağılır. Bu durumda "Kim kaç nöbet" sayıları sadece yazıldığı ay için geçerlidir.</p>
     <div class="row" style="margin-top:10px">
-      <label>🧭 Çalışma düzeni</label>
+      <label>Çalışma düzeni</label>
       <select id="workModel" style="flex:1;min-width:180px">
         <option value="shift_only">Nöbet/vardiya = tüm mesai (acil, sekreter, hemşire…)</option>
         <option value="duty_rest">Mesai + nöbet · nöbet ertesi izinli</option>
         <option value="duty_work">Mesai + nöbet · nöbet ertesi çalışır</option>
       </select>
-      <button class="btn small savebtn" title="Sadece bu ayarı kaydet" onclick="saveGrp('work')">💾</button>
+      <button class="btn small savebtn" title="Sadece bu ayarı kaydet" onclick="saveGrp('work')">Kaydet</button>
     </div>
     <div class="row" style="margin-top:10px">
-      <label>🔁 Ritim:</label>
+      <label>Ritim:</label>
       <input type="number" id="patternOn" min="0" max="7" value="0">
       <label>gün üst üste →</label>
       <input type="number" id="patternOff" min="0" max="7" value="0">
       <label>gün dinlen</label>
-      <button class="btn small savebtn" title="Sadece bu ayarı kaydet" onclick="saveGrp('rhythm')">💾</button>
+      <button class="btn small savebtn" title="Sadece bu ayarı kaydet" onclick="saveGrp('rhythm')">Kaydet</button>
     </div>
     <p class="hint" style="margin:6px 0 0">Örnek: <b>2</b> ve <b>2</b> yazarsan herkes 2 gün çalışır, 2 gün dinlenir. Kapatmak için 0 yaz.<br>💡 En iyi sonuç için "Kim kaç nöbet tutacak" kartında sayıları <b>0</b> bırak — uygun sayıları program kendisi seçer.</p>
     <div class="row" style="margin-top:10px">
-      <label>🛌 İki vardiya arası en az</label>
+      <label>İki vardiya arası en az</label>
       <input type="number" id="minRest" min="0" max="24" value="8">
       <label>saat</label>
-      <button class="btn small savebtn" title="Sadece bu ayarı kaydet" onclick="saveGrp('minrest')">💾</button>
+      <button class="btn small savebtn" title="Sadece bu ayarı kaydet" onclick="saveGrp('minrest')">Kaydet</button>
     </div>
     <p class="hint" style="margin:5px 0 0">Bir vardiya bitince aynı kişiye en az bu kadar süre nöbet yazılmaz. Örnek: 20:00–08:00 gece nöbetinden çıkan kişiye 08:00 vardiyası verilmez. 0 yazarsan kural kapanır.</p>
     <div class="row" style="margin-top:10px">
-      <label>🙋 İstenen günler</label>
+      <label>İstenen günler</label>
       <select id="wishPri" style="flex:1;min-width:180px">
         <option value="normal">Normal — dengeye öncelik ver</option>
         <option value="high">Yüksek — herkese istediği günü vermeye çalış</option>
         <option value="off">Dikkate alma</option>
       </select>
-      <button class="btn small savebtn" title="Sadece bu ayarı kaydet" onclick="saveGrp('wish')">💾</button>
+      <button class="btn small savebtn" title="Sadece bu ayarı kaydet" onclick="saveGrp('wish')">Kaydet</button>
     </div>
     <p class="hint" style="margin:5px 0 0">Ekip, Tercihler sekmesindeki takvimden ⭐ istediği günleri işaretler. <b>Yüksek</b> seçilirse çizelge bu günleri tutturmayı, nöbetleri aya düzgün yaymaktan ve hafta sonu dengesinden daha çok önemser. Nöbetin boş kalabildiği (her gün dolu olmak zorunda olmayan) aylarda çok işe yarar.</p>
     <div class="row" style="margin-top:10px">
-      <label>🤝 Eş düzeni</label>
+      <label>Eş düzeni</label>
       <select id="partnerMode" style="flex:1;min-width:180px">
         <option value="rotate">Her nöbette farklı kişiyle eşleşsin (rotasyon)</option>
         <option value="off">Fark etmez — eşe bakma</option>
         <option value="fixed">Sabit eş — mümkün oldukça aynı kişiyle</option>
       </select>
-      <button class="btn small savebtn" title="Sadece bu ayarı kaydet" onclick="saveGrp('partner')">💾</button>
+      <button class="btn small savebtn" title="Sadece bu ayarı kaydet" onclick="saveGrp('partner')">Kaydet</button>
     </div>
     <div class="row" style="margin-top:10px">
-      <label>⚖️ Denge</label>
+      <label>Denge</label>
       <label class="chk"><input type="checkbox" id="balDN" checked> ☀️/🌙 gece-gündüz sayısı</label>
       <label class="chk"><input type="checkbox" id="balWE" checked> 🏖 hafta içi/hafta sonu sayısı</label>
-      <button class="btn small savebtn" title="Sadece bu ayarı kaydet" onclick="saveGrp('balance')">💾</button>
+      <button class="btn small savebtn" title="Sadece bu ayarı kaydet" onclick="saveGrp('balance')">Kaydet</button>
     </div>
     <p class="hint" style="margin:6px 0 0">Denge açıkken herkesin <b>gece sayısı</b>, <b>gündüz sayısı</b> ve <b>hafta sonu sayısı</b> eşitlenmeye çalışılır. Tam bölünemeyen artık nöbetleri taslak onay ekranında sen dağıtırsın.</p>
     </details>
-    <button class="btn ghost small" style="margin-top:12px" id="saveSettingsBtn" onclick="saveSettings()">💾 Hepsini birden kaydet</button>
-    <p class="hint" style="margin:6px 0 0">Her satırın kendi 💾 düğmesi var — sadece o ayarı kaydeder, diğerlerine dokunmaz. Alttaki düğme bu kartın <b>ve</b> odalar / vardiyalar / kural satırlarının tamamını birden kaydeder.</p>
+    <button class="btn ghost small" style="margin-top:12px" id="saveSettingsBtn" onclick="saveSettings()">Hepsini birden kaydet</button>
+    <p class="hint" style="margin:6px 0 0">Her satırın kendi Kaydet düğmesi var — sadece o ayarı kaydeder, diğerlerine dokunmaz. Alttaki düğme bu kartın <b>ve</b> odalar / vardiyalar / kural satırlarının tamamını birden kaydeder.</p>
   </div>
-  <div class="card" id="wrCard">
+  <div class="card" id="quotaCard" style="display:none" data-grp="sayi">
+    <p class="eyebrow">Ay başı kurulum · 2/2 · kararı yönetici verir</p>
+    <h2>Kim kaç nöbet tutacak?</h2>
+    <p class="hint">Sayılara <b>sen</b> karar verirsin. Ekibin istekleri (🙋 ⭐ 🚫) sadece dikkate alınır, senin sayılarını değiştirmez.<br>
+      • <b>Toplam</b>: kişi ayda kaç nöbet tutacak. <b>0</b> = program kalanları eşit dağıtır.<br>
+      • <b>🌙 Gece</b>: bunlardan kaçı gece olacak. Örnek: Toplam 9, Gece 6 → 6 gece + 3 gündüz. <b>Boş</b> bırakırsan program dengeler, <b>0</b> yazarsan hiç gece verilmez.</p>
+    <div id="quotaBanner" class="banner info">—</div>
+    <div id="quotaList"></div>
+    <div class="row" style="margin-top:10px">
+      <button class="btn ghost small savebtn" onclick="quotaEqual()">Eşit dağıt</button>
+      <button class="btn ghost small savebtn" onclick="quotaFromWish()">Talepleri uygula</button>
+      <button class="btn ghost small savebtn" onclick="quotaClear()">Temizle</button>
+      <button class="btn small savebtn" onclick="saveQuota()">Sayıları kaydet</button>
+    </div>
+  </div>
+  <div class="card" id="closeMonthCard" style="display:none" data-grp="kapat">
+    <p class="eyebrow">Ay geçişi</p>
+    <h2>Ayı kapat, yeni aya geç</h2>
+    <p class="hint" id="closeMonthInfo">—</p>
+    <div id="arsivKutu" class="banner ok" style="margin:8px 0">—</div>
+    <p class="hint" style="margin:8px 0 4px"><b>Yeni aya taşınmasını istemediklerin:</b></p>
+    <div class="row" style="gap:6px">
+      <label class="chk"><input type="checkbox" id="clrPins" checked> 📌 Sabit atamalar</label>
+      <label class="chk"><input type="checkbox" id="clrBayram" checked> 🌙 Bayram günleri</label>
+    </div>
+    <div class="row" style="gap:6px;margin-top:4px">
+      <label class="chk"><input type="checkbox" id="clrRules"> 🎛 Gün kuralları</label>
+      <label class="chk"><input type="checkbox" id="clrTargets"> 📊 Nöbet sayıları</label>
+    </div>
+    <p class="hint" style="margin:6px 0 0">Vardiyalar, ekip, dinlenme, denge ve <b>izin / sıra kuralları</b> her hâlükârda kalır. İzinler ve tercihler aya özeldir, yeni ay boş başlar. Kuralları sonradan değiştirirsen geçmiş aylar kendi kurallarıyla saklandığı için sayaçları ve özetleri değişmez.</p>
+    <button class="btn gold small" style="margin-top:12px" id="closeMonthBtn" onclick="closeMonthGo()">Bu ayı kapat ve yeni aya geç</button>
+  </div>
+  <div class="card" id="inviteCard" style="display:none" data-grp="ekip">
+    <p class="eyebrow">Davet</p>
+    <h2>Ekibi davet et</h2>
+    <p class="hint">Bu kodu gruba at — herkes kayıt olup bu kodla katılsın, kendi bölümünü kendisi seçer.</p>
+    <div class="codebox" id="inviteCode">——————</div>
+  </div>
+  <div class="card" id="teamCard" data-grp="ekip">
+    <p class="eyebrow">Kadro</p>
+    <h2>Ekip <span style="font-weight:700;font-size:.75rem;color:var(--ink-soft)" id="teamCount"></span></h2>
+    <p class="hint" id="teamHint"></p>
+    <div id="peopleList"></div>
+  </div>
+  <div class="card" id="testCard" style="display:none" data-grp="ekip">
+    <p class="eyebrow">Geliştirici · test</p>
+    <h2>Test kişileri</h2>
+    <p class="hint">Hesabı olmayan deneme kişileri. Giriş yapamazlar, listede 🧪 ile görünürler. Gerçek kullanıma geçmeden <b>hepsini temizle</b>.</p>
+    <div class="row">
+      <input type="text" id="testName" placeholder="İsim (ör. Dr. Ayşe)" style="flex:1;min-width:130px" onkeydown="if(event.key==='Enter')addTestMembers()">
+      <button class="btn small" onclick="addTestMembers()">Ekle</button>
+    </div>
+    <div class="row" style="margin-top:6px">
+      <label>ya da toplu:</label>
+      <input type="number" id="testCount" value="5" min="1" max="20" style="width:64px">
+      <label>kişi</label>
+      <input type="text" id="testBranch" placeholder="Birim (ör. Acil)" style="flex:1;min-width:110px">
+      <button class="btn ghost small" onclick="addTestMembers(true)">Toplu ekle</button>
+    </div>
+    <div id="testList" style="margin-top:8px"></div>
+    <div class="row" style="margin-top:10px">
+      <button class="btn ghost small" onclick="randomizePrefs()">Test kişilerine rastgele izin/tercih</button>
+      <button class="btn red small" onclick="purgeTests()">Test kişilerini temizle</button>
+    </div>
+    <div id="testStatus" class="banner ok" style="display:none"></div>
+  </div>
+  <div class="card" id="wrCard" data-grp="wr">
     <p class="eyebrow">Ay başı kurulum · izin kuralları</p>
-    <h2>🗓 Nöbet sonrası izin & sıra kuralları</h2>
+    <h2>Nöbet sonrası izin & sıra kuralları</h2>
     <p class="hint">24 saat nöbet tutan ekipler için: nöbetten sonra kaç gün izinli olunacağını, hangi günlerin (ör. Perşembe, Cuma) <b>sırayla</b> verileceğini ve Cumartesi yarım gün iznini buradan ayarla. Program bu kuralları <b>kesin</b> uygular; kimin kaç kez kullandığını aylar boyunca sayar ve sırası gelene verir. Kapalıyken liste eskisi gibi hazırlanır. Kurallar kayıtlı kalır, her ay aynen kullanılır; değiştirdiğinde yalnız bundan sonraki listeler etkilenir.</p>
     <div class="row">
       <label class="chk"><input type="checkbox" id="wrOnChk" onchange="wrSet('on',this.checked)"> <b>Bu kuralları kullan</b></label>
-      <button class="btn ghost small savebtn" onclick="wrPreset()">🏥 Hazır şablon (Perşembe/Cuma 3 gün + Cumartesi yarım gün)</button>
+      <button class="btn ghost small savebtn" onclick="wrPreset()">Hazır şablon (Perşembe/Cuma 3 gün + Cumartesi yarım gün)</button>
     </div>
     <div id="wrBody">
       <div class="tblwrap" style="margin-top:8px"><table class="wrtbl"><thead><tr><th>Nöbet günü</th><th>Sonra kaç gün izinli</th><th style="white-space:nowrap">⚖️ Sıra</th><th>Ayda en fazla</th></tr></thead><tbody id="wrDays"></tbody></table></div>
@@ -533,49 +1291,32 @@ details.hbase{margin-top:8px}details.hbase summary{font-size:.74rem;font-weight:
         <p class="hint" style="margin:5px 0 0">Nöbetler kişi sayısına tam bölünmüyorsa (ör. 31 gün ÷ 6 kişi) fazla nöbet, şimdiye kadar en az fazla tutmuş kişiye verilir. Açıkken "Kim kaç nöbet tutacak" sayıları <b>sadece yazıldığı ay</b> için geçerlidir.</p>
       </div>
       <div class="row" style="margin-top:12px">
-        <label>📅 Sayaçlar bu aydan itibaren otomatik sayılsın</label>
+        <label>Sayaçlar bu aydan itibaren otomatik sayılsın</label>
         <input type="month" id="wrSince" onchange="wrSet('since',this.value)">
       </div>
     </div>
-    <button class="btn small savebtn" style="margin-top:12px" onclick="saveGrp('wr')">💾 Kuralları kaydet</button>
+    <button class="btn small savebtn" style="margin-top:12px" onclick="saveGrp('wr')">Kuralları kaydet</button>
   </div>
-  <div class="card" id="wrCntCard" style="display:none">
+  <div class="card" id="wrCntCard" style="display:none" data-grp="wr">
     <p class="eyebrow">Aylar arası adalet · otomatik</p>
-    <h2>⚖️ Sıra sayaçları</h2>
+    <h2>Sıra sayaçları</h2>
     <p class="hint" id="wrCntHint">—</p>
     <div class="tblwrap"><table><thead id="wrCntHead"></thead><tbody id="wrCntBody"></tbody></table></div>
-    <button class="btn small savebtn" style="margin-top:10px" onclick="saveGrp('wrbase')">💾 Başlangıç değerlerini kaydet</button>
+    <button class="btn small savebtn" style="margin-top:10px" onclick="saveGrp('wrbase')">Başlangıç değerlerini kaydet</button>
   </div>
-  <div class="card" id="closeMonthCard" style="display:none">
-    <p class="eyebrow">Ay geçişi</p>
-    <h2>🔒 Ayı kapat, yeni aya geç</h2>
-    <p class="hint" id="closeMonthInfo">—</p>
-    <div id="arsivKutu" class="banner ok" style="margin:8px 0">—</div>
-    <p class="hint" style="margin:8px 0 4px"><b>Yeni aya taşınmasını istemediklerin:</b></p>
-    <div class="row" style="gap:6px">
-      <label class="chk"><input type="checkbox" id="clrPins" checked> 📌 Sabit atamalar</label>
-      <label class="chk"><input type="checkbox" id="clrBayram" checked> 🌙 Bayram günleri</label>
-    </div>
-    <div class="row" style="gap:6px;margin-top:4px">
-      <label class="chk"><input type="checkbox" id="clrRules"> 🎛 Gün kuralları</label>
-      <label class="chk"><input type="checkbox" id="clrTargets"> 📊 Nöbet sayıları</label>
-    </div>
-    <p class="hint" style="margin:6px 0 0">Vardiyalar, ekip, dinlenme, denge ve <b>izin / sıra kuralları</b> her hâlükârda kalır. İzinler ve tercihler aya özeldir, yeni ay boş başlar. Kuralları sonradan değiştirirsen geçmiş aylar kendi kurallarıyla saklandığı için sayaçları ve özetleri değişmez.</p>
-    <button class="btn gold small" style="margin-top:12px" id="closeMonthBtn" onclick="closeMonthGo()">🔒 Bu ayı kapat ve yeni aya geç</button>
-  </div>
-  <div class="card" id="roomCard">
+  <div class="card" id="roomCard" data-grp="oda">
     <p class="eyebrow">Oda ayarları</p>
-    <h2>🚪 Odalar</h2>
+    <h2>Odalar</h2>
     <p class="hint">Genel odaları tüm asistanlar doldurur. Özel oda eklediğin branş, kendi listesi gibi çalışır: <b>🔒 kilitli</b> oda o branş nöbette değilse boş kalır; <b>🔓 devredilen</b> oda boşsa genel listeye açılır.</p>
     <div class="row"><label>Genel asistan odası / gece</label>
       <input type="number" id="generalRooms" min="0" max="10"></div>
     <div id="roomList" style="margin-top:8px"></div>
     <div class="row" style="margin-top:10px">
-      <button class="btn ghost small" id="addRoomBtn" onclick="addRoomRow()">＋ Özel oda ekle</button>
-      <button class="btn small savebtn" onclick="saveGrp('rooms')">💾 Odaları kaydet</button>
+      <button class="btn ghost small" id="addRoomBtn" onclick="addRoomRow()">Özel oda ekle</button>
+      <button class="btn small savebtn" onclick="saveGrp('rooms')">Odaları kaydet</button>
     </div>
     <div style="margin-top:12px;border-top:1.5px dashed var(--line);padding-top:10px">
-      <p class="eyebrow" style="margin-bottom:2px">🕗 Nöbet saatleri · hangi gün kaç saat?</p>
+      <p class="eyebrow" style="margin-bottom:2px">Nöbet saatleri · hangi gün kaç saat?</p>
       <p class="hint" style="margin:0 0 6px">Saat dengesi (kim kaç saat tuttu), telefon takvimi ve Google Takvim bu saatlerle hesaplanır. Bitiş başlangıçtan önce ya da eşitse nöbet ertesi gün biter (08:00 → 08:00 = 24 saat).</p>
       <div class="row" id="dtPresets" style="gap:6px;margin:4px 0 6px">
         <button class="dchip" onclick="dtPreset('24')">Hepsi 24 saat</button>
@@ -584,128 +1325,102 @@ details.hbase{margin-top:8px}details.hbase summary{font-size:.74rem;font-weight:
       </div>
       <div id="dtTable"></div>
       <p class="hint" style="margin:4px 0 0">Tatil = resmi tatil / bayram günleri (Ay ayarlarındaki bayram günleri).</p>
-      <div class="row" style="margin-top:8px"><button class="btn small savebtn" id="dtSaveBtn" onclick="saveGrp('duty')">💾 Nöbet saatlerini kaydet</button></div>
+      <div class="row" style="margin-top:8px"><button class="btn small savebtn" id="dtSaveBtn" onclick="saveGrp('duty')">Nöbet saatlerini kaydet</button></div>
     </div>
   </div>
-  <div class="card" id="shiftCard" style="display:none">
+  <div class="card" id="shiftCard" style="display:none" data-grp="vardiya">
     <p class="eyebrow">Vardiya ayarları</p>
-    <h2>⏰ Vardiyalar</h2>
+    <h2>Vardiyalar</h2>
     <p class="hint">Her satır bir vardiya: ad, saat aralığı, kişi sayısı ve geçerli günler (gün düğmelerine dokun). Gece yarısını aşan vardiya (ör. 16:00→09:00) o kişiye ertesi günü otomatik dinlenme yapar. Adalet; toplam saat, gece saati (20-08), hafta sonu ve bayram saati üzerinden dengelenir.</p>
     <div id="shiftList"></div>
     <div class="row" style="margin-top:10px">
-      <button class="btn ghost small" id="addShiftBtn" onclick="addShiftRow()">＋ Vardiya ekle</button>
-      <button class="btn small savebtn" onclick="saveGrp('shifts')">💾 Vardiyaları kaydet</button>
+      <button class="btn ghost small" id="addShiftBtn" onclick="addShiftRow()">Vardiya ekle</button>
+      <button class="btn small savebtn" onclick="saveGrp('shifts')">Vardiyaları kaydet</button>
     </div>
     <div style="margin-top:16px;border-top:1.5px dashed var(--line);padding-top:12px">
       <p class="eyebrow">İstisnalar</p>
       <p class="hint">Belirli bir günün veya kişinin vardiya saatini değiştir. Gün boş = tüm ay, kişi "Herkes" = o gün kim gelirse. Örnek: "15. gün · Ara · Herkes · 11:00→20:00" ya da "boş · Ara · Dr. Altuğ · 08:00→10:00".</p>
       <div id="ovrList"></div>
       <div class="row" style="margin-top:8px">
-        <button class="btn ghost small" id="addOvrBtn" onclick="addOvrRow()">＋ İstisna ekle</button>
-        <button class="btn small savebtn" onclick="saveGrp('ovr')">💾 İstisnaları kaydet</button>
+        <button class="btn ghost small" id="addOvrBtn" onclick="addOvrRow()">İstisna ekle</button>
+        <button class="btn small savebtn" onclick="saveGrp('ovr')">İstisnaları kaydet</button>
       </div>
     </div>
   </div>
-  <div class="card" id="pinCard">
+  <div class="card" id="pinCard" data-grp="sabit">
     <p class="eyebrow">Yönetici · elle atama</p>
-    <h2>📌 Bu günde kesin şu kişi</h2>
+    <h2>Bu günde kesin şu kişi</h2>
     <p class="hint">Özel durumlar için: seçtiğin günlerde nöbeti <b>kesin olarak</b> o kişi tutar, çizelge geri kalanı bunun etrafından kurar. Bu günler kilitlidir — dengeleme, takas ve yeniden üretme onlara dokunmaz. Kişinin toplam nöbet sayısına dahil edilirler.</p>
     <div id="pinList"></div>
     <div class="row" style="margin-top:10px">
-      <button class="btn ghost small" id="addPinBtn" onclick="addPinRow()">＋ Sabit atama ekle</button>
-      <button class="btn small savebtn" onclick="saveGrp('pins')">💾 Sabit atamaları kaydet</button>
+      <button class="btn ghost small" id="addPinBtn" onclick="addPinRow()">Sabit atama ekle</button>
+      <button class="btn small savebtn" onclick="saveGrp('pins')">Sabit atamaları kaydet</button>
     </div>
   </div>
-  <div class="card" id="blockCard">
+  <div class="card" id="blockCard" data-grp="kisit">
     <p class="eyebrow">Kişiye özel gün kuralları</p>
-    <h2>🎛 Tutamaz / sadece şu günler</h2>
+    <h2>Tutamaz / sadece şu günler</h2>
     <p class="hint">Her satırda bir kişi ve bir kural: <b>⛔ Tutamaz</b> = seçilen gün/saatlerde asla nöbet yazılmaz. <b>✅ Sadece bu günlerde tutabilir</b> = o kişiye <u>yalnızca</u> seçilen günlerden nöbet verilir (aralarından rastgele, diğer tüm kurallara da uyarak). Haftanın günlerini düğmeyle, ayın belirli günlerini 📅 takvimle seç. Saat aralığı boşsa gün komple kapsanır; saat girersen vardiya bu aralığın tamamen içinde olmalıdır. Oda tabanlı listede saat yok sayılır, gün bazında uygulanır.</p>
     <div id="blockList"></div>
     <div class="row" style="margin-top:10px">
-      <button class="btn ghost small" id="addBlockBtn" onclick="addBlockRow()">＋ Kural ekle</button>
-      <button class="btn small savebtn" onclick="saveGrp('blocks')">💾 Kuralları kaydet</button>
+      <button class="btn ghost small" id="addBlockBtn" onclick="addBlockRow()">Kural ekle</button>
+      <button class="btn small savebtn" onclick="saveGrp('blocks')">Kuralları kaydet</button>
     </div>
   </div>
-  <div class="card" id="leaveAdminCard" style="display:none">
-    <p class="eyebrow">Yönetici onayı</p>
-    <h2>🏖 İzin talepleri & onay</h2>
-    <p class="hint">Herkesin girdiği izin günleri burada görünür. <b>⏳ bekleyen</b> izinler onaylanana kadar geçerli değildir. Dilediğin kişinin iznini takvimden doğrudan ekleyip silebilirsin.</p>
-    <div id="leaveAdminList"></div>
+  <div class="card" id="profileCard" data-grp="profil">
+    <p class="eyebrow">Profilim</p>
+    <h2>Bilgilerim</h2>
+    <p class="hint">Adını ve birimini buradan güncelleyebilirsin. Yönetici de ekip listesinden herkesin birimini değiştirebilir.</p>
+    <label>Ad Soyad</label>
+    <input type="text" id="profName" style="width:100%;margin-bottom:10px">
+    <label>Birim / Görev</label>
+    <select id="profBranch" style="width:100%;margin-bottom:10px"></select>
+    <button class="btn small" onclick="saveProfile()">Kaydet</button>
+    <div id="profStatus" class="banner ok" style="display:none"></div>
   </div>
-  <div class="card">
-    <p class="eyebrow">Kesin engel</p>
-    <h2>🏖 İzinlerim</h2>
-    <p class="hint">Takvimden seç ya da yaz: tek gün <b>12</b>, aralık <b>12-16</b>, karışık <b>12-16,20</b>. İzinlerin <b>yönetici onayından sonra</b> geçerli olur — onaylanana kadar ⏳ bekler ve nöbet yazılmasını engellemez.</p>
+  <div class="card" id="switchCard" data-grp="profil">
+    <p class="eyebrow">Listeler</p>
+    <h2>Liste değiştir / ayrıl</h2>
+    <p class="hint" id="leaveHint">Başka bir nöbet listesine geçebilir ya da bu listeden ayrılabilirsin.</p>
     <div class="row">
-      <input type="text" id="izinInput" placeholder="ör. 12-16,20" style="flex:1;min-width:100px">
-      <button class="btn ghost small" onclick="pickIzin()">📅 Takvim</button>
-      <button class="btn small" onclick="saveIzin()">💾 Kaydet</button>
-    </div>
-    <div id="izinBek" class="banner info" style="display:none"></div>
-    <div id="izinStatus" class="banner ok" style="display:none"></div>
-  </div>
-  <div class="card" id="quotaCard" style="display:none">
-    <p class="eyebrow">Ay başı kurulum · 2/2 · kararı yönetici verir</p>
-    <h2>📊 Kim kaç nöbet tutacak?</h2>
-    <p class="hint">Sayılara <b>sen</b> karar verirsin. Ekibin istekleri (🙋 ⭐ 🚫) sadece dikkate alınır, senin sayılarını değiştirmez.<br>
-      • <b>Toplam</b>: kişi ayda kaç nöbet tutacak. <b>0</b> = program kalanları eşit dağıtır.<br>
-      • <b>🌙 Gece</b>: bunlardan kaçı gece olacak. Örnek: Toplam 9, Gece 6 → 6 gece + 3 gündüz. <b>Boş</b> bırakırsan program dengeler, <b>0</b> yazarsan hiç gece verilmez.</p>
-    <div id="quotaBanner" class="banner info">—</div>
-    <div id="quotaList"></div>
-    <div class="row" style="margin-top:10px">
-      <button class="btn ghost small savebtn" onclick="quotaEqual()">⚖️ Eşit dağıt</button>
-      <button class="btn ghost small savebtn" onclick="quotaFromWish()">🙋 Talepleri uygula</button>
-      <button class="btn ghost small savebtn" onclick="quotaClear()">🧹 Temizle</button>
-      <button class="btn small savebtn" onclick="saveQuota()">💾 Sayıları kaydet</button>
+      <button class="btn ghost small" onclick="showView('teams')">Listelerim</button>
+      <button class="btn red small" onclick="leaveTeam()">Bu listeden ayrıl</button>
     </div>
   </div>
-  <div class="card">
-    <p class="eyebrow">Kadro</p>
-    <h2>🧑‍⚕️ Ekip <span style="font-weight:700;font-size:.75rem;color:var(--ink-soft)" id="teamCount"></span></h2>
-    <p class="hint" id="teamHint"></p>
-    <div id="peopleList"></div>
-  </div>
-  <div class="card" id="testCard" style="display:none">
-    <p class="eyebrow">Geliştirici · test</p>
-    <h2>🧪 Test kişileri</h2>
-    <p class="hint">Hesabı olmayan deneme kişileri. Giriş yapamazlar, listede 🧪 ile görünürler. Gerçek kullanıma geçmeden <b>hepsini temizle</b>.</p>
-    <div class="row">
-      <input type="text" id="testName" placeholder="İsim (ör. Dr. Ayşe)" style="flex:1;min-width:130px" onkeydown="if(event.key==='Enter')addTestMembers()">
-      <button class="btn small" onclick="addTestMembers()">➕ Ekle</button>
-    </div>
-    <div class="row" style="margin-top:6px">
-      <label>ya da toplu:</label>
-      <input type="number" id="testCount" value="5" min="1" max="20" style="width:64px">
-      <label>kişi</label>
-      <input type="text" id="testBranch" placeholder="Birim (ör. Acil)" style="flex:1;min-width:110px">
-      <button class="btn ghost small" onclick="addTestMembers(true)">🧪 Toplu ekle</button>
-    </div>
-    <div id="testList" style="margin-top:8px"></div>
-    <div class="row" style="margin-top:10px">
-      <button class="btn ghost small" onclick="randomizePrefs()">🎲 Test kişilerine rastgele izin/tercih</button>
-      <button class="btn red small" onclick="purgeTests()">🗑 Test kişilerini temizle</button>
-    </div>
-    <div id="testStatus" class="banner ok" style="display:none"></div>
-  </div>
-  <div class="card">
+  <div class="card" id="devirCard" data-grp="gelismis">
     <p class="eyebrow">Aylar arası adalet</p>
-    <h2>🔄 Devir</h2>
+    <h2>Devir</h2>
     <div class="tblwrap"><table><thead><tr><th>Kişi</th><th>Toplam</th><th>H.sonu</th><th>🌙</th></tr></thead><tbody id="devirBody"></tbody></table></div>
+  </div>
+  <div class="card" id="diagCard" data-grp="gelismis">
+    <p class="eyebrow">Sorun giderme</p>
+    <h2>Ekran teşhisi</h2>
+    <p class="hint">Ekran sağa sola kayıyorsa bu düğmeye bas: sayfayı taşıran öğeyi bulur, kırmızı çerçeveyle işaretler ve adını yazar. Sonucu bana ilet.</p>
+    <div class="row">
+      <button class="btn small" onclick="overflowScan()">Taşan öğeyi bul</button>
+      <button class="btn ghost small" onclick="overflowClear()">İşaretleri kaldır</button>
+    </div>
+    <div id="diagOut" class="banner info" style="display:none;white-space:pre-wrap"></div>
   </div>
 </section>
 
 <section id="tab-izin" class="tab">
+  <div class="seg isteg" role="tablist">
+    <button data-sub="izin" onclick="showTab('izin')">Tercihler</button>
+    <button data-sub="leave" onclick="showTab('leave')">İzin</button>
+    <button data-sub="takas" onclick="showTab('takas')">Takas</button>
+  </div>
   <div class="card">
     <p class="eyebrow">Ay başı kurulum · 2/2</p>
-    <h2>⭐ Tercihlerim</h2>
+    <h2>Tercihlerim</h2>
     <div class="row" style="margin-bottom:10px;background:var(--teal-tint);border-radius:13px;padding:10px">
-      <label>🙋 Bu ay istediğim nöbet sayısı</label>
+      <label>Bu ay istediğim nöbet sayısı</label>
       <input type="number" id="myWish" min="0" max="31" placeholder="—" style="width:64px">
       <button class="btn small" onclick="saveWish()">Kaydet</button>
     </div>
     <p class="hint">1 tık = <b style="color:var(--coral)">istemediğim gün</b> · 2 tık = <b style="color:var(--teal-deep)">istediğim gün</b> · 3 tık = temizle. 🔒 = izinlerin.</p>
     <div id="asRow" style="display:none;margin-bottom:10px">
-      <label>🧪 Kimin adına giriyorum?</label>
+      <label>Kimin adına giriyorum?</label>
       <select id="asPerson" onchange="renderPrefCal();syncIzinBox()" style="width:100%"></select>
     </div>
     <div class="cal" id="prefCal"></div>
@@ -718,18 +1433,18 @@ details.hbase{margin-top:8px}details.hbase summary{font-size:.74rem;font-weight:
   </div>
   <div class="card">
     <p class="eyebrow">İstek</p>
-    <h2>🙋 Bu ay istediğim nöbet sayısı</h2>
+    <h2>Bu ay istediğim nöbet sayısı</h2>
     <p class="hint">0 = farketmez, otomatik dengele. Herkesin isteği kapasiteye tam oturuyorsa çizelge direkt üretilir; uyuşmazsa karar yöneticiye sorulur.</p>
     <div class="row">
       <input type="number" id="wishInput" min="0" max="31" style="width:84px" placeholder="0">
       <span style="font-size:.7rem;color:var(--ink-soft)">· bu bir <b>taleptir</b>, son kararı yönetici verir</span>
-      <button class="btn small" onclick="saveWish()">💾 Kaydet</button>
+      <button class="btn small" onclick="saveWish()">Kaydet</button>
     </div>
     <div id="wishStatus" class="banner ok" style="display:none"></div>
   </div>
   <div class="card">
     <p class="eyebrow">Ay düzeni</p>
-    <h2>🏖 Nöbetlerim nasıl dağılsın?</h2>
+    <h2>Nöbetlerim nasıl dağılsın?</h2>
     <p class="hint" id="shapeHint">Tatilini büyütmek için nöbetlerinin ay içindeki yerleşimini seç.</p>
     <select id="shapeSel" style="width:100%" onchange="saveShape()">
       <option value="">Farketmez / eşit dağılsın</option>
@@ -740,7 +1455,7 @@ details.hbase{margin-top:8px}details.hbase summary{font-size:.74rem;font-weight:
     <div id="shapeStatus" class="banner ok" style="display:none"></div>
   </div>
   <div class="card">
-    <h2>👀 Ekibin doluluk özeti</h2>
+    <h2>Ekibin doluluk özeti</h2>
     <div id="prefSummary"></div>
   </div>
 </section>
@@ -753,7 +1468,7 @@ details.hbase{margin-top:8px}details.hbase summary{font-size:.74rem;font-weight:
   </div>
   <div class="card" id="decideCard" style="display:none">
     <p class="eyebrow">Yönetici onayı · taslak</p>
-    <h2>⚖️ Nöbet sayılarını onayla</h2>
+    <h2>Nöbet sayılarını onayla</h2>
     <p class="hint" id="decideHint"></p>
     <div class="tblwrap"><table><thead><tr><th>Kişi</th><th>🙋</th><th>🔒</th><th>☀️/🌙/🏖</th><th>⏱ Saat</th><th title="Geçmiş aylar + bu taslak: adil paya göre saat farkı (+ fazla, − eksik)">⏱ Σ fark</th><th>Toplam</th><th>🌙 Gece</th></tr></thead><tbody id="decideBody"></tbody></table></div>
     <div class="banner info" id="decideTotal" style="margin-top:10px">—</div>
@@ -762,52 +1477,52 @@ details.hbase{margin-top:8px}details.hbase summary{font-size:.74rem;font-weight:
       <span class="draft-rib">📝 TASLAK · HENÜZ YAYINLANMADI · EKİP GÖRMÜYOR</span>
       <p class="hint" style="margin:0 0 8px">Yayınlamadan önce listeyi gün gün kontrol et. İstersen <b>📄 Taslağı Word olarak indir</b> ile resmi listenin aynısını indirip oku; uygunsa <b>✔ Onayla ve yayınla</b>.</p>
       <div class="seg" id="dvRow" style="margin-bottom:6px">
-        <button id="dvCal" onclick="setDraftView('cal')">🗓 Takvim</button>
-        <button id="dvList" onclick="setDraftView('list')">📋 Liste</button>
+        <button id="dvCal" onclick="setDraftView('cal')">Takvim</button>
+        <button id="dvList" onclick="setDraftView('list')">Liste</button>
       </div>
       <div id="draftLegend"></div>
       <div id="draftWrap"></div>
     </div>
     <div class="row" style="margin-top:10px">
-      <button class="btn gold small" onclick="draftWord()">📄 Taslağı Word olarak indir</button>
-      <button class="btn small" onclick="confirmDecide()">✔ Onayla ve yayınla</button>
-      <button class="btn ghost small" onclick="redraft()">🔄 Sayılarla yeniden hazırla</button>
+      <button class="btn gold small" onclick="draftWord()">Taslağı Word olarak indir</button>
+      <button class="btn small" onclick="confirmDecide()">Onayla ve yayınla</button>
+      <button class="btn ghost small" onclick="redraft()">Sayılarla yeniden hazırla</button>
       <button class="btn ghost small" onclick="hideDecide()">Vazgeç</button>
     </div>
   </div>
   <div class="card">
     <p class="eyebrow">Aylık plan</p>
-    <h2>🗓 Çizelge</h2>
+    <h2>Çizelge</h2>
     <div id="genRow"><p class="hint">Herkes izin/tercih girince yönetici üretir; anında herkeste görünür.</p>
-    <button class="btn" style="width:100%" onclick="generate()">⚙️ Çizelgeyi Üret & Yayınla</button></div>
+    <button class="btn" style="width:100%" onclick="generate()">Çizelgeyi Üret & Yayınla</button></div>
     <div class="row" style="margin-bottom:10px">
-      <label>📅 Ay</label>
+      <label>Ay</label>
       <select id="viewMonthSel" style="flex:1;min-width:150px" onchange="setViewMonth(this.value)"></select>
     </div>
     <div id="viewMonthBanner"></div>
     <div id="genBanner"></div>
     <div class="seg" id="schedViewRow">
-      <button class="on" id="vwCal" onclick="setSchedView('cal')">🗓 Takvim</button>
-      <button id="vwList" onclick="setSchedView('list')">📋 Liste</button>
-      <button id="vwMine" onclick="setSchedView('mine')">👤 Benimkiler</button>
+      <button class="on" id="vwCal" onclick="setSchedView('cal')">Takvim</button>
+      <button id="vwList" onclick="setSchedView('list')">Liste</button>
+      <button id="vwMine" onclick="setSchedView('mine')">Benimkiler</button>
     </div>
     <div id="schedLegend" class="daychips" style="margin-bottom:8px"></div>
     <div id="schedWrap"><div class="empty-state"><div class="big">🗓️</div>Henüz yayınlanmış çizelge yok.</div></div>
     <div id="verBox"></div>
     <div class="row" style="margin-top:12px">
-      <button class="btn gold small" onclick="wordIndir()">📄 Resmi liste (Word)</button>
-      <button class="btn ghost small" onclick="toggleVersions()">🕘 Sürüm geçmişi</button>
-      <button class="btn ghost small" onclick="window.print()">🖨 PDF</button>
-      <button class="btn ghost small" onclick="csvIndir()">📊 Excel</button>
-      <button class="btn gold small" id="devirBtn" onclick="devireEkle()">➕ Devire ekle</button>
-      <button class="btn ghost small" onclick="loadAll()">🔄 Yenile</button>
+      <button class="btn gold small" onclick="wordIndir()">Resmi liste (Word)</button>
+      <button class="btn ghost small" onclick="toggleVersions()">Sürüm geçmişi</button>
+      <button class="btn ghost small" onclick="window.print()">PDF</button>
+      <button class="btn ghost small" onclick="csvIndir()">Excel</button>
+      <button class="btn gold small" id="devirBtn" onclick="devireEkle()">Devire ekle</button>
+      <button class="btn ghost small" onclick="loadAll()">Yenile</button>
     </div>
   </div>
   <div class="card">
     <p class="eyebrow">Şeffaflık</p>
-    <h2>⚖️ Adalet tablosu</h2>
+    <h2>Adalet tablosu</h2>
     <div id="fairWrap"><div class="empty-state">Çizelge yayınlanınca burada denge görünür.</div></div>
-    <button class="btn ghost" style="width:100%;margin-top:12px" onclick="aiReport()">🤖 AI Adalet Raporu</button>
+    <button class="btn ghost" style="width:100%;margin-top:12px" onclick="aiReport()">AI Adalet Raporu</button>
     <div id="aiOut"></div>
     <div class="row" style="margin-top:12px">
       <input type="text" id="aiQ" placeholder="Adaletle ilgili soru sor…" style="flex:1;min-width:150px">
@@ -817,83 +1532,42 @@ details.hbase{margin-top:8px}details.hbase summary{font-size:.74rem;font-weight:
   </div>
   <div class="card" id="hourCard" style="display:none">
     <p class="eyebrow">Saat eşitliği · birikimli</p>
-    <h2>⏱ Saat dengesi</h2>
+    <h2>Saat dengesi</h2>
     <p class="hint">Uzun ve kısa nöbetler saat olarak sayılır. Her kişinin bütün geçmiş aylar boyunca tuttuğu saat, adil payıyla karşılaştırılır.</p>
     <div id="hourWrap"></div>
   </div>
   <div class="card" id="yearCard" style="display:none">
     <p class="eyebrow">Birikimli takip · otomatik</p>
-    <h2>📊 Aylık / yıllık özet</h2>
+    <h2>Aylık / yıllık özet</h2>
     <p class="hint">Yayınlanmış listelerden ve onaylı izinlerden kendiliğinden hesaplanır — takas ya da elle düzenleme de anında yansır. <b>Nöbet ertesi izin</b> = nöbetten sonra izinli sayılan iş günleri (Pazar ve resmi tatiller hariç; Cumartesi yarım gün açıksa Cumartesi dahil; aynı gün onaylı izin varsa izin olarak sayılır).</p>
     <div class="row">
-      <label>📅 Yıl</label><select id="yearSel" onchange="renderYear()" style="min-width:90px"></select>
+      <label>Yıl</label><select id="yearSel" onchange="renderYear()" style="min-width:90px"></select>
       <label>Gösterge</label><select id="yearMetric" onchange="renderYear()" style="flex:1;min-width:150px"></select>
     </div>
     <div class="tblwrap" style="margin-top:8px"><table id="yearTbl"></table></div>
     <div class="tblwrap" style="margin-top:12px"><table id="yearTot"></table></div>
-    <button class="btn ghost small" style="margin-top:10px" onclick="yearCsv()">📊 Yıllık özeti indir (Excel)</button>
+    <button class="btn ghost small" style="margin-top:10px" onclick="yearCsv()">Yıllık özeti indir (Excel)</button>
   </div>
   <div class="card" id="mesaiCard" style="display:none">
     <p class="eyebrow">Fazla mesai hesabı</p>
-    <h2>🕐 Mesai Raporu</h2>
+    <h2>Mesai Raporu</h2>
     <p class="hint">Hafta içi ve hafta sonu saatleri ayrı toplanır — hafta sonu nöbetleri mesai sonrası hesabında daha uzun olduğu için ayrı sütunda. Excel çıktısına da eklenir.</p>
     <div class="tblwrap"><table><thead><tr><th>Kişi</th><th>Hİ saat</th><th>HS saat</th><th>Gece</th><th>🌙</th><th>Toplam</th><th>Adet</th></tr></thead>
     <tbody id="mesaiBody"></tbody></table></div>
   </div>
 </section>
 
-<section id="tab-profil" class="tab">
-  <div class="card">
-    <p class="eyebrow">Profilim</p>
-    <h2>👤 Bilgilerim</h2>
-    <p class="hint">Adını ve birimini buradan güncelleyebilirsin. Yönetici de ekip listesinden herkesin birimini değiştirebilir.</p>
-    <label>Ad Soyad</label>
-    <input type="text" id="profName" style="width:100%;margin-bottom:10px">
-    <label>Birim / Görev</label>
-    <select id="profBranch" style="width:100%;margin-bottom:10px"></select>
-    <button class="btn small" onclick="saveProfile()">💾 Kaydet</button>
-    <div id="profStatus" class="banner ok" style="display:none"></div>
-  </div>
-  <div class="card">
-    <p class="eyebrow">Listeler</p>
-    <h2>🔀 Liste değiştir / ayrıl</h2>
-    <p class="hint" id="leaveHint">Başka bir nöbet listesine geçebilir ya da bu listeden ayrılabilirsin.</p>
-    <div class="row">
-      <button class="btn ghost small" onclick="showView('teams')">📋 Listelerim</button>
-      <button class="btn red small" onclick="leaveTeam()">🚪 Bu listeden ayrıl</button>
-    </div>
-  </div>
-  <div class="card">
-    <p class="eyebrow">Sorun giderme</p>
-    <h2>🔧 Ekran teşhisi</h2>
-    <p class="hint">Ekran sağa sola kayıyorsa bu düğmeye bas: sayfayı taşıran öğeyi bulur, kırmızı çerçeveyle işaretler ve adını yazar. Sonucu bana ilet.</p>
-    <div class="row">
-      <button class="btn small" onclick="overflowScan()">🔍 Taşan öğeyi bul</button>
-      <button class="btn ghost small" onclick="overflowClear()">✕ İşaretleri kaldır</button>
-    </div>
-    <div id="diagOut" class="banner info" style="display:none;white-space:pre-wrap"></div>
-  </div>
-  <div class="card">
-    <p class="eyebrow">Nöbet takvimim</p>
-    <h2>🗓 Nöbetlerim</h2>
-    <div class="row" style="margin-bottom:8px">
-      <label>📅 Ay</label>
-      <select id="viewMonthSel2" style="flex:1;min-width:150px" onchange="setViewMonth(this.value)"></select>
-    </div>
-    <div id="myDuties"><div class="empty-state">Çizelge yayınlanınca nöbetlerin burada listelenir.</div></div>
-    <div class="row" style="margin-top:12px">
-      <button class="btn small" onclick="icsIndir()">📲 Tüm nöbetlerimi takvime ekle (.ics)</button>
-    </div>
-    <p class="hint" style="margin-top:8px"><b>iPhone / Outlook:</b> inen dosyaya dokun → <b>Tümünü ekle</b>.<br>
-      <b>Google Takvim:</b> her nöbetin yanındaki <b>＋ Google</b> tek tek ekler. Hepsini birden eklemek için bilgisayarda calendar.google.com → ⚙️ Ayarlar → <b>İçe ve dışa aktar</b> → bu .ics dosyasını seç.<br>
-      Saatler Türkiye saatiyle yazılır; gece yarısını geçen nöbet ertesi gün biter. Liste sonradan değişirse eski kaydı takviminden silip yeniden ekle.</p>
-  </div>
-</section>
+<section id="tab-profil" class="tab"></section>
 
 <section id="tab-takas" class="tab">
+  <div class="seg isteg" role="tablist">
+    <button data-sub="izin" onclick="showTab('izin')">Tercihler</button>
+    <button data-sub="leave" onclick="showTab('leave')">İzin</button>
+    <button data-sub="takas" onclick="showTab('takas')">Takas</button>
+  </div>
   <div class="card">
     <p class="eyebrow">Değişim</p>
-    <h2>🔁 Takas isteği gönder</h2>
+    <h2>Takas isteği gönder</h2>
     <p class="hint">Sadece kendi nöbetin için istek açabilirsin. Özel oda nöbeti aynı branştan birine, genel oda nöbeti genel listedeki birine devredilir.</p>
     <label>Nöbetim</label>
     <select id="reqDay" onchange="fillReqIn()" style="width:100%;margin-bottom:8px"></select>
@@ -901,13 +1575,13 @@ details.hbase{margin-top:8px}details.hbase summary{font-size:.74rem;font-weight:
     <select id="reqIn" style="width:100%;margin-bottom:8px"></select>
     <label>Kısa açıklama</label>
     <input type="text" id="reqNote" placeholder="ör. Kızımın okul gösterisi var 🙏" style="width:100%;margin-bottom:10px">
-    <button class="btn small" onclick="createReq()">📨 Gönder</button>
+    <button class="btn small" onclick="createReq()">Gönder</button>
   </div>
   <div class="card">
     <p class="eyebrow">Gelen kutusu</p>
-    <h2>📬 İstekler</h2>
+    <h2>İstekler</h2>
     <div id="reqList"><div class="empty-state">Henüz istek yok.</div></div>
-    <button class="btn ghost small" style="margin-top:8px" onclick="loadAll()">🔄 Yenile</button>
+    <button class="btn ghost small" style="margin-top:8px" onclick="loadAll()">Yenile</button>
   </div>
 </section>
 </div>
@@ -917,45 +1591,44 @@ details.hbase{margin-top:8px}details.hbase summary{font-size:.74rem;font-weight:
 
 <div id="dayEdit" class="modal" onclick="if(event.target===this)closeDayEdit()">
   <div class="sheet">
-    <h2 id="dayEditTitle">✏️ Günü düzenle</h2>
+    <h2 id="dayEditTitle">Günü düzenle</h2>
     <p class="hint">Bu günün nöbetçilerini elle değiştirebilirsin. Değişiklik yalnız bu güne uygulanır, ayın geri kalanı olduğu gibi kalır.</p>
     <div id="dayEditBody"></div>
     <div id="dayEditMeta" style="display:none"></div>
     <div class="row" style="margin-top:12px">
-      <button class="btn small" onclick="saveDayEdit()">✔ Kaydet</button>
+      <button class="btn small" onclick="saveDayEdit()">Kaydet</button>
       <button class="btn ghost small" onclick="closeDayEdit()">Vazgeç</button>
-      <button class="btn ghost small" onclick="closeDayEdit();fillReqForm(editDay||1);showTab('takas')">🔁 Takas iste</button>
+      <button class="btn ghost small" onclick="closeDayEdit();fillReqForm(editDay||1);showTab('takas')">Takas iste</button>
     </div>
   </div>
 </div>
 
 <div id="dayPicker" class="modal" onclick="if(event.target===this)dpClose()">
   <div class="sheet">
-    <h2 id="dpTitle">📅 Gün seç</h2>
+    <h2 id="dpTitle">Gün seç</h2>
     <p class="hint" id="dpHint">Günlere dokunarak seç.</p>
     <div class="row">
       <label>Aralık</label>
       <input type="number" id="dpFrom" min="1" max="31" placeholder="ilk" style="width:62px">
       <label>→</label>
       <input type="number" id="dpTo" min="1" max="31" placeholder="son" style="width:62px">
-      <button class="btn ghost small" onclick="dpAddRange()">＋ Ekle</button>
-      <button class="btn red small" onclick="dpClear()">🗑 Temizle</button>
+      <button class="btn ghost small" onclick="dpAddRange()">Ekle</button>
+      <button class="btn red small" onclick="dpClear()">Temizle</button>
     </div>
     <div class="cal" id="dpCal"></div>
     <div id="dpOut" class="banner ok" style="margin-top:10px">—</div>
     <div class="row" style="margin-top:6px">
-      <button class="btn small" onclick="dpSave()">✔ Tamam</button>
+      <button class="btn small" onclick="dpSave()">Tamam</button>
       <button class="btn ghost small" onclick="dpClose()">Vazgeç</button>
     </div>
   </div>
 </div>
 
-<nav id="mainNav">
-  <button class="active" data-tab="kurulum" onclick="showTab('kurulum')"><span class="ic">🧑‍⚕️</span>Kurulum</button>
-  <button data-tab="izin" onclick="showTab('izin')"><span class="ic">⭐</span>Tercihler</button>
-  <button data-tab="cizelge" onclick="showTab('cizelge')"><span class="ic">🗓</span>Çizelge</button>
-  <button data-tab="takas" onclick="showTab('takas')"><span class="ic">🔁</span>Takas</button>
-  <button data-tab="profil" onclick="showTab('profil')"><span class="ic">👤</span>Profil</button>
+<nav id="mainNav" class="nd-tabbar" role="tablist">
+  <button data-tab="bugun" onclick="showTab('bugun')" aria-selected="true"><span data-icon="home"></span><span>Bugün</span></button>
+  <button data-tab="takvim" onclick="showTab('cizelge')"><span data-icon="calendar"></span><span>Takvim</span></button>
+  <button data-tab="istekler" onclick="showTab('istekler')"><span data-icon="inbox"></span><span>İstekler</span><i class="nd-dot" id="reqDot" style="display:none"></i></button>
+  <button data-tab="ayarlar" onclick="showTab('kurulum')"><span data-icon="settings"></span><span>Ayarlar</span></button>
 </nav>
 </div>
 
@@ -983,13 +1656,175 @@ function $(id){return document.getElementById(id)}
 function brEmoji(b){return BR_EMOJI[b]||"🩺";}
 function brHue(b){let h=0;for(const c of (b||"")){h=(h*31+c.charCodeAt(0))%360;}return h;}
 function brStyle(b){const h=brHue(b);return `background:hsl(${h},55%,91%);color:hsl(${h},60%,28%)`;}
+const VIEW_TITLE={auth:"Nöbet Defteri",forgot:"Şifremi unuttum",reset:"Yeni şifre",teams:"Listelerim",dept:"Ekip kur ya da katıl",config:"Kurulum"};
 function showView(v){document.querySelectorAll(".view").forEach(e=>e.classList.remove("active"));$("view-"+v).classList.add("active");
+  if(v!=="app"){document.body.dataset.tab=v;const nt=$("navTitle");if(nt)nt.textContent=VIEW_TITLE[v]||"Nöbet Defteri";}
   $("mainNav").style.display=v==="app"?"flex":"none";
   $("logoutBtn").style.display=(v==="app"||v==="dept")?"inline-block":"none";}
-function showTab(t){document.querySelectorAll(".tab").forEach(e=>e.classList.remove("active"));
-  document.querySelectorAll("nav button").forEach(e=>e.classList.remove("active"));
-  $("tab-"+t).classList.add("active");
-  document.querySelector(`nav button[data-tab=${t}]`).classList.add("active");}
+/* ================= iOS GEZİNME =================
+   Dört sekme: Bugün · Takvim · İstekler (Tercihler | İzin | Takas) · Ayarlar (iOS Ayarlar gibi gruplu liste).
+   Eski sekme adları (kurulum, izin, cizelge, takas, profil) aynen çalışır. */
+const TABS={
+  bugun:{sec:"bugun",nav:"bugun",t:"Bugün"},
+  cizelge:{sec:"cizelge",nav:"takvim",t:"Takvim"},takvim:{sec:"cizelge",nav:"takvim",t:"Takvim"},
+  izin:{sec:"izin",nav:"istekler",t:"İstekler",sub:1},leave:{sec:"leave",nav:"istekler",t:"İstekler",sub:1},
+  takas:{sec:"takas",nav:"istekler",t:"İstekler",sub:1},
+  kurulum:{sec:"kurulum",nav:"ayarlar",t:"Ayarlar",page:"root"},ayarlar:{sec:"kurulum",nav:"ayarlar",t:"Ayarlar",page:"root"},
+  profil:{sec:"kurulum",nav:"ayarlar",t:"Ayarlar",page:"profil"}};
+let istekSub="izin",curTab="bugun";
+function showTab(t){
+  if(t==="istekler")t=istekSub;
+  const T=TABS[t]||TABS.bugun;
+  if(T.sub)istekSub=t;
+  curTab=t;
+  document.body.dataset.tab=T.nav;
+  document.querySelectorAll(".tab").forEach(e=>e.classList.remove("active"));
+  const sec=$("tab-"+T.sec);if(sec)sec.classList.add("active");
+  document.querySelectorAll("#mainNav button").forEach(b=>{const on=b.dataset.tab===T.nav;
+    b.classList.toggle("active",on);b.setAttribute("aria-selected",on?"true":"false");});
+  document.querySelectorAll(".isteg button").forEach(b=>b.classList.toggle("on",b.dataset.sub===t));
+  if(T.page)setPage(T.page);
+  else{const nt=$("navTitle");if(nt)nt.textContent=T.t;}
+  if(T.sec==="bugun")renderToday();
+  try{window.scrollTo(0,0);}catch(e){}
+}
+/* ---------- Ayarlar: gruplu liste + alt sayfalar ---------- */
+const SET_GROUPS=[
+  {t:"Bu ay",rows:[
+    {k:"ay",ic:"calendar",ad:"Ay ve genel ayarlar",val:()=>dept?ayAdi(planAy()):""},
+    {k:"sayi",ic:"people",ad:"Kim kaç nöbet tutacak"},
+    {k:"kapat",ic:"lock",ad:"Ayı kapat, yeni aya geç"}]},
+  {t:"Ekip",rows:[{k:"ekip",ic:"people",ad:"Ekip ve davet kodu",val:()=>members.length+" kişi"}]},
+  {t:"Kurallar",rows:[
+    {k:"wr",ic:"rest",ad:"Nöbet sonrası izin ve sıra",val:()=>wrOn()?"Açık":"Kapalı"},
+    {k:"oda",ic:"clock",ad:"Odalar ve nöbet saatleri"},
+    {k:"vardiya",ic:"clock",ad:"Vardiyalar"},
+    {k:"sabit",ic:"duty",ad:"Sabit atamalar"},
+    {k:"kisit",ic:"avoid",ad:"Gün kısıtları"}],
+    foot:"Kurallar her listede kesin uygulanır; istekler ancak kurallara uyuyorsa karşılanır."},
+  {t:"Hesap",rows:[{k:"profil",ic:"person",ad:"Profilim ve listelerim"},{k:"__cikis",ic:"x",ad:"Çıkış yap",danger:true}]},
+  {t:"Gelişmiş",rows:[{k:"gelismis",ic:"settings",ad:"Devir ve ekran teşhisi"}]}];
+const SET_TITLE=k=>{for(const g of SET_GROUPS)for(const r of g.rows)if(r.k===k)return r.ad;return "Ayarlar";};
+function grpVisible(k){
+  const cs=[...document.querySelectorAll(`#tab-kurulum .card[data-grp~="${k}"]`)];
+  return cs.some(c=>c.style.display!=="none");
+}
+function renderSetLanding(){
+  const el=$("setLanding");if(!el)return;
+  el.innerHTML=SET_GROUPS.map(g=>{
+    const rows=g.rows.filter(r=>r.k.startsWith("__")||grpVisible(r.k));
+    if(!rows.length)return "";
+    return `<div class="nd-group"><div class="nd-group__label">${g.t}</div><div class="nd-list">`+
+      rows.map(r=>`<button class="nd-row has-icon${r.danger?" is-danger":""}" onclick="${r.k==="__cikis"?"logout()":`setPage('${r.k}')`}">
+        <span class="nd-row__icon${r.danger?" is-gray":""}">${ND.icon(r.ic)}</span>
+        <span class="nd-row__body"><span class="nd-row__title">${r.ad}</span></span>
+        ${r.val?`<span class="nd-row__value">${hEsc(r.val())}</span>`:""}
+        ${r.danger?"":ND.icon("chev-r","nd-row__chev")}</button>`).join("")+
+      `</div>${g.foot?`<div class="nd-group__foot">${g.foot}</div>`:""}</div>`;
+  }).join("");
+}
+function setPage(k){
+  const sec=$("tab-kurulum");if(!sec)return;
+  sec.dataset.page=k;
+  sec.querySelectorAll(".card[data-grp]").forEach(c=>c.classList.toggle("pg-hide",k==="root"||!c.dataset.grp.split(" ").includes(k)));
+  const bar=$("setBar"),nt=$("navTitle");
+  if(k==="root"){bar.innerHTML="";if(nt)nt.textContent="Ayarlar";renderSetLanding();}
+  else{
+    bar.innerHTML=`<button class="setback" onclick="setPage('root')">${ND.icon("chev-l")}Ayarlar</button>`;
+    if(nt)nt.textContent=SET_TITLE(k);
+  }
+  try{window.scrollTo(0,0);}catch(e){}
+}
+/* ---------- Bugün ---------- */
+const GUN_UZUN=["Pazartesi","Salı","Çarşamba","Perşembe","Cuma","Cumartesi","Pazar"];
+function upcomingDuties(){
+  const out=[];const t0=new Date();t0.setHours(0,0,0,0);
+  Object.keys(schedulesAll).sort().forEach(mk=>{const sch=schedulesAll[mk];if(!sch||!sch.asg)return;
+    withView(sch,mk,()=>myDutyList().forEach((x,i)=>{const dt=new Date(x.y,x.m-1,x.d);
+      if(dt>=t0)out.push({...x,mk,i,date:dt,ile:entryList(x.d).filter(e=>e.id!==me.id).map(e=>e.id)});}));});
+  return out.sort((a,b)=>a.date-b.date);
+}
+function gunFark(dt){const t0=new Date();t0.setHours(0,0,0,0);return Math.round((dt-t0)/864e5);}
+function relTxt(n){return n===0?"Bugün":n===1?"Yarın":n+" gün sonra";}
+function heroAdd(mk,i){withView(schedulesAll[mk],mk,()=>gcalOne(i));}
+function heroIcs(mk){withView(schedulesAll[mk],mk,()=>icsIndir());}
+function renderToday(){
+  const box=$("todayWrap");if(!box||!dept)return;
+  const up=upcomingDuties(),nx=up[0];
+  let h="";
+  if(nx){
+    const R=rulesFor(nx.mk),wd=wdOf(nx.y,nx.m,nx.d);
+    const off=(R.cfg.on&&R.cfg.off[wd]>0&&!R.wa.has(me.id))?wrOffText(R.cfg,wd).replace(/ izinli$/,"")
+      :(!R.cfg.on&&R.wm==="duty_rest"&&!R.wa.has(me.id))?"ertesi gün":"";
+    const ile=nx.ile.map(id=>kisaAd(nameOfId(id)));
+    h+=`<div class="nd-hero"><span class="nd-hero__eyebrow">Sıradaki nöbetin · ${relTxt(gunFark(nx.date))}</span>
+      <span class="nd-hero__title">${GUN_UZUN[wd]}, ${nx.d} ${MONTHS_TR[nx.m-1]}</span>
+      <span class="nd-hero__sub">${nx.start} → ${dutyEndsNextDay(nx)?"ertesi gün ":""}${nx.end} · ${hEsc(nx.label)}${ile.length?" · "+hEsc(ile.join(", ")):""}</span>
+      ${off?`<div class="nd-hero__off"><span>Sonrası izinli: ${hEsc(off)}</span></div>`:""}
+      <div class="nd-btn-row"><button class="nd-btn" onclick="heroIcs('${nx.mk}')">${ND.icon("add-cal")}Takvime ekle</button>
+      <button class="nd-btn" onclick="setViewMonth('${nx.mk}').then(()=>{showTab('cizelge');selectDay('pub',${nx.d});})">${ND.icon("calendar")}Günü gör</button></div></div>`;
+  }else{
+    const yay=!!schedulesAll[planAy()];
+    h+=`<div class="nd-hero is-quiet"><span class="nd-hero__eyebrow">Sıradaki nöbetin</span>
+      <span class="nd-hero__title">${yay?"Yaklaşan nöbetin yok":ayAdi(planAy())+" listesi henüz yayınlanmadı"}</span>
+      <span class="nd-hero__sub">${yay?"Yeni liste yayınlanınca burada görünür.":(isAdmin()?"Herkes tercihini girince listeyi hazırla.":"Liste yayınlanınca nöbetlerin burada görünür.")}</span>
+      ${!yay&&isAdmin()?`<div class="nd-btn-row"><button class="nd-btn" onclick="showTab('cizelge')">${ND.icon("duty")}Listeyi hazırla</button></div>`:""}</div>`;
+  }
+  /* bu ayın üç sayısı */
+  const t=new Date(),mkNow=t.getFullYear()+"-"+String(t.getMonth()+1).padStart(2,"0");
+  const mk=schedulesAll[mkNow]?mkNow:vMonth();
+  const sch=schedulesAll[mk];
+  const n=sch?Object.values(sch.asg||{}).reduce((a,L)=>a+(L||[]).filter(e=>e.id===me.id).length,0):0;
+  const iz=Object.values((prefsAll[mk]||{})[me.id]||{}).filter(v=>v==="izin").length;
+  const hc=hourCum(mk),hm0=sch?(monthHours(mk)||{}):{};
+  const fark=((hc[me.id]||{}).d||0)+((hm0[me.id]||{}).d||0);
+  h+=`<div class="tsec">${ayAdi(mk)}</div><div class="nd-stats">
+    <div class="nd-stat"><b>${n}</b><span>nöbet</span></div>
+    <div class="nd-stat"><b>${iz}</b><span>izin günü</span></div>
+    <div class="nd-stat"><b class="${Math.abs(fark)<0.5?"":fark>0?"is-pos":"is-neg"}">${fmtH(fark)}</b><span>saat farkı</span></div></div>`;
+  /* önümüzdeki 7 gün: kim nöbetçi */
+  const gun=[];for(let k=0;k<7;k++){const d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()+k);gun.push(d);}
+  const strip=gun.map(d=>{const mk2=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0"),s2=schedulesAll[mk2];
+    const L=s2&&s2.asg?(s2.asg[d.getDate()]||[]):[];const mine=L.some(e=>e.id===me.id);
+    return `<button class="strip__d${mine?" is-mine":""}${gunFark(d)===0?" is-today":""}" onclick="${s2?`setViewMonth('${mk2}').then(()=>{showTab('cizelge');selectDay('pub',${d.getDate()});})`:"showTab('cizelge')"}">
+      <span class="strip__w">${DAYS_TR[(d.getDay()+6)%7]}</span><span class="strip__n">${d.getDate()}</span>
+      <span class="strip__c">${L.length?L.slice(0,4).map(e=>`<b class="pb sm${e.id===me.id?" me":""}" style="background:${personColor(e.id).solid}">${hEsc(pCode(e.id))}</b>`).join(""):'<i>—</i>'}</span></button>`;}).join("");
+  h+=`<div class="tsec">Önümüzdeki 7 gün</div><div class="strip">${strip}</div>`;
+  /* yapılacaklar */
+  const todo=[];
+  const bek=Object.entries(allPrefs||{}).reduce((a,[uid,dd])=>a+Object.values(dd||{}).filter(v=>v==="izin_bek").length,0);
+  if(isAdmin()&&bek)todo.push({ic:"leave",t:`${bek} izin günü onay bekliyor`,go:"showTab('leave')"});
+  const gelen=(requests||[]).filter(r=>r.in_id===me.id&&r.status==="bekliyor").length;
+  if(gelen)todo.push({ic:"swap",t:`${gelen} takas isteği seni bekliyor`,go:"showTab('takas')"});
+  if(isAdmin()&&!schedulesAll[planAy()])todo.push({ic:"duty",t:`${ayAdi(planAy())} listesini hazırla`,go:"showTab('cizelge')"});
+  const myPref=allPrefs[me.id]||{};
+  if(!schedulesAll[planAy()]&&!Object.keys(myPref).length)todo.push({ic:"wish",t:`${ayAdi(planAy())} için tercihlerini gir`,go:"showTab('izin')"});
+  if(todo.length)h+=`<div class="nd-group"><div class="nd-group__label">Yapılacaklar</div><div class="nd-list">`+
+    todo.map(x=>`<button class="nd-row has-icon" onclick="${x.go}"><span class="nd-row__icon">${ND.icon(x.ic)}</span><span class="nd-row__body"><span class="nd-row__title">${x.t}</span></span>${ND.icon("chev-r","nd-row__chev")}</button>`).join("")+`</div></div>`;
+  box.innerHTML=h;
+  const dot=$("reqDot");if(dot){const k=gelen+(isAdmin()?(bek?1:0):0);dot.style.display=k?"block":"none";dot.textContent=k||"";}
+}
+/* ---------- Takvim: ayı parmakla kaydır ---------- */
+function monthsAvail(){return [...new Set(savedMonths.concat([dept.month]))].sort();}
+function stepMonth(d){
+  const L=monthsAvail(),i=L.indexOf(vMonth()),j=i+d;
+  if(j<0||j>=L.length){toast(d<0?"Daha eski liste yok":"Daha yeni liste yok");return;}
+  const w=$("schedWrap");if(w){w.classList.remove("slide-l","slide-r");void w.offsetWidth;w.classList.add(d>0?"slide-l":"slide-r");}
+  setViewMonth(L[j]);
+}
+function bindMonthSwipe(){
+  const w=$("schedWrap");if(!w||w._sw)return;w._sw=1;
+  let x0=0,y0=0,act=false,lock=null;
+  w.addEventListener("pointerdown",e=>{if(e.pointerType==="mouse")return;act=true;lock=null;x0=e.clientX;y0=e.clientY;},{passive:true});
+  w.addEventListener("pointermove",e=>{if(!act)return;const dx=e.clientX-x0,dy=e.clientY-y0;
+    if(lock===null&&(Math.abs(dx)>12||Math.abs(dy)>12))lock=Math.abs(dx)>Math.abs(dy)*1.3?"x":"y";},{passive:true});
+  const end=e=>{if(!act)return;act=false;if(lock!=="x")return;const dx=e.clientX-x0;
+    if(Math.abs(dx)>60){w._noClick=Date.now();stepMonth(dx<0?1:-1);}};
+  w.addEventListener("pointerup",end);w.addEventListener("pointercancel",()=>{act=false;});
+  w.addEventListener("click",e=>{if(Date.now()-(w._noClick||0)<450){e.stopPropagation();e.preventDefault();}},true);
+}
+
+
 function monthInfo(mk){const [y,m]=((mk||$("month").value)||"2026-08").split("-").map(Number);
   return {y,m,nDays:new Date(y,m,0).getDate(),firstDow:(new Date(y,m-1,1).getDay()+6)%7};}
 /* GÖRÜNTÜLENEN AY: çizelge ve "nöbetlerim" bu aya bakar.
@@ -1145,6 +1980,7 @@ async function openTeam(deptId){
   myProfile=t?{...t,id:me.id}:myProfile;
   showView("app");
   await loadAll();
+  showTab("bugun");
 }
 async function createDept(){
   const name=$("newDeptName").value.trim();
@@ -1189,7 +2025,7 @@ async function loadAll(){
   pinRows=(((dept.opts||{}).pins)||[]).map(p=>({...p}));
   wrDraft=wrNorm((dept.opts||{}).wr);
   $("schedMode").value=dept.sched_mode||"rooms";
-  $("subTitle").textContent=dept.name+(isAdmin()?" · 👑 Yönetici":"");
+  $("subTitle").textContent=dept.name+(isAdmin()?" · Yönetici":"");
   $("inviteCard").style.display=isAdmin()?"block":"none";
   $("inviteCode").textContent=dept.join_code;
   const ro=!isAdmin();
@@ -1235,6 +2071,8 @@ async function loadAll(){
   $("testCard").style.display=isAdmin()?"block":"none";
   renderTestList();
   renderRooms();renderShifts();renderBlocks();renderPins();renderWR();renderWRCounters();modeChanged();renderProfile();renderPeople();renderAsPerson();syncIzinBox();renderPrefCal();renderPrefSummary();renderLeaveAdmin();renderQuota();renderCountdown();renderCloseMonth();renderMonthPickers();renderSchedule();renderReqs();fillReqForm();
+  renderSetLanding();renderToday();bindMonthSwipe();
+  try{ND.auto();}catch(e){}
   autoGenCheck();
 }
 
@@ -1563,8 +2401,8 @@ function renderCountdown(){
   el.style.display="block";
   el.className="cdown"+(g.left<=3?" hot":"");
   el.innerHTML=g.left===0
-    ?`📒 <b>Bugün liste günü!</b> ${g.label} nöbet listesi hazırlanacak.`
-    :`📅 ${g.label} listesine <b>${g.left} gün</b> kaldı · hazırlama günü ${g.date.getDate()} ${MONTHS_TR[g.date.getMonth()]}`;
+    ?`<b>Bugün liste günü.</b> ${g.label} nöbet listesi hazırlanacak.`
+    :`${g.label} listesine <b>${g.left} gün</b> kaldı · hazırlama günü ${g.date.getDate()} ${MONTHS_TR[g.date.getMonth()]}`;
 }
 let autoAsked=false;
 async function autoGenCheck(){
