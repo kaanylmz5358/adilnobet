@@ -241,6 +241,21 @@ button.lgd.on{border-color:var(--ink);background:var(--ink);color:#fff}
 button.lgd.on small{color:#CFE3DF}
 button.lgd.me:not(.on){border-color:var(--teal)}
 .lgd-hint{font-size:.64rem;color:var(--ink-soft);margin:0 2px 4px;font-weight:600}
+.dtrow{display:flex;align-items:center;gap:5px;margin:4px 0;flex-wrap:nowrap}
+.dtrow .dtl{flex:0 0 38px;font-size:.74rem;font-weight:800;color:var(--ink)}
+.dtrow input[type=time]{flex:1 1 0;width:auto;padding:6px 6px;min-width:0;font-variant-numeric:tabular-nums}
+.dtrow input[type=time]::-webkit-calendar-picker-indicator{display:none}
+.dtrow .dta{font-weight:800;color:var(--ink-soft)}
+.dtrow .dth{font-size:.68rem;font-weight:800;color:var(--teal-dark);background:var(--teal-tint);border-radius:8px;padding:3px 7px;white-space:nowrap}
+.dtrow .dth.fark{background:var(--gold-tint);color:#9A6E06}
+tr.gone td{color:var(--ink-soft)}
+.verbox{margin-top:12px;border:1.5px solid var(--line);border-radius:14px;padding:10px 12px;background:#FAFDFC}
+.verrow{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 0;border-top:1px solid var(--line);font-size:.78rem}
+.htbl td,.htbl th{text-align:center;white-space:nowrap}
+.htbl td:first-child,.htbl th:first-child{text-align:left}
+.htbl .hpos{color:#C33D2E}.htbl .hneg{color:#1D6FD8}
+.htbl .hsub{display:block;font-size:.6rem;font-weight:700;color:var(--ink-soft)}
+details.hbase{margin-top:8px}details.hbase summary{font-size:.74rem;font-weight:800;color:var(--teal-dark);cursor:pointer}
 .draftbox{margin:14px -8px 0;border:2px dashed #E0B64C;border-radius:18px;padding:10px 8px;background:#FFFCF3}
 .draft-rib{display:inline-block;font-size:.66rem;font-weight:800;letter-spacing:.05em;color:#8A5A00;background:#FFE7A8;
   border-radius:8px;padding:3px 9px;margin-bottom:6px}
@@ -559,14 +574,18 @@ button.lgd.me:not(.on){border-color:var(--teal)}
       <button class="btn ghost small" id="addRoomBtn" onclick="addRoomRow()">＋ Özel oda ekle</button>
       <button class="btn small savebtn" onclick="saveGrp('rooms')">💾 Odaları kaydet</button>
     </div>
-    <div class="row" style="margin-top:12px;border-top:1.5px dashed var(--line);padding-top:10px">
-      <label>🕗 Nöbet saatleri</label>
-      <input type="time" id="dutyStart" value="08:00" style="width:104px">
-      <label>→</label>
-      <input type="time" id="dutyEnd" value="08:00" style="width:104px">
-      <button class="btn small savebtn" title="Sadece bu ayarı kaydet" onclick="saveGrp('duty')">💾</button>
+    <div style="margin-top:12px;border-top:1.5px dashed var(--line);padding-top:10px">
+      <p class="eyebrow" style="margin-bottom:2px">🕗 Nöbet saatleri · hangi gün kaç saat?</p>
+      <p class="hint" style="margin:0 0 6px">Saat dengesi (kim kaç saat tuttu), telefon takvimi ve Google Takvim bu saatlerle hesaplanır. Bitiş başlangıçtan önce ya da eşitse nöbet ertesi gün biter (08:00 → 08:00 = 24 saat).</p>
+      <div class="row" id="dtPresets" style="gap:6px;margin:4px 0 6px">
+        <button class="dchip" onclick="dtPreset('24')">Hepsi 24 saat</button>
+        <button class="dchip" onclick="dtPreset('16')">Hafta içi 16→08 · hafta sonu/tatil 24 sa</button>
+        <button class="dchip" onclick="dtPreset('17')">Hafta içi 17→08 · hafta sonu/tatil 24 sa</button>
+      </div>
+      <div id="dtTable"></div>
+      <p class="hint" style="margin:4px 0 0">Tatil = resmi tatil / bayram günleri (Ay ayarlarındaki bayram günleri).</p>
+      <div class="row" style="margin-top:8px"><button class="btn small savebtn" id="dtSaveBtn" onclick="saveGrp('duty')">💾 Nöbet saatlerini kaydet</button></div>
     </div>
-    <p class="hint" style="margin:5px 0 0">Telefon takvimine ve Google Takvim'e bu saatlerle aktarılır. Bitiş başlangıçtan önce ya da eşitse ertesi gün biter (08:00 → 08:00 = 24 saat).</p>
   </div>
   <div class="card" id="shiftCard" style="display:none">
     <p class="eyebrow">Vardiya ayarları</p>
@@ -736,7 +755,7 @@ button.lgd.me:not(.on){border-color:var(--teal)}
     <p class="eyebrow">Yönetici onayı · taslak</p>
     <h2>⚖️ Nöbet sayılarını onayla</h2>
     <p class="hint" id="decideHint"></p>
-    <div class="tblwrap"><table><thead><tr><th>Kişi</th><th>🙋</th><th>🔒</th><th>☀️/🌙/🏖</th><th>⏱ Saat</th><th>Toplam</th><th>🌙 Gece</th></tr></thead><tbody id="decideBody"></tbody></table></div>
+    <div class="tblwrap"><table><thead><tr><th>Kişi</th><th>🙋</th><th>🔒</th><th>☀️/🌙/🏖</th><th>⏱ Saat</th><th title="Geçmiş aylar + bu taslak: adil paya göre saat farkı (+ fazla, − eksik)">⏱ Σ fark</th><th>Toplam</th><th>🌙 Gece</th></tr></thead><tbody id="decideBody"></tbody></table></div>
     <div class="banner info" id="decideTotal" style="margin-top:10px">—</div>
     <div id="decideWR"></div>
     <div class="draftbox" id="draftBox">
@@ -774,8 +793,10 @@ button.lgd.me:not(.on){border-color:var(--teal)}
     </div>
     <div id="schedLegend" class="daychips" style="margin-bottom:8px"></div>
     <div id="schedWrap"><div class="empty-state"><div class="big">🗓️</div>Henüz yayınlanmış çizelge yok.</div></div>
+    <div id="verBox"></div>
     <div class="row" style="margin-top:12px">
       <button class="btn gold small" onclick="wordIndir()">📄 Resmi liste (Word)</button>
+      <button class="btn ghost small" onclick="toggleVersions()">🕘 Sürüm geçmişi</button>
       <button class="btn ghost small" onclick="window.print()">🖨 PDF</button>
       <button class="btn ghost small" onclick="csvIndir()">📊 Excel</button>
       <button class="btn gold small" id="devirBtn" onclick="devireEkle()">➕ Devire ekle</button>
@@ -793,6 +814,12 @@ button.lgd.me:not(.on){border-color:var(--teal)}
       <button class="btn small" onclick="aiAsk()">Sor</button>
     </div>
     <div id="aiAnswer"></div>
+  </div>
+  <div class="card" id="hourCard" style="display:none">
+    <p class="eyebrow">Saat eşitliği · birikimli</p>
+    <h2>⏱ Saat dengesi</h2>
+    <p class="hint">Uzun ve kısa nöbetler saat olarak sayılır. Her kişinin bütün geçmiş aylar boyunca tuttuğu saat, adil payıyla karşılaştırılır.</p>
+    <div id="hourWrap"></div>
   </div>
   <div class="card" id="yearCard" style="display:none">
     <p class="eyebrow">Birikimli takip · otomatik</p>
@@ -967,7 +994,7 @@ function monthInfo(mk){const [y,m]=((mk||$("month").value)||"2026-08").split("-"
   return {y,m,nDays:new Date(y,m,0).getDate(),firstDow:(new Date(y,m-1,1).getDay()+6)%7};}
 /* GÖRÜNTÜLENEN AY: çizelge ve "nöbetlerim" bu aya bakar.
    Hazırlanan ay (dept.month) ayrıdır — kurulum, tercihler ve üretim ona bağlıdır. */
-let viewMonth=null, schedulesAll={};
+let viewMonth=null, schedulesAll={}, memberArchive=[];
 function vMonth(){return viewMonth||(dept&&dept.month)||$("month").value;}
 function vInfo(){return monthInfo(vMonth());}
 function planAy(){return (dept&&dept.month)||$("month").value;}
@@ -1179,6 +1206,10 @@ async function loadAll(){
   const {data:prefRows}=await sb.from("prefs").select("*").eq("dept_id",dept.id);
   prefsAll={};(prefRows||[]).forEach(r=>{if(!r||!r.month)return;(prefsAll[r.month]=prefsAll[r.month]||{})[r.user_id]=r.days||{};});
   allPrefs=prefsAll[dept.month]=prefsAll[dept.month]||{};
+  /* ekipten ayrılanlar: geçmiş listelerde adları ve kayıtları görünmeye devam eder */
+  try{const {data:ar,error:ae}=await sb.from("member_archive").select("*").eq("dept_id",dept.id);
+    memberArchive=ae?[]:(ar||[]);}catch(e){memberArchive=[];}
+  verOpen=null;
   await loadOtherLists();
   $("workModel").value=dept.work_model||"shift_only";
   $("fillPolicy").value=dept.fill_policy||"fill_all";
@@ -1188,9 +1219,7 @@ async function loadAll(){
   $("genDay").value=(dept.opts&&dept.opts.gen_day)||25;
   $("minRest").value=(dept.opts&&dept.opts.min_rest_h!=null)?dept.opts.min_rest_h:8;
   $("wishPri").value=(dept.opts&&dept.opts.wish_pri)||"normal";
-  {const dt=(dept.opts&&dept.opts.duty_time)||{};
-   if($("dutyStart"))$("dutyStart").value=dt.start||"08:00";
-   if($("dutyEnd"))$("dutyEnd").value=dt.end||"08:00";}
+  dtRows=dtNorm(dept.opts&&dept.opts.duty_time);renderDT();
   $("partnerMode").value=(dept.opts&&dept.opts.partner_mode)||"rotate";
   $("balDN").checked=!(dept.opts&&dept.opts.bal_dn===false);
   $("balWE").checked=!(dept.opts&&dept.opts.bal_we===false);
@@ -1339,10 +1368,49 @@ function effShift(si,d,pid){
 /* ---------- LİSTENİN DÜZEN MÜHRÜ ----------
    Yayınlanan her liste, kendi vardiya saatlerini, istisnalarını, oda sayısını ve nöbet saatini saklar.
    Kurulum sonradan değişse de geçmiş/yayındaki ayın saatleri (takvime aktarım dahil) doğru kalır. */
-function dutyTimeUI(){
-  const s=$("dutyStart"),e=$("dutyEnd"),o=(dept&&dept.opts&&dept.opts.duty_time)||{};
-  const ok=v=>/^\d{1,2}:\d{2}$/.test(v||"");
-  return {start:ok(s&&s.value)?s.value:(o.start||"08:00"),end:ok(e&&e.value)?e.value:(o.end||"08:00")};
+/* ---------- NÖBET SAATLERİ (oda listesi) · güne göre ----------
+   duty_time = {start,end, d:[Pzt..Paz × {start,end}], bay:{start,end}}
+   Eski kayıtlarda yalnız start/end vardır → her gün aynı saat. */
+const DT_GUN=["Pazartesi","Salı","Çarşamba","Perşembe","Cuma","Cumartesi","Pazar"];
+let dtRows=null;
+function hhPad(t){const m=String(t||"").match(/^(\d{1,2}):(\d{2})/);return m?String(Math.min(24,+m[1])).padStart(2,"0")+":"+m[2]:null;}
+function dtNorm(o){
+  o=o||{};
+  const one=(x,def)=>({start:hhPad(x&&x.start)||def.start,end:hhPad(x&&x.end)||def.end});
+  const base=one(o,{start:"08:00",end:"08:00"});
+  const d=[];for(let i=0;i<7;i++)d.push(one(o.d&&o.d[i],base));
+  const bay=one(o.bay,o.d?d[6]:base);
+  return {start:d[0].start,end:d[0].end,d,bay};
+}
+function durH(t){const x=(hm(t.end)-hm(t.start)+24)%24;return x>1e-9?x:24;}
+function dutyFor(dt,y,m,d,bays){return (bays&&bays.has(d))?dt.bay:dt.d[wdOf(y,m,d)];}
+function dtUniform(dt){const k=t=>t.start+"|"+t.end;return dt.d.every(t=>k(t)===k(dt.d[0]))&&k(dt.bay)===k(dt.d[0]);}
+function dutyTimeUI(){return JSON.parse(JSON.stringify(dtRows||dtNorm(dept&&dept.opts&&dept.opts.duty_time)));}
+function dtPreset(k){
+  if(!isAdmin())return;
+  const t=(a,b)=>({start:a,end:b});
+  const we=t("08:00","08:00");
+  const wd=k==="16"?t("16:00","08:00"):k==="17"?t("17:00","08:00"):t("08:00","08:00");
+  dtRows=dtNorm({d:[wd,wd,wd,wd,wd,we,we],bay:we});renderDT();
+}
+function dtSet(i,f,v){
+  if(!dtRows)dtRows=dtNorm();
+  const r=i===7?dtRows.bay:dtRows.d[i];
+  const x=hhPad(v);if(x)r[f]=x;
+  dtRows.start=dtRows.d[0].start;dtRows.end=dtRows.d[0].end;
+  renderDT();
+}
+function renderDT(){
+  const box=$("dtTable");if(!box)return;
+  const dt=dtRows||dtNorm();const ro=!isAdmin();
+  const satir=(i,ad,t)=>{const h=durH(t);
+    return `<div class="dtrow"><span class="dtl" title="${ad}">${i===7?"Tatil":DAYS_TR[i]}</span>
+      <input type="time" value="${t.start}" ${ro?"disabled":""} onchange="dtSet(${i},'start',this.value)">
+      <span class="dta">→</span>
+      <input type="time" value="${t.end}" ${ro?"disabled":""} onchange="dtSet(${i},'end',this.value)">
+      <span class="dth${h!==durH(dt.d[0])?" fark":""}">${Math.round(h*10)/10} sa${hm(t.end)<=hm(t.start)?"":" ·<small> aynı gün</small>"}</span></div>`;};
+  box.innerHTML=dt.d.map((t,i)=>satir(i,DT_GUN[i],t)).join("")+satir(7,"Resmi tatil / bayram",dt.bay);
+  ["dtPresets","dtSaveBtn"].forEach(id=>{const el=$(id);if(el)el.style.display=ro?"none":"";});
 }
 function layoutSnap(){
   return {shifts:JSON.parse(JSON.stringify(shiftRows||[])),ovr:JSON.parse(JSON.stringify(ovrRows||[])),
@@ -1353,7 +1421,7 @@ function legacyLay(mk){
   return {shifts:JSON.parse(JSON.stringify(dept.shifts||[])),
     ovr:(dept.shift_overrides||[]).filter(o=>mk===dept.month||o.day==null).map(o=>({...o})),
     gr:dept.general_rooms!=null?dept.general_rooms:2,br:JSON.parse(JSON.stringify(dept.branch_rooms||{})),
-    duty:{start:dt.start||"08:00",end:dt.end||"08:00"}};
+    duty:dtNorm(dt)};
 }
 function schShifts(sch){sch=sch||schedule;return (sch&&sch.lay&&sch.lay.shifts)||(dept&&dept.shifts)||[];}
 function schEff(si,d,pid,sch){
@@ -1373,8 +1441,14 @@ function schEff(si,d,pid,sch){
 }
 function schDuty(sch){
   sch=sch||schedule;
-  const d=(sch&&sch.lay&&sch.lay.duty)||(dept&&dept.opts&&dept.opts.duty_time)||{};
-  return {start:d.start||"08:00",end:d.end||"08:00"};
+  return dtNorm((sch&&sch.lay&&sch.lay.duty)||(dept&&dept.opts&&dept.opts.duty_time)||{});
+}
+/* görüntülenen listede d. günün nöbet saati */
+function schDutyDay(d,sch){const {y,m}=vInfo();return dutyFor(schDuty(sch),y,m,d,vBaySet());}
+/* oda nöbetinin ölçüleri (saat, hafta sonu/bayram saati) — çözücü ve yeniden hesap ortak kullanır */
+function roomMT(dt,y,m,d,bays){
+  const h=durH(dutyFor(dt,y,m,d,bays)),we=isWknd(y,m,d);
+  return {h,night:h/2,wkH:we?h:0,bayH:bays.has(d)?h:0,isN:true,isWe:we};
 }
 function hh5(t){return String(t||"").slice(0,5);}
 function kSaat(t){t=hh5(t);return /:00$/.test(t)?t.slice(0,2):t;}   // "08:00"→"08", "08:30" aynen
@@ -1704,7 +1778,11 @@ function personIndex(){
     used.add(k);_pcCode[p.id]=k;
   });
 }
-function pCode(pid){personIndex();return _pcCode[pid]||"?";}
+function pCode(pid){
+  personIndex();if(_pcCode[pid])return _pcCode[pid];
+  const t=adSoyad(nameOfId(pid)).split(/\s+/).filter(Boolean);     // ekipten ayrılmış kişi
+  return t.length?(t[0][0]+(t.length>1?t[t.length-1][0]:"")).toLocaleUpperCase("tr-TR"):"?";
+}
 function personColor(pid){
   personIndex();
   let i=_pcIdx[pid];
@@ -2009,9 +2087,15 @@ function slotLabel(e){
   if(e.r&&e.r.startsWith("S:"))return e.r.slice(2)+" odası";
   return "";
 }
-function dutyRangeText(sch){
-  const t=schDuty(sch);
-  return t.start+"–"+t.end+(hm(t.end)<=hm(t.start)?" (ertesi gün)":"");
+function dutyRangeText(sch,d,kisa){
+  const dt=schDuty(sch);
+  const f=kisa?(t=>kSaat(t.start)+"→"+kSaat(t.end)+" ("+Math.round(durH(t)*10)/10+" sa)")
+    :(t=>t.start+"–"+t.end+(hm(t.end)<=hm(t.start)?" (ertesi gün)":""));
+  if(d!=null){const {y,m}=vInfo();return f(dutyFor(dt,y,m,d,vBaySet()));}
+  if(dtUniform(dt))return f(dt.d[0]);
+  const seg=[];let a=0;
+  for(let i=1;i<=7;i++)if(i===7||f(dt.d[i])!==f(dt.d[a])){seg.push((i-1>a?DAYS_TR[a]+"–"+DAYS_TR[i-1]:DAYS_TR[a])+" "+f(dt.d[a]));a=i;}
+  return seg.join(" · ")+" · Resmi tatil "+f(dt.bay);
 }
 /* bir günün nöbetçileri, vardiya / oda gruplarına ayrılmış; eksik (boş kalan) yer sayısıyla */
 function dayGroups(d){
@@ -2075,15 +2159,15 @@ function pBadge(pid,ui,extra){
   const c=personColor(pid);
   const p=members.find(x=>x.id===pid);
   const cls="pb"+(pid===me.id?" me":"")+(ui&&ui.focus&&ui.focus!==pid?" dim":"")+(extra||"");
-  return `<b class="${cls}" style="background:${c.solid}" title="${hEsc(p?p.name:"")}">${hEsc(pCode(pid))}</b>`;
+  return `<b class="${cls}" style="background:${c.solid}" title="${hEsc(p?p.name:nameOfId(pid))}">${hEsc(pCode(pid))}</b>`;
 }
 function pChip(pid,ui,o){
   o=o||{};
   const p=members.find(x=>x.id===pid);
   const c=personColor(pid);
-  const nm=p?(o.short?kisaAd(p.name):adSoyad(p.name)):"(ekipten ayrılmış)";
+  const nm0=p?p.name:nameOfId(pid),nm=o.short?kisaAd(nm0):adSoyad(nm0);
   const cls="pchip"+(pid===me.id?" me":"")+(ui&&ui.focus&&ui.focus!==pid?" dim":"")+(o.cls||"");
-  return `<span class="${cls}" style="background:${c.bg};color:${c.fg};border-color:${c.bd}" title="${hEsc(p?p.name:"")}">`
+  return `<span class="${cls}" style="background:${c.bg};color:${c.fg};border-color:${c.bd}" title="${hEsc(nm0)}">`
     +`<b class="pb sm" style="background:${c.solid}">${hEsc(pCode(pid))}</b>${hEsc(nm)}${o.pin?" 📌":""}${o.t?` <small>${hEsc(o.t)}</small>`:""}</span>`;
 }
 function entryChip(e,d,ui,short){
@@ -2127,7 +2211,7 @@ function dayPanelHTML(d,ctx,ui){
   if(!g.some(x=>x.es.length))h+=`<div class="dp-g"><div class="dp-ps"><span class="pchip miss">Bu gün nöbetçi yok</span></div></div>`;
   g.forEach(gr=>{
     if(!gr.es.length&&!gr.eksik)return;
-    const lbl=sm?`${hEsc(gr.ad)}<i>${gr.saat}</i>`:`${hEsc(gr.ad||"Nöbetçi")}<i>${dutyRangeText()}</i>`;
+    const lbl=sm?`${hEsc(gr.ad)}<i>${gr.saat}</i>`:`${hEsc(gr.ad||"Nöbetçi")}<i>${dutyRangeText(undefined,d)}</i>`;
     h+=`<div class="dp-g"><div class="dp-gl">${lbl}</div><div class="dp-ps">${gr.es.map(e=>entryChip(e,d,ui)).join("")}${missChip(gr.eksik)}</div></div>`;
   });
   const ek=dayEkIds(d),off=dayOffIds(d,ctx==="draft"),iz=dayLeaveIds(d).filter(id=>!ek.includes(id)&&!off.includes(id));
@@ -2183,7 +2267,7 @@ function drawSched(wrap,legendEl,view,ctx){
       const ek=dayEkIds(d);
       if(ek.length)rows+=`<div class="brow ekr" title="Ek Cumartesi izni">🏖${ek.map(id=>{const cc=personColor(id);
         return `<b class="pb ekb${ui.focus&&ui.focus!==id?" dim":""}" style="color:${cc.solid};border-color:${cc.solid}">${hEsc(pCode(id))}</b>`;}).join("")}</div>`;
-      const adlar=entryList(d).map(e=>(members.find(p=>p.id===e.id)||{}).name).filter(Boolean);
+      const adlar=entryList(d).map(e=>nameOfId(e.id));
       c.title=d+" "+MONTHS_TR[m-1]+(adlar.length?": "+adlar.join(", "):"");
       c.innerHTML=`<span class="num">${d}</span><div class="who">${rows}</div>`;
       c.onclick=()=>selectDay(ctx,d);
@@ -2327,7 +2411,7 @@ async function saveDept(patch,label,cfg){
   cfg=cfg||{};
   if(!isAdmin()){toast("Bu ayarı sadece yönetici değiştirebilir.",true);return false;}
   if(!dept){toast("Ekip yüklenmedi.",true);return false;}
-  if((patch.__opts&&(patch.__opts.wr||patch.__opts.duty_time))||patch.work_model||patch.opts
+  if((patch.__opts&&(patch.__opts.wr||patch.__opts.duty_time||"leave_prop" in patch.__opts))||patch.work_model||patch.opts
     ||patch.shifts||patch.shift_overrides||patch.general_rooms!=null||patch.branch_rooms||patch.sched_mode||patch.month)await stampRulesBeforeChange();
   const body={...patch};
   let touchesOpts=false;
@@ -2550,8 +2634,9 @@ async function leaveTeam(){
 }
 async function removeMember(id,name){
   if(!isAdmin())return;
-  if(!confirm(`${name} ekipten çıkarılsın mı?\n\n• Bu ayki izin/tercihleri ve takas istekleri silinir\n• Yayınlanmış çizelgede adı kalır — çıkardıktan sonra çizelgeyi yeniden üretmen önerilir\n• Hesabı silinmez, isterse başka ekibe katılabilir`))return;
+  if(!confirm(`${name} ekipten çıkarılsın mı?\n\n• Geçmiş ayların listeleri, izinleri, saatleri ve takasları SAKLANIR (yıllık özette "ayrıldı" olarak görünür)\n• Yalnızca hazırlanan ay ve sonrasının tercihleri ile bekleyen takas istekleri kalkar\n• Yayınlanmış bu ayın listesinde adı kalır — çıkardıktan sonra listeyi yeniden üretmen önerilir\n• Hesabı silinmez, isterse başka ekibe katılabilir`))return;
   if(!confirm("Son kez soruyorum: "+name+" ekipten çıkarılsın mı?"))return;
+  await stampRulesBeforeChange();      // eski listelere isim ve düzen mührü: geçmişte adı kalsın
   const {data,error}=await sb.rpc("remove_member",{target:id,d:dept.id});
   if(error||(data&&data.error)){alert("⚠️ "+((data&&data.error)||error.message));return;}
   await loadAll();
@@ -2847,6 +2932,7 @@ function buildDraft(){
   draft=solveSchedule();
   if(!draft)return;
   draft.lay=layoutSnap();               // taslağın vardiya/oda/saat düzeni
+  draft.fair=fairSnap(draft,planAy());   // saat dengesi havuzu ve ağırlıkları
   draftUI.sel=null;draftUI.focus=null;
   showDraft();
 }
@@ -2904,7 +2990,9 @@ function showDraft(){
     Değiştirmek için <b>Toplam</b> ya da <b>🌙 Gece</b> kutusuna yeni sayıyı yaz, <b>🔄 Sayılarla yeniden hazırla</b>'ya bas. Son karar senindir.<br>
     Ayda <b>${S}</b> nöbet yeri · dağıtılan <b>${assigned}</b>${bos?` · <span style="color:#C33D2E">boş kalan ${bos}</span>`:" · ✅ boş yok"}`;
   const tb=$("decideBody");tb.innerHTML="";
+  const hCum=hourCum(planAy()),hNow=monthHours(planAy(),draft)||{};
   rel.forEach(p=>{
+    const hd=((hCum[p.id]||{}).d||0)+((hNow[p.id]||{}).d||0);
     const izin=Object.values(allPrefs[p.id]||{}).filter(v=>v==="izin").length;
     const w=wishOf(p);
     const tr=document.createElement("tr");
@@ -2915,6 +3003,7 @@ function showDraft(){
       <td>${izin||"—"}</td>
       <td>${isShiftMode()?`${dcv}/${ncv}/${wev}`:`—/—/${wev}`}</td>
       <td>${Math.round((draft.hours&&draft.hours[p.id])||0)}</td>
+      <td style="white-space:nowrap;color:${Math.abs(hd)<0.5?"inherit":hd>0?"#C33D2E":"#1D6FD8"}">${fmtH(hd)}</td>
       <td><input type="number" class="decInp" data-pid="${p.id}" value="${draft.cnt[p.id]||0}" min="0" max="31" style="width:60px;padding:6px" onchange="updDecideTotal(${S})"></td>
       <td>${isShiftMode()?`<input type="number" class="decNight" data-pid="${p.id}" value="${ncv}" min="0" max="31" style="width:56px;padding:6px" title="Bu kişi tam olarak kaç gece tutsun">`:"—"}</td>`;
     tb.appendChild(tr);
@@ -3105,6 +3194,8 @@ async function saveSchedule(best){
   best.bayram=$("bayramDays").value||"";
   best.month=dept.month;
   if(!best.lay)best.lay=layoutSnap();
+  best.fair=fairSnap(best,dept.month);
+  best.names=namesSnap(best);
   await stampRulesBeforeChange();       // eski aylar kuralsızsa önce mühürle
   best.rules=rulesSnapshot();           // bu ayın kuralları listenin içinde saklanır
   viewMonth=null;                       // yeni yayınlanan aya dön
@@ -3157,10 +3248,7 @@ function slotIV(s,pid){
   return [st,st+shiftHours(sh)];
 }
 function slotMT(s,pid,y,m,nDays,bays){
-  if(s.si<0){
-    const we=isWknd(y,m,s.d);
-    return {h:24,night:12,wkH:we?24:0,bayH:bays.has(s.d)?24:0,isN:true,isWe:we};
-  }
+  if(s.si<0)return roomMT(dutyTimeUI(),y,m,s.d,bays);
   const mt=shiftMetrics(effShift(s.si,s.d,pid),s.d,y,m,nDays,bays);
   mt.isN=mt.night*2>=mt.h;mt.isWe=mt.wkH*2>=mt.h;
   return mt;
@@ -3334,7 +3422,9 @@ function makeEvaluator(slots,ctxd){
      saat bazlı dinlenme kuralı bitişik oda nöbetlerini engellemesin */
   const roomRhythm=patOn>=2&&slots.length>0&&slots.every(s=>s.si<0);
   const HARD=100000,RHY=4000;   // ritim: katı kurallardan hafif, diğer her şeyden ağır
+  const HX=ctxd.hours&&ctxd.hours.on?ctxd.hours:null,HW=60;
   return function(A,detail){
+    const UH=HX?new Float64Array(n):null;
     const dayOn=[],ivs=[],NC=new Array(n).fill(0),DC=new Array(n).fill(0),
           WEC=new Array(n).fill(0),WDC=new Array(n).fill(0),SC=[];
     for(let p=0;p<n;p++){dayOn.push(new Uint8Array(nDays+2));ivs.push([]);SC.push(null);}
@@ -3351,6 +3441,7 @@ function makeEvaluator(slots,ctxd){
       const mt=MT[s][p]||slotMT(sl,members[p].id,y,m,nDays,bays);
       if(mt.isN)NC[p]++;else DC[p]++;
       if(mt.isWe)WEC[p]++;else WDC[p]++;
+      if(UH)UH[p]+=mt.h-HX.avg[sl.si<0?"r":(mt.isN?"n":"d")];
       if(sl.si>=0){if(!SC[p])SC[p]=new Array(shiftRows.length).fill(0);SC[p][sl.si]++;}
       const pv=prefOf[p][sl.d];
       if(pv===3)prefMiss+=3;
@@ -3472,11 +3563,14 @@ function makeEvaluator(slots,ctxd){
     let divPen=0;
     if(expShare)for(let p=0;p<n;p++){const sc=SC[p];if(!sc)continue;
       for(let si=0;si<sc.length;si++){const e=Math.max(0,sc[si]-expShare[si]);divPen+=e*e*6;}}
+    /* saat dengesi: geçmiş + bu ayın uzun nöbet farkı sıfıra yakın olsun */
+    let hourPen=0;
+    if(UH)for(const p of act){const v=(HX.mixCum[p]+UH[p])/HX.unit;hourPen+=v*v;}
     const hard=(overlap+doubleDay+gapV+restV+restGap+nightOver+wrOffV+wrMaxV)*HARD+ekMiss*20000;
     const total=hard+rhythmV*RHY+bal*balW+pairPen+divPen+prefMiss*wishW+shapeSum*shapeW2
-      +satShort*3000+wrFair*1000+linkMiss*400;
+      +satShort*3000+wrFair*1000+linkMiss*400+hourPen*HW;
     if(detail)return {total,hard,overlap,doubleDay,gapV,restV,restGap,nightOver,empty,bal,pairPen,pairAdj,rhythmV,divPen,prefMiss,
-      NC,DC,WEC,WDC,wrOffV,wrMaxV,wrFair,ekMiss,satShort,ek:ekRes,linkMiss};
+      NC,DC,WEC,WDC,wrOffV,wrMaxV,wrFair,ekMiss,satShort,ek:ekRes,linkMiss,hourPen,UH};
     return total;
   };
 }
@@ -3950,6 +4044,7 @@ async function setViewMonth(mk){
   if(!dept)return;
   viewMonth=(mk===dept.month)?null:mk;
   schedule=schedulesAll[vMonth()]||null;
+  verOpen=null;if($("verBox"))$("verBox").innerHTML="";
   const {data:reqs}=await sb.from("swap_requests").select("*")
     .eq("dept_id",dept.id).eq("month",vMonth()).order("id",{ascending:false});
   requests=reqs||[];
@@ -4069,18 +4164,16 @@ function recalcSchedule(){
   const {y,m,nDays}=vInfo();
   const bays=vBaySet();
   const z=()=>{const o={};members.forEach(p=>{o[p.id]=0;});return o;};
+  const dt=schDuty(schedule);
   const cnt=z(),hours=z(),night=z(),wk=z(),bay=z(),dc=z(),nc=z(),wec=z(),wdc=z();
   for(let d=1;d<=nDays;d++)for(const e of entryList(d)){
     if(cnt[e.id]==null)continue;
     let mt;
     if(schedule.mode==="shifts"){
-      const es=effShift(e.s,d,e.id);
+      const es=schEff(e.s,d,e.id);
       mt=shiftMetrics(es,d,y,m,nDays,bays);
       mt.isN=mt.night*2>=mt.h;mt.isWe=mt.wkH*2>=mt.h;
-    }else{
-      const we=isWknd(y,m,d);
-      mt={h:24,night:12,wkH:we?24:0,bayH:bays.has(d)?24:0,isN:true,isWe:we};
-    }
+    }else mt=roomMT(dt,y,m,d,bays);
     cnt[e.id]++;hours[e.id]+=mt.h;night[e.id]+=mt.night;wk[e.id]+=mt.wkH;bay[e.id]+=mt.bayH;
     if(mt.isN)nc[e.id]++;else dc[e.id]++;
     if(mt.isWe)wec[e.id]++;else wdc[e.id]++;
@@ -4180,6 +4273,8 @@ async function stampRulesBeforeChange(){
     let ch=false;
     if(!sc.rules){sc.rules=snap;ch=true;}
     if(!sc.lay){sc.lay=legacyLay(mk);ch=true;}     // vardiya/oda/saat düzeni de o aya mühürlenir
+    if(!sc.fair&&sc.asg){sc.fair=legacyFairOf(sc,mk);ch=true;}   // saat dengesi havuzu
+    if(!sc.names&&sc.asg){sc.names=namesSnap(sc);ch=true;}       // isimler (ekipten ayrılsa da görünür)
     if(ch)await sb.from("schedules").update({data:sc}).eq("dept_id",dept.id).eq("month",mk);
   }
 }
@@ -4209,28 +4304,29 @@ function monthLedger(mk){
   const sch=schedulesAll[mk]||null,pr=prefsAll[mk]||{};
   const bays=monthBays(mk);
   const out={};
-  const row=pid=>out[pid]=out[pid]||{n:0,we:0,by:0,h:0,izin:0,pdo:0,ek:0,fz:0,w0:0,w1:0,w2:0,w3:0,w4:0,w5:0,w6:0,has:!!sch};
+  const row=pid=>out[pid]=out[pid]||{n:0,we:0,by:0,h:0,hd:0,izin:0,pdo:0,ek:0,fz:0,w0:0,w1:0,w2:0,w3:0,w4:0,w5:0,w6:0,has:!!sch};
   members.forEach(p=>row(p.id));
   const dutyDays={};
   if(sch&&sch.asg){
     for(let d=1;d<=nDays;d++){
       const seen={};
       for(const e of (sch.asg[d]||[])){
-        if(!e||!out[e.id]||seen[e.id])continue;seen[e.id]=1;
-        const r=out[e.id];r.n++;if(isWknd(y,m,d))r.we++;if(bays.has(d))r.by++;r["w"+wdOf(y,m,d)]++;
+        if(!e||!e.id||seen[e.id])continue;seen[e.id]=1;
+        const r=row(e.id);r.n++;if(isWknd(y,m,d))r.we++;if(bays.has(d))r.by++;r["w"+wdOf(y,m,d)]++;
         (dutyDays[e.id]=dutyDays[e.id]||new Set()).add(d);
       }
     }
-    if(sch.hours)for(const pid in sch.hours)if(out[pid])out[pid].h=Math.round(sch.hours[pid]||0);
+    const mh=monthHours(mk)||{};
+    for(const pid in mh){const r=row(pid);r.h=Math.round(mh[pid].h);r.hd=Math.round(mh[pid].d);}
     const st=wrMonthStats(sch,mk);
-    for(const pid in st)if(out[pid]){out[pid].ek=st[pid].ek||0;out[pid].fz=st[pid].fz||0;}
+    for(const pid in st){const r=row(pid);r.ek=st[pid].ek||0;r.fz=st[pid].fz||0;}
   }
   /* onaylı izin günleri */
-  for(const pid in pr){if(!out[pid])continue;
+  for(const pid in pr){row(pid);
     for(const k in pr[pid])if(/^\d+$/.test(k)&&+k>=1&&+k<=nDays&&pr[pid][k]==="izin")out[pid].izin++;}
   /* nöbet sonrası izinli iş günleri (önceki ayın son nöbetlerinden taşanlar dahil) */
   const pk=prevMonthKey(mk),ps=schedulesAll[pk],pi=monthInfo(pk),RP=rulesFor(pk);
-  members.forEach(p=>{
+  Object.keys(out).map(id=>members.find(x=>x.id===id)||{id}).forEach(p=>{
     const off=new Set();
     const add=(x,wd,RR)=>{const k=personOffK(p,wd,RR);for(let j=1;j<=k;j++){const dd=x+j;if(dd>=1&&dd<=nDays)off.add(dd);}};
     (dutyDays[p.id]||new Set()).forEach(x=>add(x,wdOf(y,m,x),R));
@@ -4246,9 +4342,172 @@ function monthLedger(mk){
   });
   return out;
 }
+/* ================= SAAT DENGESİ (birikimli) =================
+   Her yayınlanmış ay, KENDİ saatleriyle (o ayın vardiya / nöbet saati mührü) yeniden hesaplanır:
+     H = kişinin o ay tuttuğu nöbet saati
+     F = adil pay: ayın toplam saati, aynı havuzdaki (genel liste / kendi odası olan branş / vardiya listesi)
+         kişilere bölünür. "İzinlinin nöbet sayısı: oranında azalt" açıksa izinsiz gün oranında, değilse eşit.
+     D = H − F  (+ adil paydan fazla, − eksik)
+     U = uzun nöbet farkı: Σ (nöbetin saati − o ay aynı türdeki nöbetlerin ortalaması)
+         → "sayısına göre fazla uzun nöbet tuttu mu" (yöneticinin verdiği farklı sayılarla çatışmaz)
+   Birikimli fark = başlangıç farkı (yönetici girer) + geçmiş bütün ayların D toplamı.
+   Yeni ay hazırlanırken: uzun nöbetler U'ya göre, artan (bölünemeyen) nöbetler birikimli D'ye göre dağıtılır. */
+/* isim çözümü: ekipteki kişi → listenin kendi isim mührü → arşiv (ekipten ayrılanlar) */
+function namesSnap(sch){
+  const o={...(sch.names||{})},ids=new Set();
+  for(const d in (sch.asg||{}))for(const e of (sch.asg[d]||[]))if(e&&e.id)ids.add(e.id);
+  for(const ds in (sch.ek||{}))(sch.ek[ds]||[]).forEach(id=>ids.add(id));
+  members.forEach(p=>{if(ids.has(p.id)||(sch.cnt&&p.id in sch.cnt))o[p.id]=p.name;});
+  return o;
+}
+function nameOfId(id,sch){
+  const p=members.find(x=>x.id===id);if(p)return p.name;
+  const s=sch||schedule;if(s&&s.names&&s.names[id])return s.names[id];
+  for(const mk in schedulesAll){const x=schedulesAll[mk];if(x&&x.names&&x.names[id])return x.names[id];}
+  const a=memberArchive.find(x=>x.user_id===id);if(a)return a.name;
+  return "(ekipten ayrılmış kişi)";
+}
+function hbaseOf(pid){const b=(opts().hbase||{})[pid];return isNaN(+b)?0:+b;}
+function hourGroupOf(p,mode){
+  if((mode||"rooms")==="shifts")return "S";
+  return p&&hasOwnRoom(p.pool)?"B:"+p.pool:"G";
+}
+/* yayın anında havuz ve ağırlık mührü (izin bilgisi o anki onaylı izinlerden) */
+function fairSnap(sch,mk){
+  const {nDays}=monthInfo(mk);
+  const pr=prefsAll[mk]||{},lp=leaveProp();
+  const g={},w={};
+  members.forEach(p=>{
+    if(!onDuty(p)&&!((sch.cnt||{})[p.id]>0))return;
+    let iz=0;const days=pr[p.id]||{};for(let d=1;d<=nDays;d++)if(days[d]==="izin")iz++;
+    const av=Math.max(0,nDays-iz);
+    const wt=lp?av:(av>0?1:0);
+    if(wt<=0&&!((sch.cnt||{})[p.id]>0))return;
+    g[p.id]=hourGroupOf(p,sch.mode);w[p.id]=Math.max(wt,(sch.cnt||{})[p.id]>0?1e-6:0);
+  });
+  return {v:1,g,w,lp};
+}
+/* mührü olmayan eski listeler: yalnızca o ay nöbet tutmuş kişiler havuzdadır
+   (sonradan katılanlar eski aylardan "borçlu" görünmesin) */
+function legacyFairOf(sch,mk,ids){
+  if(!ids){ids=new Set();for(const d in (sch.asg||{}))for(const e of (sch.asg[d]||[]))if(e&&e.id)ids.add(e.id);ids=[...ids];}
+  const {nDays}=monthInfo(mk),pr=prefsAll[mk]||{},lp=leaveProp(),g={},w={};
+  ids.forEach(pid=>{
+    const p=members.find(x=>x.id===pid)||memberArchive.find(x=>x.user_id===pid);
+    g[pid]=p?hourGroupOf(p,sch.mode):(sch.mode==="shifts"?"S":"G");
+    let iz=0;const days=pr[pid]||{};for(let d=1;d<=nDays;d++)if(days[d]==="izin")iz++;
+    w[pid]=lp?Math.max(1e-6,nDays-iz):1;
+  });
+  return {v:1,g,w,lp,legacy:true};
+}
+/* bir ayın nöbet başına saatleri (o ayın kendi düzeniyle) */
+function monthDuties(sch,mk){
+  return withView(sch,mk,()=>{
+    const {y,m,nDays}=vInfo();const bays=vBaySet();
+    const sm=sch.mode==="shifts",dt=schDuty(sch),out=[];
+    for(let d=1;d<=nDays;d++)for(const e of (sch.asg[d]||[])){
+      if(!e||!e.id)continue;
+      let h,cat;
+      if(sm){const mt=shiftMetrics(schEff(e.s,d,e.id),d,y,m,nDays,bays);h=mt.h;cat=mt.night*2>=mt.h?"n":"d";}
+      else{h=durH(dutyFor(dt,y,m,d,bays));cat="r";}
+      out.push({pid:e.id,d,h,cat,r:e.r});
+    }
+    return out;
+  });
+}
+/* bir ayın saat dökümü: {pid:{h,n,f,d,u,g}} */
+function monthHours(mk,schOverride){
+  const sch=schOverride||schedulesAll[mk];
+  if(!sch||!sch.asg)return null;
+  const L=monthDuties(sch,mk),out={};
+  const row=pid=>out[pid]=out[pid]||{h:0,n:0,f:0,d:0,u:0,g:null};
+  const avg={},cn={};L.forEach(x=>{avg[x.cat]=(avg[x.cat]||0)+x.h;cn[x.cat]=(cn[x.cat]||0)+1;});
+  for(const c in avg)avg[c]/=cn[c];
+  L.forEach(x=>{const r=row(x.pid);r.h+=x.h;r.n++;r.u+=x.h-avg[x.cat];});
+  /* havuz: mühür varsa ondan; eski listelerde o ay nöbet tutmuş herkes (eşit ya da izin oranında) */
+  const fr=(sch.fair&&sch.fair.g)?sch.fair:legacyFairOf(sch,mk,Object.keys(out));
+  let g={...fr.g},w={...fr.w};
+  for(const pid in out)if(g[pid]==null){g[pid]=sch.mode==="shifts"?"S":"G";w[pid]=1e-6;}
+  const GH={},GW={};
+  for(const pid in g){const r=row(pid);r.g=g[pid];GH[g[pid]]=(GH[g[pid]]||0)+r.h;GW[g[pid]]=(GW[g[pid]]||0)+(+w[pid]||0);}
+  for(const pid in out){const r=out[pid];
+    r.f=GW[r.g]>0?GH[r.g]*(+w[pid]||0)/GW[r.g]:r.h;
+    r.d=r.h-r.f;}
+  return out;
+}
+/* birikimli: başlangıç + [ilk ay, beforeMk) arasındaki yayınlanmış ayların toplamı */
+function hourCum(beforeMk){
+  const out={};
+  const row=pid=>out[pid]=out[pid]||{h:0,f:0,d:hbaseOf(pid),u:0,n:0,ay:0};
+  members.forEach(p=>row(p.id));
+  Object.keys(schedulesAll).sort().forEach(mk=>{
+    if(!(mk<beforeMk))return;
+    const mh=monthHours(mk);if(!mh)return;
+    for(const pid in mh){const r=row(pid),x=mh[pid];r.h+=x.h;r.f+=x.f;r.d+=x.d;r.u+=x.u;r.n+=x.n;r.ay++;}
+  });
+  return out;
+}
+/* saatler her gün aynı mı? (aynıysa saat dengesi = sayı dengesi) */
+function hoursVary(){
+  if(Object.values(schedulesAll).some(s=>s&&s.mode==="shifts")||isShiftMode())return true;
+  if(!dtUniform(dutyTimeUI()))return true;
+  return Object.values(schedulesAll).some(s=>s&&s.lay&&s.lay.duty&&!dtUniform(dtNorm(s.lay.duty)));
+}
+const fmtH=v=>{const r=Math.round(v);return (r>0?"+":r<0?"−":"±")+Math.abs(r);};
+function renderHourCard(){
+  const card=$("hourCard");if(!card)return;
+  if(!dept||!schedule){card.style.display="none";return;}
+  card.style.display="block";
+  const mk=vMonth(),cur=monthHours(mk,schedule)||{},cum=hourCum(mk);
+  const ppl=members.filter(p=>onDuty(p)||(cur[p.id]&&cur[p.id].n));
+  const sm=schedule.mode==="shifts";
+  const adm=isAdmin();
+  const ayAd=ayAdi(mk);
+  const rows=ppl.map(p=>{
+    const c=cur[p.id]||{h:0,f:0,d:0,n:0},k=cum[p.id]||{h:0,d:hbaseOf(p.id)};
+    const top=k.d+c.d;
+    const cls=Math.abs(top)<0.5?"":top>0?"hpos":"hneg";
+    return `<tr><td style="white-space:nowrap">${hEsc(kisaAd(p.name))}${p.id===me.id?" ⭐":""}</td>
+      <td title="${ayAd}: ${c.n} nöbet · adil pay ${Math.round(c.f)} sa · ay farkı ${fmtH(c.d)}"><b>${Math.round(c.h)}</b><small class="hsub">${fmtH(c.d)}</small></td>
+      <td>${Math.round(k.h+c.h)}</td><td class="${cls}"><b>${fmtH(top)}</b></td></tr>`;
+  }).join("");
+  $("hourWrap").innerHTML=`<div class="tblwrap"><table class="htbl"><thead><tr><th>Kişi</th>
+    <th title="${ayAd} nöbet saati (küçük: bu ayın adil payına göre farkı)">${hEsc(ayAd.split(" ")[0])}</th>
+    <th title="Tüm geçmiş aylar + bu ay toplam nöbet saati">Toplam saat</th>
+    <th title="Başlangıç + bütün ayların farkı">Fark</th></tr></thead><tbody>${rows}</tbody></table></div>
+    <p class="hint" style="margin:6px 0 0"><b style="color:#C33D2E">+</b> = adil paydan fazla tuttu, <b style="color:#1D6FD8">−</b> = eksik.
+    ${sm?"Vardiya saatleri":"Nöbet saatleri: "+hEsc(dutyRangeText(undefined,undefined,true))} — her ay kendi listesiyle saklanır.
+    Yeni ay hazırlanırken uzun nöbetler ve artan nöbetler <b>farkı en düşük</b> olana öncelikle verilir.</p>
+    ${adm?`<details class="hbase"><summary>Başlangıç farkı (uygulamadan önceki dönem)</summary>
+      <p class="hint" style="margin:4px 0">Uygulamayı kullanmaya başlamadan önce biri fazla ya da eksik saat tuttuysa buraya yaz (ör. +24 ya da -16).</p>
+      ${ppl.map(p=>`<div class="row" style="margin:4px 0"><label style="flex:1">${hEsc(kisaAd(p.name))}</label>
+        <input type="number" class="hbInp" data-pid="${p.id}" value="${hbaseOf(p.id)}" step="1" style="width:80px;padding:6px"></div>`).join("")}
+      <button class="btn small savebtn" style="margin-top:6px" onclick="saveHbase()">💾 Başlangıç farklarını kaydet</button></details>`:""}`;
+}
+async function saveHbase(){
+  if(!isAdmin())return;
+  const hb={};document.querySelectorAll(".hbInp").forEach(i=>{const v=Math.round(+i.value||0);if(v)hb[i.dataset.pid]=v;});
+  await saveDept({__opts:{hbase:hb}},"Saat farkı başlangıçları",{after:()=>{renderHourCard();renderYear();}});
+}
+/* çözücü bağlamı: geçmişe göre uzun nöbet farkı (U) ve toplam fark (D) */
+function hourContext(slots,MT){
+  const S=slots.length,n=members.length;
+  if(!S||!n||window.__ndNoHours)return null;     // __ndNoHours: yalnız karşılaştırmalı testler için
+  const cats={};
+  for(let s=0;s<S;s++){const mt=MT[s][0];const c=slots[s].si<0?"r":(mt.isN?"n":"d");(cats[c]=cats[c]||[]).push(mt.h);}
+  let spread=0;const avg={};
+  for(const c in cats){const a=cats[c];avg[c]=a.reduce((x,v)=>x+v,0)/a.length;spread=Math.max(spread,Math.max(...a)-Math.min(...a));}
+  const cum=hourCum(planAy());
+  const mixCum=members.map(p=>(cum[p.id]||{}).u||0);
+  const totCum=members.map(p=>(cum[p.id]||{}).d||0);
+  const hist=Object.keys(schedulesAll).some(mk=>mk<planAy());
+  return {on:spread>=0.5||mixCum.some(v=>Math.abs(v)>=0.5),avg,unit:Math.max(1,spread),mixCum,totCum,hist,
+    cat:s=>slots[s].si<0?"r":null};
+}
+
 const YEAR_METRICS=()=>{
   const c=wrCfg(),L=[["n","Nöbet"],["we","Hafta sonu nöbeti"],["by","Bayram nöbeti"]];
-  if(Object.values(schedulesAll).some(s=>s&&s.mode==="shifts"))L.push(["h","Nöbet saati"]);
+  if(hoursVary())L.push(["h","Nöbet saati"],["hd","Saat farkı (adil paya göre)"]);
   for(let i=0;i<7;i++)if(c.on&&c.track[i])L.push(["w"+i,WR_GUN[i]+" nöbeti"]);
   if(c.on&&c.sat.on)L.push(["ek","Ek Cumartesi izni"]);
   if(c.on&&c.fz)L.push(["fz","Fazla nöbet"]);
@@ -4263,9 +4522,11 @@ function yearLedger(yr){
   for(let mo=1;mo<=12;mo++){const mk=yr+"-"+String(mo).padStart(2,"0");
     if(!schedulesAll[mk]&&!prefsAll[mk])continue;
     res.months[mk]=monthLedger(mk);}
-  members.forEach(p=>{const t={};
-    for(const mk in res.months){const r=res.months[mk][p.id]||{};for(const k in r)if(typeof r[k]==="number")t[k]=(t[k]||0)+r[k];}
-    res.tot[p.id]=t;});
+  const ids=new Set(members.map(p=>p.id));
+  for(const mk in res.months)Object.keys(res.months[mk]).forEach(id=>ids.add(id));
+  ids.forEach(id=>{const t={};
+    for(const mk in res.months){const r=res.months[mk][id]||{};for(const k in r)if(typeof r[k]==="number")t[k]=(t[k]||0)+r[k];}
+    res.tot[id]=t;});
   return res;
 }
 function renderYear(){
@@ -4279,23 +4540,25 @@ function renderYear(){
   const curM=M.some(x=>x[0]===msel.value)?msel.value:"n";
   msel.innerHTML=M.map(([k,ad])=>`<option value="${k}" ${k===curM?"selected":""}>${ad}</option>`).join("");
   const L=yearLedger(curY);
-  const ppl=members.filter(p=>onDuty(p)||(L.tot[p.id]&&(L.tot[p.id].n||L.tot[p.id].izin)));
+  const ppl=members.filter(p=>onDuty(p)||(L.tot[p.id]&&(L.tot[p.id].n||L.tot[p.id].izin)))
+    .concat(Object.keys(L.tot).filter(id=>!members.some(p=>p.id===id)&&(L.tot[id].n||L.tot[id].izin))
+      .map(id=>({id,name:nameOfId(id),gone:true})));
   const ays=[];for(let mo=1;mo<=12;mo++)ays.push(curY+"-"+String(mo).padStart(2,"0"));
   const kis=MONTHS_TR.map(a=>a.slice(0,3));
   const TH='style="letter-spacing:0;white-space:nowrap;text-transform:none;font-size:.62rem"';
-  const KISA={n:"Nöbet",we:"H.sonu",by:"Bayram",h:"Saat",ek:"Ek Cmt",fz:"Fazla",izin:"İzin",pdo:"N.ertesi"};
+  const KISA={n:"Nöbet",we:"H.sonu",by:"Bayram",h:"Saat",hd:"S.fark",ek:"Ek Cmt",fz:"Fazla",izin:"İzin",pdo:"N.ertesi"};
   for(let i=0;i<7;i++)KISA["w"+i]=DAYS_TR[i];
   $("yearTbl").innerHTML=`<thead><tr><th>Kişi</th>${kis.map(a=>`<th ${TH}>${a}</th>`).join("")}<th>Σ</th></tr></thead><tbody>`+
-    ppl.map(p=>`<tr><td style="white-space:nowrap">${kisaAd(p.name)}</td>${ays.map(mk=>{const r=L.months[mk]&&L.months[mk][p.id];
+    ppl.map(p=>`<tr${p.gone?' class="gone"':""}><td style="white-space:nowrap">${hEsc(kisaAd(p.name))}${p.gone?' <small>(ayrıldı)</small>':""}</td>${ays.map(mk=>{const r=L.months[mk]&&L.months[mk][p.id];
       return `<td>${r?(r[curM]||0):'<span style="color:#C9D6D2">–</span>'}</td>`;}).join("")}<td><b>${(L.tot[p.id]||{})[curM]||0}</b></td></tr>`).join("")+"</tbody>";
   $("yearTot").innerHTML=`<thead><tr><th ${TH}>${curY} toplam</th>${M.map(([k,ad])=>`<th ${TH} title="${ad}">${KISA[k]||ad}</th>`).join("")}</tr></thead><tbody>`+
-    ppl.map(p=>`<tr><td style="white-space:nowrap">${kisaAd(p.name)}</td>${M.map(([k])=>`<td>${(L.tot[p.id]||{})[k]||0}</td>`).join("")}</tr>`).join("")+"</tbody>";
+    ppl.map(p=>`<tr${p.gone?' class="gone"':""}><td style="white-space:nowrap">${hEsc(kisaAd(p.name))}${p.gone?' <small>(ayrıldı)</small>':""}</td>${M.map(([k])=>`<td>${(L.tot[p.id]||{})[k]||0}</td>`).join("")}</tr>`).join("")+"</tbody>";
 }
 function yearCsv(){
   const yr=$("yearSel").value||String(vMonth()).slice(0,4);
   const L=yearLedger(yr),M=YEAR_METRICS();
   const rows=["Kişi;Ay;"+M.map(x=>x[1]).join(";")];
-  members.forEach(p=>{
+  Object.keys(L.tot).map(id=>members.find(p=>p.id===id)||{id,name:nameOfId(id)+" (ayrıldı)"}).forEach(p=>{
     for(const mk of Object.keys(L.months).sort()){const r=L.months[mk][p.id]||{};
       rows.push(`${p.name};${ayAdi(mk)};`+M.map(([k])=>r[k]||0).join(";"));}
     rows.push(`${p.name};${yr} TOPLAM;`+M.map(([k])=>(L.tot[p.id]||{})[k]||0).join(";"));
@@ -4752,7 +5015,7 @@ function wrRefreshEk(sch,mk){
 /* Ek Cumartesi izinlisi isimleri (görüntüleme) */
 function ekNames(d){
   const L=(schedule&&schedule.ek&&schedule.ek[d])||[];
-  return L.map(id=>(members.find(p=>p.id===id)||{}).name).filter(Boolean);
+  return L.map(id=>nameOfId(id));
 }
 
 function wishPri(){const e=$("wishPri");return (e&&e.value)||opts().wish_pri||"normal";}
@@ -4798,6 +5061,9 @@ function solveSchedule(){
   const cap=slotCapacity(slots,E);
   const viol=[];
   const WRX=wrContext(slots,E,cap,y,m,nDays,bays);
+  const HX=hourContext(slots,MT);            // geçmiş ayların saat dengesi
+  const HTIE=members.map(()=>Math.random());
+  const hOrd=(a,b)=>HX&&HX.hist?(HX.totCum[a]-HX.totCum[b]):0;
   linkMissing().forEach(x=>viol.push(`ℹ️ 🔗 ${x.p.name}: ${x.t.dept_name} listesinin ${ayAdi(planAy())} çizelgesi henüz yayınlanmadı — o listeyle uyum uygulanmadı.`));
 
   /* --- 1. aşama: yöneticinin verdiği kesin sayıları doyur --- */
@@ -4855,7 +5121,7 @@ function solveSchedule(){
       const rnd=fr.map(()=>Math.random());
       const ord=fr.map((i,k)=>k).sort((a,b)=>((sh[b]-tg[b])-(sh[a]-tg[a]))>1e-9||((sh[b]-tg[b])-(sh[a]-tg[a]))<-1e-9
         ?(sh[b]-tg[b])-(sh[a]-tg[a])
-        :((WRX&&WRX.fz)?(WRX.cumFz[fr[a]]-WRX.cumFz[fr[b]]):0)||(rnd[a]-rnd[b]));
+        :((WRX&&WRX.fz)?(WRX.cumFz[fr[a]]-WRX.cumFz[fr[b]]):0)||hOrd(fr[a],fr[b])||(rnd[a]-rnd[b]));
       for(let k=0;k<fr.length;k++)if(tg[k]>cap[fr[k]]){rest+=tg[k]-cap[fr[k]];tg[k]=cap[fr[k]];}
       for(let g=0;rest>0&&g<200;g++){let mv=false;
         for(const k of ord){if(rest<=0)break;if(tg[k]<cap[fr[k]]){tg[k]++;rest--;mv=true;}}
@@ -4882,7 +5148,7 @@ function solveSchedule(){
   const roomGap=!isShiftMode()&&!(patOnV>0)?Math.max(0,(+($("minGap").value||(dept&&dept.min_gap)||1))-1):null;
   const evalFn=makeEvaluator(slots,{y,m,nDays,bays,IV,MT,pm:partnerMode(),bDN:balDN(),bWE:balWE(),
     patOn:patOnV,patOff:patOffV,expShare,minRest:minRestH(),wishPri:wishPri(),nightWant:nWant,
-    wr:WRX,roomGap,linkSame:LNK.same});
+    wr:WRX,roomGap,linkSame:LNK.same,hours:HX});
   /* ritim seçiliyse önce listeyi blok blok kur; kurallar elvermezse takaslı yola geç */
   let RB=null,rbSuggest=null;
   if(patOnV>0&&!anyNW&&!WRX){
@@ -4952,11 +5218,13 @@ function solveSchedule(){
     kuhnMatch(slots,E,capAll,A,load,both,locked);
     balanceFree(slots,E,A,load,freeIdx,locked);   // serbest kişiler arasında eşitle
     /* artık (fazla) nöbet sırası: eşit bölünmeyen nöbetler fazla sayacı en düşük olanlara geçer */
-    if(WRX&&WRX.fz&&freeIdx.length>1){
+    /* artık nöbet: kurallarda "fazla nöbet sırası" açıksa sayaca, değilse birikimli saat farkına göre
+       (en çok saat borcu olan önce alır) */
+    if(((WRX&&WRX.fz)||(HX&&HX.hist))&&freeIdx.length>1){
       const fr=freeIdx.filter(i=>cap[i]>0);
       let tot=0;fr.forEach(i=>{tot+=load[i];});
       const base=Math.floor(tot/(fr.length||1));
-      const ord=fr.slice().sort((a,b)=>(WRX.cumFz[a]-WRX.cumFz[b])||(WRX.tie[a]-WRX.tie[b]));
+      const ord=fr.slice().sort((a,b)=>((WRX&&WRX.fz)?(WRX.cumFz[a]-WRX.cumFz[b]):0)||hOrd(a,b)||(HTIE[a]-HTIE[b]));
       const holders=fr.filter(i=>load[i]>base);
       const want=new Set(ord.slice(0,holders.length));
       for(const a of holders){
@@ -5337,7 +5605,7 @@ function renderSchedule(){
     ?`<div class="banner ok">✅ Yayında — kural ihlali yok!</div>`
     :`<div class="banner err">⚠️ ${schedule.viol.length} sorun: ${[...new Set(schedule.viol)].slice(0,3).join(" · ")}</div>`);
   renderSchedGrid();
-  renderFair();renderMesai();renderMyDuties();renderYear();
+  renderFair();renderMesai();renderMyDuties();renderYear();renderHourCard();
 }
 function renderMesai(){
   const card=$("mesaiCard");if(!card)return;
@@ -5680,7 +5948,7 @@ function myDutyList(){
         label=es.name||"Vardiya";key="s"+e.s;
         baslik="Nöbet · "+label+(ekip?" · "+ekip:"");
       }else{
-        const t=schDuty();start=t.start;end=t.end;
+        const t=schDutyDay(d);start=t.start;end=t.end;
         label=(!e.r||e.r==="G")?"Nöbet":e.r.slice(2)+" odası";key=e.r||"G";
         baslik="Nöbet"+(label!=="Nöbet"?" · "+label:"")+(ekip?" · "+ekip:"");
       }
@@ -5787,6 +6055,53 @@ function icsIndir(){
   const blob=new Blob([icsText(list)],{type:"text/calendar;charset=utf-8"});
   dosyaIndir(blob,"nobetlerim-"+vMonth()+".ics");
   toast("📲 "+list.length+" nöbet takvim dosyasına yazıldı — dosyayı aç, \"Tümünü ekle\"");
+}
+
+/* ---------- SÜRÜM GEÇMİŞİ ----------
+   Veritabanı her liste değişikliğini (yayın, elle düzenleme, takas, geri yükleme) ayrı sürüm olarak saklar.
+   Hiçbir sürüm silinmez; yönetici eski bir sürümü geri yükleyebilir (geri yükleme de yeni sürüm olur). */
+let verOpen=null,verRows=[];
+async function toggleVersions(){
+  const box=$("verBox");if(!box)return;
+  const mk=vMonth();
+  if(verOpen===mk){verOpen=null;box.innerHTML="";return;}
+  verOpen=mk;box.innerHTML='<p class="hint">Sürümler yükleniyor…</p>';
+  const {data,error}=await sb.from("schedule_versions").select("*").eq("dept_id",dept.id).eq("month",mk).order("changed_at",{ascending:false});
+  if(error){box.innerHTML=`<div class="banner info">Sürüm geçmişi bu sunucuda henüz açık değil.</div>`;return;}
+  verRows=data||[];renderVersions();
+}
+function renderVersions(){
+  const box=$("verBox");if(!box||!verOpen)return;
+  const OP={insert:"İlk yayın",update:"Değişiklik",delete:"Silindi",baseline:"Kayıt başlangıcı"};
+  const toplam=d=>{if(!d||!d.asg)return 0;let t=0;for(const k in d.asg)t+=(d.asg[k]||[]).length;return t;};
+  const cur=JSON.stringify(schedulesAll[verOpen]||null);
+  box.innerHTML=`<div class="verbox"><p class="eyebrow" style="margin:0 0 4px">🕘 ${ayAdi(verOpen)} · ${verRows.length} sürüm</p>
+    <p class="hint" style="margin:0 0 6px">Her yayın, düzenleme ve takas ayrı saklanır; hiçbiri silinmez.</p>`+
+    (verRows.length?verRows.map((v,i)=>{
+      const t=new Date(v.changed_at);
+      const ts=t.getDate()+" "+MONTHS_TR[t.getMonth()].slice(0,3)+" "+String(t.getHours()).padStart(2,"0")+":"+String(t.getMinutes()).padStart(2,"0");
+      const simdiki=JSON.stringify(v.data)===cur;
+      return `<div class="verrow"><div><b>${OP[v.op]||v.op}</b> · ${ts}${v.changed_by?" · "+hEsc(kisaAd(nameOfId(v.changed_by))):""}
+        <div class="hint" style="margin:0">${toplam(v.data)} nöbet${simdiki?' · <b style="color:var(--teal-deep)">şu anki</b>':""}</div></div>
+        <div class="row" style="gap:4px;flex-wrap:nowrap">${v.data?`<button class="btn ghost small" onclick="versionWord(${i})">📄</button>`:""}
+        ${isAdmin()&&v.data&&!simdiki?`<button class="btn ghost small" onclick="restoreVersion(${i})">↩︎ Geri yükle</button>`:""}</div></div>`;}).join("")
+      :'<p class="hint">Bu ay için kayıtlı sürüm yok.</p>')+"</div>";
+}
+function versionWord(i){
+  const v=verRows[i];if(!v||!v.data)return;
+  try{const blob=withView(v.data,v.month,()=>resmiListeDocx());
+    dosyaIndir(blob,"Nobet-Listesi-"+v.month+"-surum-"+v.id+".docx");}
+  catch(e){toast("⚠️ Word oluşturulamadı: "+(e&&e.message||e),true);}
+}
+async function restoreVersion(i){
+  const v=verRows[i];if(!v||!isAdmin())return;
+  if(!confirm(ayAdi(v.month)+" listesi bu sürüme geri döndürülsün mü?\n\nŞu anki hâli de sürüm geçmişinde kalır; istersen ona da geri dönebilirsin."))return;
+  const {data,error}=await sb.rpc("restore_schedule_version",{vid:v.id});
+  if(error||(data&&data.error)){toast("⚠️ "+((data&&data.error)||error.message),true);return;}
+  toast("↩︎ "+ayAdi(v.month)+" listesi geri yüklendi");
+  const mk=v.month;await loadAll();verOpen=null;
+  if(mk!==vMonth()&&schedulesAll[mk])setViewMonth(mk);
+  await toggleVersions();
 }
 
 /* ---------- EXPORT & AI ---------- */
@@ -5955,7 +6270,7 @@ function resmiListeDocx(o){
   const ayAd=MONTHS_TR[m-1]+" "+y;
   const kurum=(dept&&dept.name)||"";
   const vardiyali=schedule.mode==="shifts";
-  const kisi=id=>members.find(x=>x.id===id)||{};
+  const kisi=id=>members.find(x=>x.id===id)||{name:nameOfId(id)};
   const GUN=GUN_TR;
   const TS=10.5; // tablo yazı boyutu (pt)
   const taslak=!!o.taslak;
@@ -6046,7 +6361,8 @@ function resmiListeDocx(o){
   const cnt=schedule.cnt||{};
   const wKeys=wrOn()?wrKeys().filter(k=>k.k!=="fz"):[];
   const wSt=wKeys.length?wrMonthStats(schedule,vMonth()):{};
-  const saatVar=vardiyali&&schedule.hours;
+  const saatVar=vardiyali||!dtUniform(schDuty());
+  const mhW=monthHours(vMonth(),schedule)||{};
   const oBas=["Adı Soyadı","Ünvan / Birim","Nöbet"].concat(saatVar?["Saat"]:[]).concat(["Hafta Sonu"]).concat(bayramVar?["Resmi Tatil"]:[]).concat(geceGoster?["Gece"]:[])
     .concat(wKeys.map(k=>k.k==="ek"?"Ek Cmt İzni":k.ad));
   const oPerc=[34,26,12].concat(saatVar?[10]:[]).concat([14]).concat(bayramVar?[14]:[]).concat(geceGoster?[10]:[]).concat(wKeys.map(()=>12));
@@ -6055,7 +6371,7 @@ function resmiListeDocx(o){
   members.forEach(p=>{
     const c=cnt[p.id]||0;
     if(!c)return;
-    const v=[p.name||"",p.pool||"",c].concat(saatVar?[Math.round(schedule.hours[p.id]||0)]:[]).concat([weCnt[p.id]||0])
+    const v=[p.name||"",p.pool||"",c].concat(saatVar?[Math.round((mhW[p.id]||{}).h||0)]:[]).concat([weCnt[p.id]||0])
       .concat(bayramVar?[bayCnt[p.id]||0]:[])
       .concat(geceGoster?[(schedule.nc&&schedule.nc[p.id])||0]:[])
       .concat(wKeys.map(k=>+((wSt[p.id]||{})[k.k])||0));
@@ -6076,7 +6392,7 @@ function resmiListeDocx(o){
     +(kurum?D.p([{t:kurum,b:true,sz:12}],{align:"center",after:8}):"")
     +D.p([{t:"NÖBET LİSTESİ",b:true,sz:14}],{align:"center",after:2})
     +D.p([{t:ayAd,sz:12}],{align:"center",after:vardiyali?12:2})
-    +(vardiyali?"":D.p([{t:"Nöbet saatleri: "+dutyRangeText().replace("–"," – "),sz:10,color:"333333"}],{align:"center",after:10}))
+    +(vardiyali?"":D.p([{t:"Nöbet saatleri: "+dutyRangeText(),sz:10,color:"333333"}],{align:"center",after:10}))
     +D.table(rows,wMain)
     +(()=>{
       const ekD=Object.keys(schedule.ek||{}).map(Number).filter(d=>(schedule.ek[d]||[]).length).sort((a,b)=>a-b);
