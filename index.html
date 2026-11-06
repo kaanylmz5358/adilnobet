@@ -1128,6 +1128,15 @@ body.wz-on{overflow:hidden}
   .wz__inner{top:4vh;bottom:4vh;max-width:760px;background:var(--bg);border-radius:24px;box-shadow:var(--shadow-sheet);overflow:hidden}
 }
 @keyframes ndPop{from{opacity:0;transform:translateY(8px) scale(.98)}to{opacity:1;transform:none}}
+/* Geliştirici modu şeridi: başka bir ekibin içindeyken her zaman görünür uyarı */
+#devBar{display:none;align-items:center;gap:12px;justify-content:space-between;flex-wrap:wrap;
+  background:#4a2a00;color:#ffd79a;border:1px solid #6b3f00;border-radius:14px;
+  padding:10px 14px;margin:0 0 14px;font-size:14px;line-height:1.35}
+#devBar b{color:#fff}
+#devBar button{flex:none;background:#ffb64d;color:#3a2200;border:none;border-radius:10px;
+  padding:7px 14px;font-weight:700;font-size:14px;cursor:pointer}
+#devBar button:hover{background:#ffc877}
+#devList .person .sub{font-size:12.5px;line-height:1.5}
 </style>
 <script id="ndJs">
 /* @ds-bundle: {"format":4,"namespace":"ND","components":[{"name":"Button"},{"name":"GroupedList"},{"name":"Switch"},{"name":"Stepper"},{"name":"Segmented"},{"name":"NavBar"},{"name":"TabBar"},{"name":"Sheet"},{"name":"Calendar"},{"name":"StatusBadge"},{"name":"Avatar"},{"name":"SwipeRow"},{"name":"NextDutyCard"},{"name":"ChoiceCard"},{"name":"WeekStrip"},{"name":"Banner"},{"name":"Toast"},{"name":"Progress"},{"name":"TextField"},{"name":"EmptyState"},{"name":"Stats"},{"name":"PreferenceBrush"}]} */
@@ -1328,6 +1337,26 @@ window.ND={guardClick:guardClick,icon:icon,icons:ICONS,haptic:haptic,stepper:ste
     <h2>Başka listeye katıl / kur</h2>
     <button class="btn ghost" style="width:100%" onclick="showView('dept')">Davet kodu gir veya yeni liste kur</button>
   </div>
+  <div class="card" id="devEntryCard" style="display:none">
+    <p class="eyebrow">Geliştirici</p>
+    <h2>🛠 Geliştirici paneli</h2>
+    <p class="hint">Bütün ekipleri görüntüle; teknik destek için herhangi birine gir ve ayarlarını yöneticisi gibi düzelt.</p>
+    <button class="btn" style="width:100%" onclick="openDevPanel()">Tüm ekipleri aç →</button>
+  </div>
+</div>
+
+<div id="view-dev" class="view">
+  <div class="card center" style="padding-top:14px;padding-bottom:14px">
+    <span class="switchlink" onclick="showView('teams')">← Listelerime dön</span>
+  </div>
+  <div class="card">
+    <p class="eyebrow">Geliştirici paneli</p>
+    <h2>Tüm ekipler</h2>
+    <p class="hint">Destek için bir ekibe gir; o ekibin yöneticisi gibi her ayarı ve listeyi görür, düzeltebilirsin. Değişiklikler o ekibe anında yansır. Kimsenin şifresine ihtiyaç yok.</p>
+    <input type="text" id="devSearch" placeholder="Ekip adı ya da kodu ara…" oninput="renderDevList()">
+    <div id="devStats" class="hint" style="margin:10px 2px 4px"></div>
+    <div id="devList"></div>
+  </div>
 </div>
 
 <div id="view-dept" class="view">
@@ -1355,6 +1384,8 @@ window.ND={guardClick:guardClick,icon:icon,icons:ICONS,haptic:haptic,stepper:ste
 </div>
 
 <div id="view-app" class="view">
+
+<div id="devBar" style="display:none"></div>
 
 <section id="tab-bugun" class="tab active">
   <div id="todayWrap"></div>
@@ -1846,19 +1877,20 @@ function branchOptionsHTML(selected){
 }
 const DAYS_TR=["Pzt","Sal","Çar","Per","Cum","Cmt","Paz"];
 let sb=null, me=null, myProfile=null, dept=null, members=[], allPrefs={}, schedule=null, requests=[];
-let myTeams=[], activeDept=null;
+let myTeams=[], activeDept=null, amDev=false, devActing=false;
 let signupMode=false, recoveryMode=false, roomRows=[], shiftRows=[], ovrRows=[], blockRows=[], pinRows=[];
 
 function $(id){return document.getElementById(id)}
 function brEmoji(b){return BR_EMOJI[b]||"🩺";}
 function brHue(b){let h=0;for(const c of (b||"")){h=(h*31+c.charCodeAt(0))%360;}return h;}
 function brStyle(b){const h=brHue(b);return `background:hsl(${h},55%,91%);color:hsl(${h},60%,28%)`;}
-const VIEW_TITLE={auth:"Nöbet Defteri",forgot:"Şifremi unuttum",reset:"Yeni şifre",teams:"Listelerim",dept:"Ekip kur ya da katıl",config:"Kurulum"};
+const VIEW_TITLE={auth:"Nöbet Defteri",forgot:"Şifremi unuttum",reset:"Yeni şifre",teams:"Listelerim",dept:"Ekip kur ya da katıl",config:"Kurulum",dev:"Geliştirici paneli"};
 function showView(v){document.querySelectorAll(".view").forEach(e=>e.classList.remove("active"));$("view-"+v).classList.add("active");
   document.body.dataset.view=v;
   if(v!=="app"){document.body.dataset.tab=v;const nt=$("navTitle");if(nt)nt.textContent=VIEW_TITLE[v]||"Nöbet Defteri";}
   $("mainNav").style.display=v==="app"?"flex":"none";
-  $("logoutBtn").style.display=(v==="app"||v==="dept")?"inline-block":"none";}
+  $("logoutBtn").style.display=(v==="app"||v==="dept"||v==="dev"||v==="teams")?"inline-block":"none";
+  if(v!=="app"){devActing=false;const db=$("devBar");if(db)db.style.display="none";}}
 /* ================= OTOMATİK KAYIT =================
    Ayarlar, tercihler, izinler ve profil değiştiği anda kaydedilir; ayrı "Kaydet" düğmesi yoktur.
    Kayıtlar sırayla yapılır (aynı anda iki kayıt birbirinin ayarını ezmesin). */
@@ -2499,7 +2531,7 @@ function editingId(){
   return me.id;
 }
 function canEdit(uid){return uid===me.id||(isAdmin()&&members.some(p=>p.id===uid));}
-function isAdmin(){return myProfile&&myProfile.is_admin;}
+function isAdmin(){return !!((myProfile&&myProfile.is_admin)||devActing);}
 function branchRooms(){return dept&&dept.branch_rooms?dept.branch_rooms:{};}
 function hasOwnRoom(branch){return !!branchRooms()[branch];}
 function generalStaff(){return members.filter(p=>!hasOwnRoom(p.pool)&&onDuty(p));}
@@ -2602,13 +2634,80 @@ async function saveNewPass(){
 }
 async function logout(){await sb.auth.signOut();location.reload();}
 async function afterLogin(){
+  amDev=await checkDev();
   const {data:rows,error}=await sb.from("memberships").select("*, departments(id,name,join_code)").eq("user_id",me.id);
   if(error){alert("⚠️ Üyelikler okunamadı: "+error.message);showView("dept");return;}
   myTeams=(rows||[]).filter(r=>r.departments);
-  $("deptBackCard").style.display=myTeams.length?"block":"none";
+  $("deptBackCard").style.display=(myTeams.length||amDev)?"block":"none";
+  if($("devEntryCard"))$("devEntryCard").style.display=amDev?"block":"none";
+  if(amDev){renderTeams();showView("teams");return;}   // geliştirici: hep seçim ekranı (kendi ekibi + panel)
   if(!myTeams.length){showView("dept");return;}
   if(myTeams.length===1){await openTeam(myTeams[0].dept_id);return;}
   renderTeams();showView("teams");
+}
+/* Bu hesap geliştirici mi? Yetki yalnızca developers tablosundaki satırdan gelir (RLS herkese yalnız kendi satırını gösterir). */
+async function checkDev(){
+  try{const {data}=await sb.from("developers").select("user_id").eq("user_id",me.id).maybeSingle();return !!data;}
+  catch(e){return false;}
+}
+/* ---------- GELİŞTİRİCİ PANELİ ---------- */
+let devAll=[];
+async function openDevPanel(){
+  if(!amDev){showView("teams");return;}
+  showView("dev");
+  $("devList").innerHTML='<p class="hint">Yükleniyor…</p>';$("devSearch").value="";
+  const [{data:deps,error:de},{data:mem},{data:sch}]=await Promise.all([
+    sb.from("departments").select("id,name,join_code,month,sched_mode,opts"),
+    sb.from("memberships").select("dept_id,name,is_admin,is_test"),
+    sb.from("schedules").select("dept_id,month")
+  ]);
+  if(de){$("devList").innerHTML='<p class="banner err">⚠️ '+hEsc(de.message)+'</p>';return;}
+  const byD={},schD={};
+  (mem||[]).forEach(m=>{(byD[m.dept_id]=byD[m.dept_id]||[]).push(m);});
+  (sch||[]).forEach(s=>{(schD[s.dept_id]=schD[s.dept_id]||[]).push(s.month);});
+  devAll=(deps||[]).map(d=>{const ms=byD[d.id]||[];return {
+    id:d.id,name:d.name||"(adsız)",join_code:d.join_code,month:d.month,sched_mode:d.sched_mode,
+    real:ms.filter(m=>!m.is_test).length,test:ms.filter(m=>m.is_test).length,
+    admins:ms.filter(m=>m.is_admin&&!m.is_test).map(m=>m.name),
+    months:(schD[d.id]||[]).sort(),setup:!!(d.opts&&d.opts.setup_done)};
+  }).sort((a,b)=>b.real-a.real||(a.name||"").localeCompare(b.name||"","tr"));
+  renderDevList();
+}
+function renderDevList(){
+  if(!$("devList"))return;
+  const q=($("devSearch").value||"").toLocaleLowerCase("tr");
+  const list=devAll.filter(d=>!q||d.name.toLocaleLowerCase("tr").includes(q)||(d.join_code||"").toLowerCase().includes(q));
+  $("devStats").textContent=`${devAll.length} ekip · ${devAll.reduce((a,d)=>a+d.real,0)} gerçek üye`;
+  $("devList").innerHTML=list.map(d=>{
+    const son=d.months.length?ayAdi(d.months[d.months.length-1]):"liste yok";
+    const mod=d.sched_mode==="shifts"?"vardiya":"oda";
+    const sub=`${d.real} üye${d.test?` +${d.test}🧪`:""} · ${mod} · ${hEsc(ayAdi(d.month))} · son: ${hEsc(son)} · ${d.admins.length?"👑 "+hEsc(d.admins.join(", ")):"⚠️ yönetici yok"} · kod ${hEsc(d.join_code||"—")}`;
+    return `<div class="person" style="cursor:pointer" onclick="enterDevTeam('${d.id}')">
+      <div class="avatar">${d.setup?"🏥":"⚙️"}</div>
+      <div class="info"><div class="nm">${hEsc(d.name)}</div><div class="sub">${sub}</div></div>
+      <button class="btn ghost small" onclick="event.stopPropagation();enterDevTeam('${d.id}')">Gir →</button>
+    </div>`;
+  }).join("")||'<p class="hint">Eşleşen ekip yok.</p>';
+}
+async function enterDevTeam(deptId){
+  if(!amDev)return;
+  devActing=true;activeDept=deptId;
+  const myName=(me.user_metadata&&me.user_metadata.name)||me.email.split("@")[0];
+  myProfile={id:me.id,dept_id:deptId,is_admin:true,name:myName,pool:null};
+  showView("app");
+  await loadAll();
+  showDevBar(true);
+  showTab("bugun");
+}
+function exitDevTeam(){
+  devActing=false;activeDept=null;dept=null;schedule=null;members=[];
+  const db=$("devBar");if(db)db.style.display="none";
+  openDevPanel();
+}
+function showDevBar(on){
+  const bar=$("devBar");if(!bar)return;
+  bar.style.display=on?"flex":"none";
+  if(on)bar.innerHTML=`<span>🛠 <b>Geliştirici modu</b> — <b>${hEsc(dept?dept.name:"")}</b> ekibine destek için girdin. Yaptığın değişiklikler bu ekibe canlı yansır.</span><button onclick="exitDevTeam()">← Panele dön</button>`;
 }
 function renderTeams(){
   const box=$("teamList");box.innerHTML="";
