@@ -30,9 +30,10 @@ html,body,#phone,main{touch-action:pan-y pinch-zoom}
 .tblwrap{touch-action:pan-x pan-y}
 body{font-family:ui-rounded,-apple-system,"SF Pro Rounded","Segoe UI",Roboto,sans-serif;
   background:var(--bg);color:var(--ink);display:flex;justify-content:center;
-  min-height:100%;width:100%;max-width:100%;overflow-x:hidden;overscroll-behavior-y:none}
+  min-height:100%;width:100%;max-width:100%;overflow-x:hidden;overflow-x:clip}
+/* not: body kaydırma kutusuna dönüşmesin (Android'de sayfa kaymıyordu); "clip" kutu oluşturmadan taşanı keser */
 #phone{width:100%;max-width:430px;min-height:100dvh;display:flex;flex-direction:column;
-  position:relative;overflow-x:hidden}
+  position:relative;overflow-x:hidden;overflow-x:clip}
 header{background:linear-gradient(135deg,#12B5A6 0%,#0B7C72 60%,#085E56 100%);
   border-radius:0 0 30px 30px;color:#fff;padding:calc(18px + env(safe-area-inset-top)) 22px 6px;
   box-shadow:var(--sh-md);position:relative;overflow:hidden}
