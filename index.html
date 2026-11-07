@@ -1154,6 +1154,12 @@ body.wz-on{overflow:hidden}
 .devrow-actions .ic{cursor:pointer;border:none;background:transparent;font-size:17px;padding:4px;border-radius:8px;line-height:1}
 .devrow-actions .ic:hover{background:var(--surface-2)}
 .catbadge{display:inline-block;background:var(--tint-soft);color:var(--tint-strong,#0a7a5a);border-radius:6px;padding:1px 7px;font-size:11.5px;font-weight:600;margin-right:6px}
+.kidctl{display:flex;align-items:center;gap:8px}
+.kidctl .seninp{width:66px;text-align:center}
+.gseg{display:inline-flex;border:1px solid var(--line,#dcdce3);border-radius:10px;overflow:hidden}
+.gseg button{border:none;background:var(--surface);padding:6px 13px;font-size:14px;cursor:pointer;color:var(--ink);font-weight:600}
+.gseg button.on{background:var(--tint);color:#fff}
+.gseg button+button{border-left:1px solid var(--line,#dcdce3)}
 </style>
 <script id="ndJs">
 /* @ds-bundle: {"format":4,"namespace":"ND","components":[{"name":"Button"},{"name":"GroupedList"},{"name":"Switch"},{"name":"Stepper"},{"name":"Segmented"},{"name":"NavBar"},{"name":"TabBar"},{"name":"Sheet"},{"name":"Calendar"},{"name":"StatusBadge"},{"name":"Avatar"},{"name":"SwipeRow"},{"name":"NextDutyCard"},{"name":"ChoiceCard"},{"name":"WeekStrip"},{"name":"Banner"},{"name":"Toast"},{"name":"Progress"},{"name":"TextField"},{"name":"EmptyState"},{"name":"Stats"},{"name":"PreferenceBrush"}]} */
@@ -1620,6 +1626,32 @@ window.ND={guardClick:guardClick,icon:icon,icons:ICONS,haptic:haptic,stepper:ste
         <button class="btn ghost small" id="addOvrBtn" onclick="addOvrRow()">İstisna ekle</button>
       </div>
     </div>
+  </div>
+  <div class="card" id="kidemCard" data-grp="kidem">
+    <p class="eyebrow">Kişi özellikleri</p>
+    <h2>Kıdem ve cinsiyet</h2>
+    <p class="hint">Her kişiye bir kıdem derecesi (sayı) ver. İstersen "her nöbette şu kademeden en az bir kişi olsun" kuralını aç. Bu ayarları yalnız yönetici görür ve değiştirir.</p>
+    <div class="seg" id="senModeSeg" style="margin-bottom:12px">
+      <button data-m="off" onclick="senSetMode('off')">Kıdem kuralı kapalı</button>
+      <button data-m="on" onclick="senSetMode('on')">Kıdem kuralı açık</button>
+    </div>
+    <div id="senRuleBox" style="display:none">
+      <div class="nd-list" style="margin-bottom:6px">
+        <div class="nd-row"><span class="nd-row__body"><span class="nd-row__title">Kıdem eşiği</span><span class="nd-row__sub">bu sayı ve üstü "üst kıdem", altı "alt kıdem"</span></span><input type="number" id="senTh" min="0" max="99" value="3" onchange="senSaveRule()"></div>
+        <div class="nd-row"><span class="nd-row__body"><span class="nd-row__title">En az kaç üst kıdem</span><span class="nd-row__sub">her nöbette kıdem eşiği ve üstünden</span></span><input type="number" id="senHiMin" min="0" max="9" value="1" onchange="senSaveRule()"></div>
+        <div class="nd-row"><span class="nd-row__body"><span class="nd-row__title">En az kaç alt kıdem</span><span class="nd-row__sub">her nöbette eşiğin altından</span></span><input type="number" id="senLoMin" min="0" max="9" value="1" onchange="senSaveRule()"></div>
+      </div>
+      <div class="seg" id="senScopeSeg" style="margin-bottom:6px">
+        <button data-s="shift" onclick="senSetScope('shift')">Her vardiyada</button>
+        <button data-s="day" onclick="senSetScope('day')">Her gün</button>
+      </div>
+      <p class="hint" id="senRulePrev" style="margin:6px 2px"></p>
+    </div>
+    <div style="margin-top:14px;border-top:1.5px dashed var(--line);padding-top:12px">
+      <p class="eyebrow">Kişiler</p>
+      <div id="kidemList" class="nd-list"></div>
+    </div>
+    <div class="nd-group__foot" style="margin-top:10px">Cinsiyet dengesi kuralları ayrıca eklenecek; şimdilik buradan cinsiyeti işaretleyebilirsin.</div>
   </div>
   <div class="card" id="pinCard" data-grp="sabit">
     <p class="eyebrow">Yönetici · elle atama</p>
@@ -2411,6 +2443,7 @@ const SET_GROUPS=[
     {k:"ritim",ic:"rest",ad:"Çalışma ritmi",val:()=>{const r=rrCfg();return r?rrText(r):(dept&&dept.pattern_on>0)?`Sabit ${dept.pattern_on}/${dept.pattern_off}`:"Kapalı";}},
     {k:"oda",ic:"clock",ad:"Odalar ve nöbet saatleri"},
     {k:"vardiya",ic:"clock",ad:"Vardiyalar"},
+    {k:"kidem",ic:"people",ad:"Kıdem ve cinsiyet",val:()=>{const c=senCfg();return c?senText(c):"Kapalı";}},
     {k:"sabit",ic:"duty",ad:"Sabit atamalar"},
     {k:"kisit",ic:"avoid",ad:"Gün kısıtları"}],
     foot:"Kurallar her listede kesin uygulanır; istekler ancak kurallara uyuyorsa karşılanır."},
@@ -2446,6 +2479,7 @@ function setPage(k){
     if(nt)nt.textContent=SET_TITLE(k);
   }
   if(k==="ritim")try{renderRhythm();}catch(e){}
+  if(k==="kidem")try{renderKidem();}catch(e){}
   syncMiniBar();
   try{window.scrollTo(0,0);}catch(e){}
 }
@@ -2964,7 +2998,7 @@ async function loadAll(){
   requests=reqs||[];
   $("testCard").style.display=isAdmin()?"block":"none";
   renderTestList();
-  renderRooms();renderShifts();renderBlocks();renderPins();renderWR();renderWRCounters();modeChanged();renderProfile();renderPeople();renderAsPerson();syncIzinBox();renderPrefCal();renderPrefSummary();renderLeaveAdmin();renderQuota();renderCountdown();renderCloseMonth();renderMonthPickers();renderSchedule();renderReqs();fillReqForm();
+  renderRooms();renderShifts();renderBlocks();renderPins();renderWR();renderWRCounters();modeChanged();renderProfile();renderPeople();renderAsPerson();syncIzinBox();renderPrefCal();renderPrefSummary();renderLeaveAdmin();renderQuota();try{renderKidem();}catch(e){}renderCountdown();renderCloseMonth();renderMonthPickers();renderSchedule();renderReqs();fillReqForm();
   renderSetLanding();renderToday();bindMonthSwipe();
   try{ND.auto();}catch(e){}
   autoGenCheck();
@@ -4511,6 +4545,21 @@ async function saveSettings(){
 
 /* ---------- KİŞİ KURALLARI (vardiya modu) ---------- */
 function sp(p){return p.shift_prefs||{};}
+/* --- Kişi özellikleri (yönetici belirler, dept.opts.people'da saklanır; üyeler değiştiremez) --- */
+function peopleOpts(){return opts().people||{};}
+function paOf(p){return peopleOpts()[(p&&p.id)||p]||{};}
+function senOf(p){const v=paOf(p).sv;return (v==null||v==="")?null:+v;}        // kıdem derecesi (sayı) ya da null
+function genderOf(p){const g=paOf(p).g;return (g==="k"||g==="e")?g:null;}       // 'k'=kadın 'e'=erkek
+/* Kıdem kuralı: her vardiyada (ya da her gün) eşiğin üstünden/altından en az kaç kişi.
+   th = eşik; hiMin = kıdem≥th en az; loMin = kıdem<th en az. */
+function senCfg(){const s=opts().sen;if(!s||!s.on)return null;
+  const th=+s.th;
+  return {on:true,scope:s.scope==="day"?"day":"shift",th:isFinite(th)?th:3,
+    hiMin:Math.max(0,+s.hiMin||0),loMin:Math.max(0,+s.loMin||0)};}
+function senTier(p,cfg){const v=senOf(p);if(v==null)return null;return v>=cfg.th?"hi":"lo";}
+function senText(c){if(!c)return "Kapalı";
+  const parts=[];if(c.hiMin)parts.push(`${c.hiMin}× kıdem ${c.th}+`);if(c.loMin)parts.push(`${c.loMin}× kıdem ${c.th} altı`);
+  return (parts.join(" · ")||"Açık")+(c.scope==="day"?" (günde)":" (vardiyada)");}
 /* Kişinin TAM gece sayısı (yönetici kararı). null = otomatik dengele.
    Taslak kartından gelen (runNight) her zaman önceliklidir. */
 function nightWantOf(p){
@@ -4542,6 +4591,44 @@ async function setSP(id,key,val){
   const p=members.find(x=>x.id===id);if(!p)return;
   await updProfile(id,{shift_prefs:{...sp(p),[key]:val}});
 }
+/* ---------- KIDEM VE CİNSİYET ---------- */
+function renderKidem(){
+  const card=$("kidemCard");if(!card)return;
+  const adm=isAdmin();
+  const s=opts().sen||{},on=!!s.on;
+  const seg=$("senModeSeg");if(seg){seg.querySelectorAll("button").forEach(b=>b.classList.toggle("on",b.dataset.m===(on?"on":"off")));seg.style.display=adm?"":"none";}
+  $("senRuleBox").style.display=on?"block":"none";
+  if($("senTh"))$("senTh").value=s.th!=null?s.th:3;
+  if($("senHiMin"))$("senHiMin").value=s.hiMin!=null?s.hiMin:1;
+  if($("senLoMin"))$("senLoMin").value=s.loMin!=null?s.loMin:1;
+  const scope=s.scope==="day"?"day":"shift";
+  const ss=$("senScopeSeg");if(ss)ss.querySelectorAll("button").forEach(b=>b.classList.toggle("on",b.dataset.s===scope));
+  if($("senRulePrev"))$("senRulePrev").textContent="Kural: "+senText({th:+($("senTh").value||3),hiMin:+($("senHiMin").value||0),loMin:+($("senLoMin").value||0),scope});
+  const box=$("kidemList");if(box){box.innerHTML="";
+    members.filter(onDuty).forEach(p=>{
+      const sv=senOf(p),g=genderOf(p);
+      const d=document.createElement("div");d.className="nd-row has-av";
+      d.innerHTML=`${avatarHTML(p.id)}<span class="nd-row__body"><span class="nd-row__title">${hEsc(kisaAd(p.name))}</span><span class="nd-row__sub">${sv==null?"kıdem girilmedi":"kıdem "+sv}${g?" · "+(g==="k"?"kadın":"erkek"):""}</span></span>
+        <span class="kidctl">
+          <input type="number" class="seninp" min="0" max="99" placeholder="kıdem" value="${sv==null?"":sv}" ${adm?"":"disabled"} onchange="setPersonSen('${p.id}',this.value)">
+          <span class="gseg">
+            <button class="${g==="k"?"on":""}" ${adm?"":"disabled"} onclick="setPersonGender('${p.id}','k')">K</button>
+            <button class="${g==="e"?"on":""}" ${adm?"":"disabled"} onclick="setPersonGender('${p.id}','e')">E</button>
+          </span>
+        </span>`;
+      box.appendChild(d);
+    });}
+}
+function senSetMode(m){if(!isAdmin())return;const cur=opts().sen||{};saveDept({__opts:{sen:{...cur,on:m==="on"}}},"Kıdem kuralı",{after:()=>{renderKidem();renderSetLanding&&renderSetLanding();}});}
+function senSetScope(s){if(!isAdmin())return;const cur=opts().sen||{};saveDept({__opts:{sen:{...cur,scope:s}}},"Kıdem kapsamı",{after:renderKidem});}
+function senSaveRule(){if(!isAdmin())return;const cur=opts().sen||{};
+  saveDept({__opts:{sen:{...cur,on:cur.on!==false,th:+$("senTh").value||0,hiMin:Math.max(0,+$("senHiMin").value||0),loMin:Math.max(0,+$("senLoMin").value||0)}}},"Kıdem kuralı",{after:()=>{renderKidem();renderSetLanding&&renderSetLanding();}});}
+function setPersonSen(uid,v){if(!isAdmin())return;const ppl={...peopleOpts()},cur={...(ppl[uid]||{})};
+  if(v===""||v==null)delete cur.sv;else cur.sv=Math.max(0,+v||0);ppl[uid]=cur;
+  saveDept({__opts:{people:ppl}},"Kıdem derecesi",{after:()=>{renderKidem();}});}
+function setPersonGender(uid,g){if(!isAdmin())return;const ppl={...peopleOpts()},cur={...(ppl[uid]||{})};
+  cur.g=cur.g===g?null:g;if(!cur.g)delete cur.g;ppl[uid]=cur;
+  saveDept({__opts:{people:ppl}},"Cinsiyet",{after:renderKidem});}
 
 /* ---------- EKİP ---------- */
 function renderPeople(){
@@ -5435,7 +5522,8 @@ function makeEvaluator(slots,ctxd){
   /* oda modunda (24 saat) ritim 2+ seçildiyse yönetici art arda günü bilerek istiyor:
      saat bazlı dinlenme kuralı bitişik oda nöbetlerini engellemesin */
   const roomRhythm=(patOn>=2||!!(RR&&RR.wMax>=2))&&slots.length>0&&slots.every(s=>s.si<0);
-  const HARD=100000,RHY=4000;   // ritim: katı kurallardan hafif, diğer her şeyden ağır
+  const SENC=ctxd.sen||null;
+  const HARD=100000,RHY=4000,SENW=15000;   // ritim: katı kurallardan hafif; kıdem: güçlü ama katı değil
   const HX=ctxd.hours&&ctxd.hours.on?ctxd.hours:null,HW=60;
   return function(A,detail){
     const UH=HX?new Float64Array(n):null;
@@ -5590,6 +5678,17 @@ function makeEvaluator(slots,ctxd){
       else{const per={};for(const k in seen){const [a,b]=k.split("-");per[a]=(per[a]||0)+1;per[b]=(per[b]||0)+1;}
         for(const a in per)if(per[a]>1)pairPen+=(per[a]-1)*(per[a]-1)*6;}
     }
+    // kıdem kompozisyonu: her vardiyada (ya da günde) eşiğin üstünden/altından en az X kişi
+    let senV=0;
+    if(SENC){
+      const grp={};
+      for(let s=0;s<S;s++){const p=A[s];if(p<0)continue;const sl=slots[s];if(sl.si<0)continue;
+        const key=SENC.scope==="day"?(""+sl.d):(sl.d+"|"+sl.si);
+        const g=grp[key]||(grp[key]={hi:0,lo:0,filled:0});g.filled++;
+        const t=senTier(members[p],SENC);if(t==="hi")g.hi++;else if(t==="lo")g.lo++;}
+      for(const k in grp){const g=grp[k];
+        senV+=Math.max(0,SENC.hiMin-g.hi)+Math.max(0,SENC.loMin-g.lo);}
+    }
     // denge
     const varr=a=>{if(!a.length)return 0;const mu=a.reduce((x,v)=>x+v,0)/a.length;
       return a.reduce((s2,v)=>s2+(v-mu)*(v-mu),0);};
@@ -5606,9 +5705,9 @@ function makeEvaluator(slots,ctxd){
     let hourPen=0;
     if(UH)for(const p of act){const v=(HX.mixCum[p]+UH[p])/HX.unit;hourPen+=v*v;}
     const hard=(overlap+doubleDay+gapV+restV+restGap+nightOver+wrOffV+wrMaxV)*HARD+ekMiss*20000;
-    const total=hard+rhythmV*RHY+rrPen+bal*balW+pairPen+divPen+prefMiss*wishW+shapeSum*shapeW2
+    const total=hard+rhythmV*RHY+senV*SENW+rrPen+bal*balW+pairPen+divPen+prefMiss*wishW+shapeSum*shapeW2
       +satShort*3000+wrFair*1000+linkMiss*400+hourPen*HW;
-    if(detail)return {total,hard,overlap,doubleDay,gapV,restV,restGap,nightOver,empty,bal,pairPen,pairAdj,rhythmV,rrV,divPen,prefMiss,
+    if(detail)return {total,hard,overlap,doubleDay,gapV,restV,restGap,nightOver,empty,bal,pairPen,pairAdj,rhythmV,rrV,senV,divPen,prefMiss,
       NC,DC,WEC,WDC,wrOffV,wrMaxV,wrFair,ekMiss,satShort,ek:ekRes,linkMiss,hourPen,UH};
     return total;
   };
@@ -7519,7 +7618,7 @@ function solveSchedule(){
   const roomGap=!isShiftMode()&&!(patOnV>0)&&!RRC?Math.max(0,(+($("minGap").value||(dept&&dept.min_gap)||1))-1):null;
   const evalFn=makeEvaluator(slots,{y,m,nDays,bays,IV,MT,pm:partnerMode(),bDN:balDN(),bWE:balWE(),
     patOn:patOnV,patOff:patOffV,expShare,minRest:minRestH(),wishPri:wishPri(),nightWant:nWant,
-    wr:WRX,roomGap,linkSame:LNK.same,hours:HX,rr:RRC?{...RRC,prev:rrPrev(planAy())}:null});
+    wr:WRX,roomGap,linkSame:LNK.same,hours:HX,rr:RRC?{...RRC,prev:rrPrev(planAy())}:null,sen:isShiftMode()?senCfg():null});
   /* ritim seçiliyse önce listeyi blok blok kur; kurallar elvermezse takaslı yola geç */
   let RB=null,rbSuggest=null;
   if(patOnV>0&&!anyNW&&!WRX){
@@ -7668,6 +7767,18 @@ function solveSchedule(){
   if(rep.nightOver){
     const ad=[];members.forEach((p,i)=>{if(nWant[i]!=null&&rep.NC[i]!==nWant[i])ad.push(`${p.name} (${nWant[i]} istendi, ${rep.NC[i]} oldu)`);});
     viol.push(`⚠️ Gece sayısı tutmadı: ${ad.join(", ")}. Gece yerleri ya da kişilerin kuralları bu sayılara yetmiyor.`);
+  }
+  if(rep.senV){
+    const c=senCfg();
+    const grp={};
+    for(let s=0;s<S;s++){const pi=A2[s];if(pi<0)continue;const sl=slots[s];if(sl.si<0)continue;
+      const key=c.scope==="day"?(""+sl.d):(sl.d+"|"+sl.si);
+      const g=grp[key]||(grp[key]={hi:0,lo:0,d:sl.d,si:sl.si});
+      const t=senTier(members[pi],c);if(t==="hi")g.hi++;else if(t==="lo")g.lo++;}
+    const eksik=[];
+    for(const k in grp){const g=grp[k];if(g.hi<c.hiMin||g.lo<c.loMin){
+      const yer=c.scope==="day"?`${g.d}.`:`${g.d}. ${(shiftRows[g.si]||{}).name||"vardiya"}`;eksik.push(yer);}}
+    if(eksik.length)viol.push(`⚠️ Kıdem kuralı ${eksik.length} yerde tutturulamadı (${eksik.slice(0,4).join(", ")}${eksik.length>4?"…":""}). O gün/vardiyada uygun kıdemde kişi kalmamış olabilir.`);
   }
   if(rep.gapV)viol.push(`⚠️ ${rep.gapV} yerde "iki nöbet arası en az … gün" kuralı tutturulamadı.`);
   if(rep.restGap)viol.push(`⚠️ ${rep.restGap} yerde iki vardiya arası ${minRestH()} saat dinlenme sağlanamadı. (Ay ayarlarından bu süreyi düşürebilirsin.)`);
