@@ -1137,6 +1137,23 @@ body.wz-on{overflow:hidden}
   padding:7px 14px;font-weight:700;font-size:14px;cursor:pointer}
 #devBar button:hover{background:#ffc877}
 #devList .person .sub{font-size:12.5px;line-height:1.5}
+.fld{display:block;margin:10px 0}
+.fld>span{display:block;font-size:13px;color:var(--ink-2);margin:0 2px 5px}
+.fld input{width:100%}
+.chiprow{display:flex;flex-wrap:wrap;gap:8px;margin:2px 0 4px}
+.chiprow .chip{cursor:pointer;border:1px solid var(--line,#dcdce3);background:var(--surface);padding:7px 12px;border-radius:999px;font-size:13px;color:var(--ink)}
+.chiprow .chip.on{background:var(--tint);color:#fff;border-color:var(--tint)}
+.rowbtn{display:flex;gap:10px;margin-top:16px}
+.rowbtn .btn{flex:1}
+.btn.danger{background:#d64532;color:#fff;border-color:#d64532}
+.btn.danger:disabled{opacity:.45;cursor:not-allowed}
+.devgrp{margin:18px 0 4px;display:flex;align-items:baseline;gap:8px}
+.devgrp h3{margin:0;font-size:17px}
+.devgrp .cnt{font-size:12.5px;color:var(--ink-soft)}
+.devrow-actions{display:flex;gap:6px;align-items:center}
+.devrow-actions .ic{cursor:pointer;border:none;background:transparent;font-size:17px;padding:4px;border-radius:8px;line-height:1}
+.devrow-actions .ic:hover{background:var(--surface-2)}
+.catbadge{display:inline-block;background:var(--tint-soft);color:var(--tint-strong,#0a7a5a);border-radius:6px;padding:1px 7px;font-size:11.5px;font-weight:600;margin-right:6px}
 </style>
 <script id="ndJs">
 /* @ds-bundle: {"format":4,"namespace":"ND","components":[{"name":"Button"},{"name":"GroupedList"},{"name":"Switch"},{"name":"Stepper"},{"name":"Segmented"},{"name":"NavBar"},{"name":"TabBar"},{"name":"Sheet"},{"name":"Calendar"},{"name":"StatusBadge"},{"name":"Avatar"},{"name":"SwipeRow"},{"name":"NextDutyCard"},{"name":"ChoiceCard"},{"name":"WeekStrip"},{"name":"Banner"},{"name":"Toast"},{"name":"Progress"},{"name":"TextField"},{"name":"EmptyState"},{"name":"Stats"},{"name":"PreferenceBrush"}]} */
@@ -1352,10 +1369,45 @@ window.ND={guardClick:guardClick,icon:icon,icons:ICONS,haptic:haptic,stepper:ste
   <div class="card">
     <p class="eyebrow">Geliştirici paneli</p>
     <h2>Tüm ekipler</h2>
-    <p class="hint">Destek için bir ekibe gir; o ekibin yöneticisi gibi her ayarı ve listeyi görür, düzeltebilirsin. Değişiklikler o ekibe anında yansır. Kimsenin şifresine ihtiyaç yok.</p>
-    <input type="text" id="devSearch" placeholder="Ekip adı ya da kodu ara…" oninput="renderDevList()">
+    <p class="hint">Hastaneye göre gruplanır. Destek için bir ekibe gir; yöneticisi gibi her ayarı ve listeyi görür, düzeltebilirsin. Değişiklikler o ekibe anında yansır. Kimsenin şifresine ihtiyaç yok.</p>
+    <button class="btn" style="width:100%;margin-bottom:10px" onclick="devNewTeam()">+ Yeni liste oluştur</button>
+    <input type="text" id="devSearch" placeholder="Hastane, liste ya da kod ara…" oninput="renderDevList()">
     <div id="devStats" class="hint" style="margin:10px 2px 4px"></div>
     <div id="devList"></div>
+  </div>
+</div>
+
+<div id="devSheet" class="modal" onclick="if(event.target===this)devCloseSheet()">
+  <div class="sheet" onclick="event.stopPropagation()">
+    <h3 id="devSheetTitle">Yeni liste</h3>
+    <label class="fld"><span>Hastane</span>
+      <input type="text" id="devHosp" placeholder="örn. Ankara Şehir Hastanesi" list="devHospList"></label>
+    <datalist id="devHospList"></datalist>
+    <label class="fld"><span>Kategori</span>
+      <input type="text" id="devCat" placeholder="örn. Doktor"></label>
+    <div id="devCatChips" class="chiprow"></div>
+    <label class="fld"><span>Liste adı</span>
+      <input type="text" id="devName" placeholder="örn. Genel Cerrahi doktor nöbeti"></label>
+    <p class="hint" id="devSheetHint">Liste boş oluşturulur. Kişiler davet koduyla katılır; yöneticiyi sen panelden girip atarsın.</p>
+    <div id="devSheetErr" class="banner err" style="display:none"></div>
+    <div class="rowbtn">
+      <button class="btn ghost" onclick="devCloseSheet()">İptal</button>
+      <button class="btn" id="devSaveBtn" onclick="devSaveTeam()">Oluştur</button>
+    </div>
+  </div>
+</div>
+
+<div id="devDelSheet" class="modal" onclick="if(event.target===this)$('devDelSheet').classList.remove('on')">
+  <div class="sheet" onclick="event.stopPropagation()">
+    <h3>Listeyi sil</h3>
+    <p class="hint" id="devDelInfo"></p>
+    <div class="banner err" style="margin:6px 0">Bu işlem geri alınamaz. Listenin bütün üyeleri, tercihleri, nöbet listeleri ve geçmişi silinir.</div>
+    <label class="fld"><span>Onaylamak için liste adını yaz</span>
+      <input type="text" id="devDelConfirm" oninput="devDelCheck()" placeholder=""></label>
+    <div class="rowbtn">
+      <button class="btn ghost" onclick="$('devDelSheet').classList.remove('on')">Vazgeç</button>
+      <button class="btn danger" id="devDelBtn" disabled onclick="devDoDelete()">Kalıcı olarak sil</button>
+    </div>
   </div>
 </div>
 
@@ -1719,6 +1771,7 @@ window.ND={guardClick:guardClick,icon:icon,icons:ICONS,haptic:haptic,stepper:ste
       <button class="btn ghost small" onclick="csvIndir()">Excel</button>
       <button class="btn gold small" id="devirBtn" onclick="devireEkle()">Devire ekle</button>
       <button class="btn ghost small" onclick="loadAll()">Yenile</button>
+      <button class="btn ghost small danger" id="delMonthBtn" style="display:none" onclick="deleteMonthList()">Bu ayın listesini sil</button>
     </div>
   </div>
   <div class="card">
@@ -2652,12 +2705,14 @@ async function checkDev(){
 }
 /* ---------- GELİŞTİRİCİ PANELİ ---------- */
 let devAll=[];
+const DEV_CATS=["Doktor","Hasta danışmanı","Hemşire","Yardımcı personel"];
+const DEV_NOHOSP="⚠️ Hastane atanmamış";
 async function openDevPanel(){
   if(!amDev){showView("teams");return;}
   showView("dev");
-  $("devList").innerHTML='<p class="hint">Yükleniyor…</p>';$("devSearch").value="";
+  $("devList").innerHTML='<p class="hint">Yükleniyor…</p>';
   const [{data:deps,error:de},{data:mem},{data:sch}]=await Promise.all([
-    sb.from("departments").select("id,name,join_code,month,sched_mode,opts"),
+    sb.from("departments").select("id,name,join_code,month,sched_mode,opts,hospital,category"),
     sb.from("memberships").select("dept_id,name,is_admin,is_test"),
     sb.from("schedules").select("dept_id,month")
   ]);
@@ -2667,27 +2722,114 @@ async function openDevPanel(){
   (sch||[]).forEach(s=>{(schD[s.dept_id]=schD[s.dept_id]||[]).push(s.month);});
   devAll=(deps||[]).map(d=>{const ms=byD[d.id]||[];return {
     id:d.id,name:d.name||"(adsız)",join_code:d.join_code,month:d.month,sched_mode:d.sched_mode,
+    hospital:(d.hospital||"").trim(),category:(d.category||"").trim(),
     real:ms.filter(m=>!m.is_test).length,test:ms.filter(m=>m.is_test).length,
     admins:ms.filter(m=>m.is_admin&&!m.is_test).map(m=>m.name),
     months:(schD[d.id]||[]).sort(),setup:!!(d.opts&&d.opts.setup_done)};
-  }).sort((a,b)=>b.real-a.real||(a.name||"").localeCompare(b.name||"","tr"));
+  });
+  // hastane önerileri (datalist)
+  const hosps=[...new Set(devAll.map(d=>d.hospital).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"tr"));
+  if($("devHospList"))$("devHospList").innerHTML=hosps.map(h=>`<option value="${hEsc(h)}">`).join("");
   renderDevList();
 }
 function renderDevList(){
   if(!$("devList"))return;
   const q=($("devSearch").value||"").toLocaleLowerCase("tr");
-  const list=devAll.filter(d=>!q||d.name.toLocaleLowerCase("tr").includes(q)||(d.join_code||"").toLowerCase().includes(q));
-  $("devStats").textContent=`${devAll.length} ekip · ${devAll.reduce((a,d)=>a+d.real,0)} gerçek üye`;
-  $("devList").innerHTML=list.map(d=>{
-    const son=d.months.length?ayAdi(d.months[d.months.length-1]):"liste yok";
-    const mod=d.sched_mode==="shifts"?"vardiya":"oda";
-    const sub=`${d.real} üye${d.test?` +${d.test}🧪`:""} · ${mod} · ${hEsc(ayAdi(d.month))} · son: ${hEsc(son)} · ${d.admins.length?"👑 "+hEsc(d.admins.join(", ")):"⚠️ yönetici yok"} · kod ${hEsc(d.join_code||"—")}`;
-    return `<div class="person" style="cursor:pointer" onclick="enterDevTeam('${d.id}')">
-      <div class="avatar">${d.setup?"🏥":"⚙️"}</div>
-      <div class="info"><div class="nm">${hEsc(d.name)}</div><div class="sub">${sub}</div></div>
-      <button class="btn ghost small" onclick="event.stopPropagation();enterDevTeam('${d.id}')">Gir →</button>
-    </div>`;
-  }).join("")||'<p class="hint">Eşleşen ekip yok.</p>';
+  const match=d=>!q||[d.name,d.hospital,d.category,d.join_code].some(x=>(x||"").toLocaleLowerCase("tr").includes(q));
+  const list=devAll.filter(match);
+  $("devStats").textContent=`${devAll.length} liste · ${new Set(devAll.map(d=>d.hospital||DEV_NOHOSP)).size} hastane · ${devAll.reduce((a,d)=>a+d.real,0)} gerçek üye`;
+  // hastaneye göre grupla
+  const groups={};
+  list.forEach(d=>{const h=d.hospital||DEV_NOHOSP;(groups[h]=groups[h]||[]).push(d);});
+  const names=Object.keys(groups).sort((a,b)=>a===DEV_NOHOSP?1:b===DEV_NOHOSP?-1:a.localeCompare(b,"tr"));
+  const catRank=c=>{const i=DEV_CATS.findIndex(x=>x.toLocaleLowerCase("tr")===(c||"").toLocaleLowerCase("tr"));return i<0?99:i;};
+  $("devList").innerHTML=names.map(h=>{
+    const rows=groups[h].sort((a,b)=>catRank(a.category)-catRank(b.category)||b.real-a.real||a.name.localeCompare(b.name,"tr"));
+    const head=`<div class="devgrp"><h3>${h===DEV_NOHOSP?h:"🏥 "+hEsc(h)}</h3><span class="cnt">${rows.length} liste</span></div>`;
+    return head+rows.map(d=>{
+      const son=d.months.length?ayAdi(d.months[d.months.length-1]):"liste yok";
+      const mod=d.sched_mode==="shifts"?"vardiya":"oda";
+      const cat=d.category?`<span class="catbadge">${hEsc(d.category)}</span>`:"";
+      const sub=`${d.real} üye${d.test?` +${d.test}🧪`:""} · ${mod} · son: ${hEsc(son)} · ${d.admins.length?"👑 "+hEsc(d.admins.join(", ")):"⚠️ yönetici yok"} · kod ${hEsc(d.join_code||"—")}`;
+      return `<div class="person" style="cursor:pointer" onclick="enterDevTeam('${d.id}')">
+        <div class="avatar">${d.setup?"🏥":"⚙️"}</div>
+        <div class="info"><div class="nm">${cat}${hEsc(d.name)}</div><div class="sub">${sub}</div></div>
+        <div class="devrow-actions">
+          <button class="ic" title="Düzenle" onclick="event.stopPropagation();devEditTeam('${d.id}')">✏️</button>
+          <button class="ic" title="Sil" onclick="event.stopPropagation();devAskDelete('${d.id}')">🗑️</button>
+          <button class="btn ghost small" onclick="event.stopPropagation();enterDevTeam('${d.id}')">Gir →</button>
+        </div>
+      </div>`;
+    }).join("");
+  }).join("")||'<p class="hint">Eşleşen liste yok.</p>';
+}
+/* --- liste oluştur / düzenle --- */
+let devEditId=null;
+function devCatChips(sel){
+  const box=$("devCatChips");if(!box)return;
+  box.innerHTML=DEV_CATS.map(c=>`<span class="chip${(sel||"").toLocaleLowerCase("tr")===c.toLocaleLowerCase("tr")?" on":""}" onclick="$('devCat').value='${c}';devCatChips('${c}')">${c}</span>`).join("");
+}
+function devNewTeam(){
+  devEditId=null;
+  $("devSheetTitle").textContent="Yeni liste";$("devSaveBtn").textContent="Oluştur";
+  $("devSheetHint").style.display="";
+  $("devHosp").value="";$("devCat").value="";$("devName").value="";
+  $("devSheetErr").style.display="none";devCatChips("");
+  $("devSheet").classList.add("on");setTimeout(()=>$("devHosp").focus(),50);
+}
+function devEditTeam(id){
+  const d=devAll.find(x=>x.id===id);if(!d)return;
+  devEditId=id;
+  $("devSheetTitle").textContent="Listeyi düzenle";$("devSaveBtn").textContent="Kaydet";
+  $("devSheetHint").style.display="none";
+  $("devHosp").value=d.hospital;$("devCat").value=d.category;$("devName").value=d.name;
+  $("devSheetErr").style.display="none";devCatChips(d.category);
+  $("devSheet").classList.add("on");setTimeout(()=>$("devHosp").focus(),50);
+}
+function devCloseSheet(){$("devSheet").classList.remove("on");}
+async function devSaveTeam(){
+  const hosp=$("devHosp").value.trim(),cat=$("devCat").value.trim(),nm=$("devName").value.trim();
+  const err=m=>{$("devSheetErr").textContent=m;$("devSheetErr").style.display="";};
+  if(!nm){err("Liste adı gerekli.");return;}
+  $("devSaveBtn").disabled=true;
+  try{
+    if(devEditId){
+      const {error}=await sb.from("departments").update({name:nm,hospital:hosp||null,category:cat||null}).eq("id",devEditId);
+      if(error)throw error;
+      toast("✓ Liste güncellendi");
+    }else{
+      const {data,error}=await sb.rpc("dev_create_department",{hospital:hosp,category:cat,dept_name:nm});
+      if(error)throw error;
+      if(data&&data.error)throw new Error(data.error);
+      toast("✓ Liste oluşturuldu · kod "+(data&&data.join_code||""));
+    }
+    devCloseSheet();await openDevPanel();
+  }catch(e){err("⚠️ "+(e.message||e));}
+  $("devSaveBtn").disabled=false;
+}
+/* --- liste sil --- */
+let devDelId=null;
+function devAskDelete(id){
+  const d=devAll.find(x=>x.id===id);if(!d)return;
+  devDelId=id;
+  $("devDelInfo").innerHTML=`<b>${hEsc(d.name)}</b>${d.hospital?" — "+hEsc(d.hospital):""} · ${d.real} gerçek üye · ${d.months.length} aylık liste`;
+  $("devDelConfirm").value="";$("devDelConfirm").placeholder=d.name;$("devDelBtn").disabled=true;
+  $("devDelSheet").classList.add("on");
+}
+function devDelCheck(){
+  const d=devAll.find(x=>x.id===devDelId);
+  $("devDelBtn").disabled=!d||$("devDelConfirm").value.trim()!==d.name;
+}
+async function devDoDelete(){
+  const d=devAll.find(x=>x.id===devDelId);if(!d)return;
+  $("devDelBtn").disabled=true;
+  try{
+    const {data,error}=await sb.rpc("delete_department",{d:devDelId});
+    if(error)throw error;
+    if(data&&data.error)throw new Error(data.error);
+    $("devDelSheet").classList.remove("on");toast("🗑️ "+d.name+" silindi");
+    await openDevPanel();
+  }catch(e){alert("⚠️ Silinemedi: "+(e.message||e));$("devDelBtn").disabled=false;}
 }
 async function enterDevTeam(deptId){
   if(!amDev)return;
@@ -7825,7 +7967,21 @@ function computeShifts(){
 
 /* ---------- GÖRÜNÜM ---------- */
 function entryList(d){return (schedule&&schedule.asg[d])||[];}
+async function deleteMonthList(){
+  if(!isAdmin()||!schedule)return;
+  const mk=vMonth();
+  if(!confirm(`${ayAdi(mk)} ayının nöbet listesi silinecek.\n\nKişilerin izin ve tercihleri KALIR; yalnızca üretilmiş liste ve bu ayın sürüm geçmişi silinir. İstersen sonra yeniden üretebilirsin.\n\nDevam edilsin mi?`))return;
+  try{
+    const {error}=await sb.from("schedules").delete().eq("dept_id",dept.id).eq("month",mk);
+    if(error)throw error;
+    await sb.from("schedule_versions").delete().eq("dept_id",dept.id).eq("month",mk);
+    toast("🗑️ "+ayAdi(mk)+" listesi silindi");
+    if(viewMonth===mk)viewMonth=null;
+    await loadAll();
+  }catch(e){alert("⚠️ Silinemedi: "+(e.message||e));}
+}
 function renderSchedule(){
+  if($("delMonthBtn"))$("delMonthBtn").style.display=(schedule&&isAdmin())?"inline-block":"none";
   if(!schedule){$("schedWrap").innerHTML='<div class="empty-state"><div class="big">🗓️</div>Henüz yayınlanmış çizelge yok.</div>';
     $("fairWrap").innerHTML='<div class="empty-state">Çizelge yayınlanınca burada denge görünür.</div>';
     ["stTotal","stViol","stBal"].forEach(i=>$(i).textContent="—");$("genBanner").innerHTML="";
