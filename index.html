@@ -1359,6 +1359,63 @@ window.ND={guardClick:guardClick,icon:icon,icons:ICONS,haptic:haptic,stepper:ste
 })();
 
 </script>
+<style id="ndFeel">
+/* ================= Dokunuş ve hareket — iOS hissi =================
+   Basınca anında karşılık, bırakınca yumuşak dönüş; perdeler parmakla çekilir; sayfalar kayarak gelir. */
+.sr-only{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+:where(button,a,[onclick],[role="button"],label.nd-row,.nd-row,.dtchip,.dchip,.day,.prefday,.strip__d,.iss-row,.rb-type,.seg button,.setback,.monthbtn,.cy-pre button,.stat){
+  transition:background-color .3s ease,opacity .3s ease,transform .38s cubic-bezier(.32,.72,0,1),box-shadow .3s ease,color .2s ease}
+:where(button,a,[onclick],[role="button"],label.nd-row,.nd-row,.dtchip,.dchip,.day,.prefday,.strip__d,.iss-row,.rb-type,.seg button,.setback,.monthbtn,.cy-pre button):active{transition-duration:.04s}
+div.nd-row[onclick]:active,label.nd-row:active{background:var(--surface-2)}
+.iss-row:not([disabled]):active,.rb-type:active{background:var(--surface-3)}
+.dtchip:active,.dchip:active,.cy-pre button:active,.prefday:active,.day[onclick]:active,.chip-p:active{transform:scale(.93)}
+.setback:active,.nd-btn.is-plain:active,.vtag:active{opacity:.35}
+.seg button:not(.on):active{opacity:.55}
+.monthbtn:active{background:var(--surface-3)}
+.card[onclick]:active{transform:scale(.985)}
+#mainNav button:active{transform:scale(.9)}
+.nd-btn.is-tinted:active,.btn.ghost:active{opacity:.6}
+@media (hover:none){button:hover,.nd-row:hover{filter:none}}
+
+/* ---------- alttan perdeler: açılış/kapanış süzülerek, parmakla aşağı çekip kapatma ---------- */
+.modal{display:flex!important;visibility:hidden;opacity:0;pointer-events:none;
+  transition:opacity .32s ease,visibility 0s linear .36s}
+.modal.on{visibility:visible;opacity:1;pointer-events:auto;transition:opacity .24s ease,visibility 0s}
+.modal .sheet{transform:translate3d(0,104%,0);transition:transform .36s cubic-bezier(.32,.72,0,1);will-change:transform}
+.modal.on .sheet{transform:none;animation:none!important;transition:transform .52s cubic-bezier(.32,.72,0,1)}
+.modal .sheet.is-drag{transition:none!important}
+.modal .sheet::before{cursor:grab}
+@media (min-width:1024px){
+  .modal .sheet{transform:translate3d(0,14px,0) scale(.97);opacity:0;transition:transform .22s ease,opacity .18s ease}
+  .modal.on .sheet{transform:none;opacity:1;transition:transform .32s cubic-bezier(.2,.8,.2,1),opacity .2s ease}
+}
+@media (prefers-reduced-motion:reduce){.modal,.modal .sheet,.modal.on .sheet{transition-duration:1ms!important}}
+
+/* ---------- ayarlar: alt sayfa sağdan gelir, geri dönüş soldan; kenardan sürükleyince geri ---------- */
+#tab-kurulum.pg-push>*:not(.pg-hide){animation:ndPush .42s cubic-bezier(.32,.72,0,1) both}
+#tab-kurulum.pg-pop>*:not(.pg-hide){animation:ndPopBack .42s cubic-bezier(.32,.72,0,1) both}
+@keyframes ndPush{from{transform:translate3d(32%,0,0);opacity:0}to{transform:none;opacity:1}}
+@keyframes ndPopBack{from{transform:translate3d(-22%,0,0);opacity:0}to{transform:none;opacity:1}}
+#tab-kurulum.is-edge{transition:none;will-change:transform}
+#tab-kurulum.is-edge-back{transition:transform .32s cubic-bezier(.32,.72,0,1)}
+.ndhdr__title{transition:opacity .2s ease}
+.ndhdr__title.is-long{font-size:28px;line-height:34px}
+.hdrback{min-height:28px;padding:0;margin-left:-6px;font-size:17px}
+.hdrback .nd-ico{width:24px;height:24px}
+@media (prefers-reduced-motion:reduce){#tab-kurulum.pg-push>*,#tab-kurulum.pg-pop>*{animation:none!important}}
+
+/* ---------- Ayarlar listesi: tek satır, uzun değer üç noktayla ---------- */
+#setLanding .nd-row__title{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#setLanding .nd-row__value{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:44%;flex:0 1 auto;min-width:0}
+
+/* ---------- Kurallar: tutamaçtan tutup sürükle ---------- */
+.rl-ord{align-self:center}
+.rl-grip{display:grid;place-items:center;width:40px;height:44px;margin:-6px -8px -6px 0;color:var(--ink-3);touch-action:none;cursor:grab;border-radius:10px;user-select:none;-webkit-user-select:none}
+.rl-grip:active{cursor:grabbing;color:var(--tint)}
+.rl-card{transition:transform .28s cubic-bezier(.32,.72,0,1),box-shadow .2s ease}
+.rl-card.is-lift{transition:box-shadow .2s ease;box-shadow:var(--shadow-lift);transform:scale(1.02);z-index:3;position:relative;background:var(--surface)}
+.rl-list-drag .rl-card:not(.is-lift){transition:transform .24s cubic-bezier(.32,.72,0,1)}
+</style>
 </head>
 <body>
 <div id="phone">
@@ -1366,6 +1423,7 @@ window.ND={guardClick:guardClick,icon:icon,icons:ICONS,haptic:haptic,stepper:ste
 <div id="wizard" class="wz" role="dialog" aria-modal="true"></div>
 <header class="ndhdr">
   <div class="ndhdr__top">
+    <button type="button" class="setback hdrback" id="hdrBack" onclick="setPage('root')" style="display:none"></button>
     <span class="ndhdr__team" id="subTitle">Nöbetin kolay ve adil hali</span>
     <span class="vtag" id="logoutBtn" onclick="logout()" style="display:none">Çıkış</span>
   </div>
@@ -1700,7 +1758,7 @@ window.ND={guardClick:guardClick,icon:icon,icons:ICONS,haptic:haptic,stepper:ste
   <div class="card" id="ruleCard" data-grp="kural">
     <p class="eyebrow">Tek sayfada bütün kurallar</p>
     <h2>Kurallar ve önem sırası</h2>
-    <p class="hint">Her kural bir cümle. Liste tam oturmazsa program önce en alttaki kuralı esnetir; sırayı ▲ ▼ ile değiştir. Kesin kurallar hiç esnemez.</p>
+    <p class="hint">Her kural bir cümle. Liste tam oturmazsa program önce en alttaki kuralı esnetir; sırayı tutamaçtan tutup sürükleyerek değiştir. Kesin kurallar hiç esnemez.</p>
     <div id="ruleList"></div>
     <button class="btn" id="ruleAddBtn" style="width:100%;margin-top:10px" onclick="ruleNew()">＋ Kural ekle</button>
   </div>
@@ -1838,11 +1896,6 @@ window.ND={guardClick:guardClick,icon:icon,icons:ICONS,haptic:haptic,stepper:ste
 </section>
 
 <section id="tab-cizelge" class="tab">
-  <div class="stats">
-    <div class="stat"><div class="v" id="stTotal">—</div><div class="l">Toplam nöbet</div></div>
-    <div class="stat"><div class="v" id="stViol">—</div><div class="l">Kural ihlali</div></div>
-    <div class="stat"><div class="v" id="stBal">—</div><div class="l">Denge skoru</div></div>
-  </div>
   <div class="card ios" id="decideCard" style="display:none">
     <p class="eyebrow">Yönetici onayı · taslak</p>
     <h2>Taslağı kontrol et</h2>
@@ -1878,12 +1931,8 @@ window.ND={guardClick:guardClick,icon:icon,icons:ICONS,haptic:haptic,stepper:ste
   <div class="card">
     <p class="eyebrow">Aylık plan</p>
     <h2>Çizelge</h2>
-    <div id="genRow"><p class="hint">Herkes izin/tercih girince yönetici üretir; anında herkeste görünür.</p>
-    <button class="btn" style="width:100%" onclick="openPrepWizard()">Listeyi hazırla</button>
-    <button class="btn ghost small" style="width:100%;margin-top:8px" onclick="generate()">Doğrudan taslak üret</button></div>
     <button type="button" class="monthbtn" id="viewMonthBtn" data-noauto onclick="openViewMonth()"><span>Ay</span><b id="viewMonthLbl">—</b><i></i></button>
     <div id="viewMonthBanner"></div>
-    <div id="genBanner"></div>
     <div class="seg" id="schedViewRow">
       <button class="on" id="vwCal" onclick="setSchedView('cal')">Takvim</button>
       <button id="vwList" onclick="setSchedView('list')">Liste</button>
@@ -1891,6 +1940,10 @@ window.ND={guardClick:guardClick,icon:icon,icons:ICONS,haptic:haptic,stepper:ste
     </div>
     <div id="schedLegend" class="daychips" style="margin-bottom:8px"></div>
     <div id="schedWrap"><div class="empty-state"><div class="big">🗓️</div>Henüz yayınlanmış çizelge yok.</div></div>
+    <div id="genBanner"></div>
+    <div id="genRow"><p class="hint">Herkes izin/tercih girince yönetici üretir; anında herkeste görünür.</p>
+    <button class="btn" style="width:100%" onclick="openPrepWizard()">Listeyi hazırla</button>
+    <button class="btn ghost small" style="width:100%;margin-top:8px" onclick="generate()">Doğrudan taslak üret</button></div>
     <div id="verBox"></div>
     <div class="row" style="margin-top:12px">
       <button class="btn gold small" onclick="wordIndir()">Resmi liste (Word)</button>
@@ -1901,6 +1954,11 @@ window.ND={guardClick:guardClick,icon:icon,icons:ICONS,haptic:haptic,stepper:ste
       <button class="btn ghost small" onclick="loadAll()">Yenile</button>
       <button class="btn ghost small danger" id="delMonthBtn" style="display:none" onclick="deleteMonthList()">Bu ayın listesini sil</button>
     </div>
+  </div>
+  <div class="stats">
+    <div class="stat"><div class="v" id="stTotal">—</div><div class="l">Toplam nöbet</div></div>
+    <div class="stat"><div class="v" id="stViol">—</div><div class="l">Kural ihlali</div></div>
+    <div class="stat"><div class="v" id="stBal">—</div><div class="l">Denge skoru</div></div>
   </div>
   <div class="card">
     <p class="eyebrow">Şeffaflık</p>
@@ -2253,6 +2311,9 @@ function makeSwipe(row,leftTxt,rightTxt,onLeft,onRight){
 
 /* ---------- büyük başlık: kaydırınca üstte küçük başlık ---------- */
 function syncMiniBar(){
+  {const hb=$("hdrBack"),st=$("subTitle"),k=$("tab-kurulum");const sub=k&&k.classList.contains("active")&&k.dataset.page!=="root";
+    if(hb)hb.style.display=sub?"":"none";if(st)st.style.display=sub?"none":"";}
+  {const nt=$("navTitle");if(nt)nt.classList.toggle("is-long",(nt.textContent||"").length>15);}
   const mb=$("miniBar");if(!mb)return;
   const t=($("navTitle")||{}).textContent||"";
   const sub=$("tab-kurulum")&&$("tab-kurulum").classList.contains("active")&&$("tab-kurulum").dataset.page!=="root";
@@ -2741,16 +2802,28 @@ function renderSetLanding(){
       `</div>${g.foot?`<div class="nd-group__foot">${g.foot}</div>`:""}</div>`;
   }).join("");
 }
-function setPage(k){
+const SET_SHORT={ay:"Bu ay",sayi:"Nöbet sayıları",kapat:"Ayı kapat",ekip:"Ekip",kural:"Kurallar",wr:"İzin ve sıra",ritim:"Çalışma ritmi",
+  oda:"Odalar",vardiya:"Vardiyalar",kidem:"Kıdem ve cinsiyet",sabit:"Sabit atamalar",kisit:"Gün kısıtları",profil:"Profilim",gelismis:"Gelişmiş"};
+function setPage(k,opt){
   const sec=$("tab-kurulum");if(!sec)return;
+  const prev=sec.dataset.page||"root";
   sec.dataset.page=k;
+  /* iOS gibi: alt sayfa sağdan gelir, geri dönüş soldan; tarayıcı/telefon geri hareketi ayarlara döner */
+  if(prev!==k&&!(opt&&opt.still)){sec.classList.remove("pg-push","pg-pop");void sec.offsetWidth;sec.classList.add(k==="root"?"pg-pop":"pg-push");
+    clearTimeout(sec._pgT);sec._pgT=setTimeout(()=>sec.classList.remove("pg-push","pg-pop"),520);}
+  try{if(k!=="root"&&prev==="root"&&!(opt&&opt.pop))history.pushState({ndset:k},"");
+    else if(k!=="root"&&prev!=="root"&&history.state&&history.state.ndset)history.replaceState({ndset:k},"");
+    else if(k==="root"&&!(opt&&opt.pop)&&history.state&&history.state.ndset)history.replaceState(null,"");}catch(e){}
   sec.querySelectorAll(".card[data-grp]").forEach(c=>c.classList.toggle("pg-hide",k==="root"||!c.dataset.grp.split(" ").includes(k)));
-  const bar=$("setBar"),nt=$("navTitle");
-  if(k==="root"){bar.innerHTML="";if(nt)nt.textContent="Ayarlar";renderSetLanding();}
+  const bar=$("setBar"),nt=$("navTitle"),hb=$("hdrBack"),st=$("subTitle");
+  if(k==="root"){bar.innerHTML="";if(nt)nt.textContent="Ayarlar";renderSetLanding();if(hb)hb.style.display="none";if(st)st.style.display="";}
   else{
-    bar.innerHTML=`<button class="setback" onclick="setPage('root')">${ND.icon("chev-l")}Ayarlar</button>`;
-    if(nt)nt.textContent=SET_TITLE(k);
+    bar.innerHTML="";
+    if(hb){hb.innerHTML=`${ND.icon("chev-l")}Ayarlar`;hb.style.display="";}
+    if(st)st.style.display="none";
+    if(nt)nt.textContent=SET_SHORT[k]||SET_TITLE(k);
   }
+  if(nt)nt.classList.toggle("is-long",(nt.textContent||"").length>15);
   if(k==="ritim")try{renderRhythm();}catch(e){}
   if(k==="kidem")try{renderKidem();}catch(e){}
   if(k==="kural")try{renderRules();}catch(e){}
@@ -4248,7 +4321,7 @@ function renderWR(){
   if(!$("wrCard"))return;
   const c=wrCfg(),ro=!isAdmin();
   const on=$("wrOnChk");on.checked=c.on;on.disabled=ro;
-  $("wrBody").style.opacity=c.on?"1":".55";
+  $("wrBody").style.opacity="1";
   const dis=ro?"disabled":"";
   const dflt=c.def;
   $("wrDays").innerHTML=iosRow("Nöbetten sonra izinli",`<input type="number" min="0" max="6" value="${dflt}" ${dis} aria-label="Gün" onchange="wrSetDefault(this.value)">`,
@@ -6994,19 +7067,20 @@ function renderRules(){
   const adm=isAdmin(),K=priKeys(),B={};builtinRuleRows().forEach(x=>{B[x.key]=x;});
   const RA=rulesAll(),byId={};RA.forEach(r=>{byId[r.id]=r;});
   const card=(key,i)=>{
-    const up=adm&&i>0?`<button class="rl-ic" aria-label="Yukarı" onclick="rulePri(${i},-1)">▲</button>`:`<span class="rl-ic is-x"></span>`;
-    const dn=adm&&i<K.length-1?`<button class="rl-ic" aria-label="Aşağı" onclick="rulePri(${i},1)">▼</button>`:`<span class="rl-ic is-x"></span>`;
+    const up=adm&&i>0?`<button class="rl-ic sr-only" aria-label="Yukarı taşı" onclick="rulePri(${i},-1)">▲</button>`:"";
+    const dn=adm&&i<K.length-1?`<button class="rl-ic sr-only" aria-label="Aşağı taşı" onclick="rulePri(${i},1)">▼</button>`:"";
+    const grip=adm&&K.length>1?`<span class="rl-grip" aria-hidden="true" title="Tut ve sürükle">${ND.icon("grip")}</span>`:"";
     if(key.startsWith("b:")){const b=B[key];if(!b)return "";
-      return `<div class="rl-card"><span class="rl-no">${i+1}</span><div class="rl-body"><div class="rl-txt">${hEsc(b.txt)}</div>
-        <div class="rl-act"><button class="nd-btn is-sm is-tinted" onclick="setPage('${b.page}')">Düzenle</button></div></div><div class="rl-ord">${up}${dn}</div></div>`;}
+      return `<div class="rl-card" data-pi="${i}"><span class="rl-no">${i+1}</span><div class="rl-body"><div class="rl-txt">${hEsc(b.txt)}</div>
+        <div class="rl-act"><button class="nd-btn is-sm is-tinted" onclick="setPage('${b.page}')">Düzenle</button></div></div><div class="rl-ord">${grip}${up}${dn}</div></div>`;}
     const r=byId[key.slice(2)];if(!r)return "";
     const off=r.on===false;
-    return `<div class="rl-card${off?" is-off":""}"><span class="rl-no">${i+1}</span><div class="rl-body"><div class="rl-txt">${hEsc(ruleText(r))}</div>
+    return `<div class="rl-card${off?" is-off":""}" data-pi="${i}"><span class="rl-no">${i+1}</span><div class="rl-body"><div class="rl-txt">${hEsc(ruleText(r))}</div>
       ${adm?`<div class="rl-act"><label class="rl-sw"><input type="checkbox" ${off?"":"checked"} onchange="ruleToggle('${r.id}',this.checked)"> ${off?"Kapalı":"Açık"}</label>
         <button class="nd-btn is-sm is-tinted" onclick="ruleEdit('${r.id}')">Düzenle</button>
-        <button class="nd-btn is-sm is-danger" onclick="ruleDel('${r.id}')">Sil</button></div>`:""}</div><div class="rl-ord">${up}${dn}</div></div>`;};
+        <button class="nd-btn is-sm is-danger" onclick="ruleDel('${r.id}')">Sil</button></div>`:""}</div><div class="rl-ord">${grip}${up}${dn}</div></div>`;};
   let h="";
-  if(K.length)h+=`<div class="rl-head">${Array.isArray(opts().pri)?"Önem sırasıyla — liste tam oturmazsa önce en alttaki esner":"Şu an hepsi eşit önemde — sıralamak için ▲ ▼ kullan"}</div>`+K.map(card).join("");
+  if(K.length)h+=`<div class="rl-head">${Array.isArray(opts().pri)?"Önem sırasıyla — liste tam oturmazsa önce en alttaki esner":"Şu an hepsi eşit önemde — sıralamak için sağdaki tutamaçtan tutup sürükle"}</div>`+K.map(card).join("");
   const hard=RA.filter(r=>r.t==="only"||r.t==="staff");
   const fixed=[];
   if(isShiftMode()&&minRestH()>0)fixed.push({txt:`İki vardiya arasında en az ${minRestH()} saat dinlenme`,page:"ay"});
@@ -7024,6 +7098,7 @@ function renderRules(){
   box.innerHTML=h;
   const ab=$("ruleAddBtn");if(ab)ab.style.display=adm?"":"none";
 }
+function ruleOrder(K){if(!isAdmin())return;saveDept({__opts:{pri:K}},"Kural sırası",{after:()=>{renderRules();}});}
 function rulePri(i,dir){if(!isAdmin())return;const K=priKeys(),j=i+dir;if(j<0||j>=K.length)return;[K[i],K[j]]=[K[j],K[i]];
   saveDept({__opts:{pri:K}},"Kural sırası",{after:()=>{renderRules();}});ND.haptic&&ND.haptic(5);}
 function ruleToggle(id,on){const L=rulesAll().map(r=>r.id===id?{...r,on}:r);rulesSave(L,on?"Kural açıldı":"Kural kapatıldı");}
@@ -10780,6 +10855,133 @@ async function aiAsk(){
     out.textContent=(data.content||[]).filter(b=>b.type==="text").map(b=>b.text).join("\n")||"Yanıt alınamadı.";
   }catch(e){out.textContent="AI'ya ulaşılamadı.";}
 }
+</script>
+<script>
+/* ================= Dokunuş ve hareket katmanı =================
+   1) iPhone'da basılı-durum renkleri (Safari bunu ancak bir dokunuş dinleyicisi varsa gösterir)
+   2) Perdeyi tutup aşağı çekince kapanır; az çekilirse yaylanarak geri gelir
+   3) Ayar alt sayfasında ekranın sol kenarından sağa sürükleyince geri döner (ana ekrana eklenmiş uygulamada);
+      tarayıcıda ve Android'de telefonun kendi "geri" hareketi aynı işi yapar
+   4) Kurallarda tutamaçtan tutup sürükleyerek önem sırası */
+document.addEventListener("touchstart",function(){},{passive:true});
+
+(function(){
+  const EASE="cubic-bezier(.32,.72,0,1)";
+  function nestedScrolled(t,sheet){for(let e=t;e&&e!==sheet;e=e.parentElement){const cs=getComputedStyle(e);
+      if(/(auto|scroll)/.test(cs.overflowY)&&e.scrollHeight>e.clientHeight+1&&e.scrollTop>0)return true;}return false;}
+  function bind(modal){
+    const sh=modal.querySelector(".sheet");if(!sh||sh._ndDrag)return;sh._ndDrag=1;
+    let y0=0,x0=0,mode=0,dy=0,lastY=0,lastT=0,v=0,t0=0;
+    sh.addEventListener("touchstart",e=>{
+      if(e.touches.length!==1){mode=-1;return;}
+      const t=e.touches[0];y0=lastY=t.clientY;x0=t.clientX;lastT=performance.now();mode=0;dy=0;v=0;
+      if(e.target.closest("input[type=range],.rl-grip,[data-nodrag]"))mode=-1;
+    },{passive:true});
+    sh.addEventListener("touchmove",e=>{
+      if(mode<0)return;const t=e.touches[0],d=t.clientY-y0,dx=t.clientX-x0;
+      if(mode===0){if(Math.abs(d)<7&&Math.abs(dx)<7)return;
+        if(d>0&&Math.abs(d)>Math.abs(dx)&&sh.scrollTop<=0&&!nestedScrolled(e.target,sh)){mode=1;sh.classList.add("is-drag");y0=t.clientY;t0=performance.now();}
+        else{mode=-1;return;}}
+      if(e.cancelable)e.preventDefault();
+      const raw=t.clientY-y0;dy=raw>0?raw:raw/4;
+      sh.style.transform=`translate3d(0,${dy}px,0)`;
+      const h=sh.offsetHeight||1;modal.style.backgroundColor=`rgba(0,0,0,${(0.32*Math.max(0,1-dy/h)).toFixed(3)})`;
+      const now=performance.now();v=(t.clientY-lastY)/Math.max(1,now-lastT);lastY=t.clientY;lastT=now;
+    },{passive:false});
+    function end(){
+      if(mode!==1){mode=0;return;}mode=0;sh.classList.remove("is-drag");
+      const h=sh.offsetHeight||1;
+      const idle=performance.now()-lastT,vv=idle>140?0:Math.max(v,dy/Math.max(1,lastT-t0));
+      if(dy>Math.min(150,h*0.28)||(vv>0.4&&dy>24)){
+        sh.style.transition=`transform .26s cubic-bezier(.2,.8,.2,1)`;sh.style.transform="translate3d(0,100%,0)";
+        modal.dispatchEvent(new MouseEvent("click",{bubbles:true}));     // her perdenin kendi kapatma kuralı çalışır
+        setTimeout(()=>{if(modal.classList.contains("on")){sh.style.transition=`transform .45s ${EASE}`;sh.style.transform="";}
+          modal.style.backgroundColor="";setTimeout(()=>{sh.style.transition="";sh.style.transform="";},460);},280);
+        try{ND.haptic&&ND.haptic(6);}catch(_){}
+      }else{
+        sh.style.transition=`transform .5s ${EASE}`;sh.style.transform="";modal.style.backgroundColor="";
+        setTimeout(()=>{sh.style.transition="";},520);
+      }
+    }
+    sh.addEventListener("touchend",end);sh.addEventListener("touchcancel",end);
+  }
+  document.querySelectorAll(".modal").forEach(bind);
+  window.ndBindSheets=()=>document.querySelectorAll(".modal").forEach(bind);
+})();
+
+/* ---------- ayarlar: telefonun/tarayıcının geri hareketi ve sol kenardan sürükleme ---------- */
+window.addEventListener("popstate",()=>{
+  const k=$("tab-kurulum");if(!k)return;
+  if(k.dataset.page!=="root")setPage("root",{pop:true});
+});
+(function(){
+  const standalone=()=>window.__ndEdge||navigator.standalone===true||(window.matchMedia&&matchMedia("(display-mode: standalone)").matches);
+  let st=null;
+  document.addEventListener("touchstart",e=>{
+    const sec=$("tab-kurulum");
+    if(!standalone()||!sec||!sec.classList.contains("active")||sec.dataset.page==="root")return;
+    if(document.querySelector(".modal.on, #wizard.is-open"))return;
+    const t=e.touches[0];if(e.touches.length!==1||t.clientX>24)return;
+    st={x:t.clientX,y:t.clientY,t:performance.now(),dx:0,on:false,lx:t.clientX,lt:performance.now(),v:0,sec};
+  },{passive:true});
+  document.addEventListener("touchmove",e=>{
+    if(!st)return;const t=e.touches[0],dx=t.clientX-st.x,dy=t.clientY-st.y;
+    if(!st.on){if(Math.abs(dy)>12&&Math.abs(dy)>Math.abs(dx)){st=null;return;}if(dx<8)return;st.on=true;st.sec.classList.add("is-edge");}
+    if(e.cancelable)e.preventDefault();
+    st.dx=Math.max(0,dx);st.sec.style.transform=`translate3d(${st.dx}px,0,0)`;
+    const now=performance.now();st.v=(t.clientX-st.lx)/Math.max(1,now-st.lt);st.lx=t.clientX;st.lt=now;
+  },{passive:false});
+  function end(){
+    if(!st)return;const s=st;st=null;if(!s.on)return;
+    s.sec.classList.remove("is-edge");s.sec.classList.add("is-edge-back");
+    const W=window.innerWidth||390;
+    if(s.dx>W*0.33||(s.v>0.45&&s.dx>40)){
+      s.sec.style.transform=`translate3d(${W}px,0,0)`;
+      setTimeout(()=>{s.sec.classList.remove("is-edge-back");s.sec.style.transform="";setPage("root",{still:true});
+        try{s.sec.classList.add("pg-pop");setTimeout(()=>s.sec.classList.remove("pg-pop"),460);}catch(_){}},300);
+    }else{s.sec.style.transform="";setTimeout(()=>s.sec.classList.remove("is-edge-back"),340);}
+  }
+  document.addEventListener("touchend",end);document.addEventListener("touchcancel",end);
+})();
+
+/* ---------- Kurallar: tutamaçtan tutup sürükleyerek sırala ---------- */
+(function(){
+  let D=null;
+  document.addEventListener("pointerdown",e=>{
+    const g=e.target.closest&&e.target.closest(".rl-grip");if(!g||!isAdmin())return;
+    const card=g.closest(".rl-card"),list=$("ruleList");if(!card||!list)return;
+    e.preventDefault();
+    const cards=[...list.querySelectorAll(".rl-card[data-pi]")];
+    const rects=cards.map(c=>c.getBoundingClientRect());
+    const i0=cards.indexOf(card);if(i0<0)return;
+    D={g,card,cards,rects,i0,to:i0,y0:e.clientY,id:e.pointerId,list,step:0};
+    try{g.setPointerCapture(e.pointerId);}catch(_){}
+    card.classList.add("is-lift");list.classList.add("rl-list-drag");
+    try{ND.haptic&&ND.haptic(8);}catch(_){}
+  });
+  document.addEventListener("pointermove",e=>{
+    if(!D||e.pointerId!==D.id)return;e.preventDefault();
+    const dy=e.clientY-D.y0,r0=D.rects[D.i0];
+    D.card.style.transform=`translate3d(0,${dy}px,0) scale(1.02)`;
+    const mid=r0.top+r0.height/2+dy;let to=D.i0;
+    D.rects.forEach((r,j)=>{if(j<D.i0&&mid<r.top+r.height/2)to=Math.min(to,j);if(j>D.i0&&mid>r.top+r.height/2)to=Math.max(to,j);});
+    if(to!==D.to){D.to=to;try{ND.haptic&&ND.haptic(4);}catch(_){}}
+    const gap=8,hh=r0.height+gap;
+    D.cards.forEach((c,j)=>{if(j===D.i0)return;let sh=0;if(j>D.i0&&j<=to)sh=-hh;else if(j<D.i0&&j>=to)sh=hh;c.style.transform=sh?`translate3d(0,${sh}px,0)`:"";});
+  },{passive:false});
+  function drop(e){
+    if(!D||(e&&e.pointerId!==D.id))return;const d=D;D=null;
+    d.card.classList.remove("is-lift");d.list.classList.remove("rl-list-drag");
+    d.cards.forEach(c=>{c.style.transform="";});
+    if(d.to===d.i0)return;
+    const K=priKeys(),k=K.splice(d.i0,1)[0];K.splice(d.to,0,k);
+    /* ekranda hemen yeni sıra, sonra kayıt */
+    const kids=[...d.list.children],moved=d.cards[d.i0],target=d.cards[d.to];
+    if(d.to>d.i0)target.after(moved);else target.before(moved);
+    ruleOrder(K);
+  }
+  document.addEventListener("pointerup",drop);document.addEventListener("pointercancel",drop);
+})();
 </script>
 </body>
 </html>
