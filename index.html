@@ -2737,7 +2737,7 @@ function renderToday(){
   let h="";
   if(nx){
     const R=rulesFor(nx.mk),wd=wdOf(nx.y,nx.m,nx.d);
-    const off=(!R.wa.has(me.id)&&(R.cfg.on||R.wm==="duty_rest"))?offDaysText(R,nx.y,nx.m,nx.d,monthBays(nx.mk)):"";
+    const off=(!nx.ic&&!R.wa.has(me.id)&&(R.cfg.on||R.wm==="duty_rest"))?offDaysText(R,nx.y,nx.m,nx.d,monthBays(nx.mk)):"";
     const ile=nx.ile.map(id=>kisaAd(nameOfId(id)));
     h+=`<div class="nd-hero"><span class="nd-hero__eyebrow">Sıradaki nöbetin · ${relTxt(gunFark(nx.date))}</span>
       <span class="nd-hero__title">${GUN_UZUN[wd]}, ${nx.d} ${MONTHS_TR[nx.m-1]}</span>
@@ -6695,7 +6695,7 @@ function cycleText(p){p=String(p||"");if(!p)return "—";const out=[];let i=0;
 function priKeys(){const keys=[];if(rrCfg()||patCur().on>0)keys.push("b:ritim");if(senCfg())keys.push("b:kidem");if((opts().gen||{}).mode&&(opts().gen||{}).mode!=="off")keys.push("b:cins");
   rulesAll().forEach(r=>{if(r.t!=="staff"&&r.t!=="only")keys.push("r:"+r.id);});
   const pr=(opts().pri||[]).filter(k=>keys.includes(k));keys.forEach(k=>{if(!pr.includes(k))pr.push(k);});return pr;}
-function priF(key){const K=priKeys(),i=K.indexOf(key);if(i<0||K.length<2)return 1;return 1+2*(K.length-1-i)/(K.length-1);}
+function priF(key){if(!Array.isArray(opts().pri))return 1;const K=priKeys(),i=K.indexOf(key);if(i<0||K.length<2)return 1;return 1+2*(K.length-1-i)/(K.length-1);}
 
 /* kişiye özel / tarihe özel kişi sayısı: belirli günlerde vardiyanın kaç kişi olacağı (son uyan kural geçerli) */
 let STAFF_RULES=null;
@@ -6930,7 +6930,7 @@ function renderRules(){
         <button class="nd-btn is-sm is-tinted" onclick="ruleEdit('${r.id}')">Düzenle</button>
         <button class="nd-btn is-sm is-danger" onclick="ruleDel('${r.id}')">Sil</button></div>`:""}</div><div class="rl-ord">${up}${dn}</div></div>`;};
   let h="";
-  if(K.length)h+=`<div class="rl-head">Önem sırasıyla — liste tam oturmazsa önce en alttaki esner</div>`+K.map(card).join("");
+  if(K.length)h+=`<div class="rl-head">${Array.isArray(opts().pri)?"Önem sırasıyla — liste tam oturmazsa önce en alttaki esner":"Şu an hepsi eşit önemde — sıralamak için ▲ ▼ kullan"}</div>`+K.map(card).join("");
   const hard=RA.filter(r=>r.t==="only"||r.t==="staff");
   const fixed=[];
   if(isShiftMode()&&minRestH()>0)fixed.push({txt:`İki vardiya arasında en az ${minRestH()} saat dinlenme`,page:"ay"});
@@ -7579,6 +7579,37 @@ function rrBuild0(slots,E,IV,A0,locked,lo,hi,evalFn,R,prev,ctx){
             const m2=Math.max(mMin,Math.min(mMax,pick.length));const ix=pick.concat(rest).slice(0,Math.max(m2,Math.min(mMax,pick.length+rest.length)));
             if(ix.length>=mMin&&ix.length<=mMax){const tt=tierOK(F.concat(ix.map(z=>O[z])));if(tt.h>=needHi[d]&&tt.l>=needLo[d])cmb.push(ix.slice(0,mMax));}}}
       }
+      /* bir günün adayını uygula → sonraki güne in → olmazsa geri al */
+      const runC=(W,asg)=>{
+        const dl=daySlots[d];
+        if(RU.length)for(let z=0;z<dl.length;z++)if(asg[z]>=0)ruleW[asg[z]*WD+d]=dl[z];
+        const svX=X.slice(),svC=cnt.slice(),svN=ncnt.slice(),svIV=prevIV.slice(),svM=lastMates.slice(),svS=slack;
+        const on=new Uint8Array(n);for(const p of W)on[p]=1;
+        for(let p=0;p<n;p++){if(out[p])continue;
+          if(on[p]){X[p]=nxW[p];cnt[p]++;}else{X[p]=nxR[p];prevIV[p]=null;}}
+        for(let z=0;z<dl.length;z++){const p=asg[z];A[dl[z]]=p;if(p<0)continue;prevIV[p]=IV[dl[z]][p];
+          const si=slots[dl[z]].si;if(si>=0)SCp[p][si]++;if(isN(dl[z],p))ncnt[p]++;}
+        slack-=h-W.length;
+        for(const p of W){lastMates[p]=W.filter(q=>q!==p);for(const q of W)if(q!==p)pairC[p][q]++;}
+        let dead=slack<0;
+        if(!dead){let remS=0;for(let dd=d+1;dd<=nDays;dd++)remS+=hiOf[dd];
+          let needC=0,room=0;
+          for(let p=0;p<n;p++){if(out[p])continue;const m=M[p][d+1][X[p]];
+            let mx=0;for(let k=31;k>=0;k--)if((m>>>k)&1){mx=k;break;}
+            needC+=Math.max(0,lo[p]-cnt[p]);room+=Math.min(hi[p]-cnt[p],mx);}
+          if(needC>remS||room<remS-slack)dead=true;
+          if(!dead&&SC){let rh=0,rl=0,ch=0,cl=0;for(let dd=d+1;dd<=nDays;dd++){rh+=needHi[dd];rl+=needLo[dd];}
+            if(rh||rl){for(let p=0;p<n;p++){if(out[p]||!tierP[p])continue;const m=M[p][d+1][X[p]];let mx=0;for(let k=31;k>=0;k--)if((m>>>k)&1){mx=k;break;}
+                const v=Math.min(hi[p]-cnt[p],mx);if(tierP[p]==="hi")ch+=v;else cl+=v;}
+              if(ch<rh||cl<rl)dead=true;}}}
+        if(!dead&&d+1<=nDays)dead=!look(d,slack);
+        if(!dead&&step(d+1))return true;
+        for(let z=0;z<dl.length;z++){const p=asg[z];A[dl[z]]=-1;if(p<0)continue;if(RU.length)ruleW[p*WD+d]=-1;const si=slots[dl[z]].si;if(si>=0)SCp[p][si]--;}
+        for(const p of W)for(const q of W)if(q!==p)pairC[p][q]--;
+        X.set(svX);cnt.set(svC);ncnt.set(svN);slack=svS;
+        for(let p=0;p<n;p++){prevIV[p]=svIV[p];lastMates[p]=svM[p];}
+        return false;
+      };
       const ranked=cmb.map(ix=>({ix,sc:setScore(ix)})).sort((x,y)=>y.sc-x.sc).slice(0,RU.length?10:6);
       const tried=new Set(),cand=[];
       for(const cb of ranked){
@@ -7602,38 +7633,10 @@ function rrBuild0(slots,E,IV,A0,locked,lo,hi,evalFn,R,prev,ctx){
         let pen=0;
         if(RU.length){for(let z=0;z<dl.length;z++)if(asg[z]>=0)ruleW[asg[z]*WD+d]=dl[z];
           pen=dayPen(d,dl,asg);for(let z=0;z<dl.length;z++)if(asg[z]>=0)ruleW[asg[z]*WD+d]=-1;}
+        if(!RU.length){if(runC(W,asg))return true;continue;}       // kuralsız ekip: eskisi gibi ilk uygun adayla hemen ilerle
         cand.push({W,asg,pen});
       }
-      if(RU.length)cand.sort((a,b)=>a.pen-b.pen);
-      for(const {W,asg} of cand){
-        const dl=daySlots[d];
-        if(RU.length)for(let z=0;z<dl.length;z++)if(asg[z]>=0)ruleW[asg[z]*WD+d]=dl[z];
-        const svX=X.slice(),svC=cnt.slice(),svN=ncnt.slice(),svIV=prevIV.slice(),svM=lastMates.slice(),svS=slack;
-        const on=new Uint8Array(n);for(const p of W)on[p]=1;
-        for(let p=0;p<n;p++){if(out[p])continue;
-          if(on[p]){X[p]=nxW[p];cnt[p]++;}else{X[p]=nxR[p];prevIV[p]=null;}}
-        for(let z=0;z<dl.length;z++){const p=asg[z];A[dl[z]]=p;if(p<0)continue;prevIV[p]=IV[dl[z]][p];
-          const si=slots[dl[z]].si;if(si>=0)SCp[p][si]++;if(isN(dl[z],p))ncnt[p]++;}
-        slack-=h-W.length;
-        for(const p of W){lastMates[p]=W.filter(q=>q!==p);for(const q of W)if(q!==p)pairC[p][q]++;}
-        let dead=slack<0;
-        if(!dead){let remS=0;for(let dd=d+1;dd<=nDays;dd++)remS+=hiOf[dd];
-          let needLo=0,room=0;
-          for(let p=0;p<n;p++){if(out[p])continue;const m=M[p][d+1][X[p]];
-            let mx=0;for(let k=31;k>=0;k--)if((m>>>k)&1){mx=k;break;}
-            needLo+=Math.max(0,lo[p]-cnt[p]);room+=Math.min(hi[p]-cnt[p],mx);}
-          if(needLo>remS||room<remS-slack)dead=true;
-          if(!dead&&SC){let rh=0,rl=0,ch=0,cl=0;for(let dd=d+1;dd<=nDays;dd++){rh+=needHi[dd];rl+=needLo[dd];}
-            if(rh||rl){for(let p=0;p<n;p++){if(out[p]||!tierP[p])continue;const m=M[p][d+1][X[p]];let mx=0;for(let k=31;k>=0;k--)if((m>>>k)&1){mx=k;break;}
-                const v=Math.min(hi[p]-cnt[p],mx);if(tierP[p]==="hi")ch+=v;else cl+=v;}
-              if(ch<rh||cl<rl)dead=true;}}}
-        if(!dead&&d+1<=nDays)dead=!look(d,slack);
-        if(!dead&&step(d+1))return true;
-        for(let z=0;z<dl.length;z++){const p=asg[z];A[dl[z]]=-1;if(p<0)continue;if(RU.length)ruleW[p*WD+d]=-1;const si=slots[dl[z]].si;if(si>=0)SCp[p][si]--;}
-        for(const p of W)for(const q of W)if(q!==p)pairC[p][q]--;
-        X.set(svX);cnt.set(svC);ncnt.set(svN);slack=svS;
-        for(let p=0;p<n;p++){prevIV[p]=svIV[p];lastMates[p]=svM[p];}
-      }
+      if(RU.length){cand.sort((a,b)=>a.pen-b.pen);for(const c of cand)if(runC(c.W,c.asg))return true;}
       return false;
     };
     const okS=step(1);
@@ -8029,8 +8032,8 @@ function dayEditSlots(){
   if(schedule.mode==="shifts"){
     const out=[];
     schShifts().forEach((sh,si)=>{
-      const n=sh.count||1;
-      for(let k=0;k<n;k++)out.push({key:"s"+si+"_"+k,si,label:(sh.name||"Vardiya")+" "+(sh.start||"")+"–"+(sh.end||"")});
+      const n=sh.count||1,ic=!!sh.icap;          // icap yerleri ayrı saklanır (schedule.icap)
+      for(let k=0;k<n;k++)out.push({key:"s"+si+"_"+k,si,ic,label:(ic?"📟 ":"")+(sh.name||"Vardiya")+" "+(sh.start||"")+"–"+(sh.end||"")});
     });
     return out;
   }
@@ -8047,15 +8050,15 @@ function renderDayEdit(){
   const {y,m}=vInfo();
   const wd=DAYS_TR[(new Date(y,m-1,editDay).getDay()+6)%7];
   $("dayEditTitle").textContent=`✏️ ${editDay} ${MONTHS_TR[m-1]} ${y} · ${wd}`;
-  const liste=entryList(editDay).slice();
+  const liste=entryList(editDay).slice().concat(((schedule.icap||{})[editDay]||[]).map(e=>({...e,ic:true})));
   const slotlar=dayEditSlots();
   // her slota sırayla mevcut atamaları yerleştir
   const kalan=liste.slice();
   const dolu=slotlar.map(sl=>{
-    const i=kalan.findIndex(e=>schedule.mode==="shifts"?e.s===sl.si:e.r===sl.room);
+    const i=kalan.findIndex(e=>schedule.mode==="shifts"?(e.s===sl.si&&!!e.ic===!!sl.ic):e.r===sl.room);
     return i>=0?kalan.splice(i,1)[0]:null;
   });
-  kalan.forEach(e=>{slotlar.push({key:"x"+Math.random(),si:e.s,room:e.r,label:slotLabel(e)||"Ek"});dolu.push(e);});
+  kalan.forEach(e=>{slotlar.push({key:"x"+Math.random(),si:e.s,room:e.r,ic:!!e.ic,label:(e.ic?"📟 ":"")+(slotLabel(e)||"Ek")});dolu.push(e);});
   box.innerHTML=slotlar.map((sl,i)=>{
     const e=dolu[i];
     const sec=e?e.id:"";
@@ -8063,6 +8066,7 @@ function renderDayEdit(){
       <label style="flex:0 0 100px;font-size:.7rem">${sl.label}</label>
       <select class="deSel" data-i="${i}" style="flex:1;min-width:130px">
         <option value="">— boş —</option>
+        ${sec&&!members.some(p=>p.id===sec)?`<option value="${sec}" selected>${hEsc(nameOfId(sec)||"Eski üye")} (ekipten ayrıldı)</option>`:""}
         ${members.map(p=>`<option value="${p.id}" ${sec===p.id?"selected":""}>${p.name}</option>`).join("")}
       </select></div>`;
   }).join("")||'<p class="hint">Bu gün için tanımlı nöbet yeri yok.</p>';
@@ -8084,22 +8088,24 @@ function renderDayEdit(){
     }
     box.innerHTML+=h+"</div>";
   }
-  $("dayEditMeta").dataset.slots=JSON.stringify(slotlar.map(sl=>({si:sl.si,room:sl.room})));
+  $("dayEditMeta").dataset.slots=JSON.stringify(slotlar.map(sl=>({si:sl.si,room:sl.room,ic:!!sl.ic})));
 }
 async function saveDayEdit(opt){
   opt=opt||{};
   if(!isAdmin()||editDay==null||!schedule)return;
   const slotlar=JSON.parse($("dayEditMeta").dataset.slots||"[]");
-  const yeni=[];
+  const yeni=[],yeniIc=[];
   const secilenler=[];
   document.querySelectorAll(".deSel").forEach(el=>{secilenler[+el.dataset.i]=el.value;});
   for(let i=0;i<slotlar.length;i++){
     const pid=secilenler[i];
     if(!pid)continue;
-    if(yeni.some(e=>e.id===pid)){toast("Aynı kişi aynı güne iki kez yazılamaz.",true);return;}
-    yeni.push(schedule.mode==="shifts"?{id:pid,s:slotlar[i].si}:{id:pid,r:slotlar[i].room});
+    if(yeni.some(e=>e.id===pid)||yeniIc.some(e=>e.id===pid)){toast("Aynı kişi aynı güne iki kez yazılamaz.",true);return;}
+    if(slotlar[i].ic)yeniIc.push({id:pid,s:slotlar[i].si});
+    else yeni.push(schedule.mode==="shifts"?{id:pid,s:slotlar[i].si}:{id:pid,r:slotlar[i].room});
   }
   schedule.asg[editDay]=yeni;
+  if(yeniIc.length||(schedule.icap&&schedule.icap[editDay])){schedule.icap=schedule.icap||{};schedule.icap[editDay]=yeniIc;}
   const ekSel=[...document.querySelectorAll(".deEk")].map(el=>el.value);
   if(ekSel.length){
     schedule.ekManual=schedule.ekManual||{};
@@ -10186,7 +10192,7 @@ function renderMyDuties(){
     const dow=DAYS_TR[wdOf(y,m,x.d)];
     const d=document.createElement("div");d.className="nd-row has-av";
     const ertesi=dutyEndsNextDay(x)?" (ertesi gün)":"";
-    const ot=(wc.on||R.nx)&&!R.wa.has(me.id)?offDaysText(R,y,m,x.d,vBaySet()):"";
+    const ot=!x.ic&&(wc.on||R.nx)&&!R.wa.has(me.id)?offDaysText(R,y,m,x.d,vBaySet()):"";
     const sonra=ot?` · sonrası izinli: ${ot}`:"";
     d.innerHTML=`<span class="datechip${x.bay?" is-hol":x.wknd?" is-we":""}"><b>${x.d}</b><span>${dow}</span></span>
       <span class="nd-row__body"><span class="nd-row__title">${hEsc(x.label)} · ${x.start}–${x.end}${ertesi}</span>
