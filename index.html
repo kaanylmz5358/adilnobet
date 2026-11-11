@@ -6165,10 +6165,12 @@ async function refreshPrefs(){
 }
 async function generateFresh(){
   if(!isAdmin()){toast("Sadece yönetici çizelge üretebilir.",true);return;}
-  try{await flushAuto();await flushPrefPaint();if(typeof wzFlushPrefs==="function")await wzFlushPrefs();await refreshPrefs();}catch(e){}
-  /* hesap birkaç saniye ekranı meşgul eder: önce "hazırlanıyor" görünsün (art arda basılmasın) */
-  if(GEN_BUSY)return;GEN_BUSY=true;
-  try{toast("⏳ Liste hazırlanıyor…");await new Promise(r=>setTimeout(r,60));generate();}finally{GEN_BUSY=false;}
+  if(GEN_BUSY)return;GEN_BUSY=true;          // art arda basılırsa ikinci basış yok sayılır
+  try{
+    try{await flushAuto();await flushPrefPaint();if(typeof wzFlushPrefs==="function")await wzFlushPrefs();await refreshPrefs();}catch(e){}
+    /* hesap birkaç saniye ekranı meşgul eder: önce "hazırlanıyor" görünsün */
+    toast("⏳ Liste hazırlanıyor…");await new Promise(r=>setTimeout(r,60));generate();
+  }finally{setTimeout(()=>{GEN_BUSY=false;},300);}
 }
 let GEN_BUSY=false;
 function generate(){
