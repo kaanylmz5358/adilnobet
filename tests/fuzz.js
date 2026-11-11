@@ -11,6 +11,7 @@ const { applyOv } = require("./lib/ovfix");
 const A = process.argv.slice(2), arg = (k, d) => { const i = A.indexOf("--" + k); return i >= 0 ? A[i + 1] : d; };
 const FROM = +arg("from", 1), N = +arg("n", 50), PS = +arg("suggest", 0.5), PR = +arg("redraft", 0.3);
 const OUT = arg("out", path.join(__dirname, "out", `fuzz_${FROM}_${N}.jsonl`));
+const MONTH = arg("month", null);   // --month 2027-03: hepsi bu ay (ör. yaz saati geçişi denemesi için TZ=Europe/Berlin ile)
 const LIST = arg("seed-list", null), NOX = A.includes("--noextra");   // --noextra: ek boyutlar (mola, puan, döngüler) olmadan eski senaryolar
 fs.mkdirSync(path.dirname(OUT), { recursive: true });
 
@@ -57,7 +58,7 @@ async function idle(E, max = 240000) { const t0 = Date.now(); await wait(150); w
   let nFail = 0, nDone = 0;
   for (const s0 of seeds) {
     const seed = parseInt(s0, 10), nox = NOX || /o$/.test(String(s0));
-    const fx = scenario(seed, nox ? { noExtra: true } : {}), rec = { seed, meta: fx.meta, fails: [], warns: [] };
+    const fx = scenario(seed, { ...(nox ? { noExtra: true } : {}), ...(MONTH ? { month: MONTH } : {}) }), rec = { seed, meta: fx.meta, fails: [], warns: [] };
     const t0 = Date.now();
     try {
       const { E, errors } = await openApp(fx);

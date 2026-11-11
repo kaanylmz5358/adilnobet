@@ -30,6 +30,8 @@ async function build(fx, file, extra) {
     const s0 = db.schedules.find(x => x.month === "2026-12");
     if (s0) { const s1 = JSON.parse(JSON.stringify(s0)); s1.month = "2026-11"; if (s1.data && s1.data.asg) delete s1.data.asg[31]; db.schedules.unshift(s1); }
   });
+  // aynı ekip, ama giren kişi sıradan üye (yönetici değil): yetkisiz düğmeler, salt okunur ayarlar, istek / takas akışları
+  { const F = JSON.parse(fs.readFileSync(path.join(__dirname, "fx_shift.json"), "utf8")); F.me = uid(3); fs.writeFileSync(path.join(__dirname, "fx_uye.json"), JSON.stringify(F)); console.log("fx_uye.json (üye: " + uid(3).slice(-2) + ")"); }
   // oda (24 saat) ekip: Perşembe/Cuma sonrası izin, Ek Cumartesi, 6 kişi
   const pr = [{ name: "Yönetici Test" }, ...NAMES.slice(0, 6).map(name => ({ name }))];
   const fxR = fixture({ month: "2026-12", mode: "rooms", dept: { general_rooms: 1, min_gap: 2, work_model: "duty_rest" },

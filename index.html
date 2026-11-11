@@ -3125,7 +3125,7 @@ window.addEventListener("load",async()=>{
   const hp=new URLSearchParams((location.hash||"").replace(/^#/,""));
   if(hp.get("type")==="recovery")recoveryMode=true;
   const linkErr=hp.get("error_code")||hp.get("error");
-  sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+  sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);hookClean();
   sb.auth.onAuthStateChange(ev=>{
     if(ev==="PASSWORD_RECOVERY"){recoveryMode=true;if(sb&&me)showView("reset");}
   });
@@ -3363,7 +3363,7 @@ async function devDoDelete(){
 async function enterDevTeam(deptId){
   if(!amDev)return;
   devActing=true;activeDept=deptId;
-  const myName=(me.user_metadata&&me.user_metadata.name)||me.email.split("@")[0];
+  const myName=cleanTxt((me.user_metadata&&me.user_metadata.name)||me.email.split("@")[0]);
   myProfile={id:me.id,dept_id:deptId,is_admin:true,name:myName,pool:null};
   showView("app");
   await loadAll();
@@ -3394,6 +3394,7 @@ function renderTeams(){
   });
 }
 async function openTeam(deptId){
+  if(dept&&dept.id!==deptId){document.querySelectorAll(".modal.on").forEach(m=>m.classList.remove("on"));try{editDay=null;}catch(e){}}   // önceki ekibin açık perdeleri kapanır
   activeDept=deptId;
   const t=myTeams.find(x=>x.dept_id===deptId);
   myProfile=t?{...t,id:me.id}:myProfile;
@@ -3404,7 +3405,7 @@ async function openTeam(deptId){
 }
 async function createDept(){
   const name=$("newDeptName").value.trim();
-  const myName=(me.user_metadata&&me.user_metadata.name)||me.email.split("@")[0];
+  const myName=cleanTxt((me.user_metadata&&me.user_metadata.name)||me.email.split("@")[0]);
   if(!name){toast("Ekip adını yaz",true);return;}
   const {data,error}=await sb.rpc("create_department",{dept_name:name,my_name:myName});
   if(error){$("deptMsg").textContent="⚠️ "+error.message;$("deptMsg").style.display="block";return;}
@@ -3415,7 +3416,7 @@ async function createDept(){
 }
 async function joinDept(){
   const code=$("joinCode").value.trim();
-  const myName=(me.user_metadata&&me.user_metadata.name)||me.email.split("@")[0];
+  const myName=cleanTxt((me.user_metadata&&me.user_metadata.name)||me.email.split("@")[0]);
   if(!code){alert("Kodu yaz");return;}
   const {data,error}=await sb.rpc("join_department",{code,my_name:myName});
   if(error||data.error){$("deptMsg").textContent="⚠️ "+((data&&data.error)||error.message);$("deptMsg").style.display="block";return;}
@@ -3434,6 +3435,7 @@ async function loadAll(){
   if(!d){alert("⚠️ Liste bulunamadı");showView("teams");return;}
   dept=d;
   members=(mem||[]).map(r=>({...r,id:r.user_id}));
+  if(draftStale())dropDraft();
   myProfile=members.find(x=>x.id===me.id)||myProfile;
   const mt=myTeams.find(x=>x.dept_id===did); if(mt&&myProfile)mt.is_admin=myProfile.is_admin;
   $("month").value=dept.month;$("minGap").value=dept.min_gap;
@@ -4858,6 +4860,23 @@ let schedView=null;                               // null = cihazda hatırlanan 
 const pubUI={sel:null,focus:null}, draftUI={sel:null,focus:null,view:null};
 function lsGet(k){try{return localStorage.getItem(k);}catch(e){return null;}}
 function lsSet(k,v){try{localStorage.setItem(k,v);}catch(e){}}
+/* GÜVENLİK: üyelerin yazdığı metinler (ad, not, ekip/vardiya adı, etiket…) ekranda HTML olarak çalışamasın.
+   Veritabanından gelen her satırda bu alanlardaki < > " ' ` \ işaretleri zararsız benzerleriyle değiştirilir. */
+const CLEAN_KEYS=new Set(["name","dept_name","note","reason","hospital","category","tag","pool","my_name","status","month"]);
+function cleanAll(v,dep){if(typeof v==="string")return cleanTxt(v);if(!v||typeof v!=="object"||(dep|0)>6)return v;for(const k in v)v[k]=cleanAll(v[k],(dep|0)+1);return v;}
+function cleanTxt(t){return typeof t!=="string"?t:t.replace(/</g,"‹").replace(/>/g,"›").replace(/"/g,"”").replace(/'/g,"’").replace(/`/g,"ˋ").replace(/\\/g,"⧵");}
+function cleanData(x,dep){if(!x||typeof x!=="object"||(dep|0)>9)return x;
+  if(Array.isArray(x)){for(let i=0;i<x.length;i++)if(x[i]&&typeof x[i]==="object")cleanData(x[i],(dep|0)+1);return x;}
+  for(const k in x){const v=x[k];if(typeof v==="string"){if(CLEAN_KEYS.has(k))x[k]=cleanTxt(v);}
+    else if(k==="tags"&&Array.isArray(v))x[k]=v.map(cleanTxt);
+    else if(k==="names"&&v&&typeof v==="object"&&!Array.isArray(v)){for(const j in v)if(typeof v[j]==="string")v[j]=cleanTxt(v[j]);}
+    else if(k==="days"&&v&&typeof v==="object")cleanAll(v);          // istek günleri (üyenin kendi yazdığı değerler)
+    else if(v&&typeof v==="object")cleanData(v,(dep|0)+1);}
+  return x;}
+function hookClean(){try{let p=Object.getPrototypeOf(sb.from("departments").select("id"));
+    while(p&&!Object.prototype.hasOwnProperty.call(p,"then"))p=Object.getPrototypeOf(p);
+    if(!p||p.__ndClean)return;const th=p.then;
+    p.then=function(res,rej){return th.call(this,r=>{try{if(r&&r.data)cleanData(r.data);}catch(e){}return r;}).then(res,rej);};p.__ndClean=1;}catch(e){}}
 function hEsc(t){return String(t==null?"":t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
 function perDay(sch){
   sch=sch||schedule;if(!sch||!sch.asg)return 0;
@@ -6030,6 +6049,11 @@ function renderPrefSummary(){
 
 /* ---------- ÇÖZÜCÜ ---------- */
 let runTargets={}, runNight={}, draft=null;
+/* taslak hangi ekibin hangi ayı için hazırlandı: başka ekibe / aya geçilince taslak düşer, yanlış yere yayınlanamaz */
+let DRAFT_CTX=null;
+function draftStale(){return !!draft&&(!DRAFT_CTX||!dept||DRAFT_CTX.dept!==dept.id||DRAFT_CTX.month!==planAy());}
+function dropDraft(){draft=null;DRAFT_CTX=null;ALT.token++;ALT.list=[];ALT.busy=false;ALT.why=null;ALT.prev=null;ALT.prevOV=null;ALT.prevTitle=null;
+  RD_NOTE=null;runTargets={};runNight={};runOV=null;try{hideDecide();}catch(e){}}
 /* Çözüm önerileri: bir deneme sırasında kuralların geçici hali (null = gerçek ayarlar).
    rr: aralıklı ritim, pat: sabit ritim, sen: kıdem kuralı, free: sayılar serbest, nFree: gece sayıları serbest,
    flex: sayılarda ±1 esneklik, ts: süre çarpanı (hızlı deneme), rrOrig: asıl ritim (esnetme az kullanılsın) */
@@ -6124,7 +6148,7 @@ function draftCmp(a,b,fa){const x=draftKey(a,fa),y=draftKey(b,fa),L=x.length;
   for(let i=0;i<L;i++){const e=i===L-1?1e-6*Math.max(1,Math.abs(y[i])):0;if(x[i]<y[i]-e)return -1;if(x[i]>y[i]+e)return 1;}return 0;}
 function draftPerfect(dr,fa){return draftKey(dr,fa).slice(0,7).every(v=>!v);}
 function setDraft(d){
-  draft=d;
+  draft=d;DRAFT_CTX={dept:dept&&dept.id,month:planAy()};
   if(runOV&&ALT.prevTitle&&!draft.alt)draft.alt={title:ALT.prevTitle.title,desc:ALT.prevTitle.desc,k:"re"};
   draft.lay=layoutSnap();               // taslağın vardiya/oda/saat düzeni
   draft.fair=fairSnap(draft,planAy());   // saat dengesi havuzu ve ağırlıkları
@@ -6166,7 +6190,7 @@ async function redraft(){
   if(runOV){const o={...runOV};["tg","free","flex","flexLock","nFree","ng"].forEach(k=>{delete o[k];});runOV=Object.keys(o).length?o:null;}
   ALT.token++;ALT.list=[];ALT.busy=false;ALT.why=null;RD_BUSY=true;
   const btn=$("redraftBtn");if(btn){btn.disabled=true;btn.textContent="Hazırlanıyor…";}
-  let best=null,note=null;
+  let best=null,note=null;const ctx0=DRAFT_CTX&&{...DRAFT_CTX};
   try{
     await new Promise(r=>setTimeout(r,40));
     const fa=(()=>{const k=SOLVE_OV;SOLVE_OV=runOV;try{return fillAll();}finally{SOLVE_OV=k;}})();
@@ -6180,7 +6204,9 @@ async function redraft(){
       if(best&&(same?pr&&draftCmp(best,pr,fa)<=0&&JSON.stringify(best.asg)!==sig:draftPerfect(best,fa)))break;
       if(el+el/n>6500)break;
       await new Promise(r=>setTimeout(r,20));
+      if(!dept||(ctx0&&(ctx0.dept!==dept.id||ctx0.month!==planAy())))return;      // bu arada başka ekibe / aya geçildi
     }
+    if(!dept||(ctx0&&(ctx0.dept!==dept.id||ctx0.month!==planAy())))return;
     if(!best){toast("Liste hazırlanamadı; ayarları kontrol et.",true);return;}
     if(same){
       if(pr&&draftCmp(best,pr,fa)>0){best=pr;note="Aynı sayılarla yeniden denendi; bundan daha iyi bir liste çıkmadı. En iyi liste aynen duruyor.";}
@@ -6299,6 +6325,7 @@ function updDecideTotal(S){
 }
 async function confirmDecide(){
   if(!draft){alert("Önce taslak üret");return;}
+  if(draftStale()){dropDraft();toast("Bu taslak başka bir ekip ya da ay için hazırlanmıştı; yayınlanmadı. Listeyi yeniden hazırla.",true);return;}
   if(RD_BUSY){toast("Liste yeniden hazırlanıyor; bitince yayınla.",true);return;}
   const finals={},nights={};
   document.querySelectorAll(".decInp").forEach(i=>{finals[i.dataset.pid]=+i.value||0;});
@@ -11966,7 +11993,7 @@ function gcalAll(){       // eski düğme: tarayıcılar art arda sekme açmayı
   toast("Google Takvim'e tek tek eklemek için her nöbetin yanındaki \"＋ Google\"a dokun. Hepsini birden eklemek için .ics dosyasını kullan.");
   const b=$("myDuties");if(b&&b.scrollIntoView)b.scrollIntoView({behavior:"smooth"});
 }
-function icsEsc(t){return String(t==null?"":t).replace(/\\/g,"\\\\").replace(/;/g,"\;").replace(/,/g,"\\,").replace(/\r?\n/g,"\\n");}
+function icsEsc(t){return String(t==null?"":t).replace(/\\/g,"\\\\").replace(/;/g,"\\;").replace(/,/g,"\\,").replace(/\r?\n/g,"\\n");}
 function icsFold(line){                  // RFC 5545: satır en fazla 75 bayt, devamı boşlukla başlar
   const enc=new TextEncoder();
   if(enc.encode(line).length<=75)return line;

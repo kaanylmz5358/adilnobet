@@ -34,7 +34,9 @@ with sync_playwright() as p:
     pg.route("https://fonts.googleapis.com/**", lambda r: r.abort())
     errs = []
     pg.on("pageerror", lambda e: errs.append("PAGE: " + str(e)[:300]))
-    pg.on("console", lambda m: errs.append("CONSOLE: " + m.text[:300]) if m.type == "error" else None)
+    # ağ hataları (ör. yapay zekâ sorusu dış sunucuya gidemez) uygulama hatası sayılmaz; uygulama bunu kendi mesajıyla gösterir
+    pg.route("https://api.anthropic.com/**", lambda r: r.abort())
+    pg.on("console", lambda m: errs.append("CONSOLE: " + m.text[:300]) if m.type == "error" and "Failed to load resource" not in m.text else None)
     pg.on("dialog", lambda d: d.accept())
     def load():
         pg.goto("file://" + os.path.abspath(APP)); pg.wait_for_function("typeof dept!=='undefined'&&!!dept&&members.length>0", timeout=30000); time.sleep(0.6)

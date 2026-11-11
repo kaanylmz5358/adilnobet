@@ -73,15 +73,23 @@ async function hareket() {
     console.log(`${ok ? "✓" : "✗"} hareket ${dev} (${dk(r.ms)})`);
   }
 }
+async function guvenlik() {
+  const r = await sh("python3", [path.join("ui", "xss.py")], { timeout: 1200e3 });
+  fs.writeFileSync(path.join(OUT, "guvenlik.log"), r.out);
+  const ok = /SONUÇ \[xss\]: TAMAM/.test(r.out) && r.code === 0;
+  R.push({ grup: "Güvenlik", ad: "üye metinleri (ad, not, etiket…) kod olarak çalışmıyor", ok, sure: r.ms, not: ok ? "" : r.out.split("\n").filter(l => /^✗|SONUÇ|Error/.test(l)).slice(0, 4).join(" · ") });
+  console.log(`${ok ? "✓" : "✗"} güvenlik (${dk(r.ms)})`);
+}
 async function arayuz(cihazlar, monkey) {
-  for (const fx of ["fx_shift.json", "fx_room.json"]) for (const dev of cihazlar) {
+  for (const fx of ["fx_shift.json", "fx_room.json", "fx_uye.json"]) for (const dev of cihazlar) {
+    if (fx === "fx_uye.json" && !["phone", "desktop"].includes(dev)) continue;
     const args = [path.join("ui", "crawl.py"), dev, fx]; if (monkey && fx === "fx_shift.json") args.push("--monkey", String(monkey));
     const r = await sh("python3", args, { timeout: 3500e3 });
     fs.writeFileSync(path.join(OUT, `arayuz_${dev}_${fx.replace(".json", "")}.log`), r.out);
     const m = r.out.match(/SONUÇ \[\w+\]: (\d+) hata, (\d+) uyarı, (\d+) öğe/);
     const ok = !!m && +m[1] === 0 && r.code === 0;
     const hata = r.out.split("\n").filter(l => /✗|HATA|Error/.test(l)).slice(0, 3).join(" · ");
-    R.push({ grup: "Arayüz", ad: `${dev} · ${fx.includes("room") ? "oda ekibi" : "vardiyalı ekip"}`, ok, sure: r.ms, not: ok ? (m ? `${m[3]} öğe, ${m[2]} uyarı` : "") : (hata || (m ? m[0] : "çalışmadı: " + r.out.slice(-200))) });
+    R.push({ grup: "Arayüz", ad: `${dev} · ${fx.includes("room") ? "oda ekibi" : fx.includes("uye") ? "üye gözüyle" : "vardiyalı ekip"}`, ok, sure: r.ms, not: ok ? (m ? `${m[3]} öğe, ${m[2]} uyarı` : "") : (hata || (m ? m[0] : "çalışmadı: " + r.out.slice(-200))) });
     console.log(`${ok ? "✓" : "✗"} arayüz ${dev} ${fx} (${dk(r.ms)})`);
   }
 }
@@ -98,13 +106,13 @@ function rapor() {
 }
 (async () => {
   if (!fs.existsSync(path.join(T, "node_modules", "jsdom"))) { console.log("Önce: cd tests && npm install"); process.exit(2); }
-  if (!fs.existsSync(path.join(T, "ui", "fx_shift.json"))) await sh("node", [path.join("ui", "make_fixtures.js")]);
-  if (level === "hizli") { await ozellik(); await fuzz(arg || 40); await hareket(); await arayuz(["phone"], 0); }
-  else if (level === "tam") { await ozellik(); await batarya(); await fuzz(arg || 300); await hareket(); await arayuz(["phone", "desktop", "tablet", "android"], 120); }
+  if (!fs.existsSync(path.join(T, "ui", "fx_uye.json"))) await sh("node", [path.join("ui", "make_fixtures.js")]);
+  if (level === "hizli") { await ozellik(); await fuzz(arg || 40); await hareket(); await guvenlik(); await arayuz(["phone"], 0); }
+  else if (level === "tam") { await ozellik(); await batarya(); await fuzz(arg || 300); await hareket(); await guvenlik(); await arayuz(["phone", "desktop", "tablet", "android"], 120); }
   else if (level === "fuzz") await fuzz(arg || 200);
   else if (level === "batarya") await batarya();
   else if (level === "ozellik") await ozellik();
-  else if (level === "arayuz") { await hareket(); await arayuz(["phone", "desktop", "tablet", "android"], arg || 150); }
+  else if (level === "arayuz") { await hareket(); await guvenlik(); await arayuz(["phone", "desktop", "tablet", "android"], arg || 150); }
   else { console.log("Bilinmeyen düzey: " + level); process.exit(2); }
   rapor();
 })();
