@@ -37,6 +37,11 @@ function check(fx, res, o = {}) {
         if (b.type === "block") { if (!b.start && !b.end) return false; let bs = hm(b.start), be = hm(b.end); if (be <= bs) be += 24; const ov = (x, y2) => Math.max(0, Math.min(z, y2) - Math.max(a, x)); if (ov(bs, be) > 1e-9 || ov(bs + 24, be + 24) > 1e-9 || ov(bs - 24, be - 24) > 1e-9) return false; }
         else if (b.type === "only") { let bs = hm(b.start || "00:00"), be = hm(b.end || "24:00"); if (be <= bs) be += 24; if (a < bs - 1e-9 || z > be + 1e-9) return false; } }
       return true; }); };
+  // oda modu: genel oda yalnız kendi odası olmayanlara; branş odası o branşa (devredilirse genele de)
+  const BR = D.branch_rooms || {}, ownRoom = pool => Object.prototype.hasOwnProperty.call(BR, pool || "");
+  if (mode !== "shifts") for (let d = 1; d <= nDays; d++) (asg[d] || []).forEach(e => { if (e.ic) return; const p = byId[e.id]; if (!p) return;
+    if (e.r === "G" && ownRoom(p.pool)) out.push(`${p.name} ${d}. gün kendi branş odası varken genel odada (yalnız seçilenlerin)`);
+    const m0 = String(e.r || "").match(/^[BS]:(.+)$/); if (m0) { const b = m0[1], c = BR[b] || {}; if (p.pool !== b && !(c.shared && !ownRoom(p.pool))) out.push(`${p.name} ${d}. gün ${b} odasında ama bu oda yalnız seçilenlerin`); } });
   // 1) slot doluluğu
   let need = 0, filled = 0, over = 0;
   for (let d = 1; d <= nDays; d++) {
@@ -46,7 +51,9 @@ function check(fx, res, o = {}) {
         if (sh.icap) return; const c = staffOf0(si, d), got = L.filter(e => e.s === si && !e.ic).length;
         need += c; filled += Math.min(c, got); if (got > c) over += got - c;
       });
-    } else { const c = D.general_rooms || 0; need += c; filled += Math.min(c, L.filter(e => e.r === "G").length); }
+    } else { const c = D.general_rooms || 0; need += c; filled += Math.min(c, L.filter(e => e.r === "G").length);
+      for (const b in (D.branch_rooms || {})) { const bc = +(D.branch_rooms[b] || {}).rooms || 0, got = L.filter(e => e.r === "B:" + b || e.r === "S:" + b).length; need += bc; filled += Math.min(bc, got); if (got > bc) over += got - bc; }
+      const gG = L.filter(e => e.r === "G").length; if (gG > c) over += gG - c; }
     L.forEach(e => { if (!byId[e.id]) out.push(`gün ${d}: bilinmeyen kişi ${e.id}`); });
   }
   info.need = need; info.filled = filled; info.empty = need - filled;
@@ -101,7 +108,7 @@ function check(fx, res, o = {}) {
         else if (restH > 0 && iv[i][0] < iv[i - 1][1] + restH - 1e-9) out.push(`${p.name} ${iv[i][2]}. gün ${restH} saat dinlenme yok`);
       }
     }
-    { const tg = qStale ? 0 : mode === "shifts" ? +spf.target || 0 : +p.quota || 0; if (o.targets && tg > 0 && !spf.noDuty && !(MS && MS.on) && cnt[id] !== tg) out.push(`${p.name}: ${tg} nöbet istendi, ${cnt[id]} verildi`); }
+    { const tg = qStale ? 0 : mode === "shifts" ? +spf.target || 0 : Object.prototype.hasOwnProperty.call(D.branch_rooms || {}, p.pool || "") ? 0 : +p.quota || 0; if (o.targets && tg > 0 && !spf.noDuty && !(MS && MS.on) && cnt[id] !== tg) out.push(`${p.name}: ${tg} nöbet istendi, ${cnt[id]} verildi`); }
     if (o.nights && spf.nightTarget != null && spf.nExact && !spf.noDuty && nc[id] !== spf.nightTarget) out.push(`${p.name}: ${spf.nightTarget} gece istendi, ${nc[id]} verildi`);
   });
   // oda modu: iki nöbet arası en az (min_gap; 2 = bir gün boşluk), ritim yoksa
@@ -242,7 +249,9 @@ function check(fx, res, o = {}) {
     if (r.t === "pair") for (let d = 1; d <= nDays; d++) { const a = !!entry(r.a, d), b = !!entry(r.b, d);
       if (r.mode === "never" && a && b) bad(`${d}. gün ${name(r.a)}+${name(r.b)} birlikte`); if (r.mode === "same" && a !== b && !isLeave(a ? r.b : r.a, d)) bad(`${d}. gün ${name(r.a)}/${name(r.b)} ayrı`); }
     if (r.t === "eq") { const k = {}; P.forEach(p => { k[p.user_id] = 0; }); for (let d = 1; d <= nDays; d++) (asg[d] || []).forEach(e => { if (!e.ic && e.s === +r.si && k[e.id] != null) k[e.id]++; });
-      const free = P.filter(p => { const sh = shifts[+r.si] || {}; if (Array.isArray(sh.deny) && sh.deny.includes(p.user_id)) return false; for (let d = 1; d <= nDays; d++) { const v = pv(p.user_id, d); if (v === "izin" || v === "never") return false; } return !(opts.blocks || []).some(b => b.pid === p.user_id); });
+      const free = P.filter(p => { const sh = shifts[+r.si] || {}; if (Array.isArray(sh.deny) && sh.deny.includes(p.user_id)) return false;
+        const spf = p.shift_prefs || {}; if (spf.noNight && nightH(sh) * 2 >= dur(sh)) return false; if (spf.allowed && spf.allowed[+r.si] === false) return false;
+        if (sh.owner && sh.owner !== p.user_id) return false; if (!sh.owner && Array.isArray(sh.only) && sh.only.length && !sh.only.includes(p.user_id)) return false; for (let d = 1; d <= nDays; d++) { const v = pv(p.user_id, d); if (v === "izin" || v === "never") return false; } return !(opts.blocks || []).some(b => b.pid === p.user_id); });
       const vs = free.map(p => k[p.user_id]); info.eq = info.eq || {}; info.eq[r.si] = k;
       if (vs.length > 1 && Math.max(...vs) - Math.min(...vs) > 1) bad(`eşit dağıt: ${shifts[+r.si].start} vardiyası ${Math.min(...vs)}–${Math.max(...vs)}`, Math.max(...vs) - Math.min(...vs) - 1); }
     if (r.t === "cycle") { const pat = String(r.pat || "").toUpperCase(), L = pat.length; if (L < 2) continue;

@@ -183,6 +183,14 @@ function scenario(seed, opt = {}) {
     }
     if (lp) { o.leave_prop = true; desc.push("izne oranlı"); }
     if (((o.wr && o.wr.on && o.wr.fz) || o.leave_prop) && xc(0.5)) { o.quota_month = month; desc.push("sayılar bu ay"); }
+    // oda modu: branşa özel odalar (yalnız o branş; "devredilir"se boşken genele açılır) — branş üyeleri genel odaya girmez
+    if (mode !== "shifts" && xc(0.25) && duty.length >= 4) {
+      const B = xp(["Anestezi", "Kadın Doğum"]), k = Math.max(2, Math.round(duty.length * xp([0.25, 0.4])));
+      duty.slice().sort(() => X() - 0.5).slice(0, k).forEach(i => { people[i].pool = B; });
+      dept.branch_rooms = { [B]: { rooms: 1, shared: xc(0.5) } };
+      if (xc(0.4)) duty.filter(i => people[i].pool === B).forEach(i => { people[i].quota = Math.round(nDays / k); });
+      desc.push(`branş odası ${B}${dept.branch_rooms[B].shared ? " (devredilir)" : ""}`);
+    }
     if (mode !== "shifts" && xc(0.1)) {
       const RL = o.rules || []; const r = { id: "x1", t: "cycle", who: { k: "all" }, pat: xp(["*--", "*---", "*-*-*----"]) };
       if (xc(0.5)) r.start = xp(["2026-09-01", "2026-11-03"]); RL.push(r); o.rules = RL; desc.push("döngü " + r.pat + (r.start ? " (ekip)" : ""));

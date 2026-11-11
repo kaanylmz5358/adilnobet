@@ -1,5 +1,5 @@
 # Arayüz denetimi: her ekran, her düğme — telefon (dokunmatik) ve fareli bilgisayar ayrı ayrı.
-# python3 ui/crawl.py [phone|desktop|tablet] [fx_shift.json] [--monkey N] [--app path]
+# python3 ui/crawl.py [phone|desktop|tablet|android|small] [fx_shift.json] [--monkey N] [--app path]
 # Denetlenenler: yatay taşma, ekran dışına taşan öğe, başka öğenin altında kalan (basılamayan) düğme,
 # küçük dokunma hedefi (telefon), fare imleci (bilgisayar), Esc ile perde kapanması (bilgisayar),
 # perde açıkken arka sayfanın kaymaması, her tıklamada JS hatası. Rastgele "maymun" tıklamaları da var.
@@ -27,6 +27,7 @@ with sync_playwright() as p:
     if DEV == "desktop": ctx = b.new_context(viewport={"width": 1440, "height": 900}, has_touch=False)
     elif DEV == "tablet": ctx = b.new_context(**p.devices["iPad Pro 11"])
     elif DEV == "android": ctx = b.new_context(**p.devices["Pixel 7"])
+    elif DEV == "small": ctx = b.new_context(**p.devices["iPhone SE"])     # 320 px: en dar telefon
     else: ctx = b.new_context(**p.devices["iPhone 13"])
     pg = ctx.new_page()
     pg.add_init_script("window.__FX=" + fxs + ";")

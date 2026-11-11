@@ -108,11 +108,11 @@ function rapor() {
   if (!fs.existsSync(path.join(T, "node_modules", "jsdom"))) { console.log("Önce: cd tests && npm install"); process.exit(2); }
   if (!fs.existsSync(path.join(T, "ui", "fx_uye.json"))) await sh("node", [path.join("ui", "make_fixtures.js")]);
   if (level === "hizli") { await ozellik(); await fuzz(arg || 40); await hareket(); await guvenlik(); await arayuz(["phone"], 0); }
-  else if (level === "tam") { await ozellik(); await batarya(); await fuzz(arg || 300); await hareket(); await guvenlik(); await arayuz(["phone", "desktop", "tablet", "android"], 120); }
+  else if (level === "tam") { await ozellik(); await batarya(); await fuzz(arg || 300); await hareket(); await guvenlik(); await arayuz(["phone", "desktop", "tablet", "android", "small"], 120); }
   else if (level === "fuzz") await fuzz(arg || 200);
   else if (level === "batarya") await batarya();
   else if (level === "ozellik") await ozellik();
-  else if (level === "arayuz") { await hareket(); await guvenlik(); await arayuz(["phone", "desktop", "tablet", "android"], arg || 150); }
+  else if (level === "arayuz") { await hareket(); await guvenlik(); await arayuz(["phone", "desktop", "tablet", "android", "small"], arg || 150); }
   else { console.log("Bilinmeyen düzey: " + level); process.exit(2); }
   rapor();
 })();

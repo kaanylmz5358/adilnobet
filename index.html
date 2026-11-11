@@ -1159,6 +1159,8 @@ body.wz-on{overflow:hidden}
 .decbar{position:sticky;z-index:31;bottom:calc(var(--tabbar-h) + 18px + env(safe-area-inset-bottom,0px));display:flex;gap:8px;margin:14px -8px -6px;padding:8px;border-radius:var(--radius-full);background:var(--glass);-webkit-backdrop-filter:blur(24px) saturate(180%);backdrop-filter:blur(24px) saturate(180%);box-shadow:var(--shadow-float)}
 .decbar .nd-btn{flex:1 1 0;min-width:0;border-radius:var(--radius-full)}
 .decbar .nd-btn:disabled{opacity:.6}
+/* dar telefonlarda (iPhone SE, 320–360 px) iki düğme yazısı sığsın */
+@media (max-width:380px){.decbar .nd-btn{font-size:15px;padding-left:8px;padding-right:8px;white-space:normal;line-height:18px}}
 @media (min-width:1024px){.decbar{bottom:16px}}
 .alt-quick{margin:10px 0 4px;padding:12px 14px;border-radius:var(--radius-md);background:var(--tint-soft);color:var(--tint-ink);font-size:15px;line-height:21px}
 .alt-quick.is-wait{display:flex;align-items:center;gap:8px;background:var(--surface-2);color:var(--ink-2);font-size:14px}
@@ -2281,7 +2283,7 @@ document.addEventListener("click",e=>{
   if(!b||b.dataset.noauto!=null)return;
   const k=autoKeyFor(b,e);if(k&&!AUTO_ID[b.id])autoSave(k,350);
 });
-document.addEventListener("visibilitychange",()=>{if(document.hidden){flushAuto();try{flushPrefPaint();}catch(e){}}});
+document.addEventListener("visibilitychange",()=>{if(document.hidden){flushAuto();try{flushPrefPaint();}catch(e){}}else{try{resumeRefresh();}catch(e){}}});
 window.addEventListener("pagehide",()=>{flushAuto();});
 async function copyInvite(){
   const c=(dept&&dept.join_code)||"";
@@ -3509,7 +3511,20 @@ async function loadAll(){
   renderRooms();renderShifts();renderBlocks();renderPins();renderWR();renderWRCounters();modeChanged();renderProfile();renderPeople();renderAsPerson();syncIzinBox();renderPrefCal();renderPrefSummary();renderLeaveAdmin();renderQuota();try{renderKidem();}catch(e){}try{renderRules();}catch(e){}renderCountdown();renderCloseMonth();renderMonthPickers();renderSchedule();renderReqs();fillReqForm();
   renderSetLanding();renderToday();bindMonthSwipe();
   try{ND.auto();}catch(e){}
+  LAST_LOAD=Date.now();
   autoGenCheck();
+}
+/* uygulama arka plandan dönünce (telefonda ana ekrandan açılınca) veriler 5 dakikadan eskiyse sessizce tazelenir:
+   yönetici listeyi yayınladıysa üye eski listeyi görmez. Açık pencere, taslak ya da kaydedilmemiş iş varken dokunulmaz. */
+let LAST_LOAD=0,RESUME_BUSY=false;
+async function resumeRefresh(){
+  if(RESUME_BUSY||!sb||!me||!dept||!LAST_LOAD||Date.now()-LAST_LOAD<5*60e3)return;
+  if(document.querySelector(".modal.on, #wizard.is-open, .nd-sheet.is-open"))return;
+  const dc=$("decideCard");if(draft&&dc&&dc.style.display!=="none")return;
+  if(RD_BUSY||ALT.busy||GEN_BUSY||Object.keys(autoPending).length||prefPaintT)return;
+  const ae=document.activeElement;if(ae&&/^(INPUT|SELECT|TEXTAREA)$/.test(ae.tagName))return;
+  RESUME_BUSY=true;const y=window.scrollY;
+  try{await loadAll();window.scrollTo(0,y);}catch(e){}finally{RESUME_BUSY=false;}
 }
 
 /* ---------- ODA AYARLARI ---------- */
