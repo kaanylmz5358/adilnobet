@@ -28,6 +28,8 @@ Sonuç: `tests/out/RAPOR.md`. Sorun varsa çıkış kodu 1.
 | `battery.js` | Elle kurulmuş uç durumlar (imkânsız kurallar, herkes izinli, tek kişi, NHS / ACGME kuralları…) |
 | `feat/*.js` | Özellik testleri (kural paketleri, ekip döngüsü, ayar aktarımı, sihirbaz, önceki ay…) |
 | `ui/crawl.py` | Playwright ile gerçek tarayıcı: her ekranda her öğeye tıklar / dokunur; taşma, örtülme, kapanmayan perde, JS hatası arar |
+| `ui/gestures.py` | Hareketler: telefonda parmak (sürükle, fiske, kenardan geri), bilgisayarda fare / tekerlek / klavye |
+| `ui/xss.py` | Güvenlik: üyelerin yazdığı metinler hiçbir ekranda kod olarak çalışmamalı |
 | `ui/make_fixtures.js` | Arayüz testi için yayınlanmış listeli zengin sahte ekipler |
 | `regress_seeds.txt` | Daha önce hata bulmuş tohumlar; her `fuzz` çalıştırmasında yeniden denenir (`105o` = eski üreticiyle) |
 | `OZELLIKLER.md` | Bütün özellikler ve hangi testin denetlediği |
@@ -41,6 +43,8 @@ Sonuç: `tests/out/RAPOR.md`. Sorun varsa çıkış kodu 1.
 4. Kartta "kusursuz" görünen her öneri, kendi geçici kurallarıyla denetçiden temiz geçmeli; sayı değişiklikleri kartta yazılı olmalı.
 5. "Yeniden hazırla" sayılar değişmediyse listeyi asla kötüleştiremez.
 6. Hiçbir tıklamada JS hatası olmamalı; hiçbir öğe ekran dışında ya da başka öğenin altında kalmamalı.
+7. Bir ekibin / ayın taslağı asla başka ekibe / aya yazılamaz; üyelerin yazdığı hiçbir metin kod olarak çalışamaz.
+8. Öneri sırası: sorunları sayıları değiştirmeden çözen bir öneri varken "aynen kalsın" ya da "boş bırak" önde olmamalı (uyarı olarak raporlanır).
 
 ## Yeni bir hata bulunca
 

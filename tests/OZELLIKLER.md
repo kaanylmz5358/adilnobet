@@ -3,7 +3,7 @@
 İlk günden bu yana eklenen her özellik ve onu hangi testin denetlediği.
 Kısaltmalar: **D** = düşman senaryo üretici + bağımsız denetçi (`fuzz.js`, `lib/gen.js`, `lib/checker.js`) ·
 **B** = uç durum bataryası (`battery.js`) · **Ö** = özellik testi (`feat/`) · **A** = arayüz taraması (`ui/crawl.py`, telefon / bilgisayar / tablet / Android) ·
-**C** = yalnız çökmeme / JS hatası (sonuç denetçiyle kanıtlanamaz).
+**C** = yalnız çökmeme / JS hatası (sonuç denetçiyle kanıtlanamaz) · **G** = güvenlik testi · **H** = hareket testi (`ui/gestures.py`).
 
 ## Liste kurma (çözücü)
 
@@ -53,16 +53,20 @@ Kısaltmalar: **D** = düşman senaryo üretici + bağımsız denetçi (`fuzz.js
 | Öneri sırası (en az değişiklik, sayı değişimi kartta yazılı) | D, B |
 | Yeniden hazırla: sayılar aynıyken liste asla kötüleşmez | D |
 | İmkânsızlık kanıtı ("matematiksel olarak tutamaz") ve nedeni | B, Ö (team_cycle) |
-| Yayınla, Word / Excel, takvime aktar (.ics, Google Takvim) | A, C |
+| Yayınla, Word / Excel, takvime aktar (.ics, Google Takvim) | A, C, Ö (akislar) |
 | Yayınlanan liste kendi ayının kurallarını saklar | B, C |
-| Gün düzenleme (önerilen kişi sırası ★), takas istekleri, açık nöbet ilanı ("Ben tutarım") | A, Ö (paket10, paket12) |
+| Gün düzenleme (önerilen kişi sırası ★; kurala takılan kişi yazılırsa nedeni söylenir), takas istekleri (uygun / kurala takılan), izin onayı, ayı kapatma | A, Ö (akislar, paket10) |
+| Açık nöbet ilanı ("Ben tutarım") | A, Ö (paket12) |
 
 ## Ekip, hesap, ayarlar
 
 | Özellik | Test |
 |---|---|
 | Kurulum ve liste hazırlama sihirbazları | Ö (sihirbaz), A |
-| Davet kodu, çoklu ekip, yönetici devri, üye çıkarma, test kişileri | A, C |
+| Davet kodu, yönetici devri, üye çıkarma, test kişileri | A, C |
+| Birden çok ekip / ay: taslak başka ekibe ya da aya geçince düşer, yanlış yere yayınlanamaz | Ö (coklu_ekip) |
+| Taslaktan hemen önce üyelerin bu arada girdiği istek / izinler tazelenir; boyanan günler kaybolmaz | Ö (tazelik) |
+| Güvenlik: üyelerin yazdığı ad, not, etiket, istek değerleri ekranda kod olarak çalışamaz | G (`ui/xss.py`) |
 | İstek takvimi (sürükleyerek boyama), izin onayı, izin / istek sınırları, yıllık izin hakkı | A, Ö (paket10, paket12) |
 | Kişi kartı: kıdem, cinsiyet, etiket, çalışma şekli, oran | A |
 | Hazır kural paketleri (Türkiye, AB, NHS, ACGME, MLC, iyi uygulama) | Ö (paket10) |
@@ -78,3 +82,27 @@ Telefon (iPhone, dokunmatik), Android (Pixel), tablet (iPad) ve dokunmatik olmay
 her sekme, her ayar sayfası ve taslak ekranındaki **her görünen düğme / seçim / alan tek tek** tıklanır ya da dokunulur;
 JS hatası, yatay taşma, ekran dışında kalan, başka öğenin altında kalıp tıklanamayan öğe, açılan perdenin kapanması
 (bilgisayarda Esc, telefonda dışına dokunma), perde açıkken arka sayfanın kaymaması denetlenir; ardından rastgele "maymun" tıklamaları yapılır.
+Aynı tarama sıradan üye gözüyle de yapılır.
+
+Hareket testleri (H): telefonda dokunma, yana sürükleyerek gün boyama, dikey kaydırmanın boyamaması, basılı tutup boyama, perdeyi aşağı çekip
+kapatma (az çekince geri gelir, içerik kaydırılmışken önce içerik kayar), hızlı fiske, perde açıkken arka sayfanın kaymaması, ayı parmakla değiştirme,
+kenardan geri ve telefonun geri hareketi, tutamaçla kural sıralama. Bilgisayarda fareyle tıklama / sürükleyerek boyama, Esc, dışına tıklama,
+tekerlekle perde içi kaydırma, fareyle sürüklemenin ayı yanlışlıkla değiştirmemesi, ay okları ve ← → tuşları, tarayıcı geri tuşu, Tab ile görünür odak.
+
+## Dünyada uygulanan nöbet kuralları → uygulamadaki karşılığı → test
+
+| Kaynak / gelenek | Kural | Uygulamada | Test |
+|---|---|---|---|
+| Türkiye uzmanlık öğrencisi | Ayda en çok 8 nöbet; herhangi 3 günde en çok 1; gece sonrası 1 gün izin | Kural paketi (kesin) | Ö (paket10), D (lim/duty, roll, after) |
+| Türkiye İş Kanunu / hastane | Vardiya arası 11 saat; herhangi 7 günde 1 boş gün; haftada 45 saat; gece en çok 7,5 saat | Dinlenme ayarı, boş gün, saat sınırı, vardiya süresi | D (rest, off/roll, hours/week, len), B |
+| AB 2003/88 | 11 saat dinlenme; 7 günde 1 boş gün; 28 günde 192 saat | Aynı kart yapısı (herhangi N günde) | D (hours/roll), B (x_roll_hours) |
+| NHS asistan hekim | 72 saat / 7 gün; art arda en çok 4 gece, sonrasında 46 saat; art arda 7 vardiya + 2 gün; art arda 4 uzun vardiya + 2 gün; 2 hafta sonundan 1 | Paket + art arda k sonrası izin + uzun vardiya + kayan hafta sonu | B (x_nhs), D (after k, long, weekend roll) |
+| ABD ACGME | 80 saat (28 günde 320), 28 günde 4 boş gün, 24+4 saat | Saat / boş gün herhangi 28 günde | B (x_big_acgme) |
+| Denizcilik MLC | 10 saat dinlenme, 7 günde 72 saat | Aynı | D (hours/roll) |
+| INRC-II (hemşire çizelgeleme yarışması) | Yasak vardiya sırası, art arda en az–en çok çalışma ve boş gün, tam hafta sonu, toplam / hafta sonu sayısı, yetkinlik, istekler | seq, lim row, off row, wkfull, lim, need / only, istekler | D, B |
+| Timefold / QGenda / Amion | Rotasyon, eşleştirme, adalet, izin, takas, icap, açık nöbet | Döngü, iki kişi birlikte/ayrı, denge, izin onayı, takas, icap, açık nöbet ilanı | D, Ö (akislar, paket12, team_cycle) |
+| Vardiya düzenleri | DuPont, 2-2-3 (Panama), Kelly, 24/48, 24/72, 48/96, 4×4, 5+2, 4×10, 8 saatlik üçlü | 14 hazır düzen + 3 vardiyalı ekipte üçlü döngüler, başlangıç tarihli A/B/C/D ekipleri | Ö (paket10, team_cycle), D (döngü, ekip döngüsü) |
+| Kıdem / cinsiyet / yetkinlik | Kıdemsiz yalnız kalmasın (vardiya / gün / aynı saatler), kompozisyon, karışık ekip | Kıdem ve cinsiyet kuralları, etiketler | D (kıdem, cins, need/only), B |
+| Adalet | Gece, hafta sonu, bayram, saat eşitliği; yarı zamanlı oran; aylar arası devir; zor nöbet puanı | Denge ayarları, oran, devir, puan | D (bal, ratio, pts), B |
+
+Kapsam dışı (nöbet listesinin işi değil): ücret / puantaj, kart-parmak izi giriş, hastane sistemleri ve çağrı cihazı bağlantısı.

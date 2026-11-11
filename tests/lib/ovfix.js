@@ -5,7 +5,8 @@ function applyOv(fx, ov) {
   const D = F.db.departments[0], O = D.opts = D.opts || {}, o = {};
   if (ov.rr !== undefined) { if (ov.rr) O.rhythm = { ...ov.rr, on: true }; else delete O.rhythm; }
   if (ov.pat) { D.pattern_on = ov.pat.on || 0; D.pattern_off = ov.pat.off || 0; }
-  if (ov.sen) O.sen = { ...ov.sen, on: true };
+  // uygulamanın iç biçimi {guard:true} → kayıt biçimi {mode:"guard"}
+  if (ov.sen) O.sen = { ...(O.sen || {}), ...ov.sen, on: true, ...(ov.sen.guard ? { mode: "guard" } : ov.sen.guard === false ? { mode: "min" } : {}) };
   if (ov.gen) O.gen = { ...ov.gen };
   if (ov.wr) O.wr = { ...(O.wr || {}), ...(ov.wr.max ? { max: ov.wr.max.slice() } : {}), ...(ov.wr.off ? { off: ov.wr.off.slice() } : {}) };
   if (ov.minRest != null) O.min_rest_h = ov.minRest;

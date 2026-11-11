@@ -44,12 +44,14 @@ const iz = (a, b, v = "izin") => { const o = {}; for (let d = a; d <= b; d++) o[
   // C) takas: uygun kişiyle → uygulanır
   const asg = pub().asg, works = (id, d) => (asg[d] || []).some(e => e.id === id);
   let swapOk = null, swapBad = null;
-  for (let d = 3; d <= 27 && (!swapOk || !swapBad); d++) if (d !== 11) for (const e of asg[d] || []) {
-    for (let k = 2; k <= 9; k++) { const b = uid(k); if (b === e.id) continue;
-      const free = !works(b, d - 1) && !works(b, d) && !works(b, d + 1) && !works(b, d - 2) && !(D.prefs.find(p => p.user_id === b && p.month === M && (p.days || {})[d]));
-      if (!swapOk && free && e.s === 0) swapOk = { d, a: e.id, b };
-      if (!swapBad && d !== 11 && !(swapOk && Math.abs(d - swapOk.d) <= 2) && e.s === 0 && (asg[d - 1] || []).some(x => x.id === b && x.s === 1)) swapBad = { d, a: e.id, b };   // dün gece çalışan → bugün gündüz olmaz
-    } }
+  // önce uygun takas, sonra ondan ve düzenlenen 11. günden uzak bir günde kurala takılan takas (dün gece çalışan → bugün gündüz olmaz)
+  for (let d = 3; d <= 27 && !swapOk; d++) if (d !== 11) for (const e of asg[d] || []) for (let k = 2; k <= 9 && !swapOk; k++) {
+    const b = uid(k); if (b === e.id) continue;
+    const free = !works(b, d - 1) && !works(b, d) && !works(b, d + 1) && !works(b, d - 2) && !(D.prefs.find(p => p.user_id === b && p.month === M && (p.days || {})[d]));
+    if (free && e.s === 0) swapOk = { d, a: e.id, b }; }
+  for (let d = 3; d <= 27 && !swapBad; d++) if (Math.abs(d - 11) > 1 && Math.abs(d - swapOk.d) > 2) for (const e of asg[d] || []) for (let k = 2; k <= 9 && !swapBad; k++) {
+    const b = uid(k); if (b === e.id || e.s !== 0) continue;
+    if ((asg[d - 1] || []).some(x => x.id === b && x.s === 1)) swapBad = { d, a: e.id, b }; }
   D.swap_requests.push({ id: 1, dept_id: D.departments[0].id, month: M, day: swapOk.d, out_id: swapOk.a, in_id: swapOk.b, note: "", status: "bekliyor", reason: "" });
   if (swapBad) D.swap_requests.push({ id: 2, dept_id: D.departments[0].id, month: M, day: swapBad.d, out_id: swapBad.a, in_id: swapBad.b, note: "", status: "bekliyor", reason: "" });
   ({ w, E, errors } = await open());

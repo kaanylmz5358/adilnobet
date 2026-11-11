@@ -110,6 +110,11 @@ async function idle(E, max = 240000) { const t0 = Date.now(); await wait(150); w
           const bad = cc.problems.filter(t => !mustOver(t, sv) && !(o.allowEmpty && /boş yer/.test(t)) && !SOFTWARN.has(famOf(t)) && !(/istendi/.test(t) && adj.some(nm => t.startsWith(nm + ":"))));
           if (bad.length) rec.fails.push(`ÖNERİ ${i + 1} "${f.t}" kusursuz dedi ama: ${bad.slice(0, 2).join(" | ")}`);
         });
+        // sıralama mantığı: sorunları çözen, sayıları ve dolu yerleri değiştirmeyen bir öneri varken "aynen kalsın" ya da "boş bırak" önde olmamalı
+        if (L.length > 1) {
+          const clean = L.slice(1).find(f => f.k !== "base" && f.k !== "keep" && !(f.ov || {}).keep && !(f.dc || []).length && !(f.res.emptyCount > (dr.emptyCount || 0)));
+          if (clean && (L[0].k === "base" || L[0].k === "keep" || (L[0].ov || {}).keep)) rec.warns.push(`SIRALAMA: "${L[0].t}" önde, ama "${clean.t}" sayıları değiştirmeden çözüyor`);
+        }
         if (L.length) {
           const sig = JSON.stringify(L[0].res.asg);
           E("altApply(0)");

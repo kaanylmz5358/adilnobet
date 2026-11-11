@@ -2014,7 +2014,7 @@ div.nd-row[onclick]:active,label.nd-row:active{background:var(--surface-2)}
     <div id="genBanner"></div>
     <div id="genRow"><p class="hint">Herkes izin/tercih girince yönetici üretir; anında herkeste görünür.</p>
     <button class="btn" style="width:100%" onclick="openPrepWizard()">Listeyi hazırla</button>
-    <button class="btn ghost small" style="width:100%;margin-top:8px" onclick="generate()">Doğrudan taslak üret</button></div>
+    <button class="btn ghost small" style="width:100%;margin-top:8px" onclick="generateFresh()">Doğrudan taslak üret</button></div>
     <div id="verBox"></div>
     <div class="row" style="margin-top:12px">
       <button class="btn gold small" onclick="wordIndir()">Resmi liste (Word)</button>
@@ -2281,7 +2281,7 @@ document.addEventListener("click",e=>{
   if(!b||b.dataset.noauto!=null)return;
   const k=autoKeyFor(b,e);if(k&&!AUTO_ID[b.id])autoSave(k,350);
 });
-document.addEventListener("visibilitychange",()=>{if(document.hidden)flushAuto();});
+document.addEventListener("visibilitychange",()=>{if(document.hidden){flushAuto();try{flushPrefPaint();}catch(e){}}});
 window.addEventListener("pagehide",()=>{flushAuto();});
 async function copyInvite(){
   const c=(dept&&dept.join_code)||"";
@@ -2370,17 +2370,24 @@ function paintPref(d,tap){
   return true;
 }
 let prefPaintT=null;
+let prefPaintUid=null;
+/* boyanan günler yarım saniye sonra kaydedilir; kaydedilecek kişi boyandığı anda belirlenir
+   (bu arada başka kişiye geçilirse öncekinin kaydı hemen yapılır, hiçbir işaret kaybolmaz) */
 function prefPainted(){
   renderPrefCal();
-  clearTimeout(prefPaintT);
-  prefPaintT=setTimeout(async()=>{
-    const uid=editingId();
-    const {error}=await savePrefsFor(uid);
-    const s=$("prefStatus");if(s){s.style.display="block";s.className=error?"banner err":"banner ok";
-      s.textContent=error?prefsErr(error):"Kaydedildi";setTimeout(()=>s.style.display="none",1600);}
-    syncIzinBox();renderPrefSummary();renderLeaveAdmin();try{renderToday();}catch(e){}
-  },500);
+  const uid=editingId();
+  if(prefPaintT&&prefPaintUid&&prefPaintUid!==uid){clearTimeout(prefPaintT);prefPaintT=null;const o=prefPaintUid;prefPaintUid=null;savePrefsFor(o);}
+  clearTimeout(prefPaintT);prefPaintUid=uid;
+  prefPaintT=setTimeout(()=>{prefPaintSave();},500);
 }
+async function prefPaintSave(){
+  const uid=prefPaintUid;clearTimeout(prefPaintT);prefPaintT=null;prefPaintUid=null;if(!uid)return;
+  const {error}=await savePrefsFor(uid);
+  const s=$("prefStatus");if(s){s.style.display="block";s.className=error?"banner err":"banner ok";
+    s.textContent=error?prefsErr(error):"Kaydedildi";setTimeout(()=>s.style.display="none",1600);}
+  syncIzinBox();renderPrefSummary();renderLeaveAdmin();try{renderToday();}catch(e){}
+}
+async function flushPrefPaint(){if(prefPaintT||prefPaintUid)await prefPaintSave();}
 /* Dokun: o günü işaretle (aynı fırçayla tekrar dokun: kaldır).
    Dikey kaydırma sayfayı kaydırır, hiçbir şey işaretlemez.
    Yana sürükle ya da basılı tutup sürükle: birden çok günü işaretle. */
@@ -2851,7 +2858,7 @@ async function wzNext(){
       if(WZ.step===S.length-2){await setupApply(WZ.d);}
       if(WZ.step===S.length-1){wzClose();showTab("bugun");return;}
     }else if(i===v.length-1){
-      const d=WZ.d;await prepApply(d);wzClose();showTab("cizelge");generate();return;
+      const d=WZ.d;await prepApply(d);wzClose();showTab("cizelge");await generateFresh();return;
     }
     if(S[WZ.step].after)await S[WZ.step].after(WZ.d);
     if(WZ.kind==="prep")await wzFlushPrefs();
@@ -3394,6 +3401,7 @@ function renderTeams(){
   });
 }
 async function openTeam(deptId){
+  try{await flushPrefPaint();}catch(e){}
   if(dept&&dept.id!==deptId){document.querySelectorAll(".modal.on").forEach(m=>m.classList.remove("on"));try{editDay=null;}catch(e){}}   // önceki ekibin açık perdeleri kapanır
   activeDept=deptId;
   const t=myTeams.find(x=>x.dept_id===deptId);
@@ -6057,7 +6065,7 @@ function dropDraft(){draft=null;DRAFT_CTX=null;ALT.token++;ALT.list=[];ALT.busy=
 /* Çözüm önerileri: bir deneme sırasında kuralların geçici hali (null = gerçek ayarlar).
    rr: aralıklı ritim, pat: sabit ritim, sen: kıdem kuralı, free: sayılar serbest, nFree: gece sayıları serbest,
    flex: sayılarda ±1 esneklik, ts: süre çarpanı (hızlı deneme), rrOrig: asıl ritim (esnetme az kullanılsın) */
-let SOLVE_OV=null,TS_LOCAL=1,SOLVE_SEED=null;
+let SOLVE_OV=null,TS_LOCAL=1,SOLVE_SEED=null,REFINE_MS=5000;
 function TS(){return ((SOLVE_OV&&SOLVE_OV.ts)||1)*TS_LOCAL;}
 function fillAll(){if(SOLVE_OV&&SOLVE_OV.fill)return true;return ($("fillPolicy").value||"fill_all")==="fill_all";}
 /* Fazla nöbet sırası açıkken kişi sayıları aya özeldir: başka ay için yazılmış sayılar
@@ -6128,6 +6136,23 @@ function feasibility(){
   return {ok:cap>=S,cap,S,detail,
     msg:cap>=S?"":`Kurallarla en fazla ~${cap} nöbet dağıtılabilir ama ${S} slot var (${S-cap} açık).`};
 }
+/* taslaktan hemen önce: bekleyen kayıtlar yazılır, üyelerin bu arada girdiği istek / izinler veritabanından tazelenir */
+async function refreshPrefs(){
+  if(!dept||!sb)return;
+  const {data,error}=await sb.from("prefs").select("*").eq("dept_id",dept.id);
+  if(error||!Array.isArray(data))return;
+  const pa={};data.forEach(r=>{if(!r||!r.month)return;(pa[r.month]=pa[r.month]||{})[r.user_id]=r.days||{};});
+  prefsAll=pa;allPrefs=prefsAll[dept.month]=prefsAll[dept.month]||{};
+  try{renderPrefCal();renderPrefSummary();renderLeaveAdmin();}catch(e){}
+}
+async function generateFresh(){
+  if(!isAdmin()){toast("Sadece yönetici çizelge üretebilir.",true);return;}
+  try{await flushAuto();await flushPrefPaint();if(typeof wzFlushPrefs==="function")await wzFlushPrefs();await refreshPrefs();}catch(e){}
+  /* hesap birkaç saniye ekranı meşgul eder: önce "hazırlanıyor" görünsün (art arda basılmasın) */
+  if(GEN_BUSY)return;GEN_BUSY=true;
+  try{toast("⏳ Liste hazırlanıyor…");await new Promise(r=>setTimeout(r,60));generate();}finally{GEN_BUSY=false;}
+}
+let GEN_BUSY=false;
 function generate(){
   if(!isAdmin()){toast("Sadece yönetici çizelge üretebilir.",true);return;}
   hideDecide();
@@ -7039,7 +7064,11 @@ function refineAsg(slots,E,A,evalFn,iters,locked){
   const rOn=rrCfg()?0:patCur().on;
   // ritim cezası ağır olduğu için başlangıç sıcaklığı da onu aşabilmeli
   let temp=rOn>0?Math.min(6000,Math.max(40,(curP||0)/20)):Math.min(2500,Math.max(40,(curP||0)/50));
-  const cool=Math.pow(rOn>0?0.005:0.02,1/Math.max(1,iters));
+  let cool=Math.pow(rOn>0?0.005:0.02,1/Math.max(1,iters));
+  /* süre sınırı: kalabalık ekip + çok kuralda her değerlendirme pahalı; ekran uzun süre donmasın.
+     REFINE_MS dolunca (katı kural ihlali sürüyorsa 3 katı) kalan aramanın küçük bir bölümünde hızla soğutulup bitirilir.
+     Küçük ve orta ekiplerde süre dolmadan biter, hiçbir şey değişmez. */
+  const Tend=temp*(rOn>0?0.005:0.02),t0=performance.now(),budget=REFINE_MS*Math.max(0.3,TS());let ev=0,tuned=false;
   /* ritim açıksa ikili blok hamlesi: a'nın x,x+1 günleri ile b'nin y,y+1 günleri yer değiştirir */
   const byDay={};for(let s=0;s<S;s++)(byDay[slots[s].d]=byDay[slots[s].d]||[]).push(s);
   const findOn=(p,d)=>{const L=byDay[d];if(!L)return -1;for(const s of L)if(cur[s]===p)return s;return -1;};
@@ -7083,6 +7112,10 @@ function refineAsg(slots,E,A,evalFn,iters,locked){
     }else{cur[i]=a;cur[j]=b;}
     temp*=cool;
     if(bestP===0)break;
+    if((++ev&255)===0&&!tuned){const el=performance.now()-t0;
+      /* süre doldu: katı kural ihlali yoksa hızlı soğutup bitir; varsa 3 katı süreye kadar aramaya devam */
+      if(el>(bestP>=HARDW?3*budget:budget)){tuned=true;const rem=Math.max(800,Math.floor((iters-it)*0.08));
+        if(it+rem<iters){iters=it+rem;cool=Math.pow(Math.min(1,Tend/Math.max(1e-9,temp)),1/Math.max(1,rem*ev/(it+1)));}}}
   }
   return best;
 }
@@ -8545,6 +8578,8 @@ function altCandidates(base){
     if(c&&c.hiMin>1)C.push({k:"sen",ov:{sen:{...c,hiMin:c.hiMin-1}},cost:4,title:`Üst kıdem en az ${c.hiMin-1} kişi olsun`,desc:"Kural yalnız bu ay için bir kişi gevşer."});
     if(c&&c.loMin>1)C.push({k:"sen",ov:{sen:{...c,loMin:c.loMin-1}},cost:4,title:`Alt kıdem en az ${c.loMin-1} kişi olsun`,desc:"Kural yalnız bu ay için bir kişi gevşer."});
     if(anyFixed)C.push({k:"free",ov:{free:true},cost:3,title:"Kişi sayılarını program ayarlasın",desc:"Kıdemlilerin sayısı kurala yetecek şekilde ayarlanır."});}
+  /* "sayılara göre, boş kalabilir" ayarında sayıları programa bırakmak bütün yerleri boşaltırdı: bu öneriler yerleri de doldurur (açıklamaları da öyle der) */
+  if(!fillAll())C.forEach(c=>{if(c.ov&&(c.ov.free||c.ov.flex))c.ov={...c.ov,fill:true};});
   return C;
 }
 function anyFixedLock(){const o={};members.forEach((p,i)=>{if(runTargets[p.id]!=null)o[i]=1;});return o;}
@@ -8554,6 +8589,7 @@ function altScore0(c,res,base){
   const r=res.rep||{},fa=fillAll(),I=altIssues(base),ks=c.parts||[c.k],has=x=>ks.includes(x);
   let ok=r.hard===0&&!r.pinMiss;
   if(c.k!=="base"){
+    if(r.noCounts)ok=false;                 // hiç sayı yok → bütün yerler boş: çözüm sayılmaz
     if((r.rrV||0)+(r.rhythmV||0)>0)ok=false;
     if((r.senV||0)>0)ok=false;
     if((r.genV||0)>0)ok=false;
@@ -8567,7 +8603,8 @@ function altScore0(c,res,base){
     if(onDuty(p)&&got!==want){dc.push(`${kisaAd(p.name)} ${want} → ${got}`);dSum+=Math.abs(got-want)*(base.want&&base.want[i]!=null?1:0.35);}});
   let nSum=0;members.forEach(p=>{nSum+=Math.abs((res.nc[p.id]||0)-(base.nc[p.id]||0));});
   const uses=has("relax")&&I.R?rhythmExc(res,I.R).length:0;
-  const exc=c.k==="base"?(r.rrV||0)+(r.rhythmV||0)+(r.senV||0)+Math.floor((r.hard||0)/HARDW)+(r.ruleV||0)+(r.genV||0):0;
+  /* "aynen kalsın": çözülmeden kalan her sorun bedel sayılır (kural, ritim, kıdem, cinsiyet, katı kural, tutmayan gece / kişi sayısı, kesin gün) */
+  const exc=c.k==="base"?(r.rrV||0)+(r.rhythmV||0)+(r.senV||0)+Math.floor((r.hard||0)/HARDW)+(r.ruleV||0)+(r.genV||0)+(r.nightMiss||0)+(r.tgtMiss||0)+(r.pinMiss||0)*3:0;
   const cost=c.cost+(fa?res.emptyCount*10:0)+exc*6+dSum*3+(c.k==="nfree"?nSum*0.6:0)+uses*1.5;
   return {ok,cost,dc,uses,nSum};
 }
