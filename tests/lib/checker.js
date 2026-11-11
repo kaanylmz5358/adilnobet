@@ -268,7 +268,10 @@ function check(fx, res, o = {}) {
   // icap: aynı gün nöbet yok, geceden çıkan icap olmaz, sayılar dengeli
   if (shifts.some(sh => sh.icap)) { const ic = {}; for (let d = 1; d <= nDays; d++) (asg[d] || []).forEach(e => { if (!e.ic) return; ic[e.id] = (ic[e.id] || 0) + 1;
       if (entry(e.id, d)) out.push(`${name(e.id)} ${d}. gün hem nöbette hem icapta`); const pe = entry(e.id, d - 1); if (pe && dur(shifts[pe.s]) + hm(shifts[pe.s].start) > 24) out.push(`${name(e.id)} ${d}. gün geceden çıkıp icapta`); });
-    const vals = mem.filter(p => onDutyP(p) && !(+((PO[p.user_id] || {}).ratio) > 0 && +((PO[p.user_id] || {}).ratio) < 100)).map(p => ic[p.user_id] || 0);
+    // icap'a hiç giremeyenler (gece yasağı gece icapında, vardiyaya katılmayan, yarı zamanlı) karşılaştırmaya girmez
+    const icS = shifts.filter(sh => sh.icap), canIc = p => icS.some(sh => { const spf = p.shift_prefs || {}; if (spf.noNight && nightH(sh) * 2 >= dur(sh)) return false;
+      if (Array.isArray(sh.deny) && sh.deny.includes(p.user_id)) return false; if (!sh.owner && Array.isArray(sh.only) && sh.only.length && !sh.only.includes(p.user_id)) return false; return true; });
+    const vals = mem.filter(p => onDutyP(p) && canIc(p) && !(+((PO[p.user_id] || {}).ratio) > 0 && +((PO[p.user_id] || {}).ratio) < 100)).map(p => ic[p.user_id] || 0);
     info.icap = ic; if (vals.length && Math.max(...vals) - Math.min(...vals) > 1) out.push(`icap sayıları dengesiz: ${Math.min(...vals)}–${Math.max(...vals)}`); }
   return { ok: out.length === 0, problems: out, info };
 }

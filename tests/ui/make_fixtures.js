@@ -32,6 +32,20 @@ async function build(fx, file, extra) {
   });
   // aynı ekip, ama giren kişi sıradan üye (yönetici değil): yetkisiz düğmeler, salt okunur ayarlar, istek / takas akışları
   { const F = JSON.parse(fs.readFileSync(path.join(__dirname, "fx_shift.json"), "utf8")); F.me = uid(3); fs.writeFileSync(path.join(__dirname, "fx_uye.json"), JSON.stringify(F)); console.log("fx_uye.json (üye: " + uid(3).slice(-2) + ")"); }
+  // her şey açık ekip: icap, sabit mesai, ekip döngüsü, engeller, sabitlemeler, yetkinlik kuralları, mola, puan, kıdem/cinsiyet
+  { const N2 = NAMES.slice(0, 10), pz = [{ name: "Yönetici Test", noDuty: true }, ...N2.map(name => ({ name }))];
+    const PP = {}; N2.forEach((_, i) => { PP[uid(i + 2)] = { sv: i % 4, g: i % 2 ? "k" : "e", ...(i < 4 ? { tags: ["YB"] } : {}) }; });
+    PP[uid(11)] = { ...PP[uid(11)], ms: { on: true, d: [["08:00", "17:00"], ["08:00", "17:00"], ["08:00", "17:00"], ["08:00", "17:00"], ["08:00", "17:00"], null, null] } };
+    const fxZ = fixture({ month: "2026-12", shifts: [SH("Gündüz", "08:00", "20:00", 2, undefined, { sid: "g", brk: 60 }), SH("Gece", "20:00", "08:00", 2, undefined, { sid: "n", pts: 2 }), SH("İcap", "08:00", "08:00", 1, undefined, { sid: "ic", icap: true })],
+      dept: { bayram: "25" },
+      opts: { min_rest_h: 11, people: PP, pts: { on: true, n: 1, we: 1, bay: 2 }, sen: { on: true, th: 2, hiMin: 1, loMin: 0, scope: "shift", mode: "guard" }, gen: { mode: "spread" },
+        blocks: [{ pid: uid(3), type: "block", start: "00:00", end: "08:00", wdays: [1, 1, 1, 1, 1, 1, 1], days: "" }], pins: [{ pid: uid(4), days: "10", si: "" }],
+        rules: [{ id: "c0", t: "cycle", who: { k: "p", ids: [uid(5), uid(6)] }, pat: "GGNN----", start: "2026-11-01" }, { id: "nd", t: "need", tag: "YB", n: 1, scope: "day", si: -1 },
+          { id: "h", t: "lim", who: { k: "all" }, op: "max", n: 72, what: "hours", per: "roll", win: 7, hard: true }, { id: "w", t: "lim", who: { k: "all" }, op: "max", n: 1, what: "weekend", per: "roll", win: 2 },
+          { id: "s", t: "seq", who: { k: "all" }, fa: "N", fb: "D", hard: true }, { id: "len", t: "len", n: 13, what: "all" }],
+        leave_cap: 2, req_lim: { izin: 5, never: 4 }, open_mode: "approve" },
+      people: pz, prefs: { 2: iz(14, 18), 3: { 5: "must", 6: "never", _sh: { 12: { n: "yes" } } }, 7: { 20: "izin_bek", 21: "izin_bek" } }, schedules: [] });
+    await build(fxZ, "fx_zengin.json"); }
   // oda (24 saat) ekip: Perşembe/Cuma sonrası izin, Ek Cumartesi, 6 kişi
   const pr = [{ name: "Yönetici Test" }, ...NAMES.slice(0, 6).map(name => ({ name }))];
   const fxR = fixture({ month: "2026-12", mode: "rooms", dept: { general_rooms: 1, min_gap: 2, work_model: "duty_rest" },

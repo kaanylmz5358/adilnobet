@@ -6226,8 +6226,11 @@ async function redraft(){
   const same=!!prev&&Object.keys(finals).every(id=>(prev.cnt[id]||0)===finals[id])&&Object.keys(nights).every(id=>((prev.nc&&prev.nc[id])||0)===nights[id]);
   runTargets=finals;
   /* geceler: elle değiştirilen ya da zaten kesin olanlar kesin; diğerlerini program dengeler */
+  /* "gece sayılarını program dağıtsın" türü bir öneri uygulandıysa tablodaki geceler o önerinin sonucudur: yeniden hazırlarken
+     bunlar korunur (yoksa kişilerin eski, tutmayan gece sayıları geri gelir ve liste kötüleşirdi) */
+  const nightsFromAlt=!!(runOV&&(runOV.nFree||runOV.free));
   const nr={};members.forEach((p,i)=>{if(nights[p.id]==null)return;const was=prev&&prev.nWant?prev.nWant[i]:null,cur=(prev&&prev.nc&&prev.nc[p.id])||0;
-    if(was!=null||!prev||nights[p.id]!==cur)nr[p.id]=nights[p.id];});
+    if(nightsFromAlt||was!=null||!prev||nights[p.id]!==cur)nr[p.id]=nights[p.id];});
   runNight=nr;
   /* seçilen önerinin sayı ayarı artık tabloda: yöneticinin yazdığı sayılar geçerli */
   if(runOV){const o={...runOV};["tg","free","flex","flexLock","nFree","ng"].forEach(k=>{delete o[k];});runOV=Object.keys(o).length?o:null;}
@@ -6366,7 +6369,10 @@ function updDecideTotal(S){
   const rb=$("redraftBtn");if(rb){rb.classList.toggle("is-filled",ch);rb.classList.toggle("is-tinted",!ch);}
   const pb=$("publishBtn");if(pb){pb.classList.toggle("is-filled",!ch);pb.classList.toggle("is-tinted",ch);}
 }
-async function confirmDecide(){
+/* yayın: art arda iki kez basılırsa ikinci basış beklenir, liste iki kez yazılmaz */
+let PUB_BUSY=false;
+async function confirmDecide(){if(PUB_BUSY)return;PUB_BUSY=true;try{await confirmDecide0();}finally{PUB_BUSY=false;}}
+async function confirmDecide0(){
   if(!draft){alert("Önce taslak üret");return;}
   if(draftStale()){dropDraft();toast("Bu taslak başka bir ekip ya da ay için hazırlanmıştı; yayınlanmadı. Listeyi yeniden hazırla.",true);return;}
   if(RD_BUSY){toast("Liste yeniden hazırlanıyor; bitince yayınla.",true);return;}
@@ -8771,9 +8777,11 @@ function renderAlts0(){
 }
 function altApply(i){
   const f=ALT.list[i];if(!f)return;
+  if(draft&&draft.alt&&draft.alt.k===f.k&&(f.k==="base"||f.res===draft))return;   // aynı öneriye ikinci kez basıldı (çift tıklama): "geri al" bozulmasın
   ALT.prev=draft;ALT.prevOV=runOV;ALT.prevAlt={base:ALT.base,list:ALT.list,why:ALT.why,tried:ALT.tried,total:ALT.total};
   if(f.k!=="base")runOV=f.ov?{...(runOV||{}),...f.ov}:runOV;
-  const nd=f.k==="base"?{...f.res}:f.res;nd.lay=layoutSnap();     // "aynen kalsın": önceki taslak nesnesi bozulmasınnd.fair=fairSnap(nd,planAy());
+  const nd=f.k==="base"?{...f.res}:f.res;     // "aynen kalsın": önceki taslak nesnesi bozulmasın
+  nd.lay=layoutSnap();nd.fair=fairSnap(nd,planAy());
   const pt=draft&&draft.alt&&draft.alt.k==="re"&&ALT.prevTitle?ALT.prevTitle:null;     // önceki öneri de sürüyor
   const tt=pt?(f.k!=="base"?pt.title+" + "+f.title:pt.title):f.title,dd=pt?pt.desc+" "+f.desc:f.desc;
   nd.alt={title:tt,desc:dd,k:f.k};ALT.prevTitle=f.k!=="base"?{title:tt,desc:dd}:pt;
@@ -10937,7 +10945,7 @@ function solveSchedule(){
   const nWant=members.map(p=>isShiftMode()?nightWantOf(p):null);
   members.forEach((p,i)=>{
     if(nWant[i]==null)return;
-    let nc=0;for(let s2=0;s2<S;s2++)if(E[s2][i]&&MT[s2][i].isN)nc++;
+    let nc=0;for(let s2=0;s2<S;s2++)if((E[s2][i]||(locked[s2]&&A[s2]===i))&&MT[s2][i].isN)nc++;   // kesin günle (kural dışı) sabitlenen gece de sayılır
     if(nWant[i]>nc){viol.push(`⚠️ ${p.name}: ${nWant[i]} gece nöbeti yazıldı ama kurallarına uyan yalnızca ${nc} gece yeri var → ${nc} verildi.`);nWant[i]=nc;}
     if(isFixed[i]&&nWant[i]>wanted[i]){viol.push(`⚠️ ${p.name}: ${nWant[i]} gece yazıldı ama toplam nöbeti ${wanted[i]}. Gece sayısı ${wanted[i]}'e indirildi.`);nWant[i]=wanted[i];}
   });
