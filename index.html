@@ -8487,11 +8487,11 @@ const ALT_CNTK=["flex","flexLock","tg","free","nFree","ng","rrOrig","ts"];
 function altSeen(c){if(!c.ov||!runOV)return false;const ks=Object.keys(c.ov).filter(k=>!ALT_CNTK.includes(k));return ks.length>0&&ks.every(k=>JSON.stringify(c.ov[k])===JSON.stringify(runOV[k]));}
 function altAny(dr){const x=withRunOV(()=>altIssues(dr));return x.rh||x.empty||x.tgt||x.night||x.sen||x.gen||x.rule||x.hard||x.noCounts;}
 /* birleşik öneri: birden çok kural ailesi tutmuyorsa tek değişiklik hepsini çözemez */
-function altFam(k){return ["relax","keep","tg","flex"].includes(k)?"rh":k==="rule"||k==="need"?"rule":k==="sen"?"sen":k==="gen"?"gen":null;}
+function altFam(k){return ["relax","keep","tg","flex"].includes(k)?"rh":k==="rule"||k==="need"?"rule":k==="sen"?"sen":k==="gen"?"gen":k==="nfree"?"night":k==="wr"?"wr":null;}
 function altCombo(parts){const ov={};parts.forEach(p=>{const o=p.ov||{};for(const k in o){if(k==="rulesRel")ov.rulesRel={...(ov.rulesRel||{}),...o.rulesRel};else if(k==="rulesOff")ov.rulesOff=[...(ov.rulesOff||[]),...o.rulesOff];else ov[k]=o[k];}});
   return {k:"combo",parts:parts.map(p=>p.k),ov,cost:parts.reduce((a,p)=>a+p.cost,0)+1,title:parts.map(p=>p.title).join(" + "),
     desc:"Birlikte uygulanır: "+parts.map(p=>String(p.desc).replace(/[;.]\s*(diğer|geri kalan|başka)[^.;]*[.;]?\s*$/i,"").replace(/\.$/,"")).join(" · ")+".",rr:(parts.find(p=>p.rr)||{}).rr};}
-function altOwnV(f,res){const r=res.rep||{};return f==="rh"?(r.rrV||0)+(r.rhythmV||0)+(res.emptyCount||0)*0.5:f==="rule"?(r.ruleV||0):f==="sen"?(r.senV||0):(r.genV||0);}
+function altOwnV(f,res){const r=res.rep||{};return f==="rh"?(r.rrV||0)+(r.rhythmV||0)+(res.emptyCount||0)*0.5:f==="rule"?(r.ruleV||0):f==="sen"?(r.senV||0):f==="night"?(r.nightMiss||0):f==="wr"?(r.wrMax||0)+(r.wrOff||0):(r.genV||0);}
 /* adaylar: her biri "neyi değiştirir" + çözücüye verilecek geçici kurallar */
 function altCandidates(base){
   const I=altIssues(base),R=I.R,C=[];
@@ -8602,7 +8602,10 @@ function anyFixedLock(){const o={};members.forEach((p,i)=>{if(runTargets[p.id]!=
 function altScore(c,res,base){return withRunOV(()=>altScore0(c,res,base));}
 function altScore0(c,res,base){
   const r=res.rep||{},fa=fillAll(),I=altIssues(base),ks=c.parts||[c.k],has=x=>ks.includes(x);
-  let ok=r.hard===0&&!r.pinMiss;
+  /* katı kural / kesin gün sorunu taslakta zaten varsa ve hiçbir öneri çözemiyorsa (ör. iki kişinin kesin günü tek yere düşüyor),
+     öteki sorunları çözen öneriler yine sunulur: o sorun aynı kalır ve kartta yazar. Kötüleştiren öneri asla kabul edilmez. */
+  const bR=base.rep||{};
+  let ok=c.k==="base"?(r.hard===0&&!r.pinMiss):((r.hard||0)<=(bR.hard||0)&&(r.pinMiss||0)<=(bR.pinMiss||0));
   if(c.k!=="base"){
     if(r.noCounts)ok=false;                 // hiç sayı yok → bütün yerler boş: çözüm sayılmaz
     if((r.rrV||0)+(r.rhythmV||0)>0)ok=false;
@@ -8620,7 +8623,8 @@ function altScore0(c,res,base){
   const uses=has("relax")&&I.R?rhythmExc(res,I.R).length:0;
   /* "aynen kalsın": çözülmeden kalan her sorun bedel sayılır (kural, ritim, kıdem, cinsiyet, katı kural, tutmayan gece / kişi sayısı, kesin gün) */
   const exc=c.k==="base"?(r.rrV||0)+(r.rhythmV||0)+(r.senV||0)+Math.floor((r.hard||0)/HARDW)+(r.ruleV||0)+(r.genV||0)+(r.nightMiss||0)+(r.tgtMiss||0)+(r.pinMiss||0)*3:0;
-  const cost=c.cost+(fa?res.emptyCount*10:0)+exc*6+dSum*3+(c.k==="nfree"?nSum*0.6:0)+uses*1.5;
+  const rem=c.k==="base"?0:Math.floor((r.hard||0)/HARDW)*6+(r.pinMiss||0)*18;      // çözülemeden kalan katı kural / kesin gün
+  const cost=c.cost+(fa?res.emptyCount*10:0)+exc*6+rem+dSum*3+(c.k==="nfree"?nSum*0.6:0)+uses*1.5;
   return {ok,cost,dc,uses,nSum};
 }
 async function altBuild(){
@@ -8670,7 +8674,7 @@ async function altBuild(){
   }
   if(tok!==ALT.token)return;
   /* birden çok aile tutmuyorsa: her aileden kendi sorununu en çok azaltan iki esnetme birlikte denenir */
-  {const F=[["rh",I.rh],["rule",I.rule],["sen",I.sen],["gen",I.gen]].filter(x=>x[1]).map(x=>x[0]);
+  {const F=[["rh",I.rh],["rule",I.rule],["sen",I.sen],["gen",I.gen],["night",I.night],["wr",I.wr]].filter(x=>x[1]).map(x=>x[0]);
     if(F.length>=2&&found.filter(f=>f.k!=="base").length<3){
       const by={};ran.forEach(({c,res})=>{const f=altFam(c.k);if(!f||!F.includes(f))return;
         const sc=altOwnV(f,res)+((res.rep||{}).tgtMiss||0)*0.3+c.cost*0.25;(by[f]=by[f]||[]).push({c,sc});});
@@ -8716,6 +8720,8 @@ function altSummary0(f){
   if(rulesAll().some(x=>x.on!==false&&x.t!=="staff"&&x.t!=="only"))ch.push(r.ruleV?[`Kurallar ${r.ruleV} yerde tutmuyor`,"w"]:[fks.includes("rule")?"Diğer kurallar tam":"Kurallar tam","ok"]);
   if(I.night||f.k==="nfree")ch.push(r.nightMiss?[`Gece ${r.nightMiss} yerde farklı`,"w"]:["Geceler tam","ok"]);
   if(I.wr||(f.ov&&f.ov.wr))ch.push((r.wrMax||0)+(r.wrOff||0)?[`Nöbet sonrası kuralı ${(r.wrMax||0)+(r.wrOff||0)} yerde tutmuyor`,"w"]:["Nöbet sonrası izinler tam","ok"]);
+  if(f.k!=="base"&&r.hard>=HARDW)ch.push([`${Math.floor(r.hard/HARDW)} katı kural sorunu aynı kalır`,"w"]);
+  if(f.k!=="base"&&r.pinMiss)ch.push([`${r.pinMiss} kesin gün yine yerleşmez`,"w"]);
   let det="";
   if(fks.includes("keep")||f.k==="base"){const em=(res.viol||[]).filter(v=>/boş bırakıldı|boş kaldı/.test(v)).map(v=>v.replace(/^ℹ️ |^❗ /,""));if(em.length)det+=em.slice(0,2).map(x=>`<li>${x}</li>`).join("");}
   if(f.k==="base"||fks.includes("relax")){const ex=rhythmExc(res,I.R||undefined);if(ex.length)det+=ex.slice(0,4).map(x=>`<li>${hEsc(x.txt)}</li>`).join("")+(ex.length>4?`<li>… ve ${ex.length-4} yer daha</li>`:"");}
@@ -8755,7 +8761,7 @@ function renderAlts0(){
   const az=!ALT.busy&&ALT.list.length<3?`<p class="hint" style="margin:2px 2px 0">Kuralları bozmadan bu sorunu çözen başka bir yol bulunamadı; denenen diğer çözümler ya yine bir kuralı bozuyor ya da bu sorunu gidermiyor.</p>`:"";
   const wait=ALT.busy?`<div class="alt-wait"><span class="alt-spin"></span>Çözüm önerileri hazırlanıyor…${ALT.total?` (${Math.min(ALT.tried+1,ALT.total)}/${ALT.total})`:""}</div>`:"";
   box.innerHTML=done+`<div class="alt-box"${done?' style="margin-top:10px"':""}><p class="eyebrow" style="margin:0 0 6px">Çözüm önerileri</p>${why}
-    <p class="hint" style="margin:0 0 8px">Her öneri bu ay için kendi içinde kusursuz bir liste hazırlar. Birini seçince taslağa uygulanır; kalıcı ayarların değişmez.</p>
+    <p class="hint" style="margin:0 0 8px">Her öneri bu ay için kendi içinde kusursuz bir liste hazırlar${((ALT.base||{}).rep||{}).pinMiss||((ALT.base||{}).rep||{}).hard>=HARDW?" (yalnız yukarıdaki kesin gün / katı kural sorunu hiçbir öneriyle çözülemiyorsa aynı kalır; kartta yazar)":""}. Birini seçince taslağa uygulanır; kalıcı ayarların değişmez.</p>
     ${cards}${az}${wait}</div>`;
 }
 function altApply(i){
@@ -10850,7 +10856,7 @@ function solveSchedule(){
   linkMissing().forEach(x=>viol.push(`ℹ️ 🔗 ${x.p.name}: ${x.t.dept_name} listesinin ${ayAdi(planAy())} çizelgesi henüz yayınlanmadı — o listeyle uyum uygulanmadı.`));
 
   /* --- 1. aşama: yöneticinin verdiği kesin sayıları doyur --- */
-  const wanted=new Array(n).fill(0),isFixed=new Array(n).fill(false);
+  const wanted=new Array(n).fill(0),isFixed=new Array(n).fill(false),autoFix=new Uint8Array(n);   // autoFix: sayıyı yönetici değil program hesapladı (izne oranlı pay vb.)
   const CYC0=rulesOn().some(r=>r.t==="cycle"&&(!r.who||r.who.k==="all")&&String(r.pat||"").length>1)||cycCoverAll();
   if(CYC0&&!EVA){const yz=members.filter(p=>onDuty(p)&&tOf(p)>0);
     if(yz.length)viol.push(`ℹ️ Döngü kuralı ekibin tamamını kapsadığı için nöbet sayılarını döngü belirliyor; kişilere yazılan sayılar (${yz.slice(0,4).map(p=>kisaAd(p.name)+" "+tOf(p)).join(", ")}${yz.length>4?"…":""}) bu ay uygulanmadı.`);}
@@ -10919,7 +10925,7 @@ function solveSchedule(){
         for(const k of ord){if(rest<=0)break;if(tg[k]<cap[fr[k]]){tg[k]++;rest--;mv=true;}}
         if(!mv)break;}
       fzBaseP={};
-      fr.forEach((i,k)=>{isFixed[i]=true;wanted[i]=Math.max(tg[k],load[i]);fzBaseP[members[i].id]=Math.floor(sh[k]+1e-9);});
+      fr.forEach((i,k)=>{isFixed[i]=true;autoFix[i]=1;wanted[i]=Math.max(tg[k],load[i]);fzBaseP[members[i].id]=Math.floor(sh[k]+1e-9);});
     }
   }
 
@@ -11069,7 +11075,8 @@ function solveSchedule(){
   }
   members.forEach((p,i)=>{
     if(isFixed[i]&&load[i]<wanted[i])
-      viol.push(`⚠️ ${p.name}: ${wanted[i]} nöbet istendi, kurallar elverdiği için ancak ${load[i]} verilebildi. (Aynı günlere sıkışan başka kişiler var.)`);
+      viol.push(autoFix[i]?`ℹ️ ${p.name}: payına düşen ${wanted[i]} nöbetten kurallar elverdiği için ${load[i]} verilebildi; fark ekibe dağıtıldı. (Aynı günlere sıkışan başka kişiler var.)`
+        :`⚠️ ${p.name}: ${wanted[i]} nöbet istendi, kurallar elverdiği için ancak ${load[i]} verilebildi. (Aynı günlere sıkışan başka kişiler var.)`);
   });
 
   /* --- 2. aşama: sayı verilmemiş kişilere kalanları dağıt --- */
@@ -11294,7 +11301,7 @@ function solveSchedule(){
   }
 
   const targets=members.map((p,i)=>({id:p.id,name:p.name,istenen:isFixed[i]?wanted[i]:null,
-    verilen:cnt[p.id],kapasite:cap[i],sabit:isFixed[i]}));
+    verilen:cnt[p.id],kapasite:cap[i],sabit:isFixed[i]&&!autoFix[i]}));
   const hedefTut=targets.every(t=>!t.sabit||t.verilen===t.istenen);
   const nightMiss=members.reduce((a,p,i)=>a+(nWant[i]!=null?Math.abs((rep.NC[i]||0)-nWant[i]):0),0);
   const sumRep={ruleV:rep.ruleV||0,genV:rep.genV||0,noCounts:!fillAll()&&!members.some((p,i)=>isFixed[i]&&wanted[i]>0)&&empty>0,rrV:rep.rrV||0,rhythmV:rep.rhythmV||0,senV:rep.senV||0,nightMiss,hard:rep.hard-(rep.nightOver||0)*HARDW,wrMax:rep.wrMaxV||0,wrOff:rep.wrOffV||0,

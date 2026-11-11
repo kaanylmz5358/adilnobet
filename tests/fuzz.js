@@ -108,7 +108,11 @@ async function idle(E, max = 240000) { const t0 = Date.now(); await wait(150); w
           const dcN = (f.dc || []).map(x => (x.match(/^(.+) \d+ → \d+$/) || [])[1]).filter(Boolean);
           if (dcN.length && (f.ov || {}).keep) adj.push(...dcN);
           const bad = cc.problems.filter(t => !mustOver(t, sv) && !(o.allowEmpty && /boş yer/.test(t)) && !SOFTWARN.has(famOf(t)) && !(/istendi/.test(t) && adj.some(nm => t.startsWith(nm + ":"))));
-          if (bad.length) rec.fails.push(`ÖNERİ ${i + 1} "${f.t}" kusursuz dedi ama: ${bad.slice(0, 2).join(" | ")}`);
+          // taslakta zaten olan ve hiçbir önerinin çözemediği kesin gün / katı kural sorunu öneride aynı kalabilir (kartta yazar), artamaz
+          const fr = f.res.rep || {}, okPin = (fr.pinMiss || 0) > 0 && (fr.pinMiss || 0) <= (rep.pinMiss || 0), okHard = (fr.hard || 0) > 0 && (fr.hard || 0) <= (rep.hard || 0);
+          if ((fr.pinMiss || 0) > (rep.pinMiss || 0) || (fr.hard || 0) > (rep.hard || 0)) rec.fails.push(`ÖNERİ ${i + 1} "${f.t}" taslaktan daha çok katı kural / kesin gün sorunu içeriyor`);
+          const bad2 = bad.filter(t => !(okPin && /^(must|shMust)$/.test(famOf(t))) && !(okHard && /^(rest|gap|double|wrOff)$/.test(famOf(t))));
+          if (bad2.length) rec.fails.push(`ÖNERİ ${i + 1} "${f.t}" kusursuz dedi ama: ${bad2.slice(0, 2).join(" | ")}`);
         });
         // sıralama mantığı: sorunları çözen, sayıları ve dolu yerleri değiştirmeyen bir öneri varken "aynen kalsın" ya da "boş bırak" önde olmamalı
         if (L.length > 1) {
