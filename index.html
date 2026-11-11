@@ -697,6 +697,7 @@ button.nd-row:active,a.nd-row:active,.nd-row.is-tap:active{background:var(--surf
 .cy-pre{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;line-height:1.3;align-items:center}
 .cy-pre span{font-size:14px;color:var(--ink-2)}
 .cy-pre button{border:0;background:var(--surface);border-radius:999px;padding:6px 10px;font-family:inherit;font-size:14px;color:var(--tint-ink);cursor:pointer}
+.cy-pre button.on{background:var(--tint);color:#fff}
 .iss{margin:10px 0 4px;padding:12px 14px;border-radius:var(--radius-md);background:var(--surface-2)}
 .iss summary{cursor:pointer;font-size:16px;display:flex;gap:8px;align-items:center}
 .iss-n{background:var(--danger-soft);color:var(--danger);border-radius:999px;padding:1px 8px;font-size:13px;font-weight:700}
@@ -1635,7 +1636,7 @@ div.nd-row[onclick]:active,label.nd-row:active{background:var(--surface-2)}
   <div id="setBar" class="setbar"></div>
   <div id="setLanding"></div>
   <div class="card ios" id="monthCard" data-grp="ay">
-  <div class="nd-group"><div class=nd-group__label>Hazırlanan ay</div><div class="nd-list"><button class="nd-row" type="button" data-noauto onclick="openMonthSheet()"><span class="nd-row__body"><span class="nd-row__title">Ay</span></span><span class="nd-row__value" id="monthLbl">—</span><span data-icon="chev-r"></span></button><input type="hidden" id="month"><div class="nd-row"><span class="nd-row__body"><span class="nd-row__title">Resmi tatil / bayram</span></span><input type="text" id="bayramDays" class="rowin" placeholder="ör. 15-17,20" inputmode="numeric"></div><button class="nd-row is-action" onclick="pickBayram()"><span class="nd-row__body"><span class="nd-row__title">Bayram günlerini takvimden seç</span></span><span data-icon="calendar"></span></button><div class="nd-row"><span class="nd-row__body"><span class="nd-row__title">Arife günleri</span><span class=nd-row__sub>nöbet öğlen başlar</span></span><input type="text" id="arifeDays" class="rowin" placeholder="ör. 19" inputmode="numeric"></div><button class="nd-row is-action" onclick="pickArife()"><span class="nd-row__body"><span class="nd-row__title">Arife günlerini takvimden seç</span></span><span data-icon="calendar"></span></button></div><div class=nd-group__foot>Ay değişince o ayın izinleri, tercihleri ve listesi açılır.</div></div>
+  <div class="nd-group"><div class=nd-group__label>Hazırlanan ay</div><div class="nd-list"><button class="nd-row" type="button" data-noauto onclick="openMonthSheet()"><span class="nd-row__body"><span class="nd-row__title">Ay</span></span><span class="nd-row__value" id="monthLbl">—</span><span data-icon="chev-r"></span></button><input type="hidden" id="month"><div class="nd-row"><span class="nd-row__body"><span class="nd-row__title">Resmi tatil / bayram</span></span><input type="text" id="bayramDays" class="rowin" placeholder="ör. 15-17,20" inputmode="numeric"></div><button class="nd-row is-action" onclick="pickBayram()"><span class="nd-row__body"><span class="nd-row__title">Bayram günlerini takvimden seç</span></span><span data-icon="calendar"></span></button><div class="nd-row"><span class="nd-row__body"><span class="nd-row__title">Arife günleri</span><span class=nd-row__sub>nöbet öğlen başlar</span></span><input type="text" id="arifeDays" class="rowin" placeholder="ör. 19" inputmode="numeric"></div><button class="nd-row is-action" onclick="pickArife()"><span class="nd-row__body"><span class="nd-row__title">Arife günlerini takvimden seç</span></span><span data-icon="calendar"></span></button><button class="nd-row is-action" id="trHolBtn" onclick="addTrHol()"><span class="nd-row__body"><span class="nd-row__title">🇹🇷 Türkiye resmi tatillerini ekle</span><span class=nd-row__sub id="trHolSub"></span></span><span data-icon="calendar"></span></button></div><div class=nd-group__foot>Ay değişince o ayın izinleri, tercihleri ve listesi açılır.</div></div>
   <div class="nd-group"><div class=nd-group__label>Nöbet düzeni</div><div class="nd-list"><div class="nd-row"><span class="nd-row__body"><span class="nd-row__title">Çalışma düzeni</span></span><select id="workModel" class="rowin">
         <option value="shift_only">Nöbet = tüm mesai</option>
         <option value="duty_rest">Mesai + nöbet, ertesi gün izinli</option>
@@ -1644,6 +1645,14 @@ div.nd-row[onclick]:active,label.nd-row:active{background:var(--surface-2)}
         <option value="1">İlk mesai günü izinli</option></select></div><div class="nd-row"><span class="nd-row__body"><span class="nd-row__title">İki nöbet arası en az</span><span class=nd-row__sub>gün (2 = bir gün boşluk)</span></span><input type="number" id="minGap" min="1" max="7"></div><div class="nd-row"><span class="nd-row__body"><span class="nd-row__title">İzinlinin nöbet sayısı</span></span><select id="leaveProp" class="rowin">
         <option value="">Eşit</option>
         <option value="1">İzin oranında azalt</option></select></div></div><div class=nd-group__foot>“İzin oranında azalt”: ayın yarısında izinli olana yaklaşık yarı sayıda nöbet yazılır.</div></div>
+  <div class="nd-group" id="reqLimGrp"><div class=nd-group__label>İzin ve istek sınırları</div><div class="nd-list">
+    <div class="nd-row"><span class="nd-row__body"><span class="nd-row__title">Aynı gün en fazla izinli</span><span class=nd-row__sub>kişi · 0 = sınırsız</span></span><input type="number" id="leaveCap" min="0" max="99"></div>
+    <div class="nd-row"><span class="nd-row__body"><span class="nd-row__title">Kişi başı ayda en fazla izin</span><span class=nd-row__sub>gün · 0 = sınırsız</span></span><input type="number" id="rqIzin" min="0" max="31"></div>
+    <div class="nd-row"><span class="nd-row__body"><span class="nd-row__title">… “Nöbet yok” günü</span><span class=nd-row__sub>gün · 0 = sınırsız</span></span><input type="number" id="rqNever" min="0" max="31"></div>
+    <div class="nd-row"><span class="nd-row__body"><span class="nd-row__title">… “Kesin nöbet” günü</span><span class=nd-row__sub>gün · 0 = sınırsız</span></span><input type="number" id="rqMust" min="0" max="31"></div>
+    <div class="nd-row"><span class="nd-row__body"><span class="nd-row__title">… “İstemiyorum” günü</span><span class=nd-row__sub>gün · 0 = sınırsız</span></span><input type="number" id="rqAvoid" min="0" max="31"></div>
+    <div class="nd-row"><span class="nd-row__body"><span class="nd-row__title">… “İstiyorum” günü</span><span class=nd-row__sub>gün · 0 = sınırsız</span></span><input type="number" id="rqYes" min="0" max="31"></div>
+  </div><div class=nd-group__foot>Ekip üyeleri bu sınırları aşarak işaretleyemez; onay bekleyen izinler de sayılır. Yönetici sınırı aşabilir, uyarı görür.</div></div>
   <details class="ndadv"><summary>Gelişmiş ayarlar <span>liste tipi, diğer listeler, dağıtım, ritim</span></summary>
   <div class="nd-group"><div class=nd-group__label>Liste</div><div class="nd-list"><div class="nd-row"><span class="nd-row__body"><span class="nd-row__title">Liste tipi</span></span><select id="schedMode" onchange="modeChanged()" class="rowin">
         <option value="rooms">Oda tabanlı</option>
@@ -1788,6 +1797,7 @@ div.nd-row[onclick]:active,label.nd-row:active{background:var(--surface-2)}
     <p class="hint">Her kural bir cümle. Liste tam oturmazsa program önce en alttaki kuralı esnetir; sırayı tutamaçtan tutup sürükleyerek değiştir. Kesin kurallar hiç esnemez.</p>
     <div id="ruleList"></div>
     <button class="btn" id="ruleAddBtn" style="width:100%;margin-top:10px" onclick="ruleNew()">＋ Kural ekle</button>
+    <button class="btn ghost" id="rulePackBtn" style="width:100%;margin-top:8px" onclick="rulePackOpen()">Hazır kural paketleri <small style="opacity:.75">· yasal sınırlar ve iyi uygulamalar</small></button>
   </div>
   <div class="card" id="kidemCard" data-grp="kidem">
     <p class="eyebrow">Kişi özellikleri</p>
@@ -2199,7 +2209,7 @@ function showView(v){document.querySelectorAll(".view").forEach(e=>e.classList.r
    Kayıtlar sırayla yapılır (aynı anda iki kayıt birbirinin ayarını ezmesin). */
 const AUTO_ID={minGap:"month",arifeDays:"arife",afterNext:"afternext",bayramDays:"bayram",schedMode:"mode",linkDefault:"link",genDay:"genday",fillPolicy:"fill",
   leaveProp:"leaveprop",workModel:"work",minRest:"minrest",wishPri:"wish",partnerMode:"partner",
-  balDN:"balance",balWE:"balance",generalRooms:"rooms",izinInput:"izin",wishInput:"mywish",profName:"profile",profBranch:"profile"};
+  balDN:"balance",balWE:"balance",generalRooms:"rooms",izinInput:"izin",leaveCap:"reqlim",rqIzin:"reqlim",rqNever:"reqlim",rqMust:"reqlim",rqAvoid:"reqlim",rqYes:"reqlim",wishInput:"mywish",profName:"profile",profBranch:"profile"};
 const autoT={};let autoQ=Promise.resolve(),autoPending={};
 /* olay yolu dağıtım anında sabitlenir: yeniden çizim öğeyi sayfadan kaldırsa bile kapsayıcı bulunur */
 function autoKeyFor(el,ev){
@@ -2287,7 +2297,10 @@ function setBrush(b){
     n.className="brushnow b-"+(b||"erase");
     const fare=isMouse(),dk=fare?"tıkla":"dokun",dkn=fare?"tıklarsan":"dokunursan";
     const shT=prefShift&&shIdxOf(prefShift)>=0?` · yalnız <b>${hEsc(prefShLbl(shIdxOf(prefShift)))}</b> için`:"";
-    n.innerHTML=b?`Seçili: <b>${BRUSH_AD[b]}</b>${shT} — günlere ${dk}${onay?" (yönetici onayına gider)":""}. Aynı güne tekrar ${dkn} kalkar.`:`Seçili: <b>Sil</b> — işaretini kaldırmak istediğin günlere ${dk}.`;}
+    const C=reqLimCfg(),lim=b?C[b]||0:0,uid0=editingId(),used=lim?reqUsed(uid0,b):0;
+    const limT=lim?` <span class="nowrap">· bu ay en fazla ${lim} (${used} kullanıldı)</span>`:"";
+    const capT=b==="izin"&&C.cap?` <span class="nowrap">· aynı gün en fazla ${C.cap} kişi izinli</span>`:"";
+    n.innerHTML=b?`Seçili: <b>${BRUSH_AD[b]}</b>${shT} — günlere ${dk}${onay?" (yönetici onayına gider)":""}. Aynı güne tekrar ${dkn} kalkar.${limT}${capT}`:`Seçili: <b>Sil</b> — işaretini kaldırmak istediğin günlere ${dk}.`;}
 }
 function paintPref(d,tap){
   const uid=editingId();if(!canEdit(uid))return false;
@@ -2301,6 +2314,7 @@ function paintPref(d,tap){
     if(tap&&nv&&(cur===nv||cur===prefBrush||cur===prefBrush+"_bek")){delete o[prefShift];tidy();return true;}
     if(!nv){if(!cur){tidy();return false;}delete o[prefShift];tidy();return true;}
     if(cur===nv){tidy();return false;}
+    if(!reqGate(uid,d,nv.replace(/_bek$/,""))){tidy();return false;}
     o[prefShift]=nv;
     if(P[d]&&!isLeaveVal(P[d]))delete P[d];               // gün geneli işaret vardiya işaretiyle çelişmesin
     if(nv.startsWith("must"))for(const k in o)if(k!==prefShift&&String(o[k]).startsWith("must"))delete o[k];   // bir günde tek kesin vardiya
@@ -2313,6 +2327,7 @@ function paintPref(d,tap){
   if(tap&&nv&&(cur===nv||cur===prefBrush||cur===prefBrush+"_bek")){delete allPrefs[uid][d];return true;}   // aynı fırçayla tekrar dokun: kaldır
   const shd=allPrefs[uid]._sh&&allPrefs[uid]._sh[d];
   if(cur===nv&&!(shd&&!nv))return false;
+  if(nv&&!reqGate(uid,d,nv.replace(/_bek$/,"")))return false;
   if(nv)allPrefs[uid][d]=nv;else delete allPrefs[uid][d];
   if(shd){delete allPrefs[uid]._sh[d];if(!Object.keys(allPrefs[uid]._sh).length)delete allPrefs[uid]._sh;}   // gün geneli işaret o günün vardiya işaretlerinin yerine geçer
   return true;
@@ -3388,7 +3403,7 @@ async function loadAll(){
   if($("monthLbl"))$("monthLbl").textContent=ayAdi(dept.month);
   if($("arifeDays"))$("arifeDays").value=(dept.opts&&dept.opts.arife)||"";
   if($("afterNext"))$("afterNext").value=(dept.opts&&dept.opts.after_next)?"1":"";
-  try{renderRhythm(true);}catch(e){}$("bayramDays").value=dept.bayram||"";
+  try{renderRhythm(true);}catch(e){}$("bayramDays").value=dept.bayram||"";try{renderTrHol();}catch(e){}
   $("generalRooms").value=dept.general_rooms!=null?dept.general_rooms:2;
   roomRows=Object.entries(branchRooms()).map(([b,v])=>({branch:b,rooms:v.rooms,shared:!!v.shared}));
   shiftRows=(dept.shifts||[]).map((s,i)=>shNorm(s,i));SH_SIDS0=shiftRows.map(x=>x.sid);
@@ -3405,6 +3420,7 @@ async function loadAll(){
   $("linkDefault").innerHTML=LINK_MODES.map(([k,ad])=>`<option value="${k}">${ad}</option>`).join("");
   $("linkDefault").value=(dept.opts&&dept.opts.link_default)||"off";
   $("leaveProp").value=(dept.opts&&dept.opts.leave_prop)?"1":"";$("leaveProp").disabled=ro;
+  {const C=reqLimCfg();[["leaveCap",C.cap],["rqIzin",C.izin],["rqNever",C.never],["rqMust",C.must],["rqAvoid",C.avoid],["rqYes",C.yes]].forEach(([id,v])=>{const e=$(id);if(e){e.value=v||0;e.disabled=ro;}});}
   $("addRoomBtn").style.display=ro?"none":"";
   $("genRow").style.display=ro?"none":"block";
   $("devirBtn").style.display=ro?"none":"inline-block";
@@ -3486,6 +3502,9 @@ function shiftMetrics(s,d,y,m,nDays,bays){
     if(isWknd(y,m,dd))wkH++;
     if(bays.has(dd))bayH++;
   }
+  /* ücretsiz mola (dakika): saat hesabından düşülür; gece / hafta sonu oranı aynı kalır */
+  const br=Math.max(0,Math.min(dur,(+s.brk||0)/60));
+  if(br>0){const f=(dur-br)/dur;return {h:dur-br,night:night*f,wkH:wkH*f,bayH:bayH*f,gross:dur};}
   return {h:dur,night,wkH,bayH};
 }
 function renderShifts(){
@@ -3494,7 +3513,7 @@ function renderShifts(){
   shiftRows.forEach((s,i)=>{
     if(s.rest==null)s.rest=0;
     const d=document.createElement("div");d.className="shiftrow";
-    const nR=rulesAll().filter(r=>ruleSi(r)===i&&r.on!==false).length;
+    const nR=rulesAll().filter(r=>ruleHasSi(r,i)&&r.on!==false).length;
     const gece=isNightShift(s);
     d.innerHTML=`<div class="row">
       <input type="text" value="${hEsc(s.name)}" placeholder="Ad" style="width:88px" ${ro?"disabled":""} onchange="shiftRows[${i}].name=this.value">
@@ -3558,6 +3577,8 @@ function shWhoToggle(pid){if(!isAdmin()||!SHS)return;const i=SHS.i,s=shiftRows[i
     else s.deny=[...new Set((s.deny||[]).concat([pid]))];}
   renderShSheet();renderShifts();renderPeople();}
 function shSetNt(v){if(!isAdmin()||!SHS)return;const s=shiftRows[SHS.i];if(!s)return;if(v)s.nt=v;else delete s.nt;renderShSheet();renderShifts();}
+function shSetBrk(v){if(!isAdmin()||!SHS)return;const s=shiftRows[SHS.i];if(!s)return;const x=Math.max(0,Math.min(Math.round(shiftHours(s)*60)-1,Math.round(+v||0)));
+  if(x>0)s.brk=x;else delete s.brk;renderShSheet();renderShifts();}
 /* bu vardiyaya kısayoldan kural: kural perdesi hazır doldurulmuş açılır, sayı ve "kesin" seçilip kaydedilir */
 function shRuleNew(k){if(!isAdmin()||!SHS)return;const i=SHS.i;
   if(!SH_SIDS0.includes(shSid(i))){toast("Önce vardiyanın kaydedilmesini bekle (bir saniye).",true);return;}
@@ -3577,10 +3598,10 @@ function renderShSheet(){
   const auto=nightRatio(s)>=0.5;
   const chips=pool.map(p=>{const on=sel.includes(p.id);
     return `<button type="button" class="dchip ${on?"on":""}${SHS.mode==="deny"&&on?" is-x":""}" ${dis} onclick="shWhoToggle('${p.id}')">${SHS.mode==="deny"&&on?"✕ ":""}${hEsc(kisaAd(p.name))}</button>`;}).join("");
-  const RS=rulesAll().filter(r=>ruleSi(r)===i);
+  const RS=rulesAll().filter(r=>ruleHasSi(r,i));
   const isN=isNightShift(s);
   let h=`<h2 style="margin:4px 2px 2px">${hEsc(shName(i))}</h2>
-    <p class="hint" style="margin:0 2px 10px">${s.count||1} kişi · ${shiftHours(s).toFixed(0)} saat · ${isN?"🌙 gece":"☀️ gündüz"} vardiyası</p>
+    <p class="hint" style="margin:0 2px 10px">${s.count||1} kişi · ${shiftHours(s).toFixed(0)} saat${+s.brk>0?` (molasız ${+(shiftHours(s)-s.brk/60).toFixed(2)} saat)`:""} · ${isN?"🌙 gece":"☀️ gündüz"} vardiyası</p>
     <p class="eyebrow" style="margin:6px 2px">Kimler tutar?</p>
     <div class="seg seg-v">
       <button class="${SHS.mode==="all"?"on":""}" ${dis} onclick="shSetMode('all')">Herkes tutabilir</button>
@@ -3599,6 +3620,9 @@ function renderShSheet(){
       <button class="${s.nt==="n"?"on":""}" ${dis} onclick="shSetNt('n')">☀️ Gündüz</button>
     </div>
     <p class="hint" style="margin:2px 2px 0">${!s.nt?`Otomatik olarak <b>${auto?"gece":"gündüz"}</b> sayılıyor (saatlerinin yarısından fazlası 20:00–08:00 arasındaysa gece). `:""}Gece sayıları, "gece nöbetlerinden sonra izin" ve "gece tutmaz" ayarları buna göre çalışır.</p>
+    <p class="eyebrow" style="margin:16px 2px 6px">Ücretsiz mola</p>
+    <div class="row" style="align-items:center;gap:8px"><input type="number" class="rb-num" min="0" max="240" step="5" value="${+s.brk||0}" ${dis} onchange="shSetBrk(this.value)"> <span>dakika</span></div>
+    <p class="hint" style="margin:2px 2px 0">Ücret ve çalışma saatine sayılmayan mola. Saat toplamları, saat kuralları ve adalet hesabı molasız (net) saatle yapılır. 0 = mola düşülmez.</p>
     <p class="eyebrow" style="margin:16px 2px 6px">Bu vardiyanın kuralları</p>`;
   h+=RS.length?RS.map(r=>`<div class="rl-card${r.on===false?" is-off":""}"><div class="rl-body"><div class="rl-txt">${hEsc(ruleText(r))}${r.hard?' <span class="rl-hard">kesin</span>':""}</div>
       ${adm?`<div class="rl-act"><label class="rl-sw"><input type="checkbox" ${r.on===false?"":"checked"} onchange="ruleToggle('${r.id}',this.checked)"> ${r.on===false?"Kapalı":"Açık"}</label>
@@ -4018,15 +4042,40 @@ function dpSave(){
   const st=dpState;dpClose();
   if(st&&st.onSave)st.onSave([...st.sel].sort((a,b)=>a-b));
 }
+/* Türkiye resmi tatilleri: sabit günler her yıl; dini bayramlar yalnız resmî olarak ilan edilmiş yıllar için */
+const TR_FIX=[[1,1,"Yılbaşı"],[4,23,"Ulusal Egemenlik ve Çocuk Bayramı"],[5,1,"Emek ve Dayanışma Günü"],[5,19,"Atatürk'ü Anma, Gençlik ve Spor Bayramı"],
+  [7,15,"Demokrasi ve Millî Birlik Günü"],[8,30,"Zafer Bayramı"],[10,29,"Cumhuriyet Bayramı"]];
+const TR_DIN={2026:[["2026-03-19","2026-03-20","2026-03-22","Ramazan Bayramı"],["2026-05-26","2026-05-27","2026-05-30","Kurban Bayramı"]],
+  2027:[["2027-03-08","2027-03-09","2027-03-11","Ramazan Bayramı"],["2027-05-15","2027-05-16","2027-05-19","Kurban Bayramı"]]};
+function trHolMonth(mk){const y=+mk.slice(0,4),m=+mk.slice(5,7),hol=[],arf=[];
+  TR_FIX.forEach(([mm,dd,ad])=>{if(mm===m)hol.push({d:dd,ad});});
+  if(m===10)arf.push({d:28,ad:"Cumhuriyet Bayramı arifesi"});
+  (TR_DIN[y]||[]).forEach(([a,b,c,ad])=>{const A=new Date(a+"T00:00"),B=new Date(b+"T00:00"),Cc=new Date(c+"T00:00");
+    if(A.getMonth()+1===m)arf.push({d:A.getDate(),ad:ad+" arifesi"});
+    for(let t=new Date(B);t<=Cc;t.setDate(t.getDate()+1))if(t.getMonth()+1===m)hol.push({d:t.getDate(),ad});});
+  return {hol:hol.sort((a,b)=>a.d-b.d),arf,known:!!TR_DIN[y]};}
+function renderTrHol(){const el=$("trHolSub"),bt=$("trHolBtn");if(!el)return;if(bt)bt.style.display=isAdmin()?"":"none";
+  const mk=planAy();if(!mk)return;const T=trHolMonth(mk),hs=new Set(parseDays($("bayramDays").value)),as=new Set(parseDays(arifeStr()));
+  const all=T.hol.map(x=>`${x.d} ${x.ad}`).concat(T.arf.map(x=>`${x.d} ${x.ad} (yarım gün)`));
+  const eksik=T.hol.filter(x=>!hs.has(x.d)).length+T.arf.filter(x=>!as.has(x.d)).length;
+  el.textContent=(all.length?`Bu ay: ${all.join(", ")}`+(eksik?"":" — eklendi ✓"):"Bu ay resmi tatil yok")+(T.known?"":` · ${mk.slice(0,4)} dini bayram tarihleri henüz eklenmedi, elle gir`);}
+async function addTrHol(){if(!isAdmin())return;const mk=planAy(),T=trHolMonth(mk);
+  if(!T.hol.length&&!T.arf.length){toast(T.known?"Bu ay resmi tatil yok.":`Bu ay sabit resmi tatil yok; ${mk.slice(0,4)} dini bayram tarihleri henüz eklenmedi — bayram varsa elle gir.`,!T.known);return;}
+  const hs=new Set(parseDays($("bayramDays").value)),as=new Set(parseDays(arifeStr()));
+  T.hol.forEach(x=>{hs.add(x.d);as.delete(x.d);});T.arf.forEach(x=>{if(!hs.has(x.d))as.add(x.d);});
+  $("bayramDays").value=fmtDays([...hs].sort((a,b)=>a-b));await saveGrp("bayram");
+  if($("arifeDays")){$("arifeDays").value=fmtDays([...as].sort((a,b)=>a-b));await saveGrp("arife");}
+  renderTrHol();try{renderPrefCal();}catch(e){}
+  toast(`✅ Eklendi: ${T.hol.map(x=>x.d).concat(T.arf.map(x=>x.d+" (arife)")).join(", ")}`+(T.known?"":` · ${mk.slice(0,4)} dini bayramları elle gir`));}
 function pickBayram(){
   if(!isAdmin())return;
   openDayPicker("Bayram / resmi tatil günleri","Bu günler saat ve adalet hesabında ayrı sayılır. Seçince hemen kaydedilir.",
-    $("bayramDays").value,arr=>{$("bayramDays").value=fmtDays(arr);renderPrefCal();autoSave("bayram",50);});
+    $("bayramDays").value,arr=>{$("bayramDays").value=fmtDays(arr);renderPrefCal();autoSave("bayram",50);renderTrHol();});
 }
 function pickArife(){
   if(!isAdmin())return;
   openDayPicker("Arife (yarım gün)","Bayram öncesi yarım günler: mesai öğlen biter, nöbet o saatte başlar. Seçince hemen kaydedilir.",
-    $("arifeDays").value,arr=>{$("arifeDays").value=fmtDays(arr);autoSave("arife",50);});
+    $("arifeDays").value,arr=>{$("arifeDays").value=fmtDays(arr);autoSave("arife",50);renderTrHol();});
 }
 function pickIzin(){
   const uid=editingId();
@@ -4120,6 +4169,7 @@ function shWhoText(sh,si,kisa){
   if(dn.length)return (kisa?"Herkes, hariç ":"Herkes — hariç: ")+ad(dn);
   return "Herkes";}
 /* bir kuralın bağlı olduğu vardiya (yoksa null) */
+function ruleHasSi(r,i){if(ruleSi(r)===i)return true;return !!r&&r.t==="seq"&&[r.fa,r.fb].some(x=>/^\d+$/.test(String(x))&&+x===i);}
 function ruleSi(r){if(!r)return null;
   if((r.t==="lim"||r.t==="after")&&r.what==="shift")return +r.si;
   if(r.t==="eq"||r.t==="only")return +r.si;
@@ -4134,6 +4184,8 @@ function shRemapPlan(){
   const M=i=>{if(i==null||i===""||+i<0)return i;i=+i;return i<map.length?map[i]:i;};
   const rules=rulesAll().map(r=>{const si=ruleSi(r);
     if(r.t==="cycle"){const pat=String(r.pat||"").replace(/[1-9]/g,c=>{const j=M(+c-1);if(j==null){const o=old[+c-1];return o&&isNightShift(o)?"N":"G";}return j<9?String(j+1):"*";});return {...r,pat};}
+    if(r.t==="seq"){let gone=false;const f=x=>{x=String(x);if(!/^\d+$/.test(x))return x;const j=M(+x);if(j==null){gone=true;return x;}return String(j);};
+      const o={...r,fa:f(r.fa),fb:f(r.fb)};return gone?null:o;}
     if(si==null)return r;const j=M(si);if(j==null)return null;return {...r,si:j};}).filter(Boolean);
   const pins=pinRows.map(p=>{if(p.si==null||p.si==="")return p;const j=M(p.si);return {...p,si:j==null?"":j};});
   const ovr=ovrRows.map(o=>{const j=M(o.si);return j==null?null:{...o,si:j};}).filter(Boolean);
@@ -4145,7 +4197,7 @@ function shClean(s){const o={...s};if(!(Array.isArray(o.only)&&o.only.length))de
   if(o.nt!=="y"&&o.nt!=="n")delete o.nt;return o;}
 function delShiftRow(i){
   const s=shiftRows[i];if(!s)return;
-  const nR=rulesAll().filter(r=>ruleSi(r)===i).length,nO=ovrRows.filter(o=>+o.si===i).length;
+  const nR=rulesAll().filter(r=>ruleHasSi(r,i)).length,nO=ovrRows.filter(o=>+o.si===i).length;
   const ek=[nR?`${nR} kural`:"",nO?`${nO} saat istisnası`:""].filter(Boolean).join(" ve ");
   if(!confirm(`${shName(i)} vardiyası silinsin mi?${ek?`\n\nBu vardiyaya bağlı ${ek} da silinecek.`:""}`))return;
   shiftRows.splice(i,1);renderShifts();}
@@ -5110,6 +5162,8 @@ function saveGrp(key){
       return saveDept({__opts:{after_next:$("afterNext").value==="1"}},"Nöbet ertesi izin",{after:()=>{renderWR();if(schedule)renderSchedule();renderToday&&renderToday();}});
     case "leaveprop":
       return saveDept({__opts:{leave_prop:$("leaveProp").value==="1"}},"İzinlinin nöbet sayısı",{after:renderQuota});
+    case "reqlim":{const v=id=>{const e=$(id);return e?Math.max(0,Math.round(+e.value||0)):0;};
+      return saveDept({__opts:{leave_cap:v("leaveCap"),req_lim:{izin:v("rqIzin"),never:v("rqNever"),must:v("rqMust"),avoid:v("rqAvoid"),yes:v("rqYes")}}},"İzin ve istek sınırları",{after:()=>{try{setBrush(prefBrush);renderPrefCal();}catch(e){}}});}
     case "link":
       return saveDept({__opts:{link_default:$("linkDefault").value}},"Diğer listelerle uyum",{after:renderPeople});
     case "partner":
@@ -5535,6 +5589,24 @@ function leaveDays(uid,state){
     .map(([d])=>+d).filter(n=>n>0).sort((a,b)=>a-b);
 }
 function isLeaveVal(v){return v==="izin"||v==="izin_bek";}
+/* izin ve istek sınırları: aynı gün en fazla N izinli, kişi başı ayda en fazla N işaret (türüne göre) */
+function reqLimCfg(){const o=(opts().req_lim)||{},n=v=>Math.max(0,Math.round(+v||0));
+  return {cap:n(opts().leave_cap),izin:n(o.izin),never:n(o.never),must:n(o.must),avoid:n(o.avoid),yes:n(o.yes)};}
+function prefDayKinds(P,d){const s=new Set();if(!P)return s;const v=P[d];if(v)s.add(String(v).replace(/_bek$/,""));
+  const o=P._sh&&P._sh[d];if(o)for(const k in o)if(o[k])s.add(String(o[k]).replace(/_bek$/,""));return s;}
+function reqUsed(uid,kind,exceptDay){const P=allPrefs[uid]||{},days=new Set();
+  for(const k in P)if(/^\d+$/.test(k))days.add(+k);if(P._sh)for(const k in P._sh)if(/^\d+$/.test(k))days.add(+k);
+  let n=0;days.forEach(d=>{if(d!==exceptDay&&prefDayKinds(P,d).has(kind))n++;});return n;}
+function leaveCount(d,exceptUid){let n=0;members.forEach(p=>{if(p.id!==exceptUid&&isLeaveVal((allPrefs[p.id]||{})[d]))n++;});return n;}
+/* yeni bir işaret sınırı aşıyor mu: aşıyorsa açıklamayı döndürür */
+function reqBlock(uid,d,kind){const C=reqLimCfg(),lim=C[kind]||0,P=allPrefs[uid]||{};
+  if(lim>0&&!prefDayKinds(P,d).has(kind)&&reqUsed(uid,kind,d)>=lim)return `Bu ay en fazla ${lim} gün “${BRUSH_AD[kind]}” işaretlenebilir.`;
+  if(kind==="izin"&&C.cap>0&&!isLeaveVal(P[d])&&leaveCount(d,uid)>=C.cap)return `${d}. gün için izin sınırı dolu: aynı gün en fazla ${C.cap} kişi izinli olabilir.`;
+  return null;}
+/* üye engellenir; yönetici uyarılır ama işaretleyebilir */
+function reqGate(uid,d,kind){const why=reqBlock(uid,d,kind);if(!why)return true;
+  if(isAdmin()){toast("⚠️ "+why+" (yönetici olarak yine de işaretlendi)",true);return true;}
+  toast("⚠️ "+why,true);return false;}
 async function savePrefsFor(uid){
   return await sb.from("prefs").upsert({user_id:uid,dept_id:dept.id,month:dept.month,days:allPrefs[uid]});
 }
@@ -5559,8 +5631,10 @@ async function saveIzin(){
   const prev={...(allPrefs[uid]||{})};
   allPrefs[uid]=allPrefs[uid]||{};
   Object.keys(allPrefs[uid]).forEach(d=>{if(isLeaveVal(allPrefs[uid][d]))delete allPrefs[uid][d];});
-  const admin=isAdmin();
-  days.forEach(d=>{allPrefs[uid][d]=(admin||prev[d]==="izin")?"izin":"izin_bek";});
+  const admin=isAdmin(),drop=[];let why="";
+  days.forEach(d=>{if(!isLeaveVal(prev[d])){const w=reqBlock(uid,d,"izin");if(w){if(!admin){drop.push(d);why=w;return;}why=w;}}
+    allPrefs[uid][d]=(admin||prev[d]==="izin")?"izin":"izin_bek";});
+  if(why)toast("⚠️ "+why+(drop.length?` Eklenmedi: ${fmtDays(drop)}.`:" (yönetici olarak yine de eklendi)"),true);
   const {error}=await savePrefsFor(uid);
   const s=$("izinStatus");s.style.display="block";
   s.className=error?"banner err":"banner ok";
@@ -6705,7 +6779,7 @@ function refineAsg(slots,E,A,evalFn,iters,locked){
 function restWhy(slots,E){
   const out=[];if(!isShiftMode()||!fillAll())return out;
   const R=rulesOn(),n=members.length,{y,m,nDays}=monthInfo();
-  const af=R.filter(r=>r.t==="after"&&+r.n>=2&&(r.what==="night"||r.what==="shift")&&(!r.who||r.who.k==="all"));
+  const af=R.filter(r=>r.t==="after"&&+r.n>=2&&Math.max(1,+r.k||1)<=1&&(r.what==="night"||r.what==="shift")&&(!r.who||r.who.k==="all"));
   if(!af.length)return out;
   const byDay=[];for(let d=0;d<=nDays+1;d++)byDay.push([]);slots.forEach((sl,s)=>{if(sl.si>=0)byDay[sl.d].push(s);});
   const av=[];for(let d=0;d<=nDays+1;d++){const a=new Uint8Array(n);for(const s of byDay[d])for(let p=0;p<n;p++)if(E[s][p])a[p]=1;av.push(a);}
@@ -6754,7 +6828,8 @@ function focusRepair(slots,E,A,locked,evalFn,RCL,deadline){
     const F=new Set();
     det.forEach(x=>{const p=x.pid!=null?pI[x.pid]:-1,c=RCL.R.find(r=>r.id===x.id);
       if(x.d==null){for(let s=0;s<S;s++)if(cur[s]===p&&(!c||c.si==null||c.t==="lim"&&c.what!=="shift"||slots[s].si===+c.si))F.add(s);return;}
-      for(let d=x.d-2;d<=x.d+3;d++)(byDay[d]||[]).forEach(s=>{if(p<0||cur[s]===p)F.add(s);});});
+      const Wf=c&&c.t==="lim"&&(c.per==="roll"||(c.per==="row"&&c.what==="weekend"))?(c.what==="weekend"?7*Math.max(2,+c.win||(+c.n+1)):Math.max(2,+c.win||7)):2;
+      for(let d=x.d-Wf;d<=x.d+3;d++)(byDay[d]||[]).forEach(s=>{if(p<0||cur[s]===p)F.add(s);});});
     let imp=false;
     for(const i of [...F].sort(()=>Math.random()-0.5)){
       if(Date.now()>deadline)break;if(kil[i])continue;
@@ -7179,7 +7254,7 @@ function senWhyBasic(){const c=senActive();if(!c||c.guard)return null;const slot
 /* kural neden tutmuyor? döngü ile ihtiyaç uyuşmazlığı, ayda en çok / en az sınırları ile toplam yer */
 /* "en çok" sınırı ekibin taşıyabileceği yükün altındaysa: gereken en küçük sınır */
 function limNeed(r){
-  if(!r||r.t!=="lim"||r.op!=="max"||(r.who&&r.who.k!=="all"))return null;
+  if(!r||r.t!=="lim"||r.op!=="max"||(r.who&&r.who.k!=="all")||r.what==="off"||r.per==="roll")return null;
   const {y,m,nDays}=monthInfo(),slots=buildSlots(),P=members.filter(onDuty).length;if(!P||!slots.length)return null;
   const hrs=s=>{if(s.si<0)return 24;const sh=shiftRows[s.si]||{};const d=(hm(sh.end)-hm(sh.start)+24)%24;return d||24;};
   const val=s=>r.what==="hours"?hrs(s):r.what==="night"?(s.si>=0&&isNightShift(shiftRows[s.si])?1:0):r.what==="shift"?(s.si===r.si?1:0):1;
@@ -7194,6 +7269,15 @@ function limNeed(r){
     if(!worst)return null;return {dem:Math.round(worst.dem),sup:P*r.n,need:Math.ceil(worst.dem/P-1e-9),P,per:"hafta",d0:Math.max(1,worst.k*7-w1+1)};}
   return null;
 }
+/* kayan pencere ve boş gün kuralları için: ekibin bütün yerleri doldurabileceği en yakın sınır (yoksa null) */
+function limRelaxN(r){
+  if(!r||r.t!=="lim"||(r.who&&r.who.k!=="all"))return null;
+  const {y,m,nDays}=monthInfo(),S=buildSlots().length,P=members.filter(onDuty).length;if(!P||!S)return null;
+  const W=Math.max(2,+r.win||7),need=Math.ceil(S/P),w1=(new Date(y,m-1,1).getDay()+6)%7;let fw=0;for(let a=1-w1;a+6<=nDays;a+=7)if(a>=1)fw++;
+  if(r.per==="roll"&&r.op!=="min"&&r.what==="duty")return Math.ceil(need/Math.ceil(nDays/W));
+  if(r.what==="off"&&r.op==="min"){const room=nDays-need;if(room<0)return 0;
+    if(r.per==="month")return room;if(r.per==="week")return fw?Math.floor(room/fw):null;if(r.per==="roll"){const k=Math.floor(nDays/W);return k?Math.floor(room/k):null;}}
+  return null;}
 function ruleWhy(base){
   const {y,m,nDays}=monthInfo(),slots=buildSlots(),S=slots.length,ppl=members.filter(onDuty);
   if(base&&base.restWhy&&base.restWhy.length){try{
@@ -7208,6 +7292,12 @@ function ruleWhy(base){
       slots.forEach(sl=>{const x=wdx(sl.d);if(x<5)return;const o=W[wk(sl.d)]||(W[wk(sl.d)]={5:0,6:0});o[x]++;});
       for(const k in W){const o=W[k],t=o[5]+o[6];if(o[5]&&o[6]&&t>ppl.length)
         return {txt:`Bir hafta sonunda cumartesi <b>${o[5]}</b>, pazar <b>${o[6]}</b> yer var (toplam ${t}); ama “cumartesi çalışan pazar çalışmasın” kuralında her kişi hafta sonunun yalnız bir gününü tutabildiği için ${ppl.length} kişi en fazla <b>${ppl.length}</b> yer doldurur. Bu kural bu ekiple matematiksel olarak tutamaz.`};}}
+    /* boş gün ve kayan pencere: bir kişinin bu ay en fazla kaç gün çalışabileceği → ekip yetiyor mu */
+    if(r.t==="lim"&&(!r.who||r.who.k==="all")&&((r.what==="off"&&r.op==="min")||(r.per==="roll"&&r.op!=="min"&&r.what==="duty"))){
+      const W=Math.max(2,+r.win||7),w1=(new Date(y,m-1,1).getDay()+6)%7;let fw=0;for(let a=1-w1;a+6<=nDays;a+=7)if(a>=1)fw++;
+      const mx=r.what==="off"?(r.per==="month"?nDays-r.n:r.per==="week"?nDays-r.n*fw:r.per==="roll"?nDays-r.n*Math.floor(nDays/W):null):r.n*Math.ceil(nDays/W);
+      if(mx!=null){const sup=ppl.length*Math.max(0,mx);
+        if(sup<S)return {txt:`“${hEsc(ruleText(r))}” kuralıyla bir kişi bu ay en fazla <b>${Math.max(0,mx)}</b> gün çalışabilir; ${ppl.length} kişi en fazla <b>${sup}</b> yer doldurur ama listede <b>${S}</b> yer var. Bu kural bu ay herkes için tutamaz; ek kişi gerekir ya da kural esnemeli.`};}}
     const L=limNeed(r);
     if(L&&L.sup<L.dem){const u=LIM_WHAT[r.what]||"nöbet",ne=r.what==="hours"||r.what==="weekend"?"çalışsa":"tutsa";
       return {txt:`“${hEsc(ruleText(r))}” kuralıyla ${L.P} kişi ${L.per==="hafta"?`${L.d0}. günün haftasında`:"bu ay"} en fazla <b>${L.sup}</b> ${u} karşılayabilir; ama listede <b>${L.dem}</b> ${u} var. Herkes eşit ${ne} bile sınırın en az <b>${L.need}</b> olması gerekir. Bu kural bu ekiple matematiksel olarak tutamaz.`};}
@@ -7234,8 +7324,9 @@ function genWhy(){const g=genCfg();if(!g||g.mode!=="mix")return null;const {y,m,
       "staff"  belirli günlerde kişi sayısı: {si(-1=hepsi),sel:"days"|"bay"|"wd",days,wd:[7],n}
    who = {k:"all"} | {k:"p",ids:[...]} | {k:"tag",tag} */
 const RULE_TYPES=[
-  {t:"lim",ad:"Sayı ya da saat sınırı",ex:"Herkes haftada en çok 45 saat çalışsın"},
+  {t:"lim",ad:"Sayı, saat ya da boş gün sınırı",ex:"Haftada en çok 45 saat · herhangi 14 günde en az 2 gün boş · art arda en çok 2 hafta sonu"},
   {t:"after",ad:"Sonrasında izin",ex:"Gece nöbetlerinden sonra en az 2 gün izin"},
+  {t:"seq",ad:"Yasak vardiya sırası",ex:"Gece vardiyasının ertesi günü gündüz vardiyası olmasın"},
   {t:"wkfull",ad:"Hafta sonu kuralı",ex:"Cumartesi çalışan pazar da çalışsın — ya da tam tersi, çalışmasın"},
   {t:"need",ad:"Yetkinlik gereken nöbet",ex:"Her vardiyada en az 1 triyaj sertifikalı olsun"},
   {t:"only",ad:"Vardiyaya yalnız yetkinler",ex:"Yoğun bakım vardiyasına yalnız YB eğitimliler girsin"},
@@ -7256,17 +7347,26 @@ function whoText(w){if(!w||w.k==="all")return "Herkes";if(w.k==="tag")return `${
   const ad=(w.ids||[]).map(id=>{const p=members.find(x=>x.id===id);return p?kisaAd(p.name):"?";});return ad.join(", ")||"Seçilen kişi";}
 function shEnd(t){return t==="00:00"?"24:00":t;}
 function shName(si){if(si==null||si<0)return "her vardiya";const s=shiftRows[si];return s?((s.name&&s.name!=="Vardiya"?s.name:"")+` ${s.start}–${shEnd(s.end)}`).trim():"vardiya";}
-const LIM_WHAT={duty:"nöbet",night:"gece nöbeti",hours:"saat",weekend:"hafta sonu",shift:"vardiya"};
+const LIM_WHAT={duty:"nöbet",night:"gece nöbeti",hours:"saat",weekend:"hafta sonu",shift:"vardiya",off:"boş gün"};
+/* yasak sıra kuralında vardiya adı: "N" gece, "D" gündüz, "*" herhangi, rakam = vardiya sırası */
+function seqAd(x,nom){x=String(x);const b=x==="N"?"gece vardiyası":x==="D"?"gündüz vardiyası":x==="*"?"nöbet":`${shName(+x)} vardiyası`;
+  if(nom)return b;return x==="*"?"herhangi bir nöbetin":b.replace(/vardiyası$/,"vardiyasının");}
 function ruleText(r){
   if(!r)return "";
   const w=whoText(r.who);
   switch(r.t){
-    case "lim":{const per=r.per==="week"?"haftada":r.per==="row"?"art arda":"ayda",op=r.op==="min"?"en az":"en çok";
+    case "lim":{const W=Math.max(2,+r.win||(r.what==="weekend"?2:7));
+      const per=r.per==="week"?"haftada":r.per==="row"?"art arda":r.per==="roll"?`herhangi ${W} günde`:"ayda",op=r.op==="min"?"en az":"en çok";
+      if(r.what==="off")return `${w} ${per} ${op} ${r.n} gün boş olsun`;
+      if(r.what==="weekend"&&r.per==="roll")return `${w} art arda gelen herhangi ${W} hafta sonunun en çok ${r.n} tanesinde çalışsın`;
       const what=r.what==="shift"?`${shName(r.si)} vardiyası`:LIM_WHAT[r.what]||"nöbet";
       return `${w} ${per} ${op} ${r.n} ${what}${r.what==="hours"?" çalışsın":r.what==="weekend"?" çalışsın":" tutsun"}`;}
-    case "after":{const what=r.what==="night"?"gece nöbetlerinden":r.what==="shift"?`${shName(r.si)} vardiyasından`:"nöbetten";
+    case "after":{const what=r.what==="night"?"gece nöbetlerinden":r.what==="shift"?`${shName(r.si)} vardiyasından`:"nöbetten",K=Math.max(1,+r.k||1);
+      if(K>1)return `${w} art arda ${K} ya da daha fazla ${r.what==="night"?"gece nöbetinden":r.what==="shift"?`${shName(r.si)} vardiyasından`:"nöbetten"} sonra en az ${r.n} gün izinli olsun`;
       return `${w} ${what} sonra en az ${r.n} gün izinli olsun`;}
-    case "wkfull":return r.mode==="split"?`${w} için cumartesi çalışan pazar çalışmasın (hafta sonunun tek günü)`:`${w} için hafta sonu bölünmesin (cumartesi çalışan pazar da çalışsın)`;
+    case "seq":return `${w} için ${seqAd(r.fa)} ertesi günü ${seqAd(r.fb,1)} olmasın`;
+    case "wkfull":if(r.mode==="type")return `${w} için hafta sonunun iki gününde de çalışan iki gün aynı vardiyada çalışsın`;
+      return r.mode==="split"?`${w} için cumartesi çalışan pazar çalışmasın (hafta sonunun tek günü)`:`${w} için hafta sonu bölünmesin (cumartesi çalışan pazar da çalışsın)`;
     case "need":return `${r.scope==="day"?"Her gün":"Her vardiyada"}${r.si>=0?` (${shName(r.si)})`:""} en az ${r.n} ${r.tag} olsun`;
     case "only":return `${shName(r.si)} vardiyasına yalnız ${r.tag} etiketliler girsin`;
     case "pair":{const a=members.find(x=>x.id===r.a),b=members.find(x=>x.id===r.b);const A=a?kisaAd(a.name):"?",B=b?kisaAd(b.name):"?";
@@ -7279,6 +7379,22 @@ function ruleText(r){
   return "";
 }
 const CYC_AD={G:"gündüz",N:"gece","-":"izin","*":"herhangi"};
+/* dünyada yaygın vardiya düzenleri (G gündüz, N gece, - izin, * herhangi vardiya — 24 saatlik nöbetlerde) */
+const CYC_LIB=[
+  {ad:"2 gündüz · 2 gece · 4 izin",p:"GGNN----",d:"12 saatlik vardiya, 8 günde bir tekrar; 4 ekiple her gün gündüz ve gece dolar (hemşirelikte yaygın)."},
+  {ad:"1 gündüz · 1 gece · 2 izin",p:"GN--",d:"12 saatlik, 4 günde bir: gündüz, gece, gece çıkışı, izin."},
+  {ad:"2-2-2 hızlı dönüş",p:"GGNN--",d:"2 gündüz, 2 gece, 2 izin; 6 günde bir."},
+  {ad:"4 gündüz · 4 izin · 4 gece · 4 izin",p:"GGGG----NNNN----",d:"12 saatlik, 16 günde bir; gündüz ve gece blokları sırayla."},
+  {ad:"2-2-3 (Panama / Pitman)",p:"GG--GGG--GG---",d:"12 saatlik; 2 çalış, 2 izin, 3 çalış, 2 izin, 2 çalış, 3 izin — iki haftada bir uzun hafta sonu."},
+  {ad:"DuPont",p:"NNNN---GGG-NNN---GGGG-------",d:"12 saatlik, 28 gün: 4 gece, 3 izin, 3 gündüz, 1 izin, 3 gece, 3 izin, 4 gündüz, 7 izin."},
+  {ad:"4 çalış · 4 izin",p:"GGGG----",d:"Sabit gündüz ekipleri için 12 saatlik düzen."},
+  {ad:"24 saat · 2 gün izin (24/48)",p:"*--",d:"24 saatlik nöbet, 3 günde bir (acil, itfaiye, ambulans)."},
+  {ad:"24 saat · 3 gün izin (24/72)",p:"*---",d:"24 saatlik nöbet, 4 günde bir."},
+  {ad:"48/96",p:"**----",d:"Art arda iki 24 saatlik nöbet, ardından 4 gün izin."},
+  {ad:"Kelly",p:"*-*-*----",d:"24 saatlik: nöbet, izin, nöbet, izin, nöbet, 4 gün izin (9 günde bir)."},
+  {ad:"7 çalış · 7 izin",p:"*******-------",d:"Uzak saha, açık deniz ya da gezici ekipler; 14 günde bir."},
+  {ad:"5 çalış · 2 izin",p:"GGGGG--",d:"Hafta içi mesai düzeni."},
+  {ad:"4 çalış · 3 izin (4×10)",p:"GGGG---",d:"10 saatlik vardiyalarla haftada 40 saat."}];
 function cycleText(p){p=String(p||"");if(!p)return "—";const out=[];let i=0;
   while(i<p.length){let j=i;while(j<p.length&&p[j]===p[i])j++;const c=p[i],k=j-i;
     out.push(`${k} ${/[1-9]/.test(c)?shName(+c-1):CYC_AD[c]||c}`);i=j;}
@@ -7315,14 +7431,19 @@ function rulesCompile(slots,MT,y,m,nDays,E){
   const weekOf=d=>Math.floor((d-1+w1)/7);
   const free=members.map(p=>{const a=new Uint8Array(nDays+3);for(let d=1;d<=nDays;d++)if(spref(p.id,d)==="izin")a[d]=1;return a;});
   /* önceki ay: hafta başı taşıması ve süren seriler */
-  const pk=prevMonthKey(planAy()),ps=schedulesAll[pk],prev=members.map(()=>({wk:{duty:0,night:0,hours:0},run:{duty:0,night:0},lastNight:false,lastDuty:false,wkSat:false}));
-  if(ps&&ps.asg){try{const L=monthDuties(ps,pk),pn=monthInfo(pk).nDays,idx={};members.forEach((p,i)=>{idx[p.id]=i;});
+  const pk=prevMonthKey(planAy()),ps=schedulesAll[pk],prev=members.map(()=>({wk:{duty:0,night:0,hours:0},run:{duty:0,night:0},lastNight:false,lastDuty:false,wkSat:false,tail:[]}));
+  /* tail[j]: önceki ayın sondan j. günü (j=0 son gün) — kayan pencere, art arda hafta sonu, yasak sıra kuralları için */
+  let hasPrev=false;
+  if(ps&&ps.asg){try{hasPrev=true;const L=monthDuties(ps,pk),pn=monthInfo(pk).nDays,idx={};members.forEach((p,i)=>{idx[p.id]=i;});
+    const psl=(ps.lay&&ps.lay.shifts)||null,mapSi=x=>{if(x==null||x==="")return -1;x=+x;const o=psl&&psl[x];
+      if(o&&o.sid)return shiftRows.findIndex((r2,i2)=>(r2.sid||("i"+i2))===o.sid);return x;};
     const by={};L.forEach(x=>{const i=idx[x.pid];if(i==null)return;(by[i]=by[i]||{})[x.d]=x;});
     const back=w1;   // ayın 1'inden önce aynı haftaya düşen gün sayısı
     for(const i in by){const o=by[i],P=prev[i];
       for(let k=0;k<back;k++){const x=o[pn-k];if(x){P.wk.duty++;P.wk.hours+=x.h;if(x.cat==="n")P.wk.night++;}}
       let r=0;while(o[pn-r])r++;P.run.duty=r;let rn=0;while(o[pn-rn]&&o[pn-rn].cat==="n")rn++;P.run.night=rn;
-      P.lastDuty=!!o[pn];P.lastNight=!!(o[pn]&&o[pn].cat==="n");P.wkSat=w1===6&&!!o[pn];}
+      P.lastDuty=!!o[pn];P.lastNight=!!(o[pn]&&o[pn].cat==="n");P.wkSat=w1===6&&!!o[pn];
+      for(let j=0;j<31;j++){const x=o[pn-j];if(x)P.tail[j]={h:x.h,n:x.cat==="n",si:mapSi(x.s)};}}
   }catch(e){}}
   const C=R.map(r=>{const c={...r,key:"r:"+r.id,W:r.hard?90000:15000*priF("r:"+r.id),txt:ruleText(r)};
     c.P=members.map((p,i)=>onDuty(p)&&(r.t==="pair"||r.t==="need"?true:whoHas(r.who,p))?i:-1).filter(i=>i>=0);
@@ -7346,7 +7467,10 @@ function rulesCompile(slots,MT,y,m,nDays,E){
           for(let o=0;o<L;o++){let mm=0;for(let d=1;d<=pn;d++){const pc=c.pat[(d-1+o)%L],a=act[d-1];mm+=cycMis(pc,a,-1);}if(mm<bm){bm=mm;bo=o;}}
           c.oe[i]=(bo+pn)%L;});}catch(e){}}}
     return c;});
-  return {R:C,n,nDays,weekOf,wdOf,free,prev,slots,MT};
+  /* kişinin o gün hiçbir yere yazılamadığı günler (izin, nöbet yok, kısıt, vardiyasız gün): "en çok boş gün" sınırında sayılmaz */
+  const cant=members.map((p,i)=>{const a=new Uint8Array(nDays+3);if(E){const ok=new Uint8Array(nDays+3);
+      for(let s=0;s<slots.length;s++)if(E[s][i])ok[slots[s].d]=1;for(let d=1;d<=nDays;d++)if(!ok[d])a[d]=1;}return a;});
+  return {R:C,n,nDays,weekOf,wdOf,free,cant,prev,hasPrev,slots,MT};
 }
 function cycMis(pc,act,si){
   if(act==="F")return 0;
@@ -7362,6 +7486,9 @@ function ruleEval(C,A,detail){
   const ds=new Int32Array(n*W).fill(-1);
   for(let s=0;s<S;s++){const p=A[s];if(p>=0)ds[p*W+slots[s].d]=s;}
   const at=(p,d)=>d<1||d>nDays?-1:ds[p*W+d];
+  const cant=C.cant||free,hasPrev=!!C.hasPrev,LO=hasPrev?-30:1;
+  const tl=(p,d)=>hasPrev&&d<=0&&d>=-30?prev[p].tail[-d]:null;
+  const onAt=(p,d)=>d>=1?(d<=nDays&&at(p,d)>=0):!!tl(p,d);
   const mt=(s,p)=>MT[s][p]||slotMT(slots[s],members[p].id,0,0,nDays,new Set());
   let pen=0,cnt=0;const per={},det=detail?[]:null;
   const NMc={},NM=p=>NMc[p]||(NMc[p]=kisaAd(members[p].name));   // ad yalnız ihlal yazılırken hesaplanır
@@ -7369,8 +7496,70 @@ function ruleEval(C,A,detail){
   for(const c of R){
     const val=(p,d,what)=>{const s=at(p,d);if(s<0)return 0;
       if(what==="night")return mt(s,p).isN?1:0;if(what==="hours")return mt(s,p).h;if(what==="shift")return slots[s].si===c.si?1:0;return 1;};
+    /* önceki ayın son günleri dahil değer (d<=0 → kuyruk) */
+    const TV=(p,d,what)=>{if(d>=1)return d>nDays?0:val(p,d,what);const t=tl(p,d);if(!t)return 0;
+      return what==="night"?(t.n?1:0):what==="hours"?t.h:what==="shift"?(t.si===+c.si?1:0):1;};
+    /* yeni sınır biçimleri: kayan pencere (herhangi W günde), boş gün, art arda / kayan hafta sonu */
+    const limX=(p,nm)=>{
+      const what=c.what,n=+c.n||0,mx=c.op!=="min",per=c.per,iz=d=>d>=1&&d<=nDays&&!!(free[p][d]||cant[p][d]);
+      if(what==="weekend"){if(!mx||(per!=="row"&&per!=="roll"))return;
+        const W=Math.max(2,+c.win||2),s1=1+((5-wdOf(1)+7)%7),L=[];
+        for(let sd=s1-35;sd<=nDays;sd+=7){if(sd+1<LO)continue;
+          L.push({sd,wk:onAt(p,sd)||(sd+1<=nDays&&onAt(p,sd+1)),inM:sd>=1||(sd===0&&!onAt(p,0))});}
+        let run=0;
+        for(let j=0;j<L.length;j++){const x=L[j];run=x.wk?run+1:0;if(!x.inM||!x.wk)continue;const d0=Math.max(1,x.sd);
+          if(per==="row"){if(run>n)hit(c,1,p,d0,`${nm} ${d0}. günün hafta sonu: art arda ${run}. hafta sonu çalışıyor (en çok ${n})`);}
+          else{let k=0;for(let i=Math.max(0,j-W+1);i<=j;i++)if(L[i].wk)k++;
+            if(k>n)hit(c,1,p,d0,`${nm} ${d0}. günün hafta sonu: son ${W} hafta sonunun ${k} tanesinde çalışıyor (en çok ${n})`);}}
+        return;}
+      if(what==="off"){const off=d=>!onAt(p,d),cn=d=>off(d)&&!(mx&&iz(d));
+        if(per==="month"){let t=0;for(let d=1;d<=nDays;d++)if(cn(d))t++;const ex=mx?t-n:n-t;
+          if(ex>0)hit(c,ex,p,null,`${nm} ayda ${t} gün boş (${mx?"en çok":"en az"} ${n})`);return;}
+        if(per==="week"){const w1=wdOf(1),K=weekOf(nDays);
+          for(let k=0;k<=K;k++){const a=k===0&&hasPrev?1-w1:Math.max(1,k*7-w1+1),b=Math.min(nDays,k*7-w1+7);if(b-a+1<7)continue;
+            let t=0;for(let d=a;d<=b;d++)if(d>=1?cn(d):(!mx&&off(d)))t++;
+            const ex=mx?t-n:n-t;if(ex>0){const d0=Math.max(1,a);hit(c,ex,p,d0,`${nm} ${d0}. günün haftasında ${t} gün boş (${mx?"en çok":"en az"} ${n})`);}}
+          return;}
+        if(per==="row"){
+          for(let d=1;d<=nDays;d++){if(!off(d))continue;let b=d;while(b<nDays&&off(b+1))b++;
+            let a=d,left=true;if(d===1){if(!hasPrev)left=false;else{while(a-1>=-30&&off(a-1))a--;if(a-1<-30)left=false;}}
+            let hz=false;for(let x=d;x<=b;x++)if(iz(x)){hz=true;break;}
+            const len=b-a+1;
+            if(!mx){if(left&&b<nDays&&!hz&&len<n)hit(c,1,p,d,`${nm} ${d}. gün: ${len} gün boş, ardından yine nöbet (art arda en az ${n} gün boş olmalı)`);}
+            else if(!hz&&len>n)hit(c,Math.min(len-n,b-d+1),p,d,`${nm} ${a>=1?a+". günden itibaren":"önceki aydan "+b+". güne kadar"} ${len} gün art arda boş (en çok ${n})`);
+            d=b;}
+          return;}
+        if(per==="roll"){const W=Math.max(2,+c.win||7);
+          if(!mx){let t=0,pv0=0,first=true;
+            if(hasPrev){for(let d=1-W;d<=0;d++)if(off(d))t++;pv0=Math.max(0,n-t);}
+            for(let e=hasPrev?1:W;e<=nDays;e++){
+              if(first){t=0;for(let d=e-W+1;d<=e;d++)if(off(d))t++;first=false;}else t+=(off(e)?1:0)-(off(e-W)?1:0);
+              const sh=Math.max(0,n-t);
+              if(sh>pv0){const a=e-W+1;hit(c,sh-pv0,p,e,`${nm} ${a>=1?a+"–"+e+". günlerde":"önceki aydan "+e+". güne kadarki "+W+" günde"} ${t} gün boş (herhangi ${W} günde en az ${n})`);}
+              pv0=sh;}}
+          else{let t=0;
+            for(let e=1;e<=nDays;e++){t+=cn(e)?1:0;if(e-W>=1&&cn(e-W))t--;
+              if(cn(e)&&t>n)hit(c,1,p,e,`${nm} ${e}. gün: son ${W} günde ${t} gün boş (en çok ${n})`);}}
+          return;}
+        return;}
+      if(per==="roll"){const W=Math.max(2,+c.win||7),WN=LIM_WHAT[what]||"nöbet";
+        if(mx){let t=0;for(let d=2-W;d<=0;d++)t+=TV(p,d,what);
+          for(let e=1;e<=nDays;e++){const v=TV(p,e,what);t+=v;
+            if(v>0&&t>n+1e-9)hit(c,what==="hours"?Math.ceil(Math.min(v,t-n)/4-1e-9):1,p,e,`${nm} ${e}. gün: son ${W} günde ${Math.round(t*10)/10} ${WN} (en çok ${n})`);
+            t-=TV(p,e-W+1,what);}}
+        else{let pv0=0,t=0;
+          const hz=(a,b)=>{for(let x=Math.max(1,a);x<=b;x++)if(iz(x))return true;return false;};
+          if(hasPrev){for(let d=1-W;d<=0;d++)t+=TV(p,d,what);pv0=Math.max(0,n-t);}
+          for(let e=hasPrev?1:W;e<=nDays;e++){t=0;for(let d=e-W+1;d<=e;d++)t+=TV(p,d,what);
+            const sh=hz(e-W+1,e)?0:Math.max(0,n-t);
+            if(sh>pv0+1e-9)hit(c,what==="hours"?Math.ceil((sh-pv0)/4-1e-9):Math.round(sh-pv0),p,e,`${nm} ${Math.max(1,e-W+1)}–${e}. günlerde ${Math.round(t*10)/10} ${WN} (herhangi ${W} günde en az ${n})`);
+            pv0=sh;}}
+        return;}
+    };
     if(c.t==="lim"){
+      const X=c.what==="off"||c.per==="roll"||(c.what==="weekend"&&c.per!=="month");
       for(const p of c.P){const nm={toString(){return NM(p);}};
+        if(X){limX(p,nm);continue;}
         if(c.what==="weekend"){let k=0;const wk=[];
           for(let d=1;d<=nDays;d++){const wd=wdOf(d);if(wd===5){if(at(p,d)>=0||at(p,d+1)>=0){k++;wk.push(d);}}else if(d===1&&wd===6&&at(p,1)>=0&&!prev[p].wkSat){k++;wk.push(1);}}
           if(c.op==="max"&&k>c.n)hit(c,k-c.n,p,wk[c.n],`${nm} ayda ${k} hafta sonu çalışıyor (en çok ${c.n})`);
@@ -7395,12 +7584,18 @@ function ruleEval(C,A,detail){
               run=0;}}}
       }
     }else if(c.t==="after"){
-      for(const p of c.P){const nm={toString(){return NM(p);}},what=c.what;
-        const ends=[];if(what==="night"?prev[p].lastNight:prev[p].lastDuty)ends.push(0);
-        for(let d=1;d<=nDays;d++)if(val(p,d,what)>0&&!(d<nDays&&val(p,d+1,what)>0))ends.push(d);
-        for(const e of ends)for(let k=1;k<=c.n;k++){const dd=e+k;if(dd>nDays)break;if(at(p,dd)>=0)hit(c,1,p,dd,`${nm} ${dd}. gün: ${e?e+". gündeki ":"önceki aydaki "}${what==="night"?"gece":"nöbet"} sonrası izin günü (${c.n} gün)`);}}
+      /* blok sonu: o tür nöbet var, ertesi gün yok (önceki ayın son günleri dahil); art arda en az K tanesinden sonra izin */
+      const K=Math.max(1,+c.k||1),ad=c.what==="night"?"gece":c.what==="shift"?shName(c.si):"nöbet";
+      for(const p of c.P){const nm={toString(){return NM(p);}},what=c.what,q=d=>TV(p,d,what)>0;
+        for(let e=hasPrev?1-c.n:1;e<=nDays;e++){if(!q(e)||(e<nDays&&q(e+1)))continue;
+          if(K>1){let L=0;for(let dd=e;dd>=LO&&q(dd);dd--)L++;if(L<K)continue;}
+          for(let k=1;k<=c.n;k++){const dd=e+k;if(dd>nDays)break;if(dd<1)continue;
+            if(at(p,dd)>=0)hit(c,1,p,dd,`${nm} ${dd}. gün: ${e>=1?e+". gündeki ":"önceki aydaki "}${ad} sonrası izin günü (${c.n} gün${K>1?`, art arda ${K}+ sonrası`:""})`);}}}
     }else if(c.t==="wkfull"){
       for(const p of c.P){const nm={toString(){return NM(p);}};
+        if(c.mode==="type"){for(let d=1;d<nDays;d++){if(wdOf(d)!==5)continue;const a=at(p,d),b=at(p,d+1);
+            if(a>=0&&b>=0&&slots[a].si!==slots[b].si)hit(c,1,p,d,`${nm} ${d}–${d+1}. hafta sonunda iki ayrı vardiya (${shName(slots[a].si)} / ${shName(slots[b].si)})`);}
+          continue;}
         if(c.mode==="split"){
           if(wdOf(1)===6&&prev[p].lastDuty&&at(p,1)>=0)hit(c,1,p,1,`${nm} 1. gün: önceki ayın son cumartesisinde de çalıştı`);
           for(let d=1;d<nDays;d++){if(wdOf(d)!==5)continue;if(at(p,d)>=0&&at(p,d+1)>=0)hit(c,1,p,d,`${nm} ${d}–${d+1}. hafta sonunun iki gününde de çalışıyor`);}
@@ -7423,6 +7618,12 @@ function ruleEval(C,A,detail){
       for(const p of c.P){const sh=c.share[p];if(sh==null)continue;
         const lo=Math.floor(sh+1e-9),hi=Math.ceil(sh-1e-9),v=k[p]>hi?k[p]-hi:k[p]<lo?lo-k[p]:0;
         if(v>0)hit(c,v,p,null,`${kisaAd(members[p].name)}: ${shName(c.si)} vardiyasından ${k[p]} tane (eşit pay ${lo===hi?lo:lo+"–"+hi})`);}
+    }else if(c.t==="seq"){
+      /* yasak sıra: dün A, bugün B olmasın (ay başında önceki ayın son günü) */
+      const fa=String(c.fa),fb=String(c.fb);
+      const mS=(sp,p,d)=>{if(d>=1){const s=at(p,d);if(s<0)return false;return sp==="*"||(sp==="N"?!!mt(s,p).isN:sp==="D"?!mt(s,p).isN:slots[s].si===+sp);}
+        const t=tl(p,d);if(!t)return false;return sp==="*"||(sp==="N"?!!t.n:sp==="D"?!t.n:t.si===+sp);};
+      for(const p of c.P)for(let d=1;d<=nDays;d++)if(mS(fb,p,d)&&mS(fa,p,d-1))hit(c,1,p,d,`${NM(p)} ${d}. gün: ${seqAd(fa)} ertesi günü ${seqAd(fb,1)}`);
     }else if(c.t==="cycle"){
       const L=c.pat.length;if(L<2)continue;
       for(const p of c.P){const act=new Array(nDays+1),si=new Array(nDays+1);
@@ -7564,6 +7765,7 @@ function renderRules(){
   if(!h)h=`<p class="hint" style="margin:4px 2px">Henüz kural yok. Örnek: “Herkes haftada en çok 45 saat çalışsın”, “Gece nöbetlerinden sonra en az 2 gün izinli olsun”.</p>`;
   box.innerHTML=h;
   const ab=$("ruleAddBtn");if(ab)ab.style.display=adm?"":"none";
+  const pb=$("rulePackBtn");if(pb)pb.style.display=adm?"":"none";
 }
 function ruleOrder(K){if(!isAdmin())return;saveDept({__opts:{pri:K}},"Kural sırası",{after:()=>{renderRules();}});}
 function rulePri(i,dir){if(!isAdmin())return;const K=priKeys(),j=i+dir;if(j<0||j>=K.length)return;[K[i],K[j]]=[K[j],K[i]];
@@ -7581,6 +7783,7 @@ function ruleDefaults(t){
   switch(t){
     case "lim":return {t,who:{k:"all"},op:"max",n:45,what:"hours",per:"week",si:0};
     case "after":return {t,who:{k:"all"},what:night>=0?"night":"duty",n:2,si:Math.max(0,night)};
+    case "seq":return {t,who:{k:"all"},fa:night>=0?"N":"*",fb:night>=0?"D":"*"};
     case "wkfull":return {t,who:{k:"all"}};
     case "need":return {t,tag:allTags()[0]||"",n:1,scope:"shift",si:-1};
     case "only":return {t,tag:allTags()[0]||"",si:0};
@@ -7592,11 +7795,103 @@ function ruleDefaults(t){
   return {t};
 }
 function rbPick(t){RB_ED.r=ruleDefaults(t);RB_ED.step="form";renderRuleSheet();}
+/* ---------- HAZIR KURAL PAKETLERİ ----------
+   Ülke mevzuatı ve yaygın iyi uygulamalar, ekibin düzenine uyarlanmış kural listesi olarak eklenir.
+   Her kural tek tek seçilir; aynısı zaten varsa yeniden eklenmez. Paket kuralları sonradan normal kural gibi düzenlenir. */
+function rulePackList(){
+  const sm=isShiftMode(),nt=sm&&shiftRows.some(x=>!x.icap&&isNightShift(x)),NW=nt?"night":"duty",A={k:"all"};
+  const R=(k,r,o)=>({k,r:{who:A,...r},...(o||{})});
+  const MR=v=>sm?[{k:"rest",set:"min_rest",v,txt:`İki vardiya arası en az ${v} saat kesintisiz dinlenme`}]:[];
+  return [
+    {id:"tr_asistan",bayrak:"🇹🇷",ad:"Türkiye — uzmanlık öğrencisi (asistan) nöbetleri",
+     kaynak:"Tıpta ve Diş Hekimliğinde Uzmanlık Eğitimi Yönetmeliği (3 Eylül 2022 değişikliği); Yataklı Tedavi Kurumları İşletme Yönetmeliği md. 41",
+     not:"Uzmanlık öğrencisi ayda en fazla 8 nöbet tutar, nöbetler üç günde birden sık olmaz, gece nöbetinin ertesi günü görev verilmez. Yalnız asistanlara uygulanacaksa ekledikten sonra kuralı düzenleyip “Kim” kısmında etiket seç (ör. Asistan).",
+     items:[R("m8",{t:"lim",op:"max",n:8,what:"duty",per:"month",hard:true}),R("r3",{t:"lim",op:"max",n:1,what:"duty",per:"roll",win:3,hard:true}),R("an",{t:"after",what:NW,n:1,hard:true})]},
+    {id:"tr_hastane",bayrak:"🇹🇷",ad:"Türkiye — hastane çalışanları",
+     kaynak:"Yataklı Tedavi Kurumları İşletme Yönetmeliği md. 41/1-e (“Gece nöbeti tutanlara ertesi gün görev verilmez.”)",
+     not:"Hekim, hemşire ve diğer sağlık çalışanlarında gece nöbetinin ertesi günü izin.",
+     items:[R("an",{t:"after",what:NW,n:1,hard:true})]},
+    {id:"tr_is",bayrak:"🇹🇷",ad:"Türkiye — İş Kanunu (vardiyalı çalışma)",
+     kaynak:"4857 sayılı İş Kanunu md. 46, 63; Postalar Halinde İşçi Çalıştırılarak Yürütülen İşlerde Çalışmalara İlişkin Özel Usul ve Esaslar Hakkında Yönetmelik md. 8, 9, 11",
+     not:"Gece postasında en fazla bir iş haftası çalışılır, sonraki hafta gündüz postasına geçilir (yönetmelik md. 8) — bunu “Vardiya döngüsü” kuralıyla kurabilirsin. Gece çalışması 7,5 saati geçemez; sağlık hizmetlerinde işçinin yazılı onayıyla aşılabilir. Haftalık 45 saat denkleştirmeyle iki aylık ortalama olarak da uygulanabildiği için esnek eklenir.",
+     items:[...MR(11),R("w1",{t:"lim",op:"min",n:1,what:"off",per:"roll",win:7,hard:true}),R("h45",{t:"lim",op:"max",n:45,what:"hours",per:"week"})]},
+    {id:"eu",bayrak:"🇪🇺",ad:"Avrupa Birliği — Çalışma Süresi Direktifi",
+     kaynak:"2003/88/AT sayılı Direktif md. 3 (günlük dinlenme), 5 (haftalık dinlenme), 6 (haftalık en çok süre)",
+     not:"Günde en az 11 saat kesintisiz dinlenme; her 7 günde 24 saat kesintisiz dinlenme; haftalık ortalama en çok 48 saat (ortalama en çok 4 ayda alınır). Burada 48 saat, herhangi 4 haftada en çok 192 saat olarak uygulanır.",
+     items:[...MR(11),R("w1",{t:"lim",op:"min",n:1,what:"off",per:"roll",win:7,hard:true}),R("h192",{t:"lim",op:"max",n:192,what:"hours",per:"roll",win:28})]},
+    {id:"nhs",bayrak:"🇬🇧",ad:"İngiltere — NHS asistan hekim (2016 sözleşmesi)",
+     kaynak:"NHS 2016 asistan hekim sözleşmesi ve 2018/2019 güncellemesi (NHS Employers, BMA)",
+     not:"Herhangi 7 günde en çok 72 saat; en çok 4 gece ve sonrasında 46 saat dinlenme; art arda en çok 7 vardiya; hafta sonlarının en çok yarısında çalışma (önerilen 3'te 1); vardiyalar arası 11 saat. En çok 13 saatlik vardiya ve art arda en çok 4 uzun (10 saatten uzun) vardiya sınırını vardiya saatlerini kurarken gözet.",
+     items:[...MR(11),R("h72",{t:"lim",op:"max",n:72,what:"hours",per:"roll",win:7,hard:true}),
+       ...(nt?[R("n4",{t:"lim",op:"max",n:4,what:"night",per:"row",hard:true}),R("a46",{t:"after",what:"night",n:2,hard:true})]:[]),
+       R("c7",{t:"lim",op:"max",n:7,what:"duty",per:"row",hard:true}),R("w2",{t:"lim",op:"max",n:1,what:"weekend",per:"row",hard:true}),
+       R("w3",{t:"lim",op:"max",n:1,what:"weekend",per:"roll",win:3},{def:false})]},
+    {id:"acgme",bayrak:"🇺🇸",ad:"ABD — ACGME asistan çalışma saatleri",
+     kaynak:"ACGME Common Program Requirements, VI.F (Clinical and Educational Work Hours)",
+     not:"Haftada en çok 80 saat ve 7 günde 1 gün serbest — ACGME'de 4 haftalık ortalamayla; burada herhangi 28 günde uygulanır (daha sıkı). Kesintisiz en çok 24 (+4) saat; 24 saatlik nöbetten sonra en az 14 saat serbest; nöbetler ortalama üç gecede birden sık olmaz.",
+     items:[...MR(8),R("h320",{t:"lim",op:"max",n:320,what:"hours",per:"roll",win:28,hard:true}),R("o4",{t:"lim",op:"min",n:4,what:"off",per:"roll",win:28,hard:true}),
+       R("q3",{t:"lim",op:"max",n:9,what:"duty",per:"roll",win:28},{def:!sm})]},
+    {id:"mlc",bayrak:"⚓",ad:"Denizcilik — MLC 2006 (gemi sağlık ekibi dahil)",
+     kaynak:"ILO Denizcilik Çalışma Sözleşmesi (MLC 2006), Kural 2.3",
+     not:"Herhangi 7 günde en çok 72 saat çalışma (ya da en az 77 saat dinlenme); 24 saatte en çok 14 saat çalışma, en az 10 saat dinlenme.",
+     items:[...MR(10),R("h72",{t:"lim",op:"max",n:72,what:"hours",per:"roll",win:7,hard:true})]},
+    {id:"iyi",bayrak:"✨",ad:"İyi uygulama — dengeli 12 saatlik vardiya (yasal zorunluluk değil)",
+     kaynak:"Hemşirelik ve vardiya planlamasında yaygın öneriler; uluslararası hemşire çizelgeleme yarışmalarındaki (INRC) ölçütler",
+     not:"Yorgunluğu azaltan ve hafta sonlarını dengeleyen esnek kurallar. Liste tam oturmazsa önce bunlar esner.",
+     items:[R("c3",{t:"lim",op:"max",n:3,what:"duty",per:"row"}),
+       ...(nt?[R("n3",{t:"lim",op:"max",n:3,what:"night",per:"row"}),R("an",{t:"after",what:"night",n:2}),R("nd",{t:"seq",fa:"N",fb:"D",hard:true})]:[]),
+       R("o2",{t:"lim",op:"min",n:2,what:"off",per:"row"}),R("w2",{t:"lim",op:"max",n:2,what:"weekend",per:"row"})]},
+  ];
+}
+function rulePackSame(a,b){const K=x=>JSON.stringify({t:x.t,who:x.who&&x.who.k!=="all"?x.who:{k:"all"},op:x.op||null,n:x.n!=null?+x.n:null,what:x.what||null,per:x.per||null,
+  win:x.per==="roll"?+x.win:null,si:x.what==="shift"?+x.si:null,k:+x.k>1?+x.k:null,fa:x.fa!=null?String(x.fa):null,fb:x.fb!=null?String(x.fb):null,mode:x.mode||null});return K(a)===K(b);}
+function rulePackOpen(){if(!isAdmin())return;RB_ED={step:"packs",r:null,edit:null};ruleOpen();}
+function rbPackPick(id){const P=rulePackList().find(x=>x.id===id);if(!P)return;const L=rulesAll();
+  RB_ED={step:"pack",pack:P,sel:P.items.map(it=>{if(it.set)return minRestH()<it.v;return it.def!==false&&!L.some(x=>x.id==="pk_"+P.id+"_"+it.k||rulePackSame(x,it.r));}),r:null,edit:null};renderRuleSheet();}
+function rbPackTog(i){if(!RB_ED||!RB_ED.sel)return;RB_ED.sel[i]=!RB_ED.sel[i];renderRuleSheet();}
+function rulePackHTML(){
+  if(RB_ED.step==="packs")return `<h2 style="margin:4px 2px 4px">Hazır kural paketleri</h2>
+    <p class="hint" style="margin:0 2px 10px">Bir paket seç; içindeki kuralları tek tek görüp istediklerini eklersin. Kurallar ekibinin vardiyalarına uyarlanır. Mevzuat değişebilir; kurumunun güncel kurallarını da kontrol et.</p>
+    <div class="rb-types">${rulePackList().map(P=>`<button class="rb-type" onclick="rbPackPick('${P.id}')"><b>${P.bayrak} ${hEsc(P.ad)}</b><span>${P.items.length} kural · ${hEsc(P.kaynak)}</span></button>`).join("")}</div>
+    <button class="nd-btn is-plain" style="width:100%;margin-top:8px" onclick="ruleClose()">Vazgeç</button>`;
+  const P=RB_ED.pack,L=rulesAll();
+  const rows=P.items.map((it,i)=>{const on=!!RB_ED.sel[i];
+    if(it.set){const cur=minRestH();return `<label class="rb-hard" style="margin-top:6px"><input type="checkbox" ${on?"checked":""} onchange="rbPackTog(${i})"> <span><b>${hEsc(it.txt)}</b>${cur>=it.v?` <small>(şu an ${cur} saat — zaten yeterli)</small>`:` <small>(şu an ${cur} saat)</small>`}</span></label>`;}
+    const ex=L.some(x=>x.id==="pk_"+P.id+"_"+it.k||rulePackSame(x,it.r));
+    return `<label class="rb-hard" style="margin-top:6px"><input type="checkbox" ${on?"checked":""} onchange="rbPackTog(${i})"> <span>${hEsc(ruleText(it.r))}${it.r.hard?' <span class="rl-hard">kesin</span>':' <small>esnek</small>'}${ex?" <small>· listende zaten var</small>":""}</span></label>`;}).join("");
+  const n=RB_ED.sel.filter(Boolean).length;
+  return `<h2 style="margin:4px 2px 4px">${P.bayrak} ${hEsc(P.ad)}</h2>
+    <p class="hint" style="margin:0 2px 6px">${hEsc(P.not)}</p>
+    <p class="hint" style="margin:0 2px 8px;font-size:12px">Kaynak: ${hEsc(P.kaynak)}</p>
+    ${rows}
+    <button class="btn" style="width:100%;margin-top:12px" ${n?"":"disabled"} onclick="rulePackApply()">${n?`Seçilen ${n} kuralı ekle`:"Kural seçilmedi"}</button>
+    <div class="nd-btn-row" style="margin-top:6px"><button class="nd-btn is-plain" onclick="RB_ED.step='packs';renderRuleSheet()">‹ Paketler</button><button class="nd-btn is-plain" onclick="ruleClose()">Vazgeç</button></div>`;
+}
+async function rulePackApply(){
+  if(!isAdmin()||!RB_ED||!RB_ED.pack)return;
+  const P=RB_ED.pack,sel=RB_ED.sel.slice();let L=rulesAll().slice(),mr=null,k=0;
+  P.items.forEach((it,i)=>{if(!sel[i])return;
+    if(it.set==="min_rest"){if(minRestH()<it.v)mr=it.v;return;}
+    const id="pk_"+P.id+"_"+it.k,j=L.findIndex(x=>x.id===id);
+    if(j>=0){L[j]={...JSON.parse(JSON.stringify(it.r)),id,on:L[j].on!==false};k++;return;}
+    if(L.some(x=>rulePackSame(x,it.r)))return;
+    L.push({...JSON.parse(JSON.stringify(it.r)),id,on:true});k++;});
+  ruleClose();
+  const o={rules:L};if(mr!=null){o.min_rest_h=mr;const e=$("minRest");if(e)e.value=mr;}
+  await saveDept({__opts:o},"Hazır kurallar",{after:()=>{renderRules();renderSetLanding&&renderSetLanding();try{renderShifts();}catch(e){}}});
+  toast(`✅ ${P.ad}: ${k} kural${mr!=null?` ve ${mr} saat dinlenme`:""} eklendi.`);
+}
 function rbSet(k,v){const r=RB_ED.r;
   if(k==="who"){const [a,b]=String(v).split("|");r.who=a==="p"?{k:"p",ids:[b]}:a==="tag"?{k:"tag",tag:b}:{k:"all"};}
-  else if(k==="what"){if(String(v).startsWith("s:")){r.what="shift";r.si=+v.slice(2);}else r.what=v;
-    if(r.what==="weekend")r.per="month";if(r.what==="hours"&&r.per==="row")r.per="week";}
-  else if(k==="per"){r.per=v;if(v==="row"&&(r.what==="hours"||r.what==="weekend"))r.what="duty";}
+  else if(k==="what"){const w0=r.what;if(String(v).startsWith("s:")){r.what="shift";r.si=+v.slice(2);}else r.what=v;
+    if(r.what==="weekend"){if(r.per==="week")r.per="month";if(r.per!=="month")r.op="max";if(r.per==="roll"&&!(+r.win>=2&&+r.win<=5))r.win=3;}
+    else if(w0==="weekend"&&r.per==="roll")r.win=7;
+    if(r.what==="hours"&&r.per==="row")r.per="week";}
+  else if(k==="per"){r.per=v;if(v==="row"&&r.what==="hours")r.what="duty";if(v==="week"&&r.what==="weekend")r.what="duty";
+    if(r.what==="weekend"&&v!=="month")r.op="max";
+    if(v==="roll"){if(r.what==="weekend"){if(!(+r.win>=2&&+r.win<=5))r.win=3;}else if(!(+r.win>=2))r.win=7;}}
+  else if(k==="win")r.win=Math.max(2,Math.min(r.what==="weekend"?5:31,Math.round(+v||7)));
+  else if(k==="k"){const x=Math.max(1,Math.min(7,Math.round(+v||1)));if(x>1)r.k=x;else delete r.k;}
   else if(k==="n")r.n=Math.max(0,Math.round(+v||0));
   else if(k==="si")r.si=+v;
   else if(k==="wd"){r.wd=r.wd||[0,0,0,0,0,0,0];r.wd[+v]=r.wd[+v]?0:1;}
@@ -7608,6 +7903,10 @@ function rbErr(r){
   if((r.t==="need"||r.t==="only")&&!String(r.tag||"").trim())return "Bir yetkinlik adı yaz (ör. Triyaj).";
   if(r.t==="pair"&&(!r.a||!r.b||r.a===r.b))return "İki farklı kişi seç.";
   if(r.t==="cycle"&&String(r.pat||"").length<2)return "Döngüye en az 2 gün ekle.";
+  if(r.t==="seq"){if(r.fa==null||r.fb==null)return "İki vardiyayı da seç.";for(const x of [r.fa,r.fb])if(/^\d+$/.test(String(x))&&!shiftRows[+x])return "Bir vardiya seç.";}
+  if(r.t==="lim"&&r.per==="roll"){const W=+r.win||0;if(W<2)return "Gün sayısı en az 2 olmalı.";
+    if(r.what==="off"&&r.n>W)return `${W} günde ${r.n} gün boş olamaz.`;if(r.what==="weekend"&&r.n>=W)return `${W} hafta sonunda en çok ${W-1} olabilir.`;}
+  if(r.t==="lim"&&r.what==="off"&&r.per==="week"&&r.n>7)return "Bir haftada en çok 7 gün boş olabilir.";
   if(r.t==="staff"&&r.sel==="days"&&!parseDays(r.days||"").length)return "Ayın günlerini yaz (ör. 1, 15, 29).";
   if(r.t==="staff"&&r.sel==="wd"&&!(r.wd||[]).some(Boolean))return "En az bir gün seç.";
   if((r.t==="only"||r.t==="eq"||((r.t==="lim"||r.t==="after")&&r.what==="shift"))&&!shiftRows[r.si])return "Bir vardiya seç.";
@@ -7616,6 +7915,7 @@ function rbErr(r){
 async function rbSave(){
   const r=RB_ED&&RB_ED.r,e=rbErr(r);if(e){toast("⚠️ "+e,true);return;}
   if(r.tag)r.tag=String(r.tag).trim();
+  if(r.t==="lim"&&r.per!=="roll")delete r.win;
   let L=rulesAll().slice();
   if(RB_ED.edit)L=L.map(x=>x.id===RB_ED.edit?{...r,id:x.id,on:x.on!==false}:x);
   else L.push({...r,id:ruleUid(),on:true});
@@ -7623,8 +7923,9 @@ async function rbSave(){
 }
 function renderRuleSheet(){
   const el=$("ruleSheetBody");if(!el||!RB_ED)return;
+  if(RB_ED.step==="packs"||RB_ED.step==="pack"){el.innerHTML=rulePackHTML();return;}
   if(RB_ED.step==="type"){
-    el.innerHTML=`<h2 style="margin:4px 2px 10px">Ne tür bir kural?</h2><div class="rb-types">${RULE_TYPES.filter(x=>isShiftMode()||!["only","staff","need","eq"].includes(x.t)).map(x=>
+    el.innerHTML=`<h2 style="margin:4px 2px 10px">Ne tür bir kural?</h2><div class="rb-types">${RULE_TYPES.filter(x=>isShiftMode()||!["only","staff","need","eq","seq"].includes(x.t)).map(x=>
       `<button class="rb-type" onclick="rbPick('${x.t}')"><b>${x.ad}</b><span>${hEsc(x.ex)}</span></button>`).join("")}</div>
       <button class="nd-btn is-plain" style="width:100%;margin-top:8px" onclick="ruleClose()">Vazgeç</button>`;
     return;}
@@ -7637,12 +7938,20 @@ function renderRuleSheet(){
   const tagIn=()=>`<input class="rb-tag" list="rbTags" value="${hEsc(r.tag||"")}" placeholder="ör. Triyaj" onchange="rbSet('tag',this.value)"><datalist id="rbTags">${T.map(t=>`<option value="${hEsc(t)}">`).join("")}</datalist>`;
   let f="";
   switch(r.t){
-    case "lim":{const what=r.what==="shift"?"s:"+r.si:r.what;
-      const whats=[["duty","nöbet"],["night","gece nöbeti"],...(r.per==="row"?[]:[["hours","saat"]]),...(r.per==="month"?[["weekend","hafta sonu"]]:[]),...(isShiftMode()?shiftRows.map((s,i)=>["s:"+i,shName(i)+" vardiyası"]).filter((x,i)=>!shiftRows[i].icap):[])];
-      f=`${whoSel()} ${sel("per",[["week","haftada"],["month","ayda"],["row","art arda"]],r.per)} ${sel("op",[["max","en çok"],["min","en az"]],r.op)} ${num("n",r.n,744)} ${sel("what",whats,what)} ${r.what==="hours"||r.what==="weekend"?"çalışsın":"tutsun"}`;break;}
-    case "after":f=`${whoSel()} ${sel("what",[["night","gece nöbetlerinden"],["duty","her nöbetten"],...(isShiftMode()?shiftRows.map((s,i)=>["s:"+i,shName(i)+" vardiyasından"]).filter((x,i)=>!shiftRows[i].icap):[])],r.what==="shift"?"s:"+r.si:r.what)} sonra en az ${num("n",r.n,14)} gün izinli olsun`;break;
-    case "wkfull":f=`${whoSel()} için ${sel("mode",[["same","cumartesi çalışan pazar da çalışsın"],["split","cumartesi çalışan pazar çalışmasın"]],r.mode==="split"?"split":"same")}
-      <p class="hint" style="margin:6px 2px 0">${r.mode==="split"?"Aynı kişi aynı hafta sonunun iki gününde birden nöbet tutmaz.":"Hafta sonu bölünmez: cumartesi izinli olan pazar da izinli olur."}</p>`;break;
+    case "lim":{const what=r.what==="shift"?"s:"+r.si:r.what,wk=r.what==="weekend",W=Math.max(2,+r.win||(wk?2:7));
+      const whats=[["duty","nöbet"],["night","gece nöbeti"],...(r.per==="row"?[]:[["hours","saat"]]),...(r.per==="week"?[]:[["weekend","hafta sonu"]]),["off","gün boş"],...(isShiftMode()?shiftRows.map((s,i)=>["s:"+i,shName(i)+" vardiyası"]).filter((x,i)=>!shiftRows[i].icap):[])];
+      const ops=wk&&r.per!=="month"?[["max","en çok"]]:[["max","en çok"],["min","en az"]];
+      f=`${whoSel()} ${sel("per",[["week","haftada"],["month","ayda"],["row","art arda"],["roll","herhangi"]],r.per)}${r.per==="roll"?` ${num("win",W,wk?5:31)} ${wk?"hafta sonunda":"günde"}`:""} ${sel("op",ops,r.op)} ${num("n",r.n,744)} ${sel("what",whats,what)} ${r.what==="off"?"olsun":r.what==="hours"||wk?"çalışsın":"tutsun"}
+        ${r.per==="roll"?`<p class="hint" style="margin:6px 2px 0">Ayın neresine düşerse düşsün art arda gelen her ${W} ${wk?"hafta sonu":"gün"} ayrı ayrı denetlenir; ay başında önceki ayın son ${wk?"hafta sonları":"günleri"} de hesaba katılır.</p>`:""}
+        ${r.what==="off"?`<p class="hint" style="margin:6px 2px 0">Boş gün: o gün başlayan nöbet ya da vardiya yok. İzinli günler de boş sayılır${r.op!=="min"?"; “en çok” sınırında izinli ve nöbet yazılamayan günler sayılmaz":""}.${r.per==="row"&&r.op==="min"?` Nöbet → ${Math.max(1,r.n-1)} gün boş → nöbet olmaz; boşluklar en az ${r.n} gün sürer (izin içeren boşluklar hariç).`:""}</p>`:""}`;break;}
+    case "after":f=`${whoSel()} ${sel("what",[["night","gece nöbetlerinden"],["duty","her nöbetten"],...(isShiftMode()?shiftRows.map((s,i)=>["s:"+i,shName(i)+" vardiyasından"]).filter((x,i)=>!shiftRows[i].icap):[])],r.what==="shift"?"s:"+r.si:r.what)} sonra en az ${num("n",r.n,14)} gün izinli olsun
+      <p class="hint" style="margin:8px 2px 0">Ne zaman: ${sel("k",[[1,"her seferinde"],[2,"art arda 2 ya da daha fazlasından sonra"],[3,"art arda 3 ya da daha fazlasından sonra"],[4,"art arda 4 ya da daha fazlasından sonra"],[5,"art arda 5 ya da daha fazlasından sonra"]],Math.max(1,+r.k||1))}</p>`;break;
+    case "seq":{const L=nom=>[["N",nom?"gece vardiyası":"gece vardiyasının"],["D",nom?"gündüz vardiyası":"gündüz vardiyasının"],["*",nom?"nöbet":"herhangi bir nöbetin"],
+        ...shiftRows.map((x,i)=>[String(i),shName(i)+(nom?" vardiyası":" vardiyasının"),x.icap]).filter(x=>!x[2]).map(x=>[x[0],x[1]])];
+      f=`${whoSel()} için ${sel("fa",L(false),String(r.fa))} ertesi günü ${sel("fb",L(true),String(r.fb))} olmasın
+        <p class="hint" style="margin:6px 2px 0">Örnek: gece çıkışının ertesi günü gündüz vardiyası yazılmasın; ya da vardiyalar hep ileri dönsün (sabah → akşam → gece, geri dönmesin). Gündüz: gece sayılmayan bütün vardiyalar. İki vardiya arası en az dinlenme saati ayrıca denetlenir.</p>`;break;}
+    case "wkfull":f=`${whoSel()} için ${sel("mode",[["same","cumartesi çalışan pazar da çalışsın"],["split","cumartesi çalışan pazar çalışmasın"],...(isShiftMode()?[["type","iki gün çalışan aynı vardiyada çalışsın"]]:[])],r.mode==="split"||r.mode==="type"?r.mode:"same")}
+      <p class="hint" style="margin:6px 2px 0">${r.mode==="split"?"Aynı kişi aynı hafta sonunun iki gününde birden nöbet tutmaz.":r.mode==="type"?"Cumartesi gündüz çalışan pazar da gündüz çalışır (gece çalışan gece); vardiya hafta sonu içinde değişmez.":"Hafta sonu bölünmez: cumartesi izinli olan pazar da izinli olur."}</p>`;break;
     case "need":f=`${sel("scope",[["shift","Her vardiyada"],["day","Her gün"]],r.scope)} ${shSel("si",r.si,true)} en az ${num("n",r.n,20)} ${tagIn()} olsun`;break;
     case "only":f=`${shSel("si",r.si,false)} vardiyasına yalnız ${tagIn()} etiketliler girsin`;break;
     case "pair":f=`${sel("a",P.map(p=>[p.id,kisaAd(p.name)]),r.a)} ile ${sel("b",P.map(p=>[p.id,kisaAd(p.name)]),r.b)} ${sel("mode",[["never","aynı gün nöbet tutmasın"],["same","aynı günlerde çalışsın"]],r.mode)}`;break;
@@ -7653,8 +7962,8 @@ function renderRuleSheet(){
         <button class="nd-btn is-sm is-tinted" onclick="rbPat('-')">＋ İzin</button><button class="nd-btn is-sm is-tinted" onclick="rbPat('*')">＋ Herhangi</button>
         ${shiftRows.filter(s=>!s.icap).length>2?shiftRows.map((s,i)=>s.icap||i>8?"":`<button class="nd-btn is-sm is-tinted" onclick="rbPat('${i+1}')">＋ ${hEsc(s.name&&s.name!=="Vardiya"?s.name:s.start+"–"+s.end)}</button>`).join(""):""}
         <button class="nd-btn is-sm is-plain" onclick="rbPat('del')">⌫ Son günü sil</button></div>
-        <div class="cy-pre"><span>Hazır:</span><button onclick="rbPat('GGNN----')">2 gündüz · 2 gece · 4 izin</button><button onclick="rbPat('GGGG----')">4 çalış · 4 izin</button>
-        <button onclick="rbPat('GG--GGG--GG---')">2-2-3 (Panama)</button><button onclick="rbPat('GGGGG--')">5 çalış · 2 izin</button><button onclick="rbPat('GN--')">1 gündüz · 1 gece · 2 izin</button></div>
+        <div class="cy-pre"><span>Hazır düzenler:</span>${CYC_LIB.map(x=>`<button class="${pat===x.p?"on":""}" onclick="rbPat('${x.p}')">${hEsc(x.ad)}</button>`).join("")}</div>
+        ${(()=>{const L=CYC_LIB.find(x=>x.p===pat);return L?`<p class="hint" style="margin:6px 2px 0"><b>${hEsc(L.ad)}:</b> ${hEsc(L.d)}</p>`:"";})()}
         <p class="hint" style="margin:6px 2px 0">Herkes döngüye farklı bir günden başlar; program başlangıçları günlük ihtiyaca göre seçer ve sonraki ayda kaldığı yerden devam ettirir.</p>`;break;}
     case "eq":f=`${shSel("si",r.si,false)} vardiyası ${whoSel()} arasında eşit dağıtılsın
       <p class="hint" style="margin:6px 2px 0">Herkes bu vardiyadan sırayla ve eşit sayıda alır. İzinli olan ya da bu vardiyaya giremeyen kişinin payı o oranda azalır. "Kişi başı haftada en çok 1" gibi bir sınırla birlikte kullanabilirsin.</p>`;break;
@@ -7790,7 +8099,8 @@ function altCandidates(base){
     const ids=[...new Set((base.ruleDet||[]).map(x=>x.id))],K=priKeys();
     ids.sort((a,b)=>K.indexOf("r:"+b)-K.indexOf("r:"+a));
     ids.slice(0,3).forEach((id,k)=>{const r=rulesAll().find(x=>x.id===id);if(!r)return;const txt=ruleText(r),pf=priF("r:"+id);
-      if(r.t==="lim"){const st=Math.max(1,Math.round(r.n*0.15)),Ln=limNeed(r);let n2=r.op==="max"?r.n+st:Math.max(0,r.n-st);if(r.op==="max"&&Ln&&Ln.need>n2)n2=Ln.need;
+      if(r.t==="lim"){const st=Math.max(1,Math.round(r.n*0.15)),Ln=limNeed(r),Rn=limRelaxN(r);let n2=r.op==="max"?r.n+st:Math.max(0,r.n-st);if(r.op==="max"&&Ln&&Ln.need>n2)n2=Ln.need;
+        if(Rn!=null){if(r.op!=="min"&&Rn>n2)n2=Rn;if(r.op==="min"&&Rn<n2)n2=Math.max(0,Rn);}
         C.push({k:"rule",ov:{rulesRel:{[id]:{n:n2}}},cost:2+pf*2+k*0.2,title:`Bu ay “${ruleText({...r,n:n2})}”`,desc:`“${txt}” kuralı bu ay ${r.n} yerine ${n2} olarak uygulanır; diğer bütün kurallar aynen kalır.`});}
       if(r.t==="after"&&r.n>1)C.push({k:"rule",ov:{rulesRel:{[id]:{n:r.n-1}}},cost:2+pf*2+k*0.2,title:`Bu ay “${ruleText({...r,n:r.n-1})}”`,desc:`İzin süresi bu ay ${r.n} yerine ${r.n-1} gün; diğer kurallar aynen kalır.`});
       if(r.t==="need"&&r.scope!=="day")C.push({k:"rule",ov:{rulesRel:{[id]:{scope:"day"}}},cost:2+pf*2+k*0.2,title:`Bu ay “${ruleText({...r,scope:"day"})}”`,desc:"Her vardiya yerine her gün için aranır; diğer kurallar aynen kalır."});
@@ -7798,7 +8108,8 @@ function altCandidates(base){
     /* birden çok kural tutmuyorsa: her biri en az ölçüde birlikte esner */
     if(ids.length>1){const rel={},off=[],ts=[];let cost=1;
       ids.forEach(id=>{const r=rulesAll().find(x=>x.id===id);if(!r)return;const pf=priF("r:"+id);
-        if(r.t==="lim"){const st=Math.max(1,Math.round(r.n*0.15)),Ln=limNeed(r);let n2=r.op==="max"?r.n+st:Math.max(0,r.n-st);if(r.op==="max"&&Ln&&Ln.need>n2)n2=Ln.need;rel[id]={n:n2};ts.push(`“${ruleText({...r,n:n2})}”`);cost+=2+pf*2;}
+        if(r.t==="lim"){const st=Math.max(1,Math.round(r.n*0.15)),Ln=limNeed(r),Rn=limRelaxN(r);let n2=r.op==="max"?r.n+st:Math.max(0,r.n-st);if(r.op==="max"&&Ln&&Ln.need>n2)n2=Ln.need;
+          if(Rn!=null){if(r.op!=="min"&&Rn>n2)n2=Rn;if(r.op==="min"&&Rn<n2)n2=Math.max(0,Rn);}rel[id]={n:n2};ts.push(`“${ruleText({...r,n:n2})}”`);cost+=2+pf*2;}
         else if(r.t==="after"&&r.n>1){rel[id]={n:r.n-1};ts.push(`“${ruleText({...r,n:r.n-1})}”`);cost+=2+pf*2;}
         else if(r.t==="need"&&r.scope!=="day"){rel[id]={scope:"day"};ts.push(`“${ruleText({...r,scope:"day"})}”`);cost+=2+pf*2;}
         else{off.push(id);ts.push(`“${ruleText(r)}” uygulanmasın`);cost+=4+pf*3;}});
@@ -8099,25 +8410,58 @@ function rrBuild0(slots,E,IV,A0,locked,lo,hi,evalFn,R,prev,ctx){
   /* Kurallar sayfasındaki kurallar: her gün, adayların o güne kadarki listesiyle yerel olarak puanlanır;
      kurala en az aykırı olan aday önce denenir (ritim ve sayılar yine kesin) */
   const RLc=ctx.rc||null,MTf=ctx.mt||null,WD=nDays+3;
-  const RU=RLc&&MTf?RLc.R.filter(c=>c.t!=="cycle"&&!(c.t==="lim"&&c.op==="min")):[];
+  const RU=RLc&&MTf?RLc.R.filter(c=>c.t!=="cycle"&&!(c.t==="lim"&&(c.op==="min"?c.what!=="off":c.what==="off"))):[];
   const ruleW=RU.length?new Int32Array(n*WD).fill(-1):null;
   const rAt=(p,dd)=>dd<1||dd>nDays?-1:ruleW[p*WD+dd];
   const rVal=(p,dd,what,c)=>{const s=rAt(p,dd);if(s<0)return 0;const mt=MTf(s,p)||{};
     if(what==="night")return mt.isN?1:0;if(what==="hours")return mt.h||0;if(what==="shift")return slots[s].si===c.si?1:0;return 1;};
   const inP=RU.map(c=>{const a=new Uint8Array(n);c.P.forEach(i=>{a[i]=1;});return a;});
   const tagP=RU.map(c=>c.t==="need"?members.map(p=>tagsOf(p).includes(c.tag)):null);
+  /* yeni kural biçimleri (kayan pencere, boş gün, art arda hafta sonu, yasak sıra, sonrasında izin):
+     p'yi d günü s yerine yazmak kuralı bozuyor mu (0 = bozmaz). d'den sonraki günler henüz yazılmadı. */
+  const hasPv=!!(RLc&&RLc.hasPrev),LBd=hasPv?-30:1;
+  const rTl=(p,dd)=>hasPv&&dd<=0&&dd>=-30?RLc.prev[p].tail[-dd]:null;
+  const rOn=(p,dd)=>dd>=1?rAt(p,dd)>=0:!!rTl(p,dd);
+  const rV2=(p,dd,what,c)=>{if(dd>=1)return rVal(p,dd,what,c);const t=rTl(p,dd);if(!t)return 0;return what==="night"?(t.n?1:0):what==="hours"?t.h:what==="shift"?(t.si===+c.si?1:0):1;};
+  const sV=(c,p,s,what)=>{const mt=MTf(s,p)||{};return what==="night"?(mt.isN?1:0):what==="hours"?(mt.h||0):what==="shift"?(slots[s].si===+c.si?1:0):1;};
+  const sM=(sp,p,s)=>sp==="*"||(sp==="N"?!!(MTf(s,p)||{}).isN:sp==="D"?!(MTf(s,p)||{}).isN:slots[s].si===+sp);
+  const dM=(sp,p,dd)=>{if(dd>=1){const s=rAt(p,dd);return s>=0&&sM(sp,p,s);}const t=rTl(p,dd);return !!t&&(sp==="*"||(sp==="N"?!!t.n:sp==="D"?!t.n:t.si===+sp));};
+  const isX=c=>c.t==="seq"||c.t==="after"||(c.t==="lim"&&(c.what==="off"||c.per==="roll"||(c.what==="weekend"&&c.per!=="month")));
+  const rBad=(c,p,d,s)=>{
+    if(c.t==="seq")return sM(String(c.fb),p,s)&&dM(String(c.fa),p,d-1)?1:0;
+    if(c.t==="after"){const what=c.what,K=Math.max(1,+c.k||1),q=sV(c,p,s,what)>0;
+      for(let e=d-1;e>=d-c.n&&e>=LBd;e--){if(rV2(p,e,what,c)<=0)continue;
+        if(e===d-1?q:rV2(p,e+1,what,c)>0)continue;            // blok sürüyor
+        if(K>1){let L=0;for(let dd=e;dd>=LBd&&rV2(p,dd,what,c)>0;dd--)L++;if(L<K)continue;}
+        return 1;}
+      return 0;}
+    if(c.t!=="lim")return 0;
+    const what=c.what,n=+c.n||0,mx=c.op!=="min";
+    if(what==="weekend"){if(!mx)return 0;const wd=RLc.wdOf(d);if(wd<5)return 0;if(wd===6&&rOn(p,d-1))return 0;
+      const sat=wd===5?d:d-1,W=c.per==="roll"?Math.max(2,+c.win||2):99;let k=1;
+      for(let i=1;i<W;i++){const sd=sat-7*i;if(sd+1<LBd)break;const on=rOn(p,sd)||rOn(p,sd+1);if(on)k++;else if(c.per==="row")break;}
+      return k>n?1:0;}
+    if(what==="off"){if(mx)return 0;
+      if(c.per==="roll"){const W=Math.max(2,+c.win||7);if(d-W+1<LBd)return 0;let t=0;for(let dd=d-W+1;dd<d;dd++)if(!rOn(p,dd))t++;return t<n?1:0;}
+      if(c.per==="week"){const k=RLc.weekOf(d),w1=RLc.wdOf(1),a=k===0&&hasPv?1-w1:Math.max(1,k*7-w1+1),b=Math.min(nDays,k*7-w1+7);if(b-a+1<7)return 0;
+        let t=0;for(let dd=a;dd<d;dd++)if(!rOn(p,dd))t++;return t+(b-d)<n?1:0;}
+      if(c.per==="month"){let t=0;for(let dd=1;dd<d;dd++)if(!rOn(p,dd))t++;return t+(nDays-d)<n?1:0;}
+      if(c.per==="row"){if(d-1<LBd||rOn(p,d-1))return 0;let a=d-1;while(a-1>=LBd&&!rOn(p,a-1))a--;if(a-1<LBd)return 0;
+        for(let x=Math.max(1,a);x<d;x++)if(RLc.free[p][x]||RLc.cant[p][x])return 0;return d-a<n?1:0;}
+      return 0;}
+    if(c.per==="roll"&&mx){const v=sV(c,p,s,what);if(v<=0)return 0;const W=Math.max(2,+c.win||7);let t=v;
+      for(let dd=d-W+1;dd<d;dd++)t+=rV2(p,dd,what,c);return t>n+1e-9?(what==="hours"?Math.min(v,t-n)/4:1):0;}
+    return 0;};
   /* KESİN kurallar kurucuda gerçekten katı: o güne/yere yazılınca kural bozulacaksa kişi o yere aday olmaz */
-  const RHX=RU.map((c,ci)=>c.W>=90000&&(c.t==="after"||(c.t==="lim"&&c.op==="max"&&c.what!=="weekend")||(c.t==="wkfull"&&c.mode==="split"))?ci:-1).filter(ci=>ci>=0);
+  const RHX=RU.map((c,ci)=>c.W>=90000&&(isX(c)||(c.t==="lim"&&c.op==="max"&&c.what!=="weekend")||(c.t==="wkfull"&&(c.mode==="split"||c.mode==="type")))?ci:-1).filter(ci=>ci>=0);
   const SOFTD=ctx.softDays||null;      // kanıtla imkânsız günler: orada kural esneyebilir (en az bozan seçilir)
   const hardSlotOK=(p,s,d)=>{
     if(SOFTD&&SOFTD.has(d))return true;
     for(const ci of RHX){const c=RU[ci];if(!inP[ci][p])continue;const what=c.what;
-      if(c.t==="after"){const q=what==="night"?(isN(s,p)?1:0):what==="shift"?(slots[s].si===+c.si?1:0):1;
-        if(q&&rVal(p,d-1,what,c)>0)continue;                 // blok sürüyor
-        for(let k=1;k<=c.n;k++){const dd=d-k;if(dd<1){if(dd===0&&(what==="night"?RLc.prev[p].lastNight:RLc.prev[p].lastDuty))return false;break;}
-          if(rVal(p,dd,what,c)>0)return false;}
-        continue;}
-      if(c.t==="wkfull"){if(RLc.wdOf(d)===6&&(d>1?rAt(p,d-1)>=0:RLc.prev[p].lastDuty))return false;continue;}
+      if(isX(c)){if(rBad(c,p,d,s)>0)return false;continue;}
+      if(c.t==="wkfull"){if(RLc.wdOf(d)!==6)continue;
+        if(c.mode==="type"){const a=d>1?rAt(p,d-1):-1;if(a>=0&&slots[a].si!==slots[s].si)return false;continue;}
+        if(d>1?rAt(p,d-1)>=0:RLc.prev[p].lastDuty)return false;continue;}
       const v=what==="night"?(isN(s,p)?1:0):what==="hours"?((MTf(s,p)||{}).h||0):what==="shift"?(slots[s].si===+c.si?1:0):1;
       if(v<=0)continue;
       if(c.per==="row"){let r=1,dd=d-1;while(dd>=1&&rVal(p,dd,what,c)>0){r++;dd--;}if(dd<1)r+=what==="night"?RLc.prev[p].run.night:RLc.prev[p].run.duty;if(r>c.n)return false;}
@@ -8138,9 +8482,11 @@ function rrBuild0(slots,E,IV,A0,locked,lo,hi,evalFn,R,prev,ctx){
       if(c.t==="pair"){if(c.ia<0||c.ib<0)return;const a=rAt(c.ia,d)>=0,b=rAt(c.ib,d)>=0;
         if(c.mode==="never"){if(a&&b)pen+=w*2;}else if(a!==b&&!RLc.free[a?c.ib:c.ia][d])pen+=w;return;}
       if(c.t==="wkfull"){if(wd!==6)return;
+        if(c.mode==="type"){for(let z=0;z<dl.length;z++){const p=asg[z];if(p<0||!ip[p])continue;const a=rAt(p,d-1);if(a>=0&&slots[a].si!==slots[dl[z]].si)pen+=w;}return;}
         if(c.mode==="split"){for(const p of c.P){const b=rAt(p,d)>=0;if(!b)continue;if(d>1?rAt(p,d-1)>=0:RLc.prev[p].lastDuty)pen+=w*2;}return;}
         for(const p of c.P){const a=rAt(p,d-1)>=0,b=rAt(p,d)>=0;if(d>1&&a!==b&&!RLc.free[p][d]&&!RLc.free[p][d-1])pen+=w;}return;}
       for(let z=0;z<dl.length;z++){const p=asg[z];if(p<0||!ip[p])continue;
+        if(isX(c)){const b=rBad(c,p,d,dl[z]);if(b>0)pen+=w*b;continue;}
         if(c.t==="lim"){const what=c.what;
           if(what==="weekend"){if(wd<5)continue;if(wd===6&&rAt(p,d-1)>=0)continue;const seen=new Set();
             for(let dd=1;dd<=d;dd++){const x=RLc.wdOf(dd);if((x===5||x===6)&&rAt(p,dd)>=0)seen.add(RLc.weekOf(dd));}if(seen.size>c.n)pen+=w;continue;}
@@ -8150,12 +8496,7 @@ function rrBuild0(slots,E,IV,A0,locked,lo,hi,evalFn,R,prev,ctx){
             if(k===0){const P0=RLc.prev[p].wk;t+=what==="hours"?P0.hours:what==="night"?P0.night:what==="duty"?P0.duty:0;}
             if(t>c.n)pen+=w*(what==="hours"?Math.min(v,t-c.n)/4:1);}
           else{let r=1,dd=d-1;while(dd>=1&&rVal(p,dd,what,c)>0){r++;dd--;}if(dd<1)r+=what==="night"?RLc.prev[p].run.night:RLc.prev[p].run.duty;if(r>c.n)pen+=w;}
-        }else if(c.t==="after"){const what=c.what;
-          if(rVal(p,d-1,what,c)>0&&rVal(p,d,what,c)>0)continue;          // blok sürüyor
-          for(let k=1;k<=c.n;k++){const dd=d-k;
-            if(dd<1){if(dd===0&&(what==="night"?RLc.prev[p].lastNight:RLc.prev[p].lastDuty))pen+=w;break;}
-            if(rVal(p,dd,what,c)>0){pen+=w;break;}
-            if(rAt(p,dd)>=0)break;}}
+        }
       }}
   };
   const T0=Date.now(),BUDGET=(ctx.budget||2200)*TS();
@@ -8766,15 +9107,19 @@ function renderDayEdit0(){
     return i>=0?kalan.splice(i,1)[0]:null;
   });
   kalan.forEach(e=>{slotlar.push({key:"x"+Math.random(),si:e.s,room:e.r,ic:!!e.ic,label:(e.ic?"📟 ":"")+(slotLabel(e)||"Ek"),extra:1});dolu.push(e);});
+  /* uygun kişiler en az nöbeti olandan (hedefe göre) başlayarak sıralanır; ilk üçü önerilen */
+  const deCnt={},deTg=(schedule&&schedule.cnt)||{};{const nD=vInfo().nDays;for(let d=1;d<=nD;d++)(schedule.asg[d]||[]).forEach(e=>{if(e&&e.id&&!e.ic)deCnt[e.id]=(deCnt[e.id]||0)+1;});}
+  const deSc=p=>(deCnt[p.id]||0)-(deTg[p.id]!=null?+deTg[p.id]:0);
   const selHTML=(sl,i)=>{
     const e=dolu[i],sec=e?e.id:"";
-    const ops=members.map(p=>({p,why:deWhy(p,sl,sec)})).sort((a,b)=>(a.why?1:0)-(b.why?1:0));
+    const ops=members.map(p=>({p,why:deWhy(p,sl,sec)})).sort((a,b)=>(a.why?1:0)-(b.why?1:0)||(a.why?0:(deSc(a.p)-deSc(b.p))||((deCnt[a.p.id]||0)-(deCnt[b.p.id]||0))));
+    const best=new Set(ops.filter(o=>!o.why&&o.p.id!==sec&&onDuty(o.p)).slice(0,3).map(o=>o.p.id));
     return `<div class="row" style="margin-top:6px">
       <label style="flex:0 0 100px;font-size:.7rem">${hEsc(sl.label)}${sl.extra?" (fazla)":""}</label>
       <select class="deSel" data-i="${i}" style="flex:1;min-width:130px">
         <option value="">— boş —</option>
         ${sec&&!members.some(p=>p.id===sec)?`<option value="${sec}" selected>${hEsc(nameOfId(sec)||"Eski üye")} (ekipten ayrıldı)</option>`:""}
-        ${ops.map(({p,why})=>`<option value="${p.id}" ${sec===p.id?"selected":""}>${hEsc(p.name)}${why?" — "+hEsc(why):""}</option>`).join("")}
+        ${ops.map(({p,why})=>`<option value="${p.id}" ${sec===p.id?"selected":""}>${best.has(p.id)?"★ ":""}${hEsc(p.name)}${why?" — "+hEsc(why):onDuty(p)?` · ${deCnt[p.id]||0} nöbet${deTg[p.id]!=null?"/"+deTg[p.id]:""}`:""}</option>`).join("")}
       </select></div>`;};
   let h="";
   if(schedule.mode==="shifts"){
@@ -9287,7 +9632,7 @@ function monthDuties(sch,mk){
       let h,cat;
       if(sm){const es=schEff(e.s,d,e.id),mt=shiftMetrics(es,d,y,m,nDays,bays);h=mt.h;cat=mtIsN(mt,es)?"n":"d";}
       else{h=durH(dutyFor(dt,y,m,d,bays));cat="r";}
-      out.push({pid:e.id,d,h,cat,r:e.r});
+      out.push({pid:e.id,d,h,cat,r:e.r,s:e.s});
     }
     return out;
   });
