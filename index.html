@@ -6083,31 +6083,81 @@ function generate(){
   hideDecide();
   /* Üyelerin 🙋 talebi yalnızca bir dilektir — hedef DEĞİLDİR.
      Kim kaç nöbet tutacağına yönetici "📊 Kim kaç nöbet tutacak?" kartından karar verir. */
-  runTargets={};runNight={};runOV=null;ALT.prevTitle=null;ALT.token++;ALT.list=[];ALT.busy=false;
+  runTargets={};runNight={};runOV=null;ALT.prevTitle=null;ALT.prev=null;ALT.prevOV=null;ALT.token++;ALT.list=[];ALT.busy=false;
   buildDraft();
 }
 
-function buildDraft(o){
-  ALT.token++;ALT.list=[];ALT.busy=false;ALT.why=null;
-  const keepOV=SOLVE_OV;SOLVE_OV=runOV?{...runOV}:null;
-  /* yeniden hazırlarken önceki taslak başlangıç olur (liste baştan karışmasın); öneri seçilmişse ya da ilk taslakta yok */
-  SOLVE_SEED=o&&o.seed&&draft&&draft.asg&&!runOV?draft.asg:null;
-  try{draft=solveSchedule();}finally{SOLVE_OV=keepOV;SOLVE_SEED=null;}
-  if(!draft)return;
-  if(runOV&&ALT.prevTitle)draft.alt={title:ALT.prevTitle.title,desc:ALT.prevTitle.desc,k:"re"};
+/* tek çözüm (seçilen önerinin geçici kuralları ve isteğe bağlı başlangıç listesiyle) */
+function solveOnce(seed){
+  const keepOV=SOLVE_OV;SOLVE_OV=runOV?{...runOV}:null;SOLVE_SEED=seed||null;
+  try{return solveSchedule();}catch(e){console.error(e);return null;}finally{SOLVE_OV=keepOV;SOLVE_SEED=null;}
+}
+/* iki taslağı aynı ayarlarla karşılaştır: önce katı kurallar, sabit günler, boş yer, ritim, kurallar, sayılar, geceler; sonra genel puan */
+function draftKey(dr,fa){const r=dr.rep||{};return [r.hard||0,r.pinMiss||0,fa?(dr.emptyCount||0):0,(r.rrV||0)+(r.rhythmV||0),(r.ruleV||0)+(r.senV||0)+(r.genV||0),r.tgtMiss||0,r.nightMiss||0,dr.score||0];}
+function draftCmp(a,b,fa){const x=draftKey(a,fa),y=draftKey(b,fa),L=x.length;
+  for(let i=0;i<L;i++){const e=i===L-1?1e-6*Math.max(1,Math.abs(y[i])):0;if(x[i]<y[i]-e)return -1;if(x[i]>y[i]+e)return 1;}return 0;}
+function draftPerfect(dr,fa){return draftKey(dr,fa).slice(0,7).every(v=>!v);}
+function setDraft(d){
+  draft=d;
+  if(runOV&&ALT.prevTitle&&!draft.alt)draft.alt={title:ALT.prevTitle.title,desc:ALT.prevTitle.desc,k:"re"};
   draft.lay=layoutSnap();               // taslağın vardiya/oda/saat düzeni
   draft.fair=fairSnap(draft,planAy());   // saat dengesi havuzu ve ağırlıkları
   draftUI.sel=null;draftUI.focus=null;
+  altQueue();
   showDraft();
-  if(!draft.alt&&altAny(draft))setTimeout(()=>{altBuild();},60);
 }
-function redraft(){
-  if(!isAdmin())return;
+/* öneriler hemen "hazırlanıyor" görünür (boşluk/titreme olmaz), hesap kısa bir an sonra başlar */
+function altQueue(){
+  if(isAdmin()&&draft&&(!draft.alt||draft.alt.k==="re")&&altAny(draft)){ALT.busy=true;ALT.base=draft;ALT.tried=0;ALT.total=0;setTimeout(()=>{altBuild();},60);}
+}
+function buildDraft(){
+  ALT.token++;ALT.list=[];ALT.busy=false;ALT.why=null;RD_NOTE=null;
+  const d=solveOnce(null);
+  if(!d)return;
+  setDraft(d);
+}
+let RD_BUSY=false,RD_NOTE=null;
+/* "Yeniden hazırla": tablodaki sayılarla birkaç kez dener, en iyisi kalır.
+   Sayılar değişmediyse eldeki liste de yarışır: yeni liste ondan kötüyse eldeki aynen kalır (liste asla kötüleşmez). */
+async function redraft(){
+  if(!isAdmin()||RD_BUSY)return;
   const finals={},nights={};
   document.querySelectorAll(".decInp").forEach(i=>{finals[i.dataset.pid]=+i.value||0;});
   document.querySelectorAll(".decNight").forEach(i=>{nights[i.dataset.pid]=+i.value||0;});
-  runTargets=finals;runNight=nights;
-  buildDraft({seed:true});
+  const prev=draft&&draft.asg?draft:null;
+  const same=!!prev&&Object.keys(finals).every(id=>(prev.cnt[id]||0)===finals[id])&&Object.keys(nights).every(id=>((prev.nc&&prev.nc[id])||0)===nights[id]);
+  runTargets=finals;
+  /* geceler: elle değiştirilen ya da zaten kesin olanlar kesin; diğerlerini program dengeler */
+  const nr={};members.forEach((p,i)=>{if(nights[p.id]==null)return;const was=prev&&prev.nWant?prev.nWant[i]:null,cur=(prev&&prev.nc&&prev.nc[p.id])||0;
+    if(was!=null||!prev||nights[p.id]!==cur)nr[p.id]=nights[p.id];});
+  runNight=nr;
+  /* seçilen önerinin sayı ayarı artık tabloda: yöneticinin yazdığı sayılar geçerli */
+  if(runOV){const o={...runOV};["tg","free","flex","flexLock","nFree","ng"].forEach(k=>{delete o[k];});runOV=Object.keys(o).length?o:null;}
+  ALT.token++;ALT.list=[];ALT.busy=false;ALT.why=null;RD_BUSY=true;
+  const btn=$("redraftBtn");if(btn){btn.disabled=true;btn.textContent="Hazırlanıyor…";}
+  let best=null,note=null;
+  try{
+    await new Promise(r=>setTimeout(r,40));
+    const fa=(()=>{const k=SOLVE_OV;SOLVE_OV=runOV;try{return fillAll();}finally{SOLVE_OV=k;}})();
+    const seedOK=!same&&prev&&!(runOV&&runOV.keep);
+    const T0=Date.now(),sig=prev?JSON.stringify(prev.asg):"",pr=same?reauditOf(prev):null;let n=0;
+    while(n<3){
+      const d=solveOnce(n===0&&seedOK?prev.asg:null);n++;
+      if(d&&(!best||draftCmp(d,best,fa)<0))best=d;
+      const el=Date.now()-T0;
+      /* yeter: kusursuz bir liste bulundu (sayılar aynıysa eldekinden de iyi ve farklı olmalı) */
+      if(best&&(same?pr&&draftCmp(best,pr,fa)<=0&&JSON.stringify(best.asg)!==sig:draftPerfect(best,fa)))break;
+      if(el+el/n>6500)break;
+      await new Promise(r=>setTimeout(r,20));
+    }
+    if(!best){toast("Liste hazırlanamadı; ayarları kontrol et.",true);return;}
+    if(same){
+      if(pr&&draftCmp(best,pr,fa)>0){best=pr;note="Aynı sayılarla yeniden denendi; bundan daha iyi bir liste çıkmadı. En iyi liste aynen duruyor.";}
+      else if(JSON.stringify(best.asg)===sig)note="Yeniden denendi; bu ayarlarla en iyi liste bu, aynı çıktı.";
+      else note=pr&&draftCmp(best,pr,fa)<0?"Yeni liste hazırlandı — öncekinden daha iyi.":"Yeni liste hazırlandı (aynı kalitede, farklı bir dağılım).";
+    }else note="Yeni sayılarla liste hazırlandı.";
+    RD_NOTE={d:best,txt:note};setDraft(best);
+  }finally{RD_BUSY=false;if(btn){btn.disabled=false;btn.textContent="Yeniden hazırla";}}
 }
 function hideDecide(){$("decideCard").style.display="none";}
 function fairShare(){
@@ -6151,11 +6201,11 @@ function showDraft(o){
   const warn=sorunlar.filter(v=>!/^(ℹ️|💡)/.test(v)),notes=sorunlar.filter(v=>/^(ℹ️|💡)/.test(v));
   const li=a=>a.map(v=>"• "+v).join("<br>");
   let durum;
-  if(draft.alt)durum=notes.length||warn.length?`<div class="banner info" style="margin:8px 0">${li(warn.concat(notes))}</div>`:"";
+  if(draft.alt&&draft.alt.k!=="re")durum=notes.length||warn.length?`<div class="banner info" style="margin:8px 0">${li(warn.concat(notes))}</div>`:"";
   else if(draft.exact&&!warn.length)durum=`<div class="banner ok" style="margin:8px 0">Bütün sayılar ve kurallar tutturuldu — ${bos?`${S-bos} nöbet dağıtıldı, ${bos} yer boş bırakıldı (ayarın "sayılara göre, boş kalabilir")`:`${S} nöbetin hepsi dağıtıldı`}.</div>`+(notes.length?`<div class="banner info" style="margin:8px 0">${li(notes)}</div>`:"");
   else durum=(warn.length?`<div class="banner err" style="margin:8px 0"><b>Şunlar tam tutturulamadı:</b><br>${li(warn)}</div>`:"")+(notes.length?`<div class="banner info" style="margin:8px 0">${li(notes)}</div>`:"");
-  const oneri=draft.rhythmSuggest&&!altAny(draft)?`<div style="margin:6px 0 10px"><button class="btn small" onclick="applyRhythmSuggest()">Düzeni tam oturt</button></div>`:"";
-  $("decideHint").innerHTML=durum+oneri;
+  const rdn=RD_NOTE&&RD_NOTE.d===draft?`<div class="banner info" style="margin:8px 0">${hEsc(RD_NOTE.txt)}</div>`:"";
+  $("decideHint").innerHTML=rdn+durum;
   renderAlts();
   try{renderIssues();}catch(e){console.error(e);}
   $("decideFoot").innerHTML=`Sayıyı − / + ile değiştirip <b>Yeniden hazırla</b>'ya bas. <b>Σ</b> = geçmiş aylar dahil saat farkı (+ fazla, − eksik). Son karar senin.`;
@@ -6199,7 +6249,7 @@ function applyRhythmSuggest(){
   if(!draft||!draft.rhythmSuggest)return;
   const sg=draft.rhythmSuggest;
   document.querySelectorAll(".decInp").forEach(i=>{if(sg[i.dataset.pid]!=null)i.value=sg[i.dataset.pid];});
-  redraft();
+  return redraft();
 }
 function updDecideTotal(S){
   let t=0;document.querySelectorAll(".decInp").forEach(i=>t+=(+i.value||0));
@@ -6216,13 +6266,14 @@ function updDecideTotal(S){
 }
 async function confirmDecide(){
   if(!draft){alert("Önce taslak üret");return;}
+  if(RD_BUSY){toast("Liste yeniden hazırlanıyor; bitince yayınla.",true);return;}
   const finals={},nights={};
   document.querySelectorAll(".decInp").forEach(i=>{finals[i.dataset.pid]=+i.value||0;});
   document.querySelectorAll(".decNight").forEach(i=>{nights[i.dataset.pid]=+i.value||0;});
   const nChanged=Object.keys(nights).some(id=>((draft.nc&&draft.nc[id])||0)!==nights[id]);
   const changed=Object.keys(finals).some(id=>(draft.cnt[id]||0)!==finals[id])||nChanged;
   if(changed&&!confirm("Sayıları değiştirdin. Bu sayılarla yeniden hazırlanıp yayınlansın mı?")){return;}
-  if(changed){runTargets=finals;runNight=nights;buildDraft({seed:true});return;}
+  if(changed){await redraft();return;}
   for(const p of members){
     if(finals[p.id]==null)continue;
     if(isShiftMode()){
@@ -6386,6 +6437,7 @@ async function saveSchedule(best){
   await stampRulesBeforeChange();       // eski aylar kuralsızsa önce mühürle
   best.rules=rulesSnapshot();           // bu ayın kuralları listenin içinde saklanır
   if(best.alt&&best.ov&&best.ov.rr)best.rules.rr=best.ov.rr;     // çözüm önerisiyle bu ay esnetilen ritim kayda geçer
+  if(best.ov&&best.ov.wr){const w=best.ov.wr;if(w.max)best.rules.wr.max=w.max.slice();if(w.off)best.rules.wr.off=w.off.slice();}   // bu ay esnetilen nöbet sonrası kuralı da
   viewMonth=null;                       // yeni yayınlanan aya dön
   const {error}=await sb.from("schedules").upsert({dept_id:dept.id,month:dept.month,data:best});
   if(error){alert("⚠️ "+error.message);return;}
@@ -6587,6 +6639,8 @@ function balanceFree(slots,E,A,load,freeIdx,locked){
 }
 
 /* Atamanın kalitesi: katı ihlaller çok ağır, yumuşak kriterler hafif */
+/* katı kurallar (çakışma, dinlenme, nöbet aralığı, nöbet sonrası izin) her zaman ritim, kıdem ve dengeden ağır basar */
+const HARDW=1e7;
 function makeEvaluator(slots,ctxd){
   const {y,m,nDays,bays,IV,MT,pm,bDN,bWE,patOn,patOff,expShare}=ctxd;
   const minRest=ctxd.minRest||0;
@@ -6623,7 +6677,7 @@ function makeEvaluator(slots,ctxd){
   const roomRhythm=(patOn>=2||!!(RR&&RR.wMax>=2))&&slots.length>0&&slots.every(s=>s.si<0);
   const SENC=ctxd.sen||null,GENC=ctxd.gen||null,genOf=members.map(p=>genderOf(p)),senT=SENC?members.map(p=>senTier(p,SENC)):null;
   const RC=ctxd.rules||null,PFr=priF("b:ritim"),PFs=priF("b:kidem"),PFg=priF("b:cins");
-  const HARD=100000,RHY=4000,SENW=15000;   // ritim: katı kurallardan hafif; kıdem: güçlü ama katı değil
+  const HARD=HARDW,RHY=4000,SENW=15000;   // ritim: katı kurallardan hafif; kıdem: güçlü ama katı değil
   const HX=ctxd.hours&&ctxd.hours.on?ctxd.hours:null,HW=60;
   const PTC=ctxd.pts||null,PTB=PTC?shiftRows.map(x=>+x.pts||1):null;
   const evalFnInner=function(A,detail){
@@ -8305,10 +8359,13 @@ function altSolve(ov,base){
 }
 function altIssues(dr){
   const b=dr&&dr.rep||{},R=rhythmEff();
-  return {noCounts:!!b.noCounts,rh:!!(R&&((b.rrV||0)+(b.rhythmV||0))>0),empty:fillAll()&&(dr.emptyCount||0)>0,tgt:(b.tgtMiss||0)>0,
-    night:(b.nightMiss||0)>0,sen:(b.senV||0)>0,gen:(b.genV||0)>0,rule:(b.ruleV||0)>0,hard:(b.hard||0)>0,R};
+  return {noCounts:!!b.noCounts,rh:!!(R&&((b.rrV||0)+(b.rhythmV||0))>0),empty:fillAll()&&(dr.emptyCount||0)>0&&!(runOV&&runOV.keep),tgt:(b.tgtMiss||0)>0,
+    night:(b.nightMiss||0)>0,sen:(b.senV||0)>0,gen:(b.genV||0)>0,rule:(b.ruleV||0)>0,hard:(b.hard||0)>0,wr:((b.wrMax||0)+(b.wrOff||0))>0,R};
 }
-function altAny(dr){const x=altIssues(dr);return x.rh||x.empty||x.tgt||x.night||x.sen||x.gen||x.rule||x.hard||x.noCounts;}
+function withRunOV(fn){if(!runOV)return fn();const k=SOLVE_OV;SOLVE_OV={...runOV};try{return fn();}finally{SOLVE_OV=k;}}
+const ALT_CNTK=["flex","flexLock","tg","free","nFree","ng","rrOrig","ts"];
+function altSeen(c){if(!c.ov||!runOV)return false;const ks=Object.keys(c.ov).filter(k=>!ALT_CNTK.includes(k));return ks.length>0&&ks.every(k=>JSON.stringify(c.ov[k])===JSON.stringify(runOV[k]));}
+function altAny(dr){const x=withRunOV(()=>altIssues(dr));return x.rh||x.empty||x.tgt||x.night||x.sen||x.gen||x.rule||x.hard||x.noCounts;}
 /* birleşik öneri: birden çok kural ailesi tutmuyorsa tek değişiklik hepsini çözemez */
 function altFam(k){return ["relax","keep","tg","flex"].includes(k)?"rh":k==="rule"||k==="need"?"rule":k==="sen"?"sen":k==="gen"?"gen":null;}
 function altCombo(parts){const ov={};parts.forEach(p=>{const o=p.ov||{};for(const k in o){if(k==="rulesRel")ov.rulesRel={...(ov.rulesRel||{}),...o.rulesRel};else if(k==="rulesOff")ov.rulesOff=[...(ov.rulesOff||[]),...o.rulesOff];else ov[k]=o[k];}});
@@ -8334,13 +8391,31 @@ function altCandidates(base){
   if(I.rh){
     C.push({k:"keep",ov:{keep:true},cost:0,title:"Ritim kusursuz kalsın",desc:"Ritmi bozan birkaç yer boş bırakılır; o yerler için dış destek ya da ek personel gerekir."});
     relax({wMax:R.wMax+1},4,`Bu ay en çok ${R.wMax+1} gün art arda çalışılabilsin`,`Ritim yalnız gereken yerlerde ${R.wMin===R.wMax+1?R.wMin:R.wMin+"–"+(R.wMax+1)} gün çalışmaya esner; geri kalan herkes eski düzende.`);
-    if(base.rhythmSuggest)C.push({k:"tg",ov:{tg:{...base.rhythmSuggest,_txt:undefined}},cost:1,title:"Kişi sayılarını ritme göre ayarla",desc:"Ritim ve bütün vardiyalar tam; yalnız birkaç kişinin aylık sayısı 1 değişir."});
-    else if(!why)C.push({k:"flex",ov:{flex:1},cost:1,title:"Kişi sayılarını ritme göre ayarla",desc:"Ritim ve bütün vardiyalar tam; yalnız birkaç kişinin aylık sayısı 1 değişir."});
+    if(base.rhythmSuggest)C.push({k:"tg",ov:{tg:{...base.rhythmSuggest,_txt:undefined}},cost:1,title:"Düzeni tam oturt",desc:`Kişi sayıları ritme göre ayarlanır (${base.rhythmSuggest._txt}); ritim ve bütün vardiyalar tam tutar.`});
+    else if(!why)C.push({k:"flex",ov:{flex:1},cost:1,title:"Düzeni tam oturt",desc:"Kişi sayıları ritme göre ayarlanır (yalnız birkaç kişinin sayısı 1 değişir); ritim ve bütün vardiyalar tam tutar."});
     if(R.oMax>0)relax({oMax:R.oMax+1},3,`Bu ay izin en çok ${R.oMax+1} gün sürebilsin`,`Gereken yerlerde dinlenme ${R.oMin}–${R.oMax+1} güne uzar; çalışma blokları aynı kalır.`);
     if(R.oMin>1)relax({oMin:R.oMin-1},6,`Bu ay dinlenme en az ${R.oMin-1} gün olabilsin`,`Gereken yerlerde iki çalışma bloğu arası ${R.oMin-1} güne iner; geri kalan herkes eski düzende.`);
     if(R.wMin>1)relax({wMin:R.wMin-1},5,`Bu ay ${R.wMin-1} günlük kısa bloklara izin ver`,`Gereken yerlerde blok ${R.wMin-1} gün olabilir.`);
   }
   if(I.noCounts)C.push({k:"fill",ov:{fill:true},cost:0,title:"Boş yerleri de doldur",desc:"Bu ay herkese kurallara uyan en adil sayı verilir ve bütün yerler dolar."});
+  if(I.wr){
+    /* nöbet sonrası izin / haftanın günü sınırı: bu ay en az ölçüde esnet */
+    const W=wrCfg(),{y,m,nDays}=monthInfo(),rot=Math.max(1,wrRotIds().length),cnt=new Array(7).fill(0);
+    for(let d=1;d<=nDays;d++)cnt[wdOf(y,m,d)]+=((base.asg||{})[d]||[]).filter(e=>e&&!e.ic).length;
+    const mx=W.max.slice(),up=[];
+    for(let wd=0;wd<7;wd++)if(W.max[wd]>0){const need=Math.ceil(cnt[wd]/rot);if(need>W.max[wd]){mx[wd]=need;up.push(wd);}}
+    if(!up.length&&(base.rep.wrMax||0)>0)for(let wd=0;wd<7;wd++)if(W.max[wd]>0){mx[wd]=W.max[wd]+1;up.push(wd);}
+    const of=W.off.slice(),dn=[];for(let wd=0;wd<7;wd++)if(W.off[wd]>1){of[wd]=W.off[wd]-1;dn.push(wd);}
+    const gl=a=>a.map(wd=>WR_GUN[wd]).join(a.length===2?" ve ":", ");
+    const maxT=up.length?(new Set(up.map(wd=>mx[wd])).size===1?`Bu ay en fazla ${mx[up[0]]} ${gl(up)} nöbeti olabilsin`:`Bu ay gün sınırları: ${up.map(wd=>WR_GUN[wd]+" "+mx[wd]).join(", ")}`):"";
+    const maxD=up.length?`${up.map(wd=>`${cnt[wd]} ${WR_GUN[wd]} nöbeti`).join(", ")} ${rot} kişiye bölünür; sınır yalnız bu ay yükselir.`:"";
+    const offT=dn.length?(new Set(dn.map(wd=>of[wd])).size===1?`Bu ay ${gl(dn)} nöbetinden sonra ${of[dn[0]]} gün izin`:`Bu ay nöbet sonrası izin 1 gün kısalsın (${gl(dn)})`):"";
+    const offD=dn.length?`${dn.map(wd=>`${WR_GUN[wd]} sonrası ${W.off[wd]} yerine ${of[wd]} gün`).join(", ")}; yalnız bu ay.`:"";
+    if(up.length)C.push({k:"wr",ov:{wr:{max:mx}},cost:3,title:maxT,desc:maxD+" Diğer bütün kurallar aynen kalır."});
+    if(dn.length)C.push({k:"wr",ov:{wr:{off:of}},cost:4,title:offT,desc:offD+" Diğer bütün kurallar aynen kalır."});
+    const sameD=up.length&&up.length===dn.length&&up.every(wd=>dn.includes(wd))&&new Set(up.map(wd=>mx[wd])).size===1&&new Set(dn.map(wd=>of[wd])).size===1;
+    if(up.length&&dn.length)C.push({k:"wrb",ov:{wr:{max:mx,off:of}},cost:6,title:sameD?`Bu ay ${gl(up)} nöbeti kişi başı en fazla ${mx[up[0]]}, sonrasında ${of[dn[0]]} gün izin`:maxT+" + "+offT.replace(/^Bu ay /,""),desc:"Birlikte uygulanır: "+maxD.replace(/; sınır yalnız bu ay yükselir\.$/,"")+" · "+offD});
+  }
   if(I.hard&&!I.rh)C.push({k:"keep",ov:{keep:true},cost:0,title:"Kurallar kesin uygulansın",desc:"Kuralı bozan nöbetler boş bırakılır; o yerler için dış destek ya da ek personel gerekir."});
   if(base.restWhy&&base.restWhy.length&&isShiftMode()){
     const {y,m}=monthInfo(),dn={},ts=[];
@@ -8402,7 +8477,8 @@ function altCandidates(base){
 }
 function anyFixedLock(){const o={};members.forEach((p,i)=>{if(runTargets[p.id]!=null)o[i]=1;});return o;}
 /* bir öneri sonucunun istenene uzaklığı ve "kendi içinde kusursuz" olup olmadığı */
-function altScore(c,res,base){
+function altScore(c,res,base){return withRunOV(()=>altScore0(c,res,base));}
+function altScore0(c,res,base){
   const r=res.rep||{},fa=fillAll(),I=altIssues(base),ks=c.parts||[c.k],has=x=>ks.includes(x);
   let ok=r.hard===0&&!r.pinMiss;
   if(c.k!=="base"){
@@ -8419,21 +8495,26 @@ function altScore(c,res,base){
     if(onDuty(p)&&got!==want){dc.push(`${kisaAd(p.name)} ${want} → ${got}`);dSum+=Math.abs(got-want);}});
   let nSum=0;members.forEach(p=>{nSum+=Math.abs((res.nc[p.id]||0)-(base.nc[p.id]||0));});
   const uses=has("relax")&&I.R?rhythmExc(res,I.R).length:0;
-  const exc=c.k==="base"?(r.rrV||0)+(r.rhythmV||0)+(r.senV||0):0;
+  const exc=c.k==="base"?(r.rrV||0)+(r.rhythmV||0)+(r.senV||0)+Math.floor((r.hard||0)/HARDW)+(r.ruleV||0)+(r.genV||0):0;
   const cost=c.cost+(fa?res.emptyCount*10:0)+exc*6+dSum*3+(c.k==="nfree"?nSum*0.6:0)+uses*1.5;
   return {ok,cost,dc,uses,nSum};
 }
 async function altBuild(){
-  if(!draft||!isAdmin()||draft.alt)return;
+  if(!draft||!isAdmin()||(draft.alt&&draft.alt.k!=="re")){ALT.busy=false;renderAlts();return;}
   const tok=++ALT.token,base=draft;
-  ALT={token:tok,busy:true,list:[],why:null,base,applied:-1,tried:0,total:0};
+  ALT={token:tok,busy:true,list:[],why:null,base,applied:-1,tried:0,total:0,prev:ALT.prev,prevOV:ALT.prevOV,prevTitle:ALT.prevTitle,prevAlt:ALT.prevAlt};
   if(!altAny(base)){ALT.busy=false;renderAlts();return;}
-  const I=altIssues(base);
+  const keepOV0=SOLVE_OV;if(runOV)SOLVE_OV={...runOV};
+  let I,C;
+  try{
+  I=altIssues(base);
   try{ALT.why=I.R&&I.rh?rrWhy(I.R):null;}catch(e){ALT.why=null;}
   if(!ALT.why&&I.sen){try{ALT.why=senWhy(I.R||null);}catch(e){}}
   if(!ALT.why&&I.sen){try{ALT.why=senWhyBasic();}catch(e){}}
   if(!ALT.why&&I.gen){try{ALT.why=genWhy();}catch(e){}}
   if(!ALT.why&&I.rule){try{ALT.why=ruleWhy(base);}catch(e){}}
+  if(!ALT.why&&I.wr){const cap=(base.viol||[]).filter(v=>/^💡 Bu ay \d+ .+ nöbeti var ama/.test(v)).map(v=>hEsc(v.replace(/^💡 /,"").replace(/ Sınırı artırmadan bu kural tam tutamaz\.$/,"")));
+    ALT.why={txt:(cap.length?cap.join(" ")+" ":"")+"Nöbet sonrası izin günleri ve gün sınırları bu ekip büyüklüğüyle her yerde birlikte tutmuyor; aşağıdaki çözümler kuralı yalnız bu ay için en az ölçüde esnetir."};}
   /* sabit ritimde sayılar ritme uymuyorsa nedeni */
   if(!ALT.why&&I.rh&&members.some(p=>onDuty(p)&&(sp(p).target>0||runTargets[p.id]!=null||(base.want||[]).some(v=>v!=null))))
     ALT.why={txt:(()=>{const f=rrFit({wMin:I.R.wMin,wMax:I.R.wMax,oMin:I.R.oMin,oMax:I.R.oMax||0},monthInfo().nDays);
@@ -8442,7 +8523,10 @@ async function altBuild(){
       const rng=f[0]>0?`yaklaşık <b>${f[0]}–${f[1]}</b>`:`en fazla <b>${f[1]}</b>`;
       if(out.length)return `Bu ritimde bir kişi ayda ${rng} gün çalışır; ama ${out.slice(0,4).join(", ")}${out.length>4?"…":""} tutmalı. Bu sayı ritme sığmıyor; ya ritim bu kişiler için esner ya da sayıları değişir.`;
       return `Kişilerin bu ayki nöbet sayılarıyla bu ritmi her yerde tutturan bir liste bulunamadı. Bu ritimde bir kişi ayda ${rng} gün çalışabilir; sayıların birkaçı 1 değişince ya da ritim biraz esneyince kusursuz olur.`;})()};
-  const C=altCandidates(base);ALT.total=C.length;renderAlts();
+  /* zaten uygulanmış bir öneriyi yeniden önerme */
+  C=altCandidates(base).filter(c=>!altSeen(c));
+  }finally{SOLVE_OV=keepOV0;}
+  ALT.total=C.length;renderAlts();
   const T0=Date.now(),found=[],ran=[];
   for(const c of C){
     if(tok!==ALT.token)return;
@@ -8495,7 +8579,8 @@ function altPick(found){
   for(const f of s){if(out.length>=lim)break;const k=f.k;if((kc[k]||0)>=(["relax","gen","sen","rule","combo"].includes(k)?2:1))continue;kc[k]=(kc[k]||0)+1;out.push(f);}
   return out;
 }
-function altSummary(f){
+function altSummary(f){return withRunOV(()=>altSummary0(f));}
+function altSummary0(f){
   const res=f.res,r=res.rep||{},I=altIssues(ALT.base||res),ch=[];
   const fa=fillAll();
   const fks=f.parts||[f.k];
@@ -8506,6 +8591,7 @@ function altSummary(f){
   if(genCfg()||(f.ov&&f.ov.gen))ch.push(r.genV?[`Karışım ${r.genV} yerde eksik`,"w"]:["Kadın–erkek dengesi tam","ok"]);
   if(rulesAll().some(x=>x.on!==false&&x.t!=="staff"&&x.t!=="only"))ch.push(r.ruleV?[`Kurallar ${r.ruleV} yerde tutmuyor`,"w"]:[fks.includes("rule")?"Diğer kurallar tam":"Kurallar tam","ok"]);
   if(I.night||f.k==="nfree")ch.push(r.nightMiss?[`Gece ${r.nightMiss} yerde farklı`,"w"]:["Geceler tam","ok"]);
+  if(I.wr||(f.ov&&f.ov.wr))ch.push((r.wrMax||0)+(r.wrOff||0)?[`Nöbet sonrası kuralı ${(r.wrMax||0)+(r.wrOff||0)} yerde tutmuyor`,"w"]:["Nöbet sonrası izinler tam","ok"]);
   let det="";
   if(fks.includes("keep")||f.k==="base"){const em=(res.viol||[]).filter(v=>/boş bırakıldı|boş kaldı/.test(v)).map(v=>v.replace(/^ℹ️ |^❗ /,""));if(em.length)det+=em.slice(0,2).map(x=>`<li>${x}</li>`).join("");}
   if(f.k==="base"||fks.includes("relax")){const ex=rhythmExc(res,I.R||undefined);if(ex.length)det+=ex.slice(0,4).map(x=>`<li>${hEsc(x.txt)}</li>`).join("")+(ex.length>4?`<li>… ve ${ex.length-4} yer daha</li>`:"");}
@@ -8515,11 +8601,10 @@ function altSummary(f){
 function renderAlts(){
   const box=$("altBox");if(!box)return;
   if(!draft||!isAdmin()){box.innerHTML="";return;}
-  if(draft.alt){
-    box.innerHTML=`<div class="alt-done"><b>Seçtiğin çözüm uygulandı:</b> ${hEsc(draft.alt.title)}.<br><span>${hEsc(draft.alt.desc||"")} Yayınlamadan önce aşağıdan kontrol et.</span>
-      <div style="margin-top:8px"><button class="nd-btn is-sm is-tinted" onclick="altUndo()">Önceki taslağa dön</button></div></div>`;
-    return;}
-  if(!ALT.busy&&!ALT.list.length){box.innerHTML="";return;}
+  const done=draft.alt?`<div class="alt-done"><b>Seçtiğin çözüm uygulandı:</b> ${hEsc(draft.alt.title)}.<br><span>${hEsc(draft.alt.desc||"")}${draft.alt.k==="re"?" Liste bu çözümle yeniden hazırlandı.":" Yayınlamadan önce aşağıdan kontrol et."}</span>
+      ${ALT.prev?`<div style="margin-top:8px"><button class="nd-btn is-sm is-tinted" onclick="altUndo()">Önceki taslağa dön</button></div>`:""}</div>`:"";
+  if(draft.alt&&draft.alt.k!=="re"){box.innerHTML=done;return;}
+  if(!ALT.busy&&!ALT.list.length){box.innerHTML=done;return;}
   const why=ALT.why?`<div class="alt-why"><b>Neden tam olmuyor?</b> ${ALT.why.txt}</div>`:"";
   const cards=ALT.list.map((f,i)=>{const {ch,det}=altSummary(f);
     return `<div class="alt-card"><div class="alt-h"><span class="alt-n">${i+1}</span><b>${hEsc(f.title)}</b>${i===0?'<span class="alt-tag">En yakın</span>':""}</div>
@@ -8528,22 +8613,29 @@ function renderAlts(){
       ${det?`<ul class="alt-det">${det}</ul>`:""}
       <button class="nd-btn is-filled is-sm" style="width:100%;margin-top:8px" onclick="altApply(${i})">${f.k==="base"?"Bunu seç":"Bunu uygula"}</button></div>`;}).join("");
   const az=!ALT.busy&&ALT.list.length<3?`<p class="hint" style="margin:2px 2px 0">Kuralları bozmadan bu sorunu çözen başka bir yol bulunamadı; denenen diğer çözümler ya yine bir kuralı bozuyor ya da bu sorunu gidermiyor.</p>`:"";
-  const wait=ALT.busy?`<div class="alt-wait"><span class="alt-spin"></span>Çözüm önerileri hazırlanıyor… (${Math.min(ALT.tried+1,ALT.total)}/${ALT.total})</div>`:"";
-  box.innerHTML=`<div class="alt-box"><p class="eyebrow" style="margin:0 0 6px">Çözüm önerileri</p>${why}
+  const wait=ALT.busy?`<div class="alt-wait"><span class="alt-spin"></span>Çözüm önerileri hazırlanıyor…${ALT.total?` (${Math.min(ALT.tried+1,ALT.total)}/${ALT.total})`:""}</div>`:"";
+  box.innerHTML=done+`<div class="alt-box"${done?' style="margin-top:10px"':""}><p class="eyebrow" style="margin:0 0 6px">Çözüm önerileri</p>${why}
     <p class="hint" style="margin:0 0 8px">Her öneri bu ay için kendi içinde kusursuz bir liste hazırlar. Birini seçince taslağa uygulanır; kalıcı ayarların değişmez.</p>
     ${cards}${az}${wait}</div>`;
 }
 function altApply(i){
   const f=ALT.list[i];if(!f)return;
-  ALT.prev=draft;ALT.prevOV=runOV;
+  ALT.prev=draft;ALT.prevOV=runOV;ALT.prevAlt={base:ALT.base,list:ALT.list,why:ALT.why,tried:ALT.tried,total:ALT.total};
   if(f.k!=="base")runOV=f.ov?{...(runOV||{}),...f.ov}:runOV;
-  const nd=f.res;nd.lay=layoutSnap();nd.fair=fairSnap(nd,planAy());
-  nd.alt={title:f.title,desc:f.desc,k:f.k};ALT.prevTitle=f.k!=="base"?{title:f.title,desc:f.desc}:null;
+  const nd=f.k==="base"?{...f.res}:f.res;nd.lay=layoutSnap();     // "aynen kalsın": önceki taslak nesnesi bozulmasınnd.fair=fairSnap(nd,planAy());
+  const pt=draft&&draft.alt&&draft.alt.k==="re"&&ALT.prevTitle?ALT.prevTitle:null;     // önceki öneri de sürüyor
+  const tt=pt?(f.k!=="base"?pt.title+" + "+f.title:pt.title):f.title,dd=pt?pt.desc+" "+f.desc:f.desc;
+  nd.alt={title:tt,desc:dd,k:f.k};ALT.prevTitle=f.k!=="base"?{title:tt,desc:dd}:pt;
   draft=nd;draftUI.sel=null;draftUI.focus=null;
   showDraft();ND.haptic&&ND.haptic(8);
   toast("Öneri taslağa uygulandı");
 }
-function altUndo(){if(!ALT.prev)return;draft=ALT.prev;runOV=ALT.prevOV||null;ALT.prev=null;ALT.prevTitle=null;showDraft();}
+function altUndo(){if(!ALT.prev)return;draft=ALT.prev;runOV=ALT.prevOV||null;ALT.prev=null;RD_NOTE=null;
+  ALT.prevTitle=draft.alt&&draft.alt.k==="re"?{title:draft.alt.title,desc:draft.alt.desc}:null;
+  const pa=ALT.prevAlt;ALT.prevAlt=null;
+  if(pa&&pa.base===draft&&pa.list.length){ALT.token++;ALT.busy=false;ALT.base=pa.base;ALT.list=pa.list;ALT.why=pa.why;ALT.tried=pa.tried;ALT.total=pa.total;}   // bu taslağın önerileri hazır: aynen geri gelir
+  else{ALT.token++;ALT.list=[];ALT.busy=false;altQueue();}
+  showDraft();}
 /* ---------- ARALIKLI RİTİM KURUCUSU (blok blok, geri izlemeli) ----------
    Gün gün herkesin çalışma desenini kurar: çalışma bloğu wMin–wMax gün, aradaki izin oMin–oMax gün.
    İzin / "nöbet yok" / kişinin zaten çalışamadığı günler bloğu erken bitirebilir ve dinlenmeyi uzatabilir.
@@ -8569,7 +8661,7 @@ function rrCountFix(slots,E,B,locked,evalFn,lo,hi,until){
   const lk=s=>!!(locked&&locked[s]);
   const cnt=new Array(n).fill(0);for(let s=0;s<S;s++)if(B[s]>=0)cnt[B[s]]++;
   const dev=()=>{let t=0;for(let p=0;p<n;p++)t+=cnt[p]<lo[p]?lo[p]-cnt[p]:cnt[p]>hi[p]?cnt[p]-hi[p]:0;return t;};
-  const okR=r=>r.hard-(r.nightOver||0)*100000===0&&!r.rrV;
+  const okR=r=>r.hard-(r.nightOver||0)*HARDW===0&&!r.rrV;
   const works=(p,d)=>(byDay[d]||[]).some(s=>B[s]===p);
   const slotOf=(p,d)=>{for(const s of (byDay[d]||[]))if(B[s]===p)return s;return -1;};
   let guard=0;
@@ -8939,7 +9031,7 @@ function rrBuild0(slots,E,IV,A0,locked,lo,hi,evalFn,R,prev,ctx){
     const okS=step(1);
     if(typeof window!=="undefined"&&window.__rrbTry)window.__rrbTry.push([maxD,nodes,okS?1:0]);
     if(okS){const r=evalFn(A,true);
-      if(r.hard-(r.nightOver||0)*100000===0&&!r.rrV&&!r.rhythmV&&!(SC&&r.senV&&!ctx.senSoft)){
+      if(r.hard-(r.nightOver||0)*HARDW===0&&!r.rrV&&!r.rhythmV&&!(SC&&r.senV&&!ctx.senSoft)){
         let dv=0;if(ctx.center)for(let p=0;p<n;p++)if(ctx.center[p]!=null)dv+=Math.abs(cnt[p]-ctx.center[p]);   // istenen sayıdan sapma az olsun
         sols.push({A:A.slice(),score:r.total+dv*4000});}
       if(sols.length>=(ctx.want||12))break;}
@@ -9539,14 +9631,19 @@ async function saveDayEdit(opt){
 }
 /* taslak elle düzenlendikten sonra: aynı kurallarla yeniden denetle (atamalar değişmez) */
 let SOLVE_EVAL=null;
-function draftReaudit(){
-  if(!draft||!isAdmin())return;
-  const keep=draft,keepOV=SOLVE_OV;let nd=null;
+function reauditOf(keep){
+  const keepOV=SOLVE_OV;let nd=null;
   SOLVE_OV=runOV?{...runOV}:null;
   try{SOLVE_EVAL=keep.asg;nd=solveSchedule();}catch(e){console.error("yeniden denetim",e);}finally{SOLVE_EVAL=null;SOLVE_OV=keepOV;}
-  if(!nd)return;
+  if(!nd)return null;
   ["icap","icapCnt","mesai","mh","md","alt","lay","fair","manual","need"].forEach(k=>{if(keep[k]!==undefined)nd[k]=keep[k];});
   if(keep.mesai){const x=msHoursOf(keep);nd.mh=x.h;nd.md=x.n;}
+  return nd;
+}
+function draftReaudit(){
+  if(!draft||!isAdmin())return;
+  const keep=draft,nd=reauditOf(keep);
+  if(!nd)return;
   const md=Object.keys(keep.manual||{}).map(Number).sort((a,b)=>a-b);
   if(md.length)nd.viol.unshift(`ℹ️ Elle düzenlenen günler: ${fmtDays(md)}. Bu günler sabitlendi; "Yeniden hazırla" dersen de aynen kalır.`);
   draft=nd;showDraft({still:true});
@@ -10291,7 +10388,8 @@ function wrNorm(o){
     fz:!!o.fz,since:typeof o.since==="string"?o.since:"",base};
 }
 let wrDraft=null;
-function wrCfg(){return wrDraft||wrNorm(opts().wr);}
+function wrCfg(){const c=wrDraft||wrNorm(opts().wr);const o=SOLVE_OV&&SOLVE_OV.wr;
+  return o?{...c,max:o.max?o.max.slice():c.max,off:o.off?o.off.slice():c.off}:c;}
 function wrOn(){return wrCfg().on;}
 function wdOf(y,m,d){return (new Date(y,m-1,d).getDay()+6)%7;}
 function prevMonthKey(mk){const [y,m]=String(mk).split("-").map(Number);const d=new Date(y,m-2,1);
@@ -10976,16 +11074,16 @@ function solveSchedule(){
   if(RRC&&rep.rrV>0){
     const [flo,fhi]=rrFit(RRC,nDays),dc={};for(let s=0;s<S;s++)if(A2[s]>=0){(dc[A2[s]]=dc[A2[s]]||new Set()).add(slots[s].d);}
     const wd=Object.values(dc).map(x=>x.size),ort=wd.length?Math.round(wd.reduce((a,b)=>a+b,0)/wd.length):0;
-    if(isAdmin()&&!SOLVE_OV)viol.push(`⚠️ Çalışma ritmi (${rrText(RRC)}) ${rep.rrV} yerde tam tutmadı. Nedeni ve uygulanabilir çözümler aşağıda.`);
+    if(isAdmin())viol.push(`⚠️ Çalışma ritmi (${rrText(RRC)}) ${rep.rrV} yerde tam tutmadı. Nedeni ve uygulanabilir çözümler aşağıda.`);
     else viol.push(`⚠️ Çalışma ritmi (${rrText(RRC)}) ${rep.rrV} yerde tam tutmadı.`+(ort<flo||ort>fhi
       ?`<br><b>Sebep:</b> bu ritimde bir kişi ayda yaklaşık ${flo}–${fhi} gün çalışır; bu listede kişi başı ortalama ${ort} gün düşüyor.<br><b>Çözüm:</b> ritim aralığını buna göre değiştir ya da nöbet sayılarını ayarla.`
       :`<br><b>Sebep:</b> izinler, kesin günler ya da kişilerin gün kuralları ritme tam uymuyor.<br><b>Çözüm:</b> aralıkları biraz genişlet ya da izinleri ritme göre ayarla.`));
   }
   if(patOnV>0&&rep.rhythmV>0){
-    if(isAdmin()&&!SOLVE_OV)viol.push(`⚠️ "${patOnV} gün çalış, ${patOffV} gün dinlen" düzeni ${rep.rhythmV} yerde bozuldu. Nedeni ve uygulanabilir çözümler aşağıda.`);
+    if(isAdmin())viol.push(`⚠️ "${patOnV} gün çalış, ${patOffV} gün dinlen" düzeni ${rep.rhythmV} yerde bozuldu. Nedeni ve uygulanabilir çözümler aşağıda.`);
     else viol.push(`⚠️ "${patOnV} gün çalış, ${patOffV} gün dinlen" düzeni ${rep.rhythmV} yerde bozuldu.`+
       (rbSuggest?`<br><b>Sebep:</b> yazdığın nöbet sayıları bu düzene uymuyor.`+
-        `<br><b>Çözüm:</b> aşağıdaki <b>✅ Düzeni tam oturt</b> butonuna bas. Şu sayıları değiştirir: <b>${rbSuggest._txt}</b>`
+        `<br><b>Çözüm:</b> sayılar şöyle değişirse düzen tam oturur: <b>${rbSuggest._txt}</b>`
         :`<br><b>Sebep:</b> izin günleri ya da kişilerin gün kısıtları bu düzene uymuyor.`+
         `<br><b>Çözüm:</b> izinleri en az 2 gün art arda olacak şekilde ayarla ya da gün kısıtlarını gevşet.`));
   }
@@ -11050,7 +11148,7 @@ function solveSchedule(){
     verilen:cnt[p.id],kapasite:cap[i],sabit:isFixed[i]}));
   const hedefTut=targets.every(t=>!t.sabit||t.verilen===t.istenen);
   const nightMiss=members.reduce((a,p,i)=>a+(nWant[i]!=null?Math.abs((rep.NC[i]||0)-nWant[i]):0),0);
-  const sumRep={ruleV:rep.ruleV||0,genV:rep.genV||0,noCounts:!fillAll()&&!members.some((p,i)=>isFixed[i]&&wanted[i]>0)&&empty>0,rrV:rep.rrV||0,rhythmV:rep.rhythmV||0,senV:rep.senV||0,nightMiss,hard:rep.hard-(rep.nightOver||0)*100000,
+  const sumRep={ruleV:rep.ruleV||0,genV:rep.genV||0,noCounts:!fillAll()&&!members.some((p,i)=>isFixed[i]&&wanted[i]>0)&&empty>0,rrV:rep.rrV||0,rhythmV:rep.rhythmV||0,senV:rep.senV||0,nightMiss,hard:rep.hard-(rep.nightOver||0)*HARDW,wrMax:rep.wrMaxV||0,wrOff:rep.wrOffV||0,
     tgtMiss:targets.reduce((a,t)=>a+(t.sabit?Math.abs(t.verilen-t.istenen):0),0),
     pinMiss:viol.filter(v=>/yerleşemedi/.test(v)).length};
   /* icap / yedek: ana liste bittikten sonra ayrı ve eşit dağıtılır */
