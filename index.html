@@ -11451,16 +11451,20 @@ function renderSchedule(){
   const {y,m,nDays,firstDow}=vInfo();
   const total=Object.values(schedule.cnt).reduce((a,b)=>a+b,0);
   $("stTotal").textContent=total;
-  const v=$("stViol");v.textContent=schedule.viol.length;v.className="v"+(schedule.viol.length?" bad":"");
+  /* bilgi notları (ℹ️ 💡) sorun sayılmaz; sayaç ve kırmızı uyarı yalnız gerçek kural ihlalleri için */
+  const sWarn=[...new Set(schedule.viol||[])].filter(x=>!/^(ℹ️|💡)/.test(x)),sNote=[...new Set(schedule.viol||[])].filter(x=>/^(ℹ️|💡)/.test(x));
+  const v=$("stViol");v.textContent=sWarn.length;v.className="v"+(sWarn.length?" bad":"");
+  /* denge: yalnız nöbet havuzundakiler (nöbet tutmayan yönetici ve sabit mesaili kişiler hariç) */
   const balSrc=schedule.mode==="shifts"
-    ?members.map(p=>(schedule.hours&&schedule.hours[p.id])||0)
+    ?members.filter(onDuty).map(p=>(schedule.hours&&schedule.hours[p.id])||0)
     :generalStaff().map(p=>schedule.cnt[p.id]||0);
   const diff=balSrc.length?Math.max(...balSrc)-Math.min(...balSrc):0;
   $("stBal").textContent=schedule.mode==="shifts"?(diff<=8?"A+":diff<=16?"B":"C"):(diff<=1?"A+":diff===2?"B":"C");
   const lnkNow=vMonth()===planAy()?linkAudit(schedule,vMonth()).filter(v=>/^⚠️/.test(v)):[];
-  $("genBanner").innerHTML=(lnkNow.length?`<div class="banner err" style="margin-bottom:6px">🔗 Diğer listelerle ${lnkNow.length} çakışma var (o listeler sonradan değişmiş olabilir): ${lnkNow.slice(0,2).join(" · ")}</div>`:"")+(schedule.viol.length===0
+  $("genBanner").innerHTML=(lnkNow.length?`<div class="banner err" style="margin-bottom:6px">🔗 Diğer listelerle ${lnkNow.length} çakışma var (o listeler sonradan değişmiş olabilir): ${lnkNow.slice(0,2).join(" · ")}</div>`:"")+(sWarn.length===0
     ?`<div class="banner ok">✅ Yayında — kural ihlali yok!</div>`
-    :`<div class="banner err">⚠️ ${schedule.viol.length} sorun: ${[...new Set(schedule.viol)].slice(0,3).join(" · ")}</div>`);
+    :`<div class="banner err">⚠️ ${sWarn.length} sorun: ${sWarn.slice(0,3).join(" · ")}</div>`)
+    +(sNote.length?`<div class="banner info" style="margin-top:6px">${sNote.slice(0,3).join(" · ")}</div>`:"");
   renderSchedGrid();
   renderFair();renderMesai();renderMyDuties();renderYear();renderHourCard();
 }
