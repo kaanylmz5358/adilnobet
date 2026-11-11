@@ -1148,6 +1148,16 @@ body.wz-on{overflow:hidden}
 #decideBody .decSigma{white-space:nowrap}
 .decnight{display:flex;align-items:center;gap:8px;margin-top:6px;font-size:13px;color:var(--ink-2);white-space:nowrap;flex-wrap:nowrap}
 .decact{display:flex;flex-direction:column;gap:8px;margin-top:14px}
+/* taslak: kaydırırken hep görünen işlem çubuğu (sekme çubuğunun hemen üstünde) */
+#decideCard{overflow-anchor:none;scroll-margin-top:calc(56px + env(safe-area-inset-top,0px))}
+#altBox{scroll-margin-top:calc(56px + env(safe-area-inset-top,0px))}
+.decbar{position:sticky;z-index:31;bottom:calc(var(--tabbar-h) + 18px + env(safe-area-inset-bottom,0px));display:flex;gap:8px;margin:14px -8px -6px;padding:8px;border-radius:var(--radius-full);background:var(--glass);-webkit-backdrop-filter:blur(24px) saturate(180%);backdrop-filter:blur(24px) saturate(180%);box-shadow:var(--shadow-float)}
+.decbar .nd-btn{flex:1 1 0;min-width:0;border-radius:var(--radius-full)}
+.decbar .nd-btn:disabled{opacity:.6}
+@media (min-width:1024px){.decbar{bottom:16px}}
+.alt-quick{margin:10px 0 4px;padding:12px 14px;border-radius:var(--radius-md);background:var(--tint-soft);color:var(--tint-ink);font-size:15px;line-height:21px}
+.alt-quick.is-wait{display:flex;align-items:center;gap:8px;background:var(--surface-2);color:var(--ink-2);font-size:14px}
+.alt-quick__row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
 #wizard .nd-row__value{max-width:58%}
 
 /* ================= TABLET VE BİLGİSAYAR =================
@@ -1974,12 +1984,14 @@ div.nd-row[onclick]:active,label.nd-row:active{background:var(--surface-2)}
       <div id="draftWrap"></div>
     </div>
     <div class="decact">
-      <button class="btn" style="width:100%" onclick="confirmDecide()">Onayla ve yayınla</button>
       <div class="nd-btn-row">
         <button class="nd-btn is-tinted" onclick="draftWord()">Word'e indir</button>
-        <button class="nd-btn is-tinted" id="redraftBtn" onclick="redraft()">Yeniden hazırla</button>
+        <button class="nd-btn is-plain" onclick="hideDecide()">Vazgeç</button>
       </div>
-      <button class="nd-btn is-plain" style="width:100%" onclick="hideDecide()">Vazgeç</button>
+    </div>
+    <div class="decbar">
+      <button class="nd-btn is-tinted" id="redraftBtn" onclick="redraft()">Yeniden hazırla</button>
+      <button class="nd-btn is-filled" id="publishBtn" onclick="confirmDecide()">Onayla ve yayınla</button>
     </div>
   </div>
   <div class="card">
@@ -6200,10 +6212,10 @@ function showDraft(o){
   /* uyarılar (⚠️ ❗) ile bilgi notları (ℹ️ 💡) ayrı gösterilir; sayılar tutsa bile bir kural bozulduysa yeşil "tamam" denmez */
   const warn=sorunlar.filter(v=>!/^(ℹ️|💡)/.test(v)),notes=sorunlar.filter(v=>/^(ℹ️|💡)/.test(v));
   const li=a=>a.map(v=>"• "+v).join("<br>");
-  let durum;
-  if(draft.alt&&draft.alt.k!=="re")durum=notes.length||warn.length?`<div class="banner info" style="margin:8px 0">${li(warn.concat(notes))}</div>`:"";
-  else if(draft.exact&&!warn.length)durum=`<div class="banner ok" style="margin:8px 0">Bütün sayılar ve kurallar tutturuldu — ${bos?`${S-bos} nöbet dağıtıldı, ${bos} yer boş bırakıldı (ayarın "sayılara göre, boş kalabilir")`:`${S} nöbetin hepsi dağıtıldı`}.</div>`+(notes.length?`<div class="banner info" style="margin:8px 0">${li(notes)}</div>`:"");
-  else durum=(warn.length?`<div class="banner err" style="margin:8px 0"><b>Şunlar tam tutturulamadı:</b><br>${li(warn)}</div>`:"")+(notes.length?`<div class="banner info" style="margin:8px 0">${li(notes)}</div>`:"");
+  let durum;const Q='<div id="altQuick"></div>';
+  if(draft.alt&&draft.alt.k!=="re")durum=Q+(notes.length||warn.length?`<div class="banner info" style="margin:8px 0">${li(warn.concat(notes))}</div>`:"");
+  else if(draft.exact&&!warn.length)durum=`<div class="banner ok" style="margin:8px 0">Bütün sayılar ve kurallar tutturuldu — ${bos?`${S-bos} nöbet dağıtıldı, ${bos} yer boş bırakıldı (ayarın "sayılara göre, boş kalabilir")`:`${S} nöbetin hepsi dağıtıldı`}.</div>`+Q+(notes.length?`<div class="banner info" style="margin:8px 0">${li(notes)}</div>`:"");
+  else durum=(warn.length?`<div class="banner err" style="margin:8px 0"><b>Şunlar tam tutturulamadı:</b><br>${li(warn)}</div>`:"")+Q+(notes.length?`<div class="banner info" style="margin:8px 0">${li(notes)}</div>`:"");
   const rdn=RD_NOTE&&RD_NOTE.d===draft?`<div class="banner info" style="margin:8px 0">${hEsc(RD_NOTE.txt)}</div>`:"";
   $("decideHint").innerHTML=rdn+durum;
   renderAlts();
@@ -6243,8 +6255,9 @@ function showDraft(o){
   renderDraftPreview();
   if(o&&o.still)return;
   showTab("cizelge");
-  $("decideCard").scrollIntoView({behavior:"smooth"});
+  draftToTop();
 }
+function draftToTop(){const c=$("decideCard");if(!c)return;const go=()=>{try{c.scrollIntoView({block:"start"});}catch(e){}};go();requestAnimationFrame(go);}
 function applyRhythmSuggest(){
   if(!draft||!draft.rhythmSuggest)return;
   const sg=draft.rhythmSuggest;
@@ -6263,6 +6276,7 @@ function updDecideTotal(S){
   let ch=false;if(draft){document.querySelectorAll(".decInp").forEach(i=>{if((+i.value||0)!==(draft.cnt[i.dataset.pid]||0))ch=true;});
     document.querySelectorAll(".decNight").forEach(i=>{if((+i.value||0)!==((draft.nc&&draft.nc[i.dataset.pid])||0))ch=true;});}
   const rb=$("redraftBtn");if(rb){rb.classList.toggle("is-filled",ch);rb.classList.toggle("is-tinted",!ch);}
+  const pb=$("publishBtn");if(pb){pb.classList.toggle("is-filled",!ch);pb.classList.toggle("is-tinted",ch);}
 }
 async function confirmDecide(){
   if(!draft){alert("Önce taslak üret");return;}
@@ -8442,18 +8456,18 @@ function altCandidates(base){
     ids.slice(0,3).forEach((id,k)=>{const r=rulesAll().find(x=>x.id===id);if(!r)return;const txt=ruleText(r),pf=priF("r:"+id);
       if(r.t==="lim"){const st=Math.max(1,Math.round(r.n*0.15)),Ln=limNeed(r),Rn=limRelaxN(r);let n2=r.op==="max"?r.n+st:Math.max(0,r.n-st);if(r.op==="max"&&Ln&&Ln.need>n2)n2=Ln.need;
         if(Rn!=null){if(r.op!=="min"&&Rn>n2)n2=Rn;if(r.op==="min"&&Rn<n2)n2=Math.max(0,Rn);}
-        C.push({k:"rule",ov:{rulesRel:{[id]:{n:n2}}},cost:2+pf*2+k*0.2,title:`Bu ay “${ruleText({...r,n:n2})}”`,desc:`“${txt}” kuralı bu ay ${r.n} yerine ${n2} olarak uygulanır; diğer bütün kurallar aynen kalır.`});}
-      if(r.t==="after"&&r.n>1)C.push({k:"rule",ov:{rulesRel:{[id]:{n:r.n-1}}},cost:2+pf*2+k*0.2,title:`Bu ay “${ruleText({...r,n:r.n-1})}”`,desc:`İzin süresi bu ay ${r.n} yerine ${r.n-1} gün; diğer kurallar aynen kalır.`});
-      if(r.t==="need"&&r.scope!=="day")C.push({k:"rule",ov:{rulesRel:{[id]:{scope:"day"}}},cost:2+pf*2+k*0.2,title:`Bu ay “${ruleText({...r,scope:"day"})}”`,desc:"Her vardiya yerine her gün için aranır; diğer kurallar aynen kalır."});
-      C.push({k:"rule",ov:{rulesOff:[id]},cost:4+pf*3+k*0.2,title:`Bu ay “${txt}” uygulanmasın`,desc:"Yalnız bu kural bu ay için askıya alınır; diğer bütün kurallar aynen kalır."});});
+        C.push({k:"rule",ov:{rulesRel:{[id]:{n:n2}}},cost:2+pf*2+k*0.2+(r.hard?3:0),title:`Bu ay “${ruleText({...r,n:n2})}”`,desc:`“${txt}” kuralı bu ay ${r.n} yerine ${n2} olarak uygulanır; diğer bütün kurallar aynen kalır.`});}
+      if(r.t==="after"&&r.n>1)C.push({k:"rule",ov:{rulesRel:{[id]:{n:r.n-1}}},cost:2+pf*2+k*0.2+(r.hard?3:0),title:`Bu ay “${ruleText({...r,n:r.n-1})}”`,desc:`İzin süresi bu ay ${r.n} yerine ${r.n-1} gün; diğer kurallar aynen kalır.`});
+      if(r.t==="need"&&r.scope!=="day")C.push({k:"rule",ov:{rulesRel:{[id]:{scope:"day"}}},cost:2+pf*2+k*0.2+(r.hard?3:0),title:`Bu ay “${ruleText({...r,scope:"day"})}”`,desc:"Her vardiya yerine her gün için aranır; diğer kurallar aynen kalır."});
+      C.push({k:"rule",ov:{rulesOff:[id]},cost:4+pf*3+k*0.2+(r.hard?8:0),title:`Bu ay “${txt}” uygulanmasın`,desc:"Yalnız bu kural bu ay için askıya alınır; diğer bütün kurallar aynen kalır."});});
     /* birden çok kural tutmuyorsa: her biri en az ölçüde birlikte esner */
     if(ids.length>1){const rel={},off=[],ts=[];let cost=1;
       ids.forEach(id=>{const r=rulesAll().find(x=>x.id===id);if(!r)return;const pf=priF("r:"+id);
         if(r.t==="lim"){const st=Math.max(1,Math.round(r.n*0.15)),Ln=limNeed(r),Rn=limRelaxN(r);let n2=r.op==="max"?r.n+st:Math.max(0,r.n-st);if(r.op==="max"&&Ln&&Ln.need>n2)n2=Ln.need;
-          if(Rn!=null){if(r.op!=="min"&&Rn>n2)n2=Rn;if(r.op==="min"&&Rn<n2)n2=Math.max(0,Rn);}rel[id]={n:n2};ts.push(`“${ruleText({...r,n:n2})}”`);cost+=2+pf*2;}
-        else if(r.t==="after"&&r.n>1){rel[id]={n:r.n-1};ts.push(`“${ruleText({...r,n:r.n-1})}”`);cost+=2+pf*2;}
-        else if(r.t==="need"&&r.scope!=="day"){rel[id]={scope:"day"};ts.push(`“${ruleText({...r,scope:"day"})}”`);cost+=2+pf*2;}
-        else{off.push(id);ts.push(`“${ruleText(r)}” uygulanmasın`);cost+=4+pf*3;}});
+          if(Rn!=null){if(r.op!=="min"&&Rn>n2)n2=Rn;if(r.op==="min"&&Rn<n2)n2=Math.max(0,Rn);}rel[id]={n:n2};ts.push(`“${ruleText({...r,n:n2})}”`);cost+=2+pf*2+(r.hard?3:0);}
+        else if(r.t==="after"&&r.n>1){rel[id]={n:r.n-1};ts.push(`“${ruleText({...r,n:r.n-1})}”`);cost+=2+pf*2+(r.hard?3:0);}
+        else if(r.t==="need"&&r.scope!=="day"){rel[id]={scope:"day"};ts.push(`“${ruleText({...r,scope:"day"})}”`);cost+=2+pf*2+(r.hard?3:0);}
+        else{off.push(id);ts.push(`“${ruleText(r)}” uygulanmasın`);cost+=4+pf*3+(r.hard?8:0);}});
       const ov={};if(Object.keys(rel).length)ov.rulesRel=rel;if(off.length)ov.rulesOff=off;
       C.push({k:"rule",ov,cost,title:"Bu ay: "+ts.join(" · "),desc:"Tutmayan kuralların her biri bu ay en az ölçüde esner; diğer bütün kurallar aynen kalır."});
       const offAll=ids.filter(id=>rulesAll().some(x=>x.id===id));
@@ -8492,7 +8506,7 @@ function altScore0(c,res,base){
   }
   const dc=[];let dSum=0;
   members.forEach((p,i)=>{const want=base.want&&base.want[i]!=null?base.want[i]:(base.cnt[p.id]||0),got=res.cnt[p.id]||0;
-    if(onDuty(p)&&got!==want){dc.push(`${kisaAd(p.name)} ${want} → ${got}`);dSum+=Math.abs(got-want);}});
+    if(onDuty(p)&&got!==want){dc.push(`${kisaAd(p.name)} ${want} → ${got}`);dSum+=Math.abs(got-want)*(base.want&&base.want[i]!=null?1:0.35);}});
   let nSum=0;members.forEach(p=>{nSum+=Math.abs((res.nc[p.id]||0)-(base.nc[p.id]||0));});
   const uses=has("relax")&&I.R?rhythmExc(res,I.R).length:0;
   const exc=c.k==="base"?(r.rrV||0)+(r.rhythmV||0)+(r.senV||0)+Math.floor((r.hard||0)/HARDW)+(r.ruleV||0)+(r.genV||0):0;
@@ -8598,7 +8612,20 @@ function altSummary0(f){
   if(f.sc.dc.length)det+=`<li>Sayılar: ${hEsc(f.sc.dc.slice(0,6).join(", "))}${f.sc.dc.length>6?"…":""}</li>`;
   return {ch,det};
 }
-function renderAlts(){
+function renderAlts(){renderAlts0();try{renderAltQuick();}catch(e){console.error(e);}}
+/* taslağın en üstünde: öneriler hazırlanıyor / en iyi öneriyi tek dokunuşla uygula */
+function renderAltQuick(){
+  const q=$("altQuick");if(!q)return;
+  if(!draft||!isAdmin()||(draft.alt&&draft.alt.k!=="re")){q.innerHTML="";return;}
+  if(ALT.busy){q.innerHTML=`<div class="alt-quick is-wait"><span class="alt-spin"></span>Çözüm önerileri hazırlanıyor…</div>`;return;}
+  const f=ALT.list[0];if(!f){q.innerHTML="";return;}
+  const n=ALT.list.length-1;
+  q.innerHTML=`<div class="alt-quick"><b>En iyi çözüm:</b> ${hEsc(f.title)}
+    <div class="alt-quick__row"><button class="nd-btn is-filled is-sm" onclick="altApply(0)">${f.k==="base"?"Bunu seç":"En iyi öneriyi uygula"}</button>
+    <button class="nd-btn is-plain is-sm" onclick="altShow()">${n>0?`Bütün öneriler (${n+1})`:"Ayrıntı"}</button></div></div>`;
+}
+function altShow(){const b=$("altBox");if(b)b.scrollIntoView({block:"start",behavior:"smooth"});}
+function renderAlts0(){
   const box=$("altBox");if(!box)return;
   if(!draft||!isAdmin()){box.innerHTML="";return;}
   const done=draft.alt?`<div class="alt-done"><b>Seçtiğin çözüm uygulandı:</b> ${hEsc(draft.alt.title)}.<br><span>${hEsc(draft.alt.desc||"")}${draft.alt.k==="re"?" Liste bu çözümle yeniden hazırlandı.":" Yayınlamadan önce aşağıdan kontrol et."}</span>
@@ -9638,6 +9665,7 @@ function reauditOf(keep){
   if(!nd)return null;
   ["icap","icapCnt","mesai","mh","md","alt","lay","fair","manual","need"].forEach(k=>{if(keep[k]!==undefined)nd[k]=keep[k];});
   if(keep.mesai){const x=msHoursOf(keep);nd.mh=x.h;nd.md=x.n;}
+  if((nd.emptyCount||0)>0){const lost=(keep.viol||[]).filter(v=>/boş (kaldı|bırakıldı)|^💡 Çözüm için/.test(v)&&!(nd.viol||[]).includes(v));if(lost.length)nd.viol=lost.concat(nd.viol||[]);}
   return nd;
 }
 function draftReaudit(){
