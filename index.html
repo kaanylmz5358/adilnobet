@@ -2205,6 +2205,9 @@ const SUPABASE_KEY = "sb_publishable_Pg7QxEPEENlXR_cDgWGEoQ_SVxb73DO";
 /* ======================================================== */
 /* fare ile kullanılan cihaz mı (bilgisayar) — yazılarda "tıkla" / "dokun" seçimi için */
 function isMouse(){try{return matchMedia("(hover:hover) and (pointer:fine)").matches;}catch(e){return false;}}
+/* bilgisayarda yalnız simgeli düğmelerin üzerine gelince ne işe yaradığı yazsın (aria-label → ipucu) */
+document.addEventListener("mouseover",e=>{const b=e.target&&e.target.closest&&e.target.closest("[aria-label]:not([title])");
+  if(b&&b.tagName!=="INPUT"&&isMouse())b.title=b.getAttribute("aria-label");},{passive:true});
 /* bilgisayarda ← → takvimde ayı değiştirir (yazı alanında, açık pencerede ya da taslak açıkken değil) */
 document.addEventListener("keydown",e=>{if((e.key!=="ArrowLeft"&&e.key!=="ArrowRight")||e.altKey||e.ctrlKey||e.metaKey||e.shiftKey)return;
   const t=e.target;if(t&&(t.isContentEditable||/^(INPUT|SELECT|TEXTAREA)$/.test(t.tagName)))return;
@@ -8003,7 +8006,9 @@ function ruleEval(C,A,detail){
     }else if(c.t==="eq"){
       const k=new Array(n).fill(0);
       for(let s=0;s<S;s++){if(slots[s].si!==+c.si)continue;const p=A[s];if(p>=0)k[p]++;}
-      for(const p of c.P){const sh=c.share[p];if(sh==null)continue;
+      /* boş kalan yerler varsa (ör. "sayılara göre, boş kalabilir") eşit pay doldurulan yerlerden hesaplanır */
+      let F=0;for(let p=0;p<n;p++)F+=k[p];const sc=c.T>0&&F<c.T?F/c.T:1;
+      for(const p of c.P){const sh=c.share[p]==null?null:c.share[p]*sc;if(sh==null)continue;
         const lo=Math.floor(sh+1e-9),hi=Math.ceil(sh-1e-9),v=k[p]>hi?k[p]-hi:k[p]<lo?lo-k[p]:0;
         if(v>0)hit(c,v,p,null,`${kisaAd(members[p].name)}: ${shName(c.si)} vardiyasından ${k[p]} tane (eşit pay ${lo===hi?lo:lo+"–"+hi})`);}
     }else if(c.t==="seq"){
