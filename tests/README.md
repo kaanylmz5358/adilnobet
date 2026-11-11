@@ -6,8 +6,8 @@ Canlı veriye hiç dokunmaz; buradaki bütün ekipler ve kişiler uydurmadır.
 ## Çalıştırma
 
 ```bash
-bash tests/run.sh hizli      # ~10 dk: özellik testleri + 40 düşman senaryo + telefon arayüzü
-bash tests/run.sh tam        # ~1-2 sa: hepsi
+bash tests/run.sh hizli      # ~30 dk: özellik testleri + 40 düşman senaryo + hareket + güvenlik + telefon arayüzü
+bash tests/run.sh tam        # ~2-4 sa: hepsi (2 işlemcili makinede)
 bash tests/run.sh fuzz 500   # yalnız düşman senaryolar
 bash tests/run.sh batarya    # elle kurulmuş ~70 uç durum
 bash tests/run.sh ozellik    # feat/ klasöründeki özellik testleri
@@ -30,6 +30,7 @@ Sonuç: `tests/out/RAPOR.md`. Sorun varsa çıkış kodu 1.
 | `ui/crawl.py` | Playwright ile gerçek tarayıcı: her ekranda her öğeye tıklar / dokunur; taşma, örtülme, kapanmayan perde, JS hatası arar |
 | `ui/gestures.py` | Hareketler: telefonda parmak (sürükle, fiske, kenardan geri), bilgisayarda fare / tekerlek / klavye |
 | `ui/xss.py` | Güvenlik: üyelerin yazdığı metinler hiçbir ekranda kod olarak çalışmamalı |
+| `ui/fx_*.json` | Arayüz fikstürleri: vardiyalı ekip (2 yayınlı ay), oda ekibi, üye gözüyle, her özelliği açık ekip |
 | `ui/make_fixtures.js` | Arayüz testi için yayınlanmış listeli zengin sahte ekipler |
 | `regress_seeds.txt` | Daha önce hata bulmuş tohumlar; her `fuzz` çalıştırmasında yeniden denenir (`105o` = eski üreticiyle) |
 | `OZELLIKLER.md` | Bütün özellikler ve hangi testin denetlediği |
@@ -49,5 +50,6 @@ Sonuç: `tests/out/RAPOR.md`. Sorun varsa çıkış kodu 1.
 ## Yeni bir hata bulunca
 
 - Tohumu tekrar çalıştır: `node fuzz.js --seed-list 1234 --suggest 1`
+- Sınırlar: `--kisi 55` (ekip büyüklüğü), `--mod rooms|shifts`, `--month 2028-02` (artık yıl); yaz saati için başına `TZ=Europe/Berlin`
 - Uygulamada mı, denetçide mi? Denetçi uygulamanın tasarım kararını yanlış modelliyorsa denetçi düzeltilir; değilse uygulama.
 - Düzeltildikten sonra tohumu `regress_seeds.txt`e ekle.

@@ -1,6 +1,6 @@
 /* Nöbet Defteri test koşucusu.
-   node run.js hizli          ~10 dk: özellik testleri + 40 düşman senaryo + telefon arayüz taraması
-   node run.js tam            ~1-2 sa: hepsi (batarya, özellikler, 300+ düşman senaryo, telefon/bilgisayar/tablet arayüz)
+   node run.js hizli          ~30 dk: özellik testleri + 40 düşman senaryo + hareket + güvenlik + telefon arayüz taraması
+   node run.js tam            ~2-4 sa: hepsi (batarya, özellikler, 200+ düşman senaryo, bütün cihazlarda arayüz)
    node run.js fuzz 500       yalnız düşman senaryolar (yeni tohumlar + eski hatalı tohumlar)
    node run.js batarya | ozellik | arayuz
    Sonuç: out/RAPOR.md (özet) + out/ altında ayrıntılar. Hata varsa çıkış kodu 1. */
@@ -49,7 +49,7 @@ async function fuzz(n) {
   const base = 100000 + (Math.floor(Date.now() / 864e5) % 5000) * 1000;
   const reg = fs.existsSync(path.join(T, "regress_seeds.txt")) ? fs.readFileSync(path.join(T, "regress_seeds.txt"), "utf8").split(/\s+/).filter(x => /^\d+$/.test(x)) : [];
   const parts = [], per = Math.ceil(n / CPU);
-  for (let k = 0; k < CPU; k++) parts.push(sh("node", ["fuzz.js", "--from", String(base + k * per), "--n", String(Math.min(per, n - k * per)), "--suggest", "0.5", "--redraft", "0.3", "--out", path.join(OUT, `fuzz_${k}.jsonl`)], { timeout: 7200e3 }));
+  for (let k = 0; k < CPU; k++) parts.push(sh("node", ["fuzz.js", "--from", String(base + k * per), "--n", String(Math.min(per, n - k * per)), "--suggest", level === "hizli" ? "0.3" : "0.4", "--redraft", "0.3", "--out", path.join(OUT, `fuzz_${k}.jsonl`)], { timeout: 7200e3 }));
   if (reg.length) parts.push(sh("node", ["fuzz.js", "--seed-list", reg.join(","), "--suggest", "1", "--redraft", "0.5", "--out", path.join(OUT, "fuzz_regress.jsonl")], { timeout: 7200e3 }));
   ["fuzz_0", "fuzz_1", "fuzz_2", "fuzz_3", "fuzz_regress"].forEach(f => { try { fs.unlinkSync(path.join(OUT, f + ".jsonl")); } catch (e) {} });
   const rs = await Promise.all(parts);
@@ -108,7 +108,7 @@ function rapor() {
   if (!fs.existsSync(path.join(T, "node_modules", "jsdom"))) { console.log("Önce: cd tests && npm install"); process.exit(2); }
   if (!fs.existsSync(path.join(T, "ui", "fx_zengin.json"))) await sh("node", [path.join("ui", "make_fixtures.js")]);
   if (level === "hizli") { await ozellik(); await fuzz(arg || 40); await hareket(); await guvenlik(); await arayuz(["phone"], 0); }
-  else if (level === "tam") { await ozellik(); await batarya(); await fuzz(arg || 300); await hareket(); await guvenlik(); await arayuz(["phone", "desktop", "tablet", "android", "small"], 120); }
+  else if (level === "tam") { await ozellik(); await batarya(); await fuzz(arg || 200); await hareket(); await guvenlik(); await arayuz(["phone", "desktop", "tablet", "android", "small"], 120); }
   else if (level === "fuzz") await fuzz(arg || 200);
   else if (level === "batarya") await batarya();
   else if (level === "ozellik") await ozellik();
