@@ -1,0 +1,16 @@
+{
+  "name": "nobet-defteri-tests",
+  "private": true,
+  "description": "Nöbet Defteri test düzeni: bağımsız denetçi, düşman senaryo üretici, arayüz testleri",
+  "scripts": {
+    "hizli": "bash run.sh hizli",
+    "tam": "bash run.sh tam",
+    "fuzz": "bash run.sh fuzz",
+    "batarya": "bash run.sh batarya",
+    "ozellik": "bash run.sh ozellik",
+    "arayuz": "bash run.sh arayuz"
+  },
+  "dependencies": {
+    "jsdom": "^24.1.3"
+  }
+}

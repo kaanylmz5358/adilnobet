@@ -295,7 +295,7 @@ details.hbase{margin-top:8px}details.hbase summary{font-size:.74rem;font-weight:
 .draftbox{margin:14px -8px 0;border:2px dashed #E0B64C;border-radius:18px;padding:10px 8px;background:#FFFCF3}
 .draft-rib{display:inline-block;font-size:.66rem;font-weight:800;letter-spacing:.05em;color:#8A5A00;background:#FFE7A8;
   border-radius:8px;padding:3px 9px;margin-bottom:6px}
-.toast{position:fixed;left:50%;transform:translateX(-50%);top:14px;z-index:120;max-width:400px;
+.toast{position:fixed;left:50%;transform:translateX(-50%);top:14px;z-index:120;max-width:400px;pointer-events:none;
   width:calc(100% - 28px);padding:12px 15px;border-radius:15px;font-size:.8rem;font-weight:700;
   display:none;box-shadow:0 10px 30px rgba(11,124,114,.22);line-height:1.4}
 .toast.ok{background:var(--teal-tint);color:var(--teal-dark);border:1px solid var(--teal)}
@@ -1091,6 +1091,11 @@ body.wz-on{overflow:hidden}
 #monthSheet .sheet{background:var(--bg)}
 .monthbtn{appearance:none;width:100%;display:flex;align-items:center;gap:10px;border:0;background:var(--surface-2);border-radius:12px;min-height:44px;padding:0 14px;margin:0 0 12px;font:inherit;color:var(--ink);cursor:pointer}
 .monthbtn span{color:var(--ink-2)}
+/* bilgisayarda (fare) ayın iki yanında önceki / sonraki ok; telefonda parmakla kaydırılır, oklar gizli */
+.mrow{display:flex;align-items:stretch;gap:8px;margin:0 0 12px}.mrow .monthbtn{margin:0;flex:1;min-width:0}
+.mnav{display:none;appearance:none;border:0;background:var(--surface-2);border-radius:12px;width:44px;min-height:44px;place-items:center;color:var(--ink-2);cursor:pointer;font:inherit}
+.mnav:hover{color:var(--tint)}.mnav svg{width:18px;height:18px}
+@media (hover:hover) and (pointer:fine){.mnav{display:grid}.lgd-row{flex-wrap:wrap;overflow-x:visible}}
 .monthbtn b{flex:1;text-align:left;font-weight:600}
 .monthbtn i{width:8px;height:8px;border-right:2px solid var(--ink-3);border-bottom:2px solid var(--ink-3);transform:rotate(45deg);margin:-4px 4px 0 0}
 .ndadv{margin:8px 0 0}
@@ -1614,7 +1619,7 @@ div.nd-row[onclick]:active,label.nd-row:active{background:var(--surface-2)}
   <div class="card" id="myDutiesCard">
     <p class="eyebrow">Nöbet takvimim</p>
     <h2>Nöbetlerim</h2>
-    <button type="button" class="monthbtn" id="viewMonthBtn2" data-noauto onclick="openViewMonth()"><span>Ay</span><b id="viewMonthLbl2">—</b><i></i></button>
+    <div class="mrow"><button type="button" class="mnav" data-noauto onclick="stepMonth(-1)" aria-label="Önceki ay" title="Önceki ay (←)"><span data-icon="chev-l"></span></button><button type="button" class="monthbtn" id="viewMonthBtn2" data-noauto onclick="openViewMonth()"><span>Ay</span><b id="viewMonthLbl2">—</b><i></i></button><button type="button" class="mnav" data-noauto onclick="stepMonth(1)" aria-label="Sonraki ay" title="Sonraki ay (→)"><span data-icon="chev-r"></span></button></div>
     <div id="myDuties"><div class="empty-state">Çizelge yayınlanınca nöbetlerin burada listelenir.</div></div>
     <div class="row" style="margin-top:12px">
       <button class="btn small" onclick="icsIndir()">Tüm nöbetlerimi takvime ekle (.ics)</button>
@@ -1997,7 +2002,7 @@ div.nd-row[onclick]:active,label.nd-row:active{background:var(--surface-2)}
   <div class="card">
     <p class="eyebrow">Aylık plan</p>
     <h2>Çizelge</h2>
-    <button type="button" class="monthbtn" id="viewMonthBtn" data-noauto onclick="openViewMonth()"><span>Ay</span><b id="viewMonthLbl">—</b><i></i></button>
+    <div class="mrow"><button type="button" class="mnav" data-noauto onclick="stepMonth(-1)" aria-label="Önceki ay" title="Önceki ay (←)"><span data-icon="chev-l"></span></button><button type="button" class="monthbtn" id="viewMonthBtn" data-noauto onclick="openViewMonth()"><span>Ay</span><b id="viewMonthLbl">—</b><i></i></button><button type="button" class="mnav" data-noauto onclick="stepMonth(1)" aria-label="Sonraki ay" title="Sonraki ay (→)"><span data-icon="chev-r"></span></button></div>
     <div id="viewMonthBanner"></div>
     <div class="seg" id="schedViewRow">
       <button class="on" id="vwCal" onclick="setSchedView('cal')">Takvim</button>
@@ -2198,10 +2203,19 @@ const SUPABASE_KEY = "sb_publishable_Pg7QxEPEENlXR_cDgWGEoQ_SVxb73DO";
 /* ======================================================== */
 /* fare ile kullanılan cihaz mı (bilgisayar) — yazılarda "tıkla" / "dokun" seçimi için */
 function isMouse(){try{return matchMedia("(hover:hover) and (pointer:fine)").matches;}catch(e){return false;}}
+/* bilgisayarda ← → takvimde ayı değiştirir (yazı alanında, açık pencerede ya da taslak açıkken değil) */
+document.addEventListener("keydown",e=>{if((e.key!=="ArrowLeft"&&e.key!=="ArrowRight")||e.altKey||e.ctrlKey||e.metaKey||e.shiftKey)return;
+  const t=e.target;if(t&&(t.isContentEditable||/^(INPUT|SELECT|TEXTAREA)$/.test(t.tagName)))return;
+  if(document.querySelector(".modal.on, #wizard.is-open, .nd-sheet.is-open"))return;
+  if(typeof curTab==="undefined"||!["cizelge","takvim","bugun"].includes(curTab)||!dept)return;
+  const dc=document.getElementById("decideCard");if(dc&&dc.offsetParent)return;
+  e.preventDefault();stepMonth(e.key==="ArrowLeft"?-1:1);});
 /* bilgisayarda Esc açık pencereyi kapatır */
 document.addEventListener("keydown",e=>{if(e.key!=="Escape")return;
   const m=[...document.querySelectorAll(".modal.on")].pop();
-  if(m){e.preventDefault();m.dispatchEvent(new MouseEvent("click",{bubbles:true}));}});
+  if(m){e.preventDefault();m.dispatchEvent(new MouseEvent("click",{bubbles:true}));return;}
+  const wz=document.getElementById("wizard");
+  if(wz&&wz.classList.contains("is-open")&&!document.querySelector(".nd-sheet.is-open")){e.preventDefault();wzClose();}});
 
 const BRANCHES=["Acil Tıp","Anestezi","Beyin Cerrahisi","Çocuk Cerrahisi","Çocuk Sağlığı","Dahiliye","Dermatoloji","Enfeksiyon","FTR","Genel Cerrahi","Göğüs Hastalıkları","Göz","Kadın Doğum","KBB","Kardiyoloji","Nöroloji","Ortopedi","Patoloji","Plastik Cerrahi","Psikiyatri","Radyoloji","Üroloji"];
 const ROLES=["Hemşire (Kat)","Hemşire (Yoğun Bakım)","Hemşire (Ameliyathane)","Yoğun Bakım Doktoru","Sekreter","Kat Sekreteri","Güvenlik","Temizlik Personeli","Porter","Aşçı","Mutfak Personeli","Teknisyen"];
@@ -3086,10 +3100,10 @@ function prefApplyPend(o,x){if(x.sid){const sh={...(o._sh||{})};sh[x.d]={...(sh[
 function spref(uid,d){return solvePref(pref(uid,d));}
 function effPins(){
   const out=(pinRows||[]).slice();
-  members.forEach(p=>{if(!onDuty(p))return;      // "nöbet tutmaz" kişinin kesin günü olmaz
+  members.forEach(p=>{const off=onDuty(p)?{}:{off:1};      // "nöbet tutmaz" / sabit mesaili kişinin kesin günü uygulanmaz; taslakta bilgi notu çıkar
     const ds=Object.entries(allPrefs[p.id]||{}).filter(([d,v])=>v==="must"&&/^\d+$/.test(d)).map(([d])=>+d);
-    if(ds.length)out.push({pid:p.id,days:fmtDays(ds),si:"",must:true});
-    if(isShiftMode())shPrefItems(p.id).forEach(x=>{if(x.v==="must")out.push({pid:p.id,days:String(x.d),si:x.si,must:true});});});
+    if(ds.length)out.push({pid:p.id,days:fmtDays(ds),si:"",must:true,...off});
+    if(isShiftMode())shPrefItems(p.id).forEach(x=>{if(x.v==="must")out.push({pid:p.id,days:String(x.d),si:x.si,must:true,...off});});});
   return out;
 }
 function testMembers(){return members.filter(p=>p.is_test);}
@@ -4470,7 +4484,7 @@ function pickPinDays(i){
 /* bir atama elle sabitlenmiş mi? (takvimde 📌 göstermek için) */
 function isPinned(d,e){
   const P=(!schedule||vMonth()===planAy())?effPins():pinRows;
-  return P.some(p=>p.pid===e.id&&parseDays(p.days).indexOf(d)>=0
+  return P.some(p=>!p.off&&p.pid===e.id&&parseDays(p.days).indexOf(d)>=0
     &&(p.si==null||p.si===""||(e.s!=null&&+p.si===e.s)));
 }
 
@@ -6124,8 +6138,13 @@ function altQueue(){
 }
 function buildDraft(){
   ALT.token++;ALT.list=[];ALT.busy=false;ALT.why=null;RD_NOTE=null;
-  const d=solveOnce(null);
+  const t0=Date.now();let d=solveOnce(null);
   if(!d)return;
+  /* ilk deneme katı bir kuralı tutturamadıysa (hızlı ekiplerde) bir-iki kez daha dener, en iyisi kalır
+     (çözücü rastgele başlar; sıkışık aylarda ikinci deneme çoğu zaman temiz çıkar) */
+  const fa=fillAll(),t1=Date.now()-t0;
+  for(let k=0;k<2&&t1<3000&&d.rep&&(d.rep.hard||0)>0&&Date.now()-t0<7000;k++){
+    const e=solveOnce(null);if(e&&draftCmp(e,d,fa)<0)d=e;}
   setDraft(d);
 }
 let RD_BUSY=false,RD_NOTE=null;
@@ -6887,6 +6906,8 @@ function makeEvaluator(slots,ctxd){
     let bal=0;
     if(bDN)bal+=varr(act.map(p=>NC[p]))*30+varr(act.map(p=>DC[p]))*22;
     if(bWE)bal+=varr(act.map(p=>WEC[p]))*30+varr(act.map(p=>WDC[p]))*8;
+    /* ekip döngüsü: gece / hafta sonu dengesi döngüye bırakılır ama ekip yerlerden kalabalıksa toplam nöbet yine eşit kalsın */
+    if(ctxd.cycBal)bal+=varr(act.map(p=>(NC[p]+DC[p])/ctxd.cycBal[p]))*22;
     /* zor nöbet puanı: kişinin puanı, nöbet sayısı × ekip ortalaması (puan / nöbet) civarında kalsın */
     let ptPen=0;
     if(PT&&act.length>1){let sp2=0,sc2=0;for(const p of act){sp2+=PT[p];sc2+=NC[p]+DC[p];}const av=sc2?sp2/sc2:0;
@@ -7549,6 +7570,12 @@ function ruleWhy(base){
   if(base&&base.restWhy&&base.restWhy.length){try{
     const E=slots.map(sl=>{const r=new Uint8Array(members.length);members.forEach((p,i)=>{r[i]=slotEligible(p,sl,y,m,nDays)?1:0;});return r;});
     const L=restWhy(slots,E);if(L.length)return {txt:L.slice(0,2).map(restWhyText).join("<br>")+(L.length>2?`<br>… ve ${L.length-2} gün daha.`:"")};}catch(e){}}
+  {const RS=rulesOn().filter(r=>r.t==="cycle"&&String(r.pat||"").length>1&&r.who&&r.who.k!=="all");
+    if(RS.length&&cycCoverAll()){let sup=0;const seen=new Set();
+      RS.forEach(r=>{const pat=String(r.pat).toUpperCase(),L=pat.length,w=[...pat].filter(c=>c!=="-").length;
+        ppl.forEach(p=>{if(seen.has(p.id)||!whoHas(r.who,p))return;seen.add(p.id);sup+=nDays*w/L;});});
+      sup=Math.round(sup);
+      if(Math.abs(sup-S)>=Math.max(2,S*0.03))return {txt:`Ekip döngülerine göre ${seen.size} kişi ayda yaklaşık <b>${sup}</b> gün çalışır ama listede <b>${S}</b> nöbet yeri var. Ekiplerin kişi sayısı günlük ihtiyaçla tam oturmadığı için bazı kişiler döngüden sapmak zorunda${sup>S?"; fazla kişiler arasında nöbetler eşit paylaştırılır":""}.`};}}
   for(const r of rulesOn()){
     if(r.t==="cycle"&&(!r.who||r.who.k==="all")){const pat=String(r.pat||"").toUpperCase(),L=pat.length;if(L<2)continue;
       const w=[...pat].filter(c=>c!=="-").length,sup=Math.round(ppl.length*nDays*w/L);
@@ -7969,16 +7996,20 @@ function cycleSeedM(slots,E,A,locked,RS,C){
       if(!imp)break;}}
   const B=A.slice();for(let s=0;s<S;s++)if(!locked[s])B[s]=-1;
   const busy=new Uint8Array(n*W);for(let s=0;s<S;s++)if(locked[s]&&B[s]>=0)busy[B[s]*W+slots[s].d]=1;
+  /* döngüde o gün çalışması gerekenler yerlerden fazlaysa (ekip kalabalık) yeri o ana kadar en az nöbet alana ver: tek kişiye yığılmasın */
+  const ld=new Float64Array(n);for(let s=0;s<S;s++)if(locked[s]&&B[s]>=0)ld[B[s]]++;
+  const rt=members.map(p=>Math.max(0.05,(ratioOf(p)||100)/100));
   for(let d=1;d<=nDays;d++){
     const sl=byDay[d].filter(s=>!locked[s]);if(!sl.length)continue;
-    const X=P.map(p=>({p,w:raw(p,d)})).filter(x=>x.w!=="-"&&!busy[x.p*W+d]);
+    const X=P.map((p,k)=>({p,k,w:raw(p,d)})).filter(x=>x.w!=="-"&&!busy[x.p*W+d])
+      .sort((a,b)=>ld[a.p]/rt[a.p]-ld[b.p]/rt[b.p]||((a.k+d)%P.length)-((b.k+d)%P.length));
     const own=new Array(sl.length).fill(null);
     const fit=(x,s)=>{if(!E[s][x.p])return false;if(x.w==="*")return true;if(/[1-9]/.test(x.w))return slots[s].si===+x.w-1;return clsOf(s)===x.w;};
     const tryP=(x,seen)=>{for(let j=0;j<sl.length;j++){if(seen[j]||!fit(x,sl[j]))continue;seen[j]=1;
         if(!own[j]||tryP(own[j],seen)){own[j]=x;return true;}}return false;};
     X.filter(x=>x.w!=="*").forEach(x=>tryP(x,new Uint8Array(sl.length)));
     X.filter(x=>x.w==="*").forEach(x=>tryP(x,new Uint8Array(sl.length)));
-    own.forEach((x,j)=>{if(x)B[sl[j]]=x.p;});
+    own.forEach((x,j)=>{if(x){B[sl[j]]=x.p;ld[x.p]++;}});
   }
   /* döngünün boş bıraktığı yerler (izin vb.): o gün boşta olan, dinlenmesi uyan ve en az fazladan gün alan kişiyle doldur;
      döngüdeki öteki atamalara dokunulmaz (sonra kalanları eşleştirme doldurur) */
@@ -8620,6 +8651,9 @@ function renderAltQuick(){
   if(ALT.busy){q.innerHTML=`<div class="alt-quick is-wait"><span class="alt-spin"></span>Çözüm önerileri hazırlanıyor…</div>`;return;}
   const f=ALT.list[0];if(!f){q.innerHTML="";return;}
   const n=ALT.list.length-1;
+  /* tek seçenek "aynen kalsın"sa seçilecek bir şey yok: yalnız durumu söyle */
+  if(f.k==="base"&&!n){q.innerHTML=`<div class="alt-quick"><b>Başka çözüm yok:</b> kuralları bozmadan bu sorunu gideren bir yol bulunamadı. Liste böyle yayınlanabilir ya da günleri elle düzenleyebilirsin.
+    <div class="alt-quick__row"><button class="nd-btn is-plain is-sm" onclick="altShow()">Ayrıntı</button></div></div>`;return;}
   q.innerHTML=`<div class="alt-quick"><b>En iyi çözüm:</b> ${hEsc(f.title)}
     <div class="alt-quick__row"><button class="nd-btn is-filled is-sm" onclick="altApply(0)">${f.k==="base"?"Bunu seç":"En iyi öneriyi uygula"}</button>
     <button class="nd-btn is-plain is-sm" onclick="altShow()">${n>0?`Bütün öneriler (${n+1})`:"Ayrıntı"}</button></div></div>`;
@@ -9612,7 +9646,12 @@ async function saveDayEdit(opt){
   const ekSel=[...document.querySelectorAll(".deEk")].map(el=>el.value);
   const msRows=[...document.querySelectorAll("#dayEditBody .msrow[data-pid]")].map(r=>({id:r.dataset.pid,on:r.querySelector(".deMs").checked,
     a:r.querySelector(".deMsA").value||"08:00",b:r.querySelector(".deMsB").value||"17:00"}));
-  const uyar=deRun(()=>{
+  /* yayınlanan listede yönetici kurala takılan birini (izinli, dinlenmesi dolmamış…) bilerek yazabilir; kaydederken nedeni söylenir */
+  const kuralUyar=[];
+  if(!isDr&&!opt.count){const eski=new Set((schedule.asg[editDay]||[]).concat((schedule.icap||{})[editDay]||[]).map(e=>e&&e.id));
+    for(let i=0;i<slotlar.length;i++){const pid=secilenler[i];if(!pid||eski.has(pid))continue;const p=members.find(x=>x.id===pid);if(!p)continue;
+      const w=deRun(()=>deWhy(p,slotlar[i],""));if(w)kuralUyar.push(`${kisaAd(p.name)}: ${w}`);}}
+  const uyar=kuralUyar.concat(deRun(()=>{
     const d=editDay;
     if(!opt.count){
       schedule.asg[d]=yeni;
@@ -9634,7 +9673,7 @@ async function saveDayEdit(opt){
     if(isDr)return [];
     const ay=vMonth();
     return wrAudit(schedule,ay).concat(linkAudit(schedule,ay).filter(v=>/^⚠️/.test(v)));
-  })||[];
+  })||[]);
   const gun=editDay;
   if(isDr){
     deApplyPins(gun,(draft.asg[gun]||[]).filter(e=>!e.ic));
@@ -10734,6 +10773,8 @@ function solveSchedule(){
   /* --- 1. aşama: yöneticinin verdiği kesin sayıları doyur --- */
   const wanted=new Array(n).fill(0),isFixed=new Array(n).fill(false);
   const CYC0=rulesOn().some(r=>r.t==="cycle"&&(!r.who||r.who.k==="all")&&String(r.pat||"").length>1)||cycCoverAll();
+  if(CYC0&&!EVA){const yz=members.filter(p=>onDuty(p)&&tOf(p)>0);
+    if(yz.length)viol.push(`ℹ️ Döngü kuralı ekibin tamamını kapsadığı için nöbet sayılarını döngü belirliyor; kişilere yazılan sayılar (${yz.slice(0,4).map(p=>kisaAd(p.name)+" "+tOf(p)).join(", ")}${yz.length>4?"…":""}) bu ay uygulanmadı.`);}
   members.forEach((p,i)=>{
     const t=CYC0?0:tOf(p);
     if(t>0){
@@ -10753,7 +10794,7 @@ function solveSchedule(){
     const pi=pIdx[pin.pid];
     if(pi==null)return;
     const ad=members[pi].name;
-    if(!onDuty(members[pi])){viol.push(`ℹ️ ${ad} ${msOf(members[pi])?"sabit mesaide (nöbete girmez)":"\"nöbet tutmaz\" olarak işaretli"}; ${pin.days}. gün için sabit atama uygulanmadı.`);return;}
+    if(!onDuty(members[pi])){viol.push(`ℹ️ ${ad} ${msOf(members[pi])?"sabit mesaide (nöbete girmez)":"\"nöbet tutmaz\" olarak işaretli"}; ${pin.days}. gün için ${pin.must?"kesin nöbet isteği":"sabit atama"} uygulanmadı.`);return;}
     const gunler=parseDays(pin.days);
     gunler.forEach(d=>{
       let hedef=-1;
@@ -10828,6 +10869,7 @@ function solveSchedule(){
   /* ekip döngüsünde (sabit başlangıç) aynı ekip hep birlikte çalışır ve dengeyi döngü kurar:
      "her nöbette farklı kişi" ile gece / hafta sonu eşitleme cezaları uygulanmaz */
   const evalFn=makeEvaluator(slots,{pts:ptsCfg(),y,m,nDays,bays,IV,MT,pm:CYC&&(CYC.multi||CYC.fix!=null)?"off":partnerMode(),bDN:CYC&&(CYC.multi||CYC.fix!=null)?false:balDN(),bWE:CYC&&(CYC.multi||CYC.fix!=null)?false:balWE(),
+    cycBal:CYC&&(CYC.multi||CYC.fix!=null)?members.map(p=>Math.max(0.05,(ratioOf(p)||100)/100)):null,
     patOn:patOnV,patOff:patOffV,expShare,minRest:minRestH(),wishPri:wishPri(),nightWant:nWant,
     wr:WRX,roomGap,linkSame:LNK.same,hours:HX,rr:RRC?{...RRC,prev:rrPrev(planAy())}:null,sen:isShiftMode()?senActive():null,
     rrOrig:SOLVE_OV&&SOLVE_OV.rrOrig||null,gen:genCfg(),rules:RCL,
@@ -11191,7 +11233,7 @@ function solveSchedule(){
     ek:ekOut,fzBase,fzBaseP:WRX&&WRX.fz?fzBaseP:null,wrOn:!!WRX,
     ...(()=>{const M=mesaiPlan();if(!M)return {};const x=msHoursOf({mesai:M});return {mesai:M,mh:x.h,md:x.n};})(),
     slotCount:S,emptyCount:empty,
-    exact:hedefTut&&rep.hard===0&&(!fillAll()||empty===0)&&!rep.rrV&&!rep.rhythmV&&!rep.senV&&!rep.genV&&!rep.ruleV,
+    exact:hedefTut&&rep.hard===0&&(!fillAll()||empty===0)&&!rep.rrV&&!rep.rhythmV&&!rep.senV&&!rep.genV&&!rep.ruleV&&!sumRep.pinMiss&&!nightMiss,
     score:rep.total,soft:0,pm:partnerMode(),mode:isShiftMode()?"shifts":"rooms",
     rhythmSuggest:(rep.rhythmV>0&&rbSuggest)?rbSuggest:null};
 }
