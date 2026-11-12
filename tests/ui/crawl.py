@@ -18,7 +18,7 @@ def F(m): fails.append(m); print("✗", m)
 def W(m): warns.append(m)
 SKIP = r"/(çıkış|oturumu kapat|ekipten ayrıl|ayrıl|hesabı sil|ekibi sil|listeyi sil|takımı sil|bu ayı sil)/i"
 SCREENS = [("bugun", "showTab('bugun')"), ("takvim", "showTab('cizelge')"), ("takvim-liste", "showTab('cizelge');setSchedView('list')"),
-  ("takvim-benim", "showTab('cizelge');setSchedView('mine')"), ("istek-izin", "showTab('izin')"), ("istek-leave", "showTab('leave')"), ("istek-takas", "showTab('takas')"),
+  ("takvim-benim", "showTab('cizelge');setSchedView('mine')"), ("takvim-tablo", "showTab('cizelge');setSchedView('grid')"), ("istek-izin", "showTab('izin')"), ("istek-leave", "showTab('leave')"), ("istek-takas", "showTab('takas')"),
   ("ayarlar", "showTab('ayarlar')")] + [("ayar-" + k, f"showTab('ayarlar');setPage('{k}')") for k in
   ["ay", "ekip", "vardiya", "oda", "sayi", "kisit", "kural", "ritim", "kidem", "sabit", "wr", "aktar", "gelismis", "profil", "kapat"]] + \
   [("taslak", "showTab('cizelge');generate()")]
