@@ -93,7 +93,7 @@ async function idle(E, max = 240000) { const t0 = Date.now(); await wait(150); w
       if (errors.length) rec.fails.push("JS: " + errors.slice(0, 2).join(" | "));
       // öneriler
       if (doSug) {
-        const L = E("ALT.list.map(f=>({k:f.k,parts:f.parts||[f.k],t:f.title,ov:f.ov,ok:f.sc.ok,cost:f.sc.cost,dc:f.sc.dc||[],nSum:f.sc.nSum||0,res:f.res}))");
+        const L = E("ALT.list.map(f=>({k:f.k,parts:f.parts||[f.k],t:f.title,ov:f.ov,ok:f.sc.ok,cost:f.sc.cost,dc:f.sc.dc||[],nSum:f.sc.nSum||0,tg:(f.res.targets||[]).filter(t=>t.sabit&&t.istenen!=null&&t.verilen!==t.istenen).map(t=>t.name),res:f.res}))");
         rec.sug = L.map(f => ({ k: f.k, t: f.t, cost: Math.round(f.cost * 10) / 10 }));
         const issues = E("altAny(draft)");
         if (issues && !L.length) rec.warns.push("sorun var ama hiç öneri yok");
@@ -108,7 +108,7 @@ async function idle(E, max = 240000) { const t0 = Date.now(); await wait(150); w
           // kartta "Sayılar: Ayşe 19 → 22 …" diye açıkça yazılan sayı değişiklikleri sessiz değildir
           const dcN = (f.dc || []).map(x => (x.match(/^(.+) \d+ → \d+$/) || [])[1]).filter(Boolean);
           // "ritim kusursuz kalsın" ve "gece sayılarını program dağıtsın" önerileri kişi sayısını değiştirebilir (uygulama buna izin verir, kartta yazar)
-          if (dcN.length && ((f.ov || {}).keep || (f.parts || []).includes("nfree"))) adj.push(...dcN);
+          if ((f.ov || {}).keep || (f.parts || []).includes("nfree")) adj.push(...dcN, ...(f.tg || []));   // kartta "N kişinin yazılı sayısı tutmaz" diye de yazar
           const bad = cc.problems.filter(t => !mustOver(t, sv) && !(o.allowEmpty && /boş yer/.test(t)) && !SOFTWARN.has(famOf(t)) && !(/istendi/.test(t) && adj.some(nm => t.startsWith(nm + ":"))));
           // taslakta zaten olan ve hiçbir önerinin çözemediği kesin gün / katı kural sorunu öneride aynı kalabilir (kartta yazar), artamaz
           const fr = f.res.rep || {}, okPin = (fr.pinMiss || 0) > 0 && (fr.pinMiss || 0) <= (rep.pinMiss || 0), okHard = (fr.hard || 0) > 0 && (fr.hard || 0) <= (rep.hard || 0);

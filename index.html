@@ -8729,6 +8729,9 @@ function altSummary0(f){
   if(I.R)ch.push((r.rrV||0)+(r.rhythmV||0)?[`Ritim ${(r.rrV||0)+(r.rhythmV||0)} yerde esner`,"w"]:fks.includes("relax")?[`Esneklik ${f.sc.uses} yerde kullanılır`,"w"]:["Ritim tam","ok"]);
   if(fa)ch.push(res.emptyCount?[`${res.emptyCount} yer boş`,"w"]:["Bütün vardiyalar dolu","ok"]);
   ch.push(f.sc.dc.length?[`${f.sc.dc.length} kişinin sayısı değişir`,"w"]:["Sayılar aynı","ok"]);
+  /* yazılan kesin sayı bu öneride tutmuyorsa (ör. döngü kapanınca sayılar yeniden geçerli olur) kartta yazar */
+  const tgx=(res.targets||[]).filter(t=>t.sabit&&t.istenen!=null&&t.verilen!==t.istenen&&!f.sc.dc.some(x=>x.startsWith(kisaAd(t.name)+" "))).map(t=>`${kisaAd(t.name)} ${t.istenen} yazılı, ${t.verilen} verilir`);
+  if(tgx.length)ch.push([`${tgx.length} kişinin yazılı sayısı tutmaz`,"w"]);
   if(senActive()||(f.ov&&f.ov.sen))ch.push(r.senV?[`Kıdem ${r.senV} yerde eksik`,"w"]:["Kıdem tam","ok"]);
   if(genCfg()||(f.ov&&f.ov.gen))ch.push(r.genV?[`Karışım ${r.genV} yerde eksik`,"w"]:["Kadın–erkek dengesi tam","ok"]);
   if(rulesAll().some(x=>x.on!==false&&x.t!=="staff"&&x.t!=="only"))ch.push(r.ruleV?[`Kurallar ${r.ruleV} yerde tutmuyor`,"w"]:[fks.includes("rule")?"Diğer kurallar tam":"Kurallar tam","ok"]);
@@ -8743,6 +8746,7 @@ function altSummary0(f){
   if(f.k==="base"||fks.includes("relax")){const ex=rhythmExc(res,I.R||undefined);if(ex.length)det+=ex.slice(0,4).map(x=>`<li>${hEsc(x.txt)}</li>`).join("")+(ex.length>4?`<li>… ve ${ex.length-4} yer daha</li>`:"");}
   if(f.sc.dc.length)det+=`<li>Sayılar: ${hEsc(f.sc.dc.slice(0,6).join(", "))}${f.sc.dc.length>6?"…":""}</li>`;
   if(ngc.length)det+=`<li>Geceler: ${hEsc(ngc.slice(0,6).join(", "))}${ngc.length>6?"…":""}</li>`;
+  if(tgx.length)det+=`<li>Yazılı sayı: ${hEsc(tgx.slice(0,4).join(", "))}${tgx.length>4?"…":""}</li>`;
   return {ch,det};
 }
 function renderAlts(){renderAlts0();try{renderAltQuick();}catch(e){console.error(e);}}
