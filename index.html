@@ -2479,7 +2479,7 @@ const SETUP_STEPS=[
      ${d.dt==="custom"?choiceHTML("dt","custom",true,"Şu anki saatleri koru","Ayarlar → Odalar ve nöbet saatleri'nde güne göre girilmiş."):""}</div>`;
      if(d.dt==="mesai"){const e=msErr(d.ms);
        h+=`<div style="margin-top:16px">${iosGroup("Mesai saatlerin",[iosRow("Mesai başlar",tm("start")),iosRow("Mesai biter",tm("end")),iosRow("Hafta sonu ve tatil devri",tm("we"),d.ms.we&&d.ms.we!==d.ms.start?"hafta içinden farklı":"hafta içiyle aynı")],
-         e?`<span style="color:var(--danger)">${e}</span>`:msSummary(d.ms)+` Hafta sonu ve tatil nöbeti ${d.ms.we||d.ms.start}'da devredilir.`)}</div>`;}
+         e?`<span style="color:var(--danger)">${e}</span>`:msSummary(d.ms)+` Hafta sonu ve tatil nöbeti ${saatDe(d.ms.we||d.ms.start)} devredilir.`)}</div>`;}
      if(d.dt==="24")h+=`<div style="margin-top:16px">${iosGroup("",[iosRow("Hafta içi devir",tm("start")),iosRow("Hafta sonu ve tatil devri",tm("we"))],"Her nöbet ertesi günün devir saatinde biter.")}</div>`;
      return h+`<p class="wz__note">Cumartesi yarım gün mesai varsa Ayarlar → Odalar ve nöbet saatleri'nden ekleyebilirsin.</p>`;}},
   {t:"Vardiyalar nasıl?",skip:d=>d.kind!=="shift",r:d=>`<div class="nd-choices">
@@ -2716,7 +2716,7 @@ const PREP_STEPS=[
     for(let dd=1;dd<=nDays;dd++)h+=`<button type="button" class="day prefday${d.hol.has(dd)?" holsel":d.arf.has(dd)?" arfsel":""}${isWknd(y,m,dd)?" wknd":""}" onclick="wzHol(${dd})">${dd}</button>`;
     const dt=dutyTimeUI(),bs=withArf(new Set(d.hol),fmtDays([...d.arf]));
     const arfT=[...d.arf].filter(x=>isArfDuty(dt,y,m,x,bs)).sort((a,b)=>a-b);
-    return h+`</div><p class="wz__note">${d.hol.size?"Tatil: "+fmtDays([...d.hol].sort((a,b)=>a-b))+". ":"Bu ay resmi tatil yoksa hiçbirini seçme. "}${d.arf.size?"Arife: "+fmtDays([...d.arf].sort((a,b)=>a-b))+(arfT.length?` — nöbet ${dt.arf.start}'te başlar.`:" (hafta sonuna denk geldiği için nöbet saati değişmez).")+" ":""}Tatil günleri ayrıca dengelenir; arifede nöbet daha uzun sürer ve saat dengesine öyle girer.</p>`;}},
+    return h+`</div><p class="wz__note">${d.hol.size?"Tatil: "+fmtDays([...d.hol].sort((a,b)=>a-b))+". ":"Bu ay resmi tatil yoksa hiçbirini seçme. "}${d.arf.size?"Arife: "+fmtDays([...d.arf].sort((a,b)=>a-b))+(arfT.length?` — nöbet ${saatDe(dt.arf.start)} başlar.`:" (hafta sonuna denk geldiği için nöbet saati değişmez).")+" ":""}Tatil günleri ayrıca dengelenir; arifede nöbet daha uzun sürer ve saat dengesine öyle girer.</p>`;}},
   {t:"Onay bekleyen istekler",skip:d=>!pendCount()&&!d.sawPend,sub:()=>"İzin, kesin nöbet ve nöbet yok istekleri. Onaylanınca liste bunlara kesin uyar.",r:d=>{
     d.sawPend=true;
     const L=members.filter(p=>pendDays(p.id).length);
@@ -3855,7 +3855,7 @@ function msErr(ms){
 }
 function msSummary(ms){
   const wd={start:ms.end,end:ms.start},h=Math.round(durH(wd)*10)/10;
-  return `Hafta içi nöbet ${ms.end}'de başlar, ertesi gün ${ms.start}'de biter (${h} saat).`;
+  return `Hafta içi nöbet ${saatDe(ms.end)} başlar, ertesi gün ${saatDe(ms.start)} biter (${h} saat).`;
 }
 function durH(t){if(t&&t.h!=null)return t.h;const x=(hm(t.end)-hm(t.start)+24)%24;return x>1e-9?x:24;}
 function endsNextDay(t){return t.h!=null?true:hm(t.end)<=hm(t.start);}
@@ -4292,7 +4292,7 @@ async function autoGenCheck(){
   const g=nextGenInfo();
   if(g.left!==0)return;                       // sadece hazırlama gününde sor
   if(dept.month===g.monthKey)return;          // zaten o aydayız
-  if(!confirm(`📒 Ayın ${genDay()}'i geldi.\n\n${g.label} nöbet listesini hazırlamaya geçelim mi?\n\n"Tamam" → çalışılan ay ${g.label} olarak ayarlanır; ekip izin/tercihlerini bu aya girer.\n"İptal" → şimdilik dokunma.`))return;
+  if(!confirm(`📒 Ayın ${sayI(genDay())} geldi.\n\n${g.label} nöbet listesini hazırlamaya geçelim mi?\n\n"Tamam" → çalışılan ay ${g.label} olarak ayarlanır; ekip izin/tercihlerini bu aya girer.\n"İptal" → şimdilik dokunma.`))return;
   const {error}=await sb.from("departments").update({month:g.monthKey}).eq("id",dept.id);
   if(error){alert("⚠️ "+error.message);return;}
   await loadAll();
@@ -4638,7 +4638,7 @@ function renderQuota(){
     b.textContent=`⚠️ ${fark} nöbet açıkta: ${sum} dağıttın ama ayda ${total} nöbet yeri var. Birilerine ${fark} nöbet daha ekle, yoksa o günler boş kalır.`;
   }else{
     b.className="banner err";
-    b.textContent=`⚠️ ${-fark} nöbet fazla: ${sum} dağıttın ama ayda ${total} nöbet yeri var. Toplamı ${total}'e indir.`;
+    b.textContent=`⚠️ ${-fark} nöbet fazla: ${sum} dağıttın ama ayda ${total} nöbet yeri var. Toplamı ${sayE(total)} indir.`;
   }
 }
 function quotaSet(pid,v){quotaDraft[pid]=Math.max(0,v|0);renderQuota();}
@@ -10805,6 +10805,21 @@ function wrRefreshEk(sch,mk){
   return out;
 }
 /* Ek Cumartesi izinlisi isimleri (görüntüleme) */
+/* sayıya yönelme eki: 6'ya, 7'ye, 10'a, 20'ye */
+function sayE(n){n=Math.abs(Math.round(+n||0));if(n===0)return "0'a";
+  if(n%10)return n+"'"+["","e","ye","e","e","e","ya","ye","e","a"][n%10];
+  if(n%100)return n+"'"+["","a","ye","a","a","ye","a","e","e","a"][Math.floor(n/10)%10];
+  return n+"'e";}
+/* bulunma eki (8'de, 13'te, 16'da) ve ayın günü iyelik eki (15'i, 20'si, 6'sı); saat "HH:MM" için son okunan sayıya göre */
+function sayDe(n){n=Math.abs(Math.round(+n||0));if(n===0)return "0'da";
+  if(n%10)return n+"'"+["","de","de","te","te","te","da","de","de","da"][n%10];
+  if(n%100)return n+"'"+["","da","de","da","ta","de","ta","te","de","da"][Math.floor(n/10)%10];
+  return n+"'de";}
+function sayI(n){n=Math.abs(Math.round(+n||0));
+  if(n%10)return n+"'"+["","i","si","ü","ü","i","sı","si","i","u"][n%10];
+  return n+"'"+["ı","u","si","u","ı","si","ı","i","i","ı"][Math.floor(n/10)%10];}
+function saatDe(t){t=String(t||"");const m=t.match(/^(\d{1,2}):(\d{2})$/);if(!m)return t+"'de";
+  const k=+m[2]?+m[2]:+m[1];return t+sayDe(k).slice(String(k).length);}
 function ekNames(d){
   const L=(schedule&&schedule.ek&&schedule.ek[d])||[];
   return L.map(id=>nameOfId(id));
@@ -10939,6 +10954,12 @@ function solveSchedule(){
       for(let g=0;rest>0&&g<200;g++){let mv=false;
         for(const k of ord){if(rest<=0)break;if(tg[k]<cap[fr[k]]){tg[k]++;rest--;mv=true;}}
         if(!mv)break;}
+      /* kişiye yazılan gece sayısı programın hesapladığı paydan büyükse pay, geceleri karşılayacak kadar artar;
+         fark payını en çok aşan kişilerden alınır (yönetici gece sayısını elle yazdı, pay ise kendiliğinden hesaplandı) */
+      if(isShiftMode()){const nf=fr.map(i=>{const w=nightWantOf(members[i]);return w==null?0:Math.min(Math.max(0,+w||0),cap[i]);});
+        for(let k=0;k<fr.length;k++){let g=0;while(tg[k]<nf[k]&&g++<500){let b=-1,bv=-Infinity;
+          for(let q=0;q<fr.length;q++){if(q===k||tg[q]<=nf[q]||tg[q]<=0)continue;const v=tg[q]-sh[q];if(v>bv){bv=v;b=q;}}
+          if(b<0)break;tg[b]--;tg[k]++;}}}
       fzBaseP={};
       fr.forEach((i,k)=>{isFixed[i]=true;autoFix[i]=1;wanted[i]=Math.max(tg[k],load[i]);fzBaseP[members[i].id]=Math.floor(sh[k]+1e-9);});
     }
@@ -10949,7 +10970,7 @@ function solveSchedule(){
     if(nWant[i]==null)return;
     let nc=0;for(let s2=0;s2<S;s2++)if((E[s2][i]||(locked[s2]&&A[s2]===i))&&MT[s2][i].isN)nc++;   // kesin günle (kural dışı) sabitlenen gece de sayılır
     if(nWant[i]>nc){viol.push(`⚠️ ${p.name}: ${nWant[i]} gece nöbeti yazıldı ama kurallarına uyan yalnızca ${nc} gece yeri var → ${nc} verildi.`);nWant[i]=nc;}
-    if(isFixed[i]&&nWant[i]>wanted[i]){viol.push(`⚠️ ${p.name}: ${nWant[i]} gece yazıldı ama toplam nöbeti ${wanted[i]}. Gece sayısı ${wanted[i]}'e indirildi.`);nWant[i]=wanted[i];}
+    if(isFixed[i]&&nWant[i]>wanted[i]){viol.push(`⚠️ ${p.name}: ${nWant[i]} gece yazıldı ama toplam nöbeti ${wanted[i]}. Gece sayısı ${sayE(wanted[i])} indirildi.`);nWant[i]=wanted[i];}
   });
   const anyNW=nWant.some(v=>v!=null);
   /* değerlendirici (takaslı ince ayar ve ritim kurucusu ortak kullanır) */

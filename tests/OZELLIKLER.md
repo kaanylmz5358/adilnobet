@@ -19,6 +19,7 @@ Kısaltmalar: **D** = düşman senaryo üretici + bağımsız denetçi (`fuzz.js
 | Saat / gün engelleri ("bu saatlerde çalışamaz", "yalnız bu saatlerde") | D |
 | Kesin sayı (kim kaç nöbet), kesin gece sayısı, gece yasağı, kişiye özel iki nöbet arası | D, B |
 | Sayıları program dağıtsın (adil pay), yarı zamanlı oran | D, B |
+| Kesin gece sayısı programın hesapladığı paydan büyükse pay geceleri karşılayacak kadar artar | D, Ö (gece_payi) |
 | İzne oranlı pay, devirli adalet (aylar arası), eski ay sayılarının yok sayılması | D, B |
 | Boş yer politikası: hepsi dolsun / sayılara göre boş kalabilir | D, B |
 | Önceki ayın son günleri (kuyruk) kurallarda sayılır | D, Ö (onceki_ay) |

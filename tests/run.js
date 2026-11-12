@@ -47,7 +47,7 @@ async function batarya() {
 async function fuzz(n) {
   // her çalıştırmada yeni tohumlar (tarihten) + daha önce hata vermiş tohumlar (regress_seeds.txt)
   const base = 100000 + (Math.floor(Date.now() / 864e5) % 5000) * 1000;
-  const reg = fs.existsSync(path.join(T, "regress_seeds.txt")) ? fs.readFileSync(path.join(T, "regress_seeds.txt"), "utf8").split(/\s+/).filter(x => /^\d+$/.test(x)) : [];
+  const reg = fs.existsSync(path.join(T, "regress_seeds.txt")) ? fs.readFileSync(path.join(T, "regress_seeds.txt"), "utf8").split(/\s+/).filter(x => /^\d+o?$/.test(x)) : [];
   const parts = [], per = Math.ceil(n / CPU);
   for (let k = 0; k < CPU; k++) parts.push(sh("node", ["fuzz.js", "--from", String(base + k * per), "--n", String(Math.min(per, n - k * per)), "--suggest", level === "hizli" ? "0.3" : "0.4", "--redraft", "0.3", "--out", path.join(OUT, `fuzz_${k}.jsonl`)], { timeout: 7200e3 }));
   if (reg.length) parts.push(sh("node", ["fuzz.js", "--seed-list", reg.join(","), "--suggest", "1", "--redraft", "0.5", "--out", path.join(OUT, "fuzz_regress.jsonl")], { timeout: 7200e3 }));
