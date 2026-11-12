@@ -7092,9 +7092,9 @@ function refineAsg(slots,E,A,evalFn,iters,locked){
   let temp=rOn>0?Math.min(6000,Math.max(40,(curP||0)/20)):Math.min(2500,Math.max(40,(curP||0)/50));
   let cool=Math.pow(rOn>0?0.005:0.02,1/Math.max(1,iters));
   /* süre sınırı: kalabalık ekip + çok kuralda her değerlendirme pahalı; ekran uzun süre donmasın.
-     REFINE_MS dolunca (katı kural ihlali sürüyorsa 2 katı) kalan aramanın küçük bir bölümünde hızla soğutulup bitirilir.
+     REFINE_MS dolunca (katı kural ihlali sürüyor ve azalıyorsa 2 katı) kalan aramanın küçük bir bölümünde hızla soğutulup bitirilir.
      Küçük ve orta ekiplerde süre dolmadan biter, hiçbir şey değişmez. */
-  const Tend=temp*(rOn>0?0.005:0.02),t0=performance.now(),budget=REFINE_MS*Math.max(0.3,TS());let ev=0,tuned=false;
+  const Tend=temp*(rOn>0?0.005:0.02),t0=performance.now(),budget=REFINE_MS*Math.max(0.3,TS());let ev=0,tuned=false,hLv=Math.floor(bestP/HARDW),hT=t0;
   /* ritim açıksa ikili blok hamlesi: a'nın x,x+1 günleri ile b'nin y,y+1 günleri yer değiştirir */
   const byDay={};for(let s=0;s<S;s++)(byDay[slots[s].d]=byDay[slots[s].d]||[]).push(s);
   const findOn=(p,d)=>{const L=byDay[d];if(!L)return -1;for(const s of L)if(cur[s]===p)return s;return -1;};
@@ -7138,9 +7138,10 @@ function refineAsg(slots,E,A,evalFn,iters,locked){
     }else{cur[i]=a;cur[j]=b;}
     temp*=cool;
     if(bestP===0)break;
-    if((++ev&255)===0&&!tuned){const el=performance.now()-t0;
-      /* süre doldu: katı kural ihlali yoksa hızlı soğutup bitir; varsa 2 katı süreye kadar aramaya devam */
-      if(el>(bestP>=HARDW?2*budget:budget)){tuned=true;const rem=Math.max(800,Math.floor((iters-it)*0.08));
+    if((++ev&255)===0&&!tuned){const now=performance.now(),el=now-t0,hl=Math.floor(bestP/HARDW);if(hl<hLv){hLv=hl;hT=now;}
+      /* süre doldu: katı kural ihlali yoksa hızlı soğutup bitir; varsa ihlal azaldıkça 2 katı süreye kadar aramaya devam
+         (son 0,4 süre boyunca katı ihlal sayısı hiç azalmadıysa beklemek boşuna) */
+      if(el>budget&&(bestP<HARDW||el>2*budget||now-hT>0.4*budget)){tuned=true;const rem=Math.max(800,Math.floor((iters-it)*0.08));
         if(it+rem<iters){iters=it+rem;cool=Math.pow(Math.min(1,Tend/Math.max(1e-9,temp)),1/Math.max(1,rem*ev/(it+1)));}}}
   }
   return best;
