@@ -39,7 +39,7 @@ Kısaltmalar: **D** = düşman senaryo üretici + bağımsız denetçi (`fuzz.js
 | Vardiya döngüsü (14 hazır düzen + 8 saatlik üçlü), ekip döngüsü (A/B/C/D, başlangıç tarihli) | D, B, Ö (team_cycle, paket12) |
 | Ücretsiz mola (net saat), zor nöbet puanı, vardiya süresi sınırı | D, B (x_pts), Ö (paket10, paket12) |
 | Nöbet sonrası izin ve sıra kuralları (Perşembe/Cuma sonrası izin, gün sınırı, Ek Cumartesi, fazla nöbet sırası) | D, B |
-| İstekler: istiyor / istemiyor / kesin / nöbet yok / izin; vardiyaya özel istek: güne dokununca o günün vardiyaları açılır, her biri ayrı seçilir (takvimde "08 ✓ 20 ✗"); dilek önceliği | D, B, A, H, Ö (istek_vardiya) |
+| İstekler: istiyor / istemiyor / kesin / nöbet yok / izin; vardiyaya özel istek: güne dokununca o günün vardiyaları açılır, her biri ayrı seçilir (takvimde "08 ✓ 20 ✗", aynı saatte başlayanlar "08–20 / 08–24"); liste hazırlama sihirbazında yönetici de vardiya vardiya işaretler; nöbet tutmayan yöneticide ekran ilk nöbetçiyle açılır; dilek önceliği | D, B, A, H, Ö (istek_vardiya) |
 | Onaylı kesin gün kurallara üstün gelir ve bunu açıkça yazar | D |
 | Elle sabitleme (📌), "nöbet tutmaz" ve sabit mesaili kişiye kesin gün → bilgi notu | D, B |
 | Saat eşitliği (birikimli), listeler arası uyum | B, C |

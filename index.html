@@ -143,6 +143,7 @@ label.chk{display:inline-flex;align-items:center;gap:5px;font-size:.72rem;font-w
 .prefday.shmulti small.shl.must{background:var(--tint);color:#fff}
 .prefday.shmulti small.shl.never{background:#3A3A3C;color:#fff}
 .prefday.shmulti small.shl.bekk{opacity:.75}
+.prefday.shmulti small.shl.lg{font-size:9px;padding:0 1px;letter-spacing:-.2px;white-space:nowrap}
 .deh{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:12px 0 2px;font-size:.82rem}
 .decnt{display:inline-flex;align-items:center;gap:6px;font-size:.78rem;color:var(--ink-soft)}
 .decnt b{min-width:14px;text-align:center;color:var(--ink)}
@@ -2504,15 +2505,15 @@ function bindPrefPaint(){
    Vardiyalı ekipte (kişinin 2+ vardiyası varsa) "İstiyorum / İstemiyorum / Kesin / Nöbet yok" fırçasıyla bir güne dokununca
    alttan o günün vardiyaları açılır: her vardiya için ayrı seçilir (ör. Gündüz İstiyorum, Gece İstemiyorum).
    Sürükleyerek boyama eskisi gibi bütün güne (ya da üstte seçili vardiyaya) işler. */
-let PDS=null;       // {d, uid, L}
+let PDS=null;       // {d, uid, L, brush, after}
 function pdsWanted(){return isShiftMode()&&!prefShift&&["yes","avoid","must","never"].includes(prefBrush);}
-function pdsOpen(d){const uid=editingId();if(!canEdit(uid))return false;const p=members.find(x=>x.id===uid);
+function pdsOpen(d,o){o=o||{};const uid=o.uid||editingId();if(!canEdit(uid))return false;const p=members.find(x=>x.id===uid);
   const L=p&&onDuty(p)?prefShiftList(uid):[];if(L.length<2)return false;
   if(isLeaveVal((allPrefs[uid]||{})[d]))return false;
-  PDS={d,uid,L,t:Date.now()};pdsRender();$("prefDaySheet").classList.add("on");ND.haptic&&ND.haptic(4);return true;}
+  PDS={d,uid,L,t:Date.now(),brush:o.brush||null,after:o.after||null};pdsRender();$("prefDaySheet").classList.add("on");ND.haptic&&ND.haptic(4);return true;}
 function pdsVal(si){const P=allPrefs[PDS.uid]||{};if(si==null)return String(P[PDS.d]||"");return String((((P._sh||{})[PDS.d])||{})[shSid(si)]||"");}
 function pdsRender(){if(!PDS)return;const {d,L}=PDS,{y,m}=monthInfo(),dow=(new Date(y,m-1,d).getDay()+6)%7;
-  const fam=(prefBrush==="must"||prefBrush==="never")?["must","never"]:["yes","avoid"];
+  const br=PDS.brush||prefBrush,fam=(br==="must"||br==="never")?["must","never"]:["yes","avoid"];
   const LAB={yes:"İstiyorum",avoid:"İstemiyorum",must:"Kesin nöbet",never:"Nöbet yok"};
   const whole=pdsVal(null).replace(/_bek$/,"");
   const row=(si,name,sub)=>{const raw=pdsVal(si),cur=raw.replace(/_bek$/,""),bek=/_bek$/.test(raw);
@@ -2529,9 +2530,9 @@ function pdsSet(si,v){if(!PDS)return;const P=allPrefs[PDS.uid]=allPrefs[PDS.uid]
     if(si!=null&&v){const w=P[PDS.d];       // "bütün gün İstiyorum" iken Gece "İstemiyorum" seçildi: Gündüz İstiyorum olarak kalsın
       if(w&&!isLeaveVal(w)&&!String(w).startsWith("must")){const sh=P._sh=P._sh||{},o=sh[PDS.d]=sh[PDS.d]||{};
         PDS.L.forEach(({si:j})=>{if(j!==si&&!o[shSid(j)])o[shSid(j)]=w;});}}
-    const kb=prefBrush,ks=prefShift;prefShift=si==null?null:shSid(si);prefBrush=v;
-    try{ch=paintPref(PDS.d,false);}finally{prefBrush=kb;prefShift=ks;}}
-  if(ch){ND.haptic&&ND.haptic(4);prefPainted();}
+    const kb=prefBrush,ks=prefShift,ku=PREF_UID;prefShift=si==null?null:shSid(si);prefBrush=v;PREF_UID=PDS.uid;
+    try{ch=paintPref(PDS.d,false);}finally{prefBrush=kb;prefShift=ks;PREF_UID=ku;}}
+  if(ch){ND.haptic&&ND.haptic(4);if(PDS.after)PDS.after();else prefPainted();}
   pdsRender();}
 function pdsClose(){const s=$("prefDaySheet");if(s)s.classList.remove("on");PDS=null;}
 
@@ -2848,17 +2849,18 @@ const PREP_STEPS=[
     if(!d.pid||!members.some(p=>p.id===d.pid))d.pid=(members.find(onDuty)||members[0]||{}).id;
     const p=members.find(x=>x.id===d.pid)||{};
     const {y,m,nDays,firstDow}=monthInfo(planAy());
-    const hic=members.filter(x=>onDuty(x)&&!Object.keys(allPrefs[x.id]||{}).filter(k=>/^\d+$/.test(k)).length);
-    let h=planIssuesHTML()+`<div class="wzpeople">${members.map(x=>{const n=Object.keys(allPrefs[x.id]||{}).filter(k=>/^\d+$/.test(k)).length;
+    const hic=members.filter(x=>onDuty(x)&&!prefMarkedDays(x.id));
+    let h=planIssuesHTML()+`<div class="wzpeople">${members.map(x=>{const n=prefMarkedDays(x.id);
       return `<button type="button" class="wzp${x.id===d.pid?" on":""}${onDuty(x)?"":" off"}" onclick="WZ.d.pid='${x.id}';wzRender()">${avatarHTML(x.id)}<span>${hEsc(kisaAd(x.name))}</span>${n?`<i>${n}</i>`:""}</button>`;}).join("")}</div>`;
     const B=[["yes","İstiyor","is-wish","wish"],["avoid","İstemiyor","is-avoid","avoid"],["must","Kesin nöbet","is-must","lock"],["never","Nöbet yok","is-never","off-duty"],["izin","İzin","is-leave","leave"],["","Sil","is-erase","x"]];
     h+=`<div class="nd-brush wzb">${B.map(([k,t,c,ic])=>`<button type="button" class="${c}" aria-pressed="${d.brush2===k?"true":"false"}" onclick="WZ.d.brush2='${k}';wzRender()">${ND.icon(ic)}${t}</button>`).join("")}</div>`;
     h+=`<div class="cal wzcal wzpc">${DAYS_TR.map(x=>`<div class="dh">${x}</div>`).join("")}`;
     for(let i=0;i<firstDow;i++)h+=`<div class="day empty"></div>`;
     const bs=bayramSet();
-    for(let dd=1;dd<=nDays;dd++){const [cls,lab]=prefCell(pref(d.pid,dd));
-      h+=`<button type="button" class="day prefday ${cls}${bs.has(dd)?" bay":isWknd(y,m,dd)?" wknd":""}" onclick="wzPaint(${dd})"><b>${dd}</b>${lab?`<small>${lab}</small>`:""}</button>`;}
+    for(let dd=1;dd<=nDays;dd++){const x=prefDayCell(d.pid,dd,-1);
+      h+=`<button type="button" class="${x.cls}${bs.has(dd)&&!/ bay/.test(x.cls)?" bay":""}" title="${hEsc(x.title)}" onclick="wzPaint(${dd})">${x.html}</button>`;}
     h+=`</div>`;
+    if(wzShiftPick(d.pid,d.brush2))h+=`<p class="wz__note">Güne dokununca o günün vardiyaları açılır; her vardiyayı ayrı seçebilirsin (ör. Gündüz istiyor, Gece istemiyor).</p>`;
     h+=`<div style="margin-top:14px">${iosGroup("",[iosRow("Bu ay nöbet tutar",`<input type="checkbox" ${onDuty(p)?"checked":""} aria-label="Nöbet tutar" onchange="setSP('${p.id}','noDuty',!this.checked).then(()=>wzRender())">`,hEsc(p.name||""))],
       hic.length?`${hEsc(hic.map(x=>kisaAd(x.name)).join(", "))} için hiçbir gün işaretlenmedi; onlara yalnız kurallar uygulanır.`:"")}</div>`;
     return h;}},
@@ -2903,14 +2905,20 @@ function planIssuesHTML(){const L=planIssues();if(!L.length)return "";
   return `<div class="banner err" style="margin:0 0 14px"><b>Dikkat, bu günler tutmuyor:</b><br>${L.slice(0,6).map(hEsc).join("<br>")}${L.length>6?`<br>… ${L.length-6} tane daha`:""}<br><span style="font-weight:400">Bir isteği değiştir ya da reddet; değiştirmezsen liste en yakın çözümü yazar ve ihlali gösterir.</span></div>`;}
 /* sihirbazda kişinin gününü boya (yönetici: doğrudan onaylı) */
 const wzSaveT={};
+/* vardiyalı ekipte (kişinin 2+ vardiyası varsa) istiyor / istemiyor / kesin / yok fırçası güne dokununca vardiya perdesini açar */
+function wzShiftPick(uid,br){if(!isShiftMode()||!["yes","avoid","must","never"].includes(br))return false;const p=members.find(x=>x.id===uid);
+  return !!p&&onDuty(p)&&prefShiftList(uid).length>1;}
+function wzSaveLater(uid){clearTimeout(wzSaveT[uid]);
+  wzSaveT[uid]=setTimeout(()=>{delete wzSaveT[uid];savePrefsFor(uid).then(({error})=>{if(error)toast(prefsErr(error),true);});},400);}
 function wzPaint(dd){
   const d=WZ.d,uid=d.pid;if(!uid||!isAdmin())return;
   allPrefs[uid]=allPrefs[uid]||{};
-  const cur=allPrefs[uid][dd]||"",nv=d.brush2;
-  if(!nv||cur===nv)delete allPrefs[uid][dd];else allPrefs[uid][dd]=nv;
-  ND.haptic(4);wzRender();
-  clearTimeout(wzSaveT[uid]);
-  wzSaveT[uid]=setTimeout(()=>{delete wzSaveT[uid];savePrefsFor(uid).then(({error})=>{if(error)toast(prefsErr(error),true);});},400);
+  if(wzShiftPick(uid,d.brush2)&&pdsOpen(dd,{uid,brush:d.brush2,after:()=>{wzRender();wzSaveLater(uid);}}))return;
+  const P=allPrefs[uid],cur=P[dd]||"",nv=d.brush2;
+  const shd=P._sh&&P._sh[dd]&&Object.keys(P._sh[dd]).length;
+  if(!nv||(cur===nv&&!shd))delete P[dd];else P[dd]=nv;
+  if(P._sh&&P._sh[dd]){delete P._sh[dd];if(!Object.keys(P._sh).length)delete P._sh;}   // gün geneli işaret (ya da Sil) o günün vardiya işaretlerinin yerine geçer
+  ND.haptic(4);wzRender();wzSaveLater(uid);
 }
 async function wzFlushPrefs(){
   for(const uid of Object.keys(wzSaveT)){clearTimeout(wzSaveT[uid]);delete wzSaveT[uid];const {error}=await savePrefsFor(uid);if(error)toast(prefsErr(error),true);}
@@ -2956,6 +2964,7 @@ function wzRender(){
   const S=wzSteps(),st=S[WZ.step],vis=wzVisible(),pos=vis.indexOf(WZ.step)+1,tot=vis.length;
   const last=WZ.kind==="setup"?S.length-1:-1;
   const showP=WZ.step!==last;
+  const ob=$("wizard").querySelector(".wz__body"),keepY=ob&&WZ._lastStep===WZ.step?ob.scrollTop:0;WZ._lastStep=WZ.step;
   $("wizard").innerHTML=`<div class="wz__inner">
     <div class="wz__bar">${WZ.step>0&&!st.noBack?`<button class="nd-iconbtn" onclick="wzBack()" aria-label="Geri">${ND.icon("chev-l")}</button>`:'<span style="width:44px"></span>'}
       ${showP?`<div class="wz__prog"><span class="nd-steplabel">Adım ${pos} / ${tot-(WZ.kind==="setup"?1:0)}</span><div class="nd-progress" style="--p:${Math.round(pos/(tot-(WZ.kind==="setup"?1:0))*100)}%"><i></i></div></div>`:"<span></span>"}
@@ -2964,6 +2973,7 @@ function wzRender(){
     <div class="wz__foot"><button class="btn" style="width:100%" id="wzNext" onclick="wzNext()">${st.btn||"Devam"}</button></div></div>`;
   if(st.mount)st.mount(WZ.d);
   try{ND.auto($("wizard"));enhanceSteppers($("wizard"));}catch(e){}
+  if(keepY){const nb=$("wizard").querySelector(".wz__body");if(nb)nb.scrollTop=keepY;}
 }
 function wzBack(){const v=wzVisible(),i=v.indexOf(WZ.step);if(i>0){WZ.step=v[i-1];wzRender();}}
 async function wzNext(){
@@ -3231,7 +3241,9 @@ function effPins(){
   return out;
 }
 function testMembers(){return members.filter(p=>p.is_test);}
+let PREF_UID=null;          // vardiya perdesi başka bir ekrandan (liste hazırlama sihirbazı) açıldığında düzenlenen kişi
 function editingId(){
+  if(PREF_UID)return PREF_UID;
   const sel=$("asPerson");
   if(sel&&sel.value&&isAdmin())return sel.value;
   return me.id;
@@ -6167,6 +6179,23 @@ function prefCell(st){
   return st==="izin"?["izin","izin"]:st==="izin_bek"?["bek","izin?"]:st==="avoid"?["no","istemiyor"]:st==="yes"?["yes","istiyor"]
     :st==="must"?["must","kesin"]:st==="must_bek"?["must bekk","kesin?"]:st==="never"?["never","yok"]:st==="never_bek"?["never bekk","yok?"]:["",""];
 }
+/* bir günün istek hücresi: gün geneli işaret, tek vardiya işareti ("20 istiyor") ya da birden çok vardiya ("08 ✓ / 20 ✗") */
+/* takvim hücresinde vardiyanın kısa adı: başlangıç saati; aynı saatte başlayan başka vardiya varsa "08–24" gibi */
+function prefShTag(si){const sh=shiftRows[si]||{},st=kSaat(sh.start);
+  const dup=shiftRows.some((x,j)=>j!==si&&!x.icap&&kSaat(x.start)===st);return dup?st+"–"+(sh.end==="00:00"?"24":kSaat(sh.end)):st;}
+function prefDayCell(uid,d,shSel){const {y,m}=monthInfo();let st=pref(uid,d),shTag="",multi=null;
+  if(shSel>=0){if(!isLeaveVal(st))st=shPref(uid,d,shSel);}
+  else if(!st){const it=shPrefItems(uid).filter(x=>x.d===d);if(it.length===1){st=it[0].v;shTag=prefShTag(it[0].si);}else if(it.length>1)multi=it;}
+  const [cls,lab]=prefCell(st),SHY={yes:"✓",avoid:"✗",must:"kesin",never:"yok"},wk=isBay(d)?" bay":isWknd(y,m,d)?" wknd":"";
+  const tt=v=>v==="izin"?"İzin (onaylı)":v==="izin_bek"?"İzin (onay bekliyor)":v==="avoid"?"İstemiyorum":v==="yes"?"İstiyorum"
+    :v==="must"?"Kesin nöbet (onaylı)":v==="must_bek"?"Kesin nöbet (onay bekliyor)":v==="never"?"Nöbet yok (onaylı)":v==="never_bek"?"Nöbet yok (onay bekliyor)":"";
+  if(multi)return {cls:"day prefday shmulti"+wk,html:`<b>${d}</b>`+multi.slice(0,3).map(x=>{const v=String(x.v),[cl]=prefCell(v);
+      const tg=prefShTag(x.si),lg=tg.length>3;     // "08–24" gibi uzun etiket dar hücreye sığsın
+      return `<small class="shl ${cl}${lg?" lg":""}">${hEsc(tg)}${lg?"":" "}${SHY[v.replace(/_bek$/,"")]||""}${/_bek$/.test(v)?"?":""}</small>`;}).join(""),
+    title:multi.map(x=>`${prefShLbl(x.si)}: ${tt(String(x.v))}`).join(" · ")};
+  return {cls:"day prefday "+cls+(shSel>=0?" shsel":"")+(shTag?" shmark":"")+wk,html:`<b>${d}</b>${lab?`<small>${shTag?hEsc(shTag)+" ":""}${lab}</small>`:""}`,title:(shTag&&st?`${shTag}: `:"")+tt(st)};}
+/* kişinin işaretli gün sayısı (gün geneli + vardiya işaretli günler) */
+function prefMarkedDays(uid){const P=allPrefs[uid]||{},S=new Set();for(const k in P)if(/^\d+$/.test(k))S.add(k);for(const k in (P._sh||{}))if(/^\d+$/.test(k)&&Object.keys(P._sh[k]||{}).length)S.add(k);return S.size;}
 function renderPrefCal(){
   const {y,m,nDays,firstDow}=monthInfo();
   const uid=editingId();
@@ -6176,24 +6205,8 @@ function renderPrefCal(){
   try{renderPrefShiftSel();}catch(e){}
   const shSel=prefShift&&shIdxOf(prefShift)>=0?shIdxOf(prefShift):-1;
   for(let d=1;d<=nDays;d++){
-    const c=document.createElement("div");let st=pref(uid,d);
-    let shTag="",multi=null;
-    if(shSel>=0){if(!isLeaveVal(st))st=shPref(uid,d,shSel);}
-    else if(!st){const it=shPrefItems(uid).filter(x=>x.d===d);if(it.length===1){st=it[0].v;shTag=kSaat((shiftRows[it[0].si]||{}).start);}else if(it.length>1)multi=it;}
-    const [cls,lab]=prefCell(st);
-    const SHY={yes:"✓",avoid:"✗",must:"kesin",never:"yok"};
-    const tt=v=>v==="izin"?"İzin (onaylı)":v==="izin_bek"?"İzin (onay bekliyor)":v==="avoid"?"İstemiyorum":v==="yes"?"İstiyorum"
-      :v==="must"?"Kesin nöbet (onaylı)":v==="must_bek"?"Kesin nöbet (onay bekliyor)":v==="never"?"Nöbet yok (onaylı)":v==="never_bek"?"Nöbet yok (onay bekliyor)":"";
-    if(multi){
-      /* aynı günde birden çok vardiya işareti (ör. gündüz istiyor, gece istemiyor): her biri ayrı satırda */
-      c.className="day prefday shmulti"+(isBay(d)?" bay":isWknd(y,m,d)?" wknd":"");
-      c.innerHTML=`<b>${d}</b>`+multi.slice(0,3).map(x=>{const v=String(x.v),[cl]=prefCell(v);
-        return `<small class="shl ${cl}">${hEsc(kSaat((shiftRows[x.si]||{}).start))} ${SHY[v.replace(/_bek$/,"")]||""}${/_bek$/.test(v)?"?":""}</small>`;}).join("");
-      c.title=multi.map(x=>`${prefShLbl(x.si)}: ${tt(String(x.v))}`).join(" · ");
-    }else{
-      c.className="day prefday "+cls+(shSel>=0?" shsel":"")+(shTag?" shmark":"")+(isBay(d)?" bay":isWknd(y,m,d)?" wknd":"");
-      c.innerHTML=`<b>${d}</b>${lab?`<small>${shTag?hEsc(shTag)+" ":""}${lab}</small>`:""}`;
-      c.title=(shTag&&st?`${shTag}: `:"")+tt(st);}
+    const c=document.createElement("div"),x=prefDayCell(uid,d,shSel);
+    c.className=x.cls;c.innerHTML=x.html;c.title=x.title;
     c.dataset.d=d;
     cal.appendChild(c);
   }
