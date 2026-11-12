@@ -1,7 +1,7 @@
 /* Ekip döngüsü (A/B/C/D): gerçekçi kurulumda döngü tam tutmalı; kalabalık ekipte nöbetler eşit paylaşılmalı. */
 const { openApp, fixture, SH, uid } = require("../lib/harness");
 const { check } = require("../lib/checker");
-const ok = (c, m) => { console.log((c ? "✓ " : "✗ ") + m); if (!c) process.exitCode = 1; };
+const fails = []; const ok = (c, m) => { console.log((c ? "✓ " : "✗ ") + m); if (!c) { process.exitCode = 1; fails.push(m); } };
 const teams = (k, per, pat, base, step, off = 1) => Array.from({ length: k }, (_, t) => ({ id: "c" + t, t: "cycle", who: { k: "p", ids: Array.from({ length: per }, (_, j) => uid(off + 1 + t * per + j)) }, pat, start: new Date(Date.UTC(...base) + t * step * 864e5).toISOString().slice(0, 10) }));
 (async () => {
   // 1) 4 ekip × 2 kişi, gündüz 2 + gece 2, GGNN---- ; ekipler 2 gün kaydırmalı → her gün 1 ekip gündüz, 1 ekip gece
@@ -43,5 +43,6 @@ const teams = (k, per, pat, base, step, off = 1) => Array.from({ length: k }, (_
     ok(/Ekip döngülerine göre/.test(why) || /döngü/i.test((dr.viol || []).join(" ")), "neden açıklanıyor: " + String(why).replace(/<[^>]+>/g, "").slice(0, 120));
     ok(!errors.length, "JS hatası yok");
   }
+  console.log("SONUÇ:", fails.length ? fails.length + " hata: " + fails.join(" / ") : "TAMAM");
   process.exit();
 })();
