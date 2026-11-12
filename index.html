@@ -6083,7 +6083,7 @@ function dropDraft(){draft=null;DRAFT_CTX=null;ALT.token++;ALT.list=[];ALT.busy=
 /* Çözüm önerileri: bir deneme sırasında kuralların geçici hali (null = gerçek ayarlar).
    rr: aralıklı ritim, pat: sabit ritim, sen: kıdem kuralı, free: sayılar serbest, nFree: gece sayıları serbest,
    flex: sayılarda ±1 esneklik, ts: süre çarpanı (hızlı deneme), rrOrig: asıl ritim (esnetme az kullanılsın) */
-let SOLVE_OV=null,TS_LOCAL=1,SOLVE_SEED=null,REFINE_MS=5000;
+let SOLVE_OV=null,TS_LOCAL=1,SOLVE_SEED=null,REFINE_MS=20000;
 function TS(){return ((SOLVE_OV&&SOLVE_OV.ts)||1)*TS_LOCAL;}
 function fillAll(){if(SOLVE_OV&&SOLVE_OV.fill)return true;return ($("fillPolicy").value||"fill_all")==="fill_all";}
 /* Fazla nöbet sırası açıkken kişi sayıları aya özeldir: başka ay için yazılmış sayılar
@@ -7092,7 +7092,7 @@ function refineAsg(slots,E,A,evalFn,iters,locked){
   let temp=rOn>0?Math.min(6000,Math.max(40,(curP||0)/20)):Math.min(2500,Math.max(40,(curP||0)/50));
   let cool=Math.pow(rOn>0?0.005:0.02,1/Math.max(1,iters));
   /* süre sınırı: kalabalık ekip + çok kuralda her değerlendirme pahalı; ekran uzun süre donmasın.
-     REFINE_MS dolunca (katı kural ihlali sürüyorsa 3 katı) kalan aramanın küçük bir bölümünde hızla soğutulup bitirilir.
+     REFINE_MS dolunca (katı kural ihlali sürüyorsa 2 katı) kalan aramanın küçük bir bölümünde hızla soğutulup bitirilir.
      Küçük ve orta ekiplerde süre dolmadan biter, hiçbir şey değişmez. */
   const Tend=temp*(rOn>0?0.005:0.02),t0=performance.now(),budget=REFINE_MS*Math.max(0.3,TS());let ev=0,tuned=false;
   /* ritim açıksa ikili blok hamlesi: a'nın x,x+1 günleri ile b'nin y,y+1 günleri yer değiştirir */
@@ -7139,8 +7139,8 @@ function refineAsg(slots,E,A,evalFn,iters,locked){
     temp*=cool;
     if(bestP===0)break;
     if((++ev&255)===0&&!tuned){const el=performance.now()-t0;
-      /* süre doldu: katı kural ihlali yoksa hızlı soğutup bitir; varsa 3 katı süreye kadar aramaya devam */
-      if(el>(bestP>=HARDW?3*budget:budget)){tuned=true;const rem=Math.max(800,Math.floor((iters-it)*0.08));
+      /* süre doldu: katı kural ihlali yoksa hızlı soğutup bitir; varsa 2 katı süreye kadar aramaya devam */
+      if(el>(bestP>=HARDW?2*budget:budget)){tuned=true;const rem=Math.max(800,Math.floor((iters-it)*0.08));
         if(it+rem<iters){iters=it+rem;cool=Math.pow(Math.min(1,Tend/Math.max(1e-9,temp)),1/Math.max(1,rem*ev/(it+1)));}}}
   }
   return best;
