@@ -103,7 +103,7 @@ async function idle(E, max = 240000) { const t0 = Date.now(); await wait(150); w
           const cc = check(F, f.res, { ...o, targets: !o.noTargets, nights: !o.noNights });
           // ana listede "kurallarına uyan yalnızca N yer var → N verildi" diye bildirilen sayı/gece uyuşmazlıkları öneride de aynen kalır
           // (önerinin kendi taslağında da aynı "yalnızca N yer var" uyarısı yazıyorsa o da bildirilmiş sayılır: ör. döngü kapanınca kişi sayıları yeniden geçerli olur)
-          const adj = [...(dr.viol || []), ...(f.res.viol || [])].map(v => (v.match(/^⚠️ (.+?): \d+ (gece )?nöbet(i)? yazıldı ama kurallarına uyan yalnızca|^⚠️ (.+?): \d+ gece yazıldı ama toplam nöbeti/) || []).slice(1).find(Boolean)).filter(Boolean);
+          const adj = [...(dr.viol || []), ...(f.res.viol || [])].map(v => (v.match(/^⚠️ (.+?): \d+ (gece )?nöbet(i)? yazıldı ama kurallarına uyan yalnızca|^⚠️ (.+?): \d+ gece yazıldı ama toplam nöbeti|^⚠️ (.+?): \d+ gün elle sabitlenmiş ama nöbet sayısı/) || []).slice(1).find(Boolean)).filter(Boolean);
           const sv = (f.res.viol || []).join("\n");
           // kartta "Sayılar: Ayşe 19 → 22 …" diye açıkça yazılan sayı değişiklikleri sessiz değildir
           const dcN = (f.dc || []).map(x => (x.match(/^(.+) \d+ → \d+$/) || [])[1]).filter(Boolean);

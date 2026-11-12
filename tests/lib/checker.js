@@ -251,7 +251,9 @@ function check(fx, res, o = {}) {
     if (r.t === "eq") { const k = {}; P.forEach(p => { k[p.user_id] = 0; }); for (let d = 1; d <= nDays; d++) (asg[d] || []).forEach(e => { if (!e.ic && e.s === +r.si && k[e.id] != null) k[e.id]++; });
       const free = P.filter(p => { const sh = shifts[+r.si] || {}; if (Array.isArray(sh.deny) && sh.deny.includes(p.user_id)) return false;
         const spf = p.shift_prefs || {}; if (spf.noNight && nightH(sh) * 2 >= dur(sh)) return false; if (spf.allowed && spf.allowed[+r.si] === false) return false;
-        if (sh.owner && sh.owner !== p.user_id) return false; if (!sh.owner && Array.isArray(sh.only) && sh.only.length && !sh.only.includes(p.user_id)) return false; for (let d = 1; d <= nDays; d++) { const v = pv(p.user_id, d); if (v === "izin" || v === "never") return false; } return !(opts.blocks || []).some(b => b.pid === p.user_id); });
+        if (sh.owner && sh.owner !== p.user_id) return false; if (!sh.owner && Array.isArray(sh.only) && sh.only.length && !sh.only.includes(p.user_id)) return false; for (let d = 1; d <= nDays; d++) { const v = pv(p.user_id, d); if (v === "izin" || v === "never") return false; }
+        // yarı zamanlı (oran < %100) kişinin eşit payı oranıyla küçülür (uygulamanın tasarımı): karşılaştırmaya girmez
+        if ((((opts.people || {})[p.user_id] || {}).ratio ?? 100) < 100) return false; return !(opts.blocks || []).some(b => b.pid === p.user_id); });
       const vs = free.map(p => k[p.user_id]); info.eq = info.eq || {}; info.eq[r.si] = k;
       if (vs.length > 1 && Math.max(...vs) - Math.min(...vs) > 1) bad(`eşit dağıt: ${shifts[+r.si].start} vardiyası ${Math.min(...vs)}–${Math.max(...vs)}`, Math.max(...vs) - Math.min(...vs) - 1); }
     if (r.t === "cycle") { const pat = String(r.pat || "").toUpperCase(), L = pat.length; if (L < 2) continue;
