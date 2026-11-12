@@ -11940,6 +11940,30 @@ function partnerPool(r){
   const b=r.slice(2);return members.filter(p=>p.pool===b&&p.id!==me.id);
 }
 /* P kişisi, day günündeki entry nöbetini devralabilir mi? "" = uygun, değilse gerekçe */
+/* Takas için yalnız fiziksel imkânsızlık denetlenir (ekibin kuralları değil — takası iki kişi kendi aralarında kararlaştırır):
+   yer dolu kalmalı (kişiye özel vardiya / branş odası ancak uygun kişiyle dolar) ve gelen kişi o nöbeti kendi başka bir nöbetiyle
+   üst üste ya da uç uca (biri biterken öteki başlayacak şekilde) birleştiremez. */
+function swapHardReason(day,entry,P){
+  if(!entry)return "nöbet bulunamadı";
+  if(!P)return "kişi bulunamadı";
+  const pid=P.id;
+  if(entryList(day).some(e=>e.id===pid&&!e.ic))return "o gün zaten çalışıyor";
+  if(schedule.mode==="shifts"){
+    const sh=schShifts()[entry.s]||{};
+    if(sh.owner&&sh.owner!==pid)return "bu vardiya kişiye özel";
+    const iv=(d2,sh2)=>{const a=(d2-1)*24+hm(sh2.start||"00:00");return [a,a+shiftHours(sh2)];};
+    const me0=iv(day,sh);
+    for(const d2 of [day-1,day,day+1])for(const e2 of entryList(d2))if(e2.id===pid&&!e2.ic){
+      const o=iv(d2,schShifts()[e2.s]||{});
+      if(o[0]<=me0[1]&&me0[0]<=o[1])return o[1]===me0[0]||me0[1]===o[0]?"nöbetleri uç uca eklenir (ara vermeden devam edemez)":"nöbetleri çakışır";}
+  }else{
+    if(entry.r&&entry.r.startsWith("S:")&&P.pool!==entry.r.slice(2))return "farklı branş odası";
+    if((!entry.r||entry.r==="G"||entry.r.startsWith("B:"))&&hasOwnRoom(P.pool))return "genel listede değil";
+    const on=d2=>entryList(d2).some(e2=>e2.id===pid&&!e2.ic);
+    if(on(day-1)||on(day+1))return "nöbetleri uç uca eklenir (ara vermeden devam edemez)";
+  }
+  return "";
+}
 function swapReason(day,entry,P){
   if(!entry)return "nöbet bulunamadı";
   if(!P)return "kişi bulunamadı";
@@ -12000,7 +12024,7 @@ function fillReqIn(){
   const sel=$("reqIn");sel.innerHTML="";
   if(!d)return;
   const e=myEntry(d);if(!e)return;
-  const pool=partnerPool(e.r).map(p=>({p,why:swapReason(d,e,p)})).sort((a,b)=>(!!a.why)-(!!b.why)||a.p.name.localeCompare(b.p.name,"tr"));
+  const pool=partnerPool(e.r).map(p=>({p,why:swapHardReason(d,e,p)})).sort((a,b)=>(!!a.why)-(!!b.why)||a.p.name.localeCompare(b.p.name,"tr"));
   pool.forEach(({p,why})=>{
     const o=document.createElement("option");o.value=p.id;
     o.textContent=p.name+(p.is_test?" (test)":"")+(why?" — "+why:"");
@@ -12010,7 +12034,7 @@ function fillReqIn(){
   const ok=pool.filter(x=>!x.why).length;
   if(!ok){sel.innerHTML=(pool.length?"":"")+"<option value=''>Bu güne uygun kimse yok</option>"+sel.innerHTML;sel.value="";}
   const h=$("reqInHint");
-  if(h)h.textContent=pool.length?`${ok} kişi uygun${pool.length-ok?`, ${pool.length-ok} kişi kurala takılıyor (gerekçesi yanında)`:""}.`:"Ekipte başka kimse yok.";
+  if(h)h.textContent=pool.length?`${ok} kişi uygun${pool.length-ok?`, ${pool.length-ok} kişiyle olmaz (gerekçesi yanında). Ekip kuralları takası engellemez; yalnız nöbetlerin çakışması ya da uç uca eklenmesi engeller`:""}.`:"Ekipte başka kimse yok.";
 }
 async function createReq(){
   const day=+$("reqDay").value,inId=$("reqIn").value,note=$("reqNote").value.trim();
@@ -12047,23 +12071,11 @@ async function acceptReq(id){
   const P=members.find(x=>x.id===rq.in_id);
   if(rq.in_id!==me.id&&!(isAdmin()&&P&&P.is_test)){alert("Bu isteği yalnız "+(P?P.name:"alıcı")+" yanıtlayabilir.");return;}
   const entry=entryList(rq.day).find(e=>e.id===rq.out_id);
-  const reason=swapReason(rq.day,entry,P);
+  /* yalnız fiziksel imkânsızlık: ekip kuralları takası engellemez */
+  const reason=swapHardReason(rq.day,entry,P);
   if(reason){
-    await sb.from("swap_requests").update({status:"red",reason:"kural: "+reason}).eq("id",id);
-    await loadAll();alert("Takas kurala takıldı: "+reason);return;
-  }
-  /* nöbet sonrası izin & sıra kuralları: takas yeni bir ihlal doğuruyorsa reddet */
-  if(wrOn()||otherLists){
-    const say=()=>wrAudit(schedule,_ay).concat(linkAudit(schedule,_ay).filter(v=>/^⚠️/.test(v)));
-    const once=say().length;
-    entry.id=rq.in_id;
-    const sonra=say();
-    entry.id=rq.out_id;
-    if(sonra.length>once){
-      const r2="izin/sıra kuralı — "+sonra[sonra.length-1].replace(/^⚠️\s*/,"");
-      await sb.from("swap_requests").update({status:"red",reason:"kural: "+r2}).eq("id",id);
-      await loadAll();alert("Takas kurala takıldı: "+r2);return;
-    }
+    await sb.from("swap_requests").update({status:"red",reason:"olmaz: "+reason}).eq("id",id);
+    await loadAll();alert("Takas yapılamaz: "+reason);return;
   }
   /* veritabanındaki son listenin üstünde yalnız bu takas yapılır; sayılar, saatler ve Ek Cumartesi izinleri yeniden hesaplanır */
   const fr=await freshSchedule(_ay);

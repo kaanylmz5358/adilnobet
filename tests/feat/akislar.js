@@ -63,7 +63,7 @@ const iz = (a, b, v = "izin") => { const o = {}; for (let d = a; d <= b; d++) o[
     const snap = JSON.stringify(pub().asg);
     await E("acceptReq(2)"); await sleep(300);
     const r2 = st.db.swap_requests.find(r => r.id === 2);
-    ok(r2.status === "red" && /kural/.test(r2.reason) && !/bulunamadı/.test(r2.reason) && JSON.stringify(pub().asg) === snap, "gece çıkışına gündüz takası reddedildi, liste değişmedi: " + r2.reason.slice(0, 80));
+    ok(r2.status === "red" && /uç uca|çakış/.test(r2.reason) && !/bulunamadı/.test(r2.reason) && JSON.stringify(pub().asg) === snap, "gece çıkışına gündüz takası reddedildi, liste değişmedi: " + r2.reason.slice(0, 80));
   } else ok(true, "(kurala takılan takas örneği bulunamadı, atlandı)");
   const c1 = check(st, pub(), {}); const c1b = c1.problems.filter(t => !/Cem 11\. gün izinli/.test(t));
   ok(!c1b.length, "takaslardan sonra liste denetçiden temiz (bilerek yazılan izinli gün hariç): " + (c1b.slice(0, 2).join(" | ") || "—"));
