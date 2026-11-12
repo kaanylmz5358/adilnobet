@@ -121,6 +121,20 @@ async function idle(E, max = 240000) { const t0 = Date.now(); await wait(150); w
           const clean = L.slice(1).find(f => f.k !== "base" && f.k !== "keep" && !(f.ov || {}).keep && !(f.dc || []).length && !(f.nSum > 0) && !(f.res.emptyCount > (dr.emptyCount || 0)));   // gece sayılarını değiştiren de "sayı değiştirir"
           if (clean && (L[0].k === "base" || L[0].k === "keep" || (L[0].ov || {}).keep)) rec.warns.push(`SIRALAMA: "${L[0].t}" önde, ama "${clean.t}" sayıları değiştirmeden çözüyor`);
         }
+        // önizleme: önerinin listesi gösterilir, kapatınca taslak aynen geri gelir; önizlemeden uygulamak doğrudan uygulamakla aynı
+        const pi = L.findIndex(f => f.k !== "base");
+        if (pi >= 0) {
+          const before = JSON.stringify(E("draft.asg")), want = JSON.stringify(L[pi].res.asg);
+          E(`altPreview(${pi})`);
+          if (!E("!!ALT_PV")) rec.fails.push("ÖNİZLEME açılmadı");
+          else {
+            if (JSON.stringify(E("draft.asg")) !== want) rec.fails.push("ÖNİZLEME karttaki listeyi göstermiyor");
+            const nd = E(`(()=>{const a=ALT_PV.keep,b=draft;let n=0;const {nDays}=monthInfo();for(let d=1;d<=nDays;d++){const x=((a.asg||{})[d]||[]).map(entrySig).sort().join(),y=((b.asg||{})[d]||[]).map(entrySig).sort().join();if(x!==y)n++;}return n===ALT_PV.chg.size;})()`);
+            if (!nd) rec.fails.push("ÖNİZLEME değişen gün sayısı yanlış");
+            E("altPreviewEnd()");
+            if (E("!!ALT_PV") || JSON.stringify(E("draft.asg")) !== before) rec.fails.push("ÖNİZLEME kapatınca taslak geri gelmedi");
+          }
+        }
         if (L.length) {
           const sig = JSON.stringify(L[0].res.asg);
           E("altApply(0)");
