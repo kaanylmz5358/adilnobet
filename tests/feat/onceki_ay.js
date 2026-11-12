@@ -24,7 +24,8 @@ const fails = []; const ok = (c, m) => { console.log((c ? "✓ " : "✗ ") + m);
     E("generate()"); const dr = E("draft");
     const on = (i, d) => (dr.asg[d] || []).find(e => e.id === uid(i) && !e.ic);
     console.log(`— ${variant}: ruleV=${dr.rep.ruleV} viol=${(dr.viol || []).filter(v => /⚠️/.test(v)).length}`);
-    ok(!on(1, 1) && !on(1, 2), `${variant}: A (son 3 gece) 1-2 Aralık izinli`);
+    // A 28-30 Kasım gece çalıştı: art arda gece sınırı yok → ya gece bloğu sürer (1 Aralık gece) ya da 1-2 Aralık izinli
+    { const a1 = on(1, 1), a2 = on(1, 2); ok(a1 ? a1.s === 1 : !a2, `${variant}: A (son 3 gece) gece bloğu sürüyor ya da 1-2 Aralık izinli`); }
     ok(!(on(2, 1) && !E(`isNightShift(shiftRows[${on(2, 1) ? on(2, 1).s : 0}])`)), `${variant}: B (30 Kasım gece) 1 Aralık gündüz değil`);
     { const b1 = on(2, 1), b2 = on(2, 2); console.log("    B 1-2:", JSON.stringify(b1), JSON.stringify(b2)); ok(b1 ? b1.s === 1 : !b2, `${variant}: B gece sonrası: ya gece bloğu sürüyor ya da 2 gün izin`); }
     ok(!on(3, 1), `${variant}: C (24–30 Kasım her gün) 1 Aralık boş`);

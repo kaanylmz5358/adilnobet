@@ -32,13 +32,14 @@ Kısaltmalar: **D** = düşman senaryo üretici + bağımsız denetçi (`fuzz.js
 | Boş gün kuralları (ayda, haftada, art arda, herhangi N günde) | D, B |
 | Hafta sonu: ayda N, art arda N, herhangi N hafta sonunda, bölünmesin, iki gün aynı vardiya, cumartesi çalışan pazar çalışmasın | D, B |
 | Yasak vardiya sırası (gece → ertesi gün gündüz …) | D, B, Ö (vardiya_eslestirme) |
+| Kuralın iki seviyesi: "mümkün olduğunca" / "asla"; "asla" tutmazsa "bu ay mümkün olduğunca uygulansın" ve "asla bozulmasın (o yerler boş)" önerileri | Ö (oneri_onizleme), D |
 | Sonrasında izin (gece / nöbet sonrası N gün; art arda k sonrası) | D, B |
 | Eşit dağıt (bir vardiyayı herkese eşit) | D, B |
 | Tarihe / bayrama / hafta gününe özel kişi sayısı, takvimden gün gün kişi sayısı | D, B |
 | Vardiya döngüsü (14 hazır düzen + 8 saatlik üçlü), ekip döngüsü (A/B/C/D, başlangıç tarihli) | D, B, Ö (team_cycle, paket12) |
 | Ücretsiz mola (net saat), zor nöbet puanı, vardiya süresi sınırı | D, B (x_pts), Ö (paket10, paket12) |
 | Nöbet sonrası izin ve sıra kuralları (Perşembe/Cuma sonrası izin, gün sınırı, Ek Cumartesi, fazla nöbet sırası) | D, B |
-| İstekler: istiyor / istemiyor / kesin / nöbet yok / izin; vardiyaya özel istek; dilek önceliği | D, B |
+| İstekler: istiyor / istemiyor / kesin / nöbet yok / izin; vardiyaya özel istek (aynı güne vardiya vardiya ayrı işaret, takvimde "08 ✓ 20 ✗"); dilek önceliği | D, B, A |
 | Onaylı kesin gün kurallara üstün gelir ve bunu açıkça yazar | D |
 | Elle sabitleme (📌), "nöbet tutmaz" ve sabit mesaili kişiye kesin gün → bilgi notu | D, B |
 | Saat eşitliği (birikimli), listeler arası uyum | B, C |
@@ -52,11 +53,14 @@ Kısaltmalar: **D** = düşman senaryo üretici + bağımsız denetçi (`fuzz.js
 | Katı kural ya da kesin gün kaçarsa ilk taslak kendiliğinden yeniden denenir | D |
 | Çözüm önerileri: her öneri kendi geçici kurallarıyla denetçiden geçer; en iyi öneri kartta görülenle aynı liste | D, B |
 | Öneri sırası (en az değişiklik, sayı değişimi kartta yazılı) | D, B |
+| Öneriyi önizle ("Listeyi gör"): değişen günler çerçeveli, gün panelinde şimdiki / önerilen kişiler; önizlemeden tek tıkla uygula ya da kapat; önizleme yayınlanamaz | Ö (oneri_onizleme), A |
+| Taslakta sorunlu günler kırmızı noktalı; gün panelinde o günün sorunları; elle düzenleyince kaç sorun kalktığı söylenir | Ö (oneri_onizleme), A |
 | Yeniden hazırla: sayılar aynıyken liste asla kötüleşmez | D |
 | İmkânsızlık kanıtı ("matematiksel olarak tutamaz") ve nedeni | B, Ö (team_cycle) |
 | Yayınla, Word / Excel, takvime aktar (.ics, Google Takvim) | A, C, Ö (akislar) |
 | Yayınlanan liste kendi ayının kurallarını saklar | B, C |
 | Gün düzenleme (önerilen kişi sırası ★; kurala takılan kişi yazılırsa nedeni söylenir), takas istekleri (uygun / kurala takılan), izin onayı, ayı kapatma | A, Ö (akislar, paket10) |
+| Takas kabulü ve "ilk isteyen alır" açık nöbeti sunucu işleviyle (`swap_accept`, `open_claim`): liste veritabanındaki son hâlinin üstüne kurulur, sunucu yalnız o değişikliği kabul eder | Ö (akislar, paket12) + `sql/` geri alınan deneme |
 | Açık nöbet ilanı ("Ben tutarım") | A, Ö (paket12) |
 
 ## Ekip, hesap, ayarlar
@@ -68,6 +72,7 @@ Kısaltmalar: **D** = düşman senaryo üretici + bağımsız denetçi (`fuzz.js
 | Birden çok ekip / ay: taslak başka ekibe ya da aya geçince düşer, yanlış yere yayınlanamaz | Ö (coklu_ekip) |
 | Taslaktan hemen önce üyelerin bu arada girdiği istek / izinler tazelenir; boyanan günler kaybolmaz | Ö (tazelik) |
 | Güvenlik: üyelerin yazdığı ad, not, etiket, istek değerleri ekranda kod olarak çalışamaz | G (`ui/xss.py`) |
+| Veritabanı yetkisi: yayınlı listeyi yalnız yönetici yazar; üye kendi satırında yalnız ad ve birim değiştirir; takas isteğini alıcı yalnız reddeder (kabul sunucuda) | `sql/2026-11-12_yetki_sikilastirma.sql` (geri alınan işlemle denenir) |
 | İstek takvimi (sürükleyerek boyama), izin onayı, izin / istek sınırları, yıllık izin hakkı | A, Ö (paket10, paket12) |
 | Kişi kartı: kıdem, cinsiyet, etiket, çalışma şekli, oran | A |
 | Hazır kural paketleri (Türkiye, AB, NHS, ACGME, MLC, iyi uygulama) | Ö (paket10) |
