@@ -42,8 +42,9 @@ with sync_playwright() as p:
     sheet_on = lambda sid: E(f"()=>document.getElementById('{sid}').classList.contains('on')")
 
     # ---------- 1) istek takvimi: dokun / sürükle / kaydır ----------
-    E("()=>{showTab('izin');setBrush('yes')}"); time.sleep(0.6)
-    cnt = lambda: E("()=>Object.entries(allPrefs[me.id]||{}).filter(([d,v])=>/^\\d+$/.test(d)&&v==='yes').length")
+    # nöbet tutan bir kişinin isteklerini düzenle (yönetici bu fikstürde nöbet tutmuyor)
+    E("()=>{showTab('izin');const s=document.getElementById('asPerson');const p=members.find(x=>x.id!==me.id&&onDuty(x)&&prefShiftList(x.id).length>1);if(s&&p){s.value=p.id;s.onchange&&s.onchange();}setBrush('yes')}"); time.sleep(0.6)
+    cnt = lambda: E("()=>Object.entries(allPrefs[editingId()]||{}).filter(([d,v])=>/^\\d+$/.test(d)&&v==='yes').length")
     cells = E("""()=>{const c=[...document.querySelectorAll('#prefCal .prefday')].filter(e=>!e.classList.contains('izin')&&!e.classList.contains('never')&&!e.classList.contains('must'));
        const byRow={};c.forEach(e=>{const r=e.getBoundingClientRect();const k=Math.round(r.top);(byRow[k]=byRow[k]||[]).push({d:+e.dataset.d,x:r.left+r.width/2,y:r.top+r.height/2,w:r.width});});
        const rows=Object.values(byRow).filter(r=>r.length>=4);return rows[1]||rows[0]||null;}""")
@@ -52,18 +53,39 @@ with sync_playwright() as p:
         pg.evaluate(f"window.scrollTo(0,{max(0, cells[0]['y'] - 300)})"); time.sleep(0.3)
         cells = E(f"""()=>{{const ds={json.dumps([c['d'] for c in cells])};return ds.map(d=>{{const e=document.querySelector('#prefCal .prefday[data-d="'+d+'"]');const r=e.getBoundingClientRect();return {{d,x:r.left+r.width/2,y:r.top+r.height/2,w:r.width}};}});}}""")
         c0 = cnt(); a, z = cells[0], cells[3]
+        # vardiyalı ekip: güne dokununca o günün vardiyaları açılır; seçimler gerçek dokunuş / tıklamayla yapılır
+        pds = lambda: E("()=>document.getElementById('prefDaySheet').classList.contains('on')")
+        def pbtn(row, which):   # which: 0 = İstiyorum, 1 = İstemiyorum, -1 = Fark etmez
+            return E(f"()=>{{const r=document.querySelectorAll('#pdsBody .pds-row')[{row}];if(!r)return null;const b=[...r.querySelectorAll('button')];const e=b[{which}<0?b.length-1:{which}];e.scrollIntoView({{block:'center'}});const q=e.getBoundingClientRect();return {{x:q.left+q.width/2,y:q.top+q.height/2}}}}")
+        def press(pt):
+            if DEV == "desktop": pg.mouse.click(pt["x"], pt["y"])
+            else: pg.touchscreen.tap(pt["x"], pt["y"])
+            time.sleep(0.35)
+        def closePds():
+            pt = E("()=>{const e=document.querySelector('#prefDaySheet .nd-btn');const q=e.getBoundingClientRect();return {x:q.left+q.width/2,y:q.top+q.height/2}}")
+            press(pt); time.sleep(0.3)
+        shp = lambda d: E(f"()=>JSON.stringify(((allPrefs[editingId()]||{{}})._sh||{{}})[{a['d']}]||{{}})")
+        if DEV == "desktop": pg.mouse.click(a["x"], a["y"]); time.sleep(0.5)
+        else: tdrag(a["x"], a["y"], 0, 0, steps=1); time.sleep(0.3)
+        ok(pds(), "güne dokununca o günün vardiyaları açıldı")
+        if pds():
+            press(pbtn(0, 0))
+            ok(cnt() == c0 + 1, f"vardiya perdesinde 'Bütün gün · İstiyorum' bir günü işaretledi ({c0}→{cnt()})")
+            press(pbtn(0, -1))
+            ok(cnt() == c0, "'Bütün gün · Fark etmez' işareti kaldırdı")
+            press(pbtn(1, 0)); press(pbtn(2, 1))
+            v = shp(a["d"])
+            ok(v.count("yes") == 1 and v.count("avoid") == 1, f"aynı güne bir vardiya İstiyorum, öteki İstemiyorum: {v}")
+            if DEV == "desktop":
+                pg.keyboard.press("Escape"); time.sleep(0.4); ok(not pds(), "Esc vardiya perdesini kapattı")
+            else:
+                closePds(); ok(not pds(), "Tamam vardiya perdesini kapattı")
+            ok(E(f"()=>document.querySelector('#prefCal .prefday[data-d=\"{a['d']}\"]').classList.contains('shmulti')"), "takvimde o gün iki işaretle görünüyor")
+            E(f"()=>{{const P=allPrefs[editingId()];if(P&&P._sh){{delete P._sh[{a['d']}];if(!Object.keys(P._sh).length)delete P._sh;}}renderPrefCal();}}"); time.sleep(0.2)
         if DEV == "desktop":
-            pg.mouse.click(a["x"], a["y"]); time.sleep(0.4)
-            ok(cnt() == c0 + 1, f"fareyle tıklama bir günü işaretledi ({c0}→{cnt()})")
-            pg.mouse.click(a["x"], a["y"]); time.sleep(0.4)
-            ok(cnt() == c0, "aynı güne tekrar tıklama işareti kaldırdı")
             mdrag(a["x"], a["y"], z["x"] - a["x"], 0)
             ok(cnt() == c0 + 4, f"fareyle sürükleme 4 günü boyadı ({c0}→{cnt()})")
         else:
-            tdrag(a["x"], a["y"], 0, 0, steps=1); time.sleep(0.3)
-            ok(cnt() == c0 + 1, f"parmakla dokunma bir günü işaretledi ({c0}→{cnt()})")
-            tdrag(a["x"], a["y"], 0, 0, steps=1); time.sleep(0.3)
-            ok(cnt() == c0, "aynı güne tekrar dokunma işareti kaldırdı")
             tdrag(a["x"], a["y"], z["x"] - a["x"], 0, steps=16)
             ok(cnt() == c0 + 4, f"yana sürükleme 4 günü boyadı ({c0}→{cnt()})")
             c1 = cnt(); y0 = E("scrollY")

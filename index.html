@@ -104,6 +104,19 @@ label.chk{display:inline-flex;align-items:center;gap:5px;font-size:.72rem;font-w
 .prefday.shmark small{font-size:.58rem}
 .prefday.shmulti{gap:1px}
 .prefsh__h{margin:6px 2px 0;font-size:13px;line-height:17px;color:var(--ink-2)}
+.pds-h{margin:0 0 2px;font-size:20px;line-height:25px;font-weight:700}
+.pds-row{display:flex;flex-direction:column;gap:6px;padding:10px 0;border-top:1px solid var(--separator)}
+.pds-row:first-of-type{border-top:0}
+.pds-n{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 8px;font-size:16px}
+.pds-n small{font-size:13px;color:var(--ink-2)}
+.pds-n small.pds-bek{color:#9A6700}
+.pds-n small.pds-inh{color:var(--tint-ink)}
+.pds-seg{display:flex;width:100%}
+.pds-seg button{flex:1 1 0;min-width:0;min-height:40px;white-space:normal;line-height:17px}
+.pds-seg button.on.pv-yes{background:#DDF3E4;color:#14622E}
+.pds-seg button.on.pv-avoid{background:#FDE7E7;color:#B3261E}
+.pds-seg button.on.pv-must{background:var(--tint);color:#fff}
+.pds-seg button.on.pv-never{background:#3A3A3C;color:#fff}
 .prefday.shmulti small.shl{display:block;font-size:10px;line-height:12px;font-weight:700;border-radius:5px;padding:0 3px;margin-top:1px}
 .prefday.shmulti small.shl.yes{background:#DDF3E4;color:#14622E}
 .prefday.shmulti small.shl.no{background:#FDE7E7;color:#B3261E}
@@ -1969,7 +1982,7 @@ div.nd-row[onclick]:active,label.nd-row:active{background:var(--surface-2)}
     <button class="is-erase" data-b="" aria-pressed="false" onclick="setBrush('')"><span data-icon="x"></span>Sil</button>
   </div>
   <div class="brushnow b-avoid" id="brushNow">Seçili: <b>İstemiyorum</b> — günlere dokun. Aynı güne tekrar dokunursan kalkar.</div>
-  <p class="hint" style="margin:8px 4px 8px"><span class="only-touch">Dokun: işaretle · yana sürükle ya da basılı tutup sürükle: birden çok gün · aşağı kaydır: sayfa kayar.</span><span class="only-mouse">Tıkla: işaretle · basılı tutup sürükle: birden çok gün.</span> Hemen kaydedilir. <b>İstiyorum / İstemiyorum</b> dilektir, liste mümkün olduğunca uyar. <b>Kesin nöbet</b>, <b>Nöbet yok</b> ve <b>İzin</b> yönetici onayıyla kesinleşir.</p>
+  <p class="hint" style="margin:8px 4px 8px"><span class="only-touch">Dokun: işaretle (vardiyalı ekipte o günün vardiyaları açılır) · yana sürükle ya da basılı tutup sürükle: birden çok gün · aşağı kaydır: sayfa kayar.</span><span class="only-mouse">Tıkla: işaretle (vardiyalı ekipte o günün vardiyaları açılır) · basılı tutup sürükle: birden çok gün.</span> Hemen kaydedilir. <b>İstiyorum / İstemiyorum</b> dilektir, liste mümkün olduğunca uyar. <b>Kesin nöbet</b>, <b>Nöbet yok</b> ve <b>İzin</b> yönetici onayıyla kesinleşir.</p>
   <div class="cal" id="prefCal"></div>
   <div class="preflegend">
     <span class="prefday no"><small>istemiyor</small></span><span class="prefday yes"><small>istiyor</small></span><span class="prefday must"><small>kesin</small></span>
@@ -2169,6 +2182,13 @@ div.nd-row[onclick]:active,label.nd-row:active{background:var(--surface-2)}
   </div>
 </div>
 
+<div id="prefDaySheet" class="modal" onclick="if(event.target===this&&!(PDS&&Date.now()-PDS.t<450))pdsClose()">
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="pdsTitle">
+    <div id="pdsBody"></div>
+    <button class="nd-btn is-filled" style="width:100%;margin-top:14px" onclick="pdsClose()">Tamam</button>
+  </div>
+</div>
+
 <div id="dayPicker" class="modal" onclick="if(event.target===this)dpClose()">
   <div class="sheet">
     <h2 id="dpTitle">Gün seç</h2>
@@ -2347,7 +2367,7 @@ function renderPrefShiftSel(){const el=$("prefShiftSel");if(!el)return;const uid
   el.innerHTML=`<span class="prefsh__l">Hangi nöbet için işaretliyorsun?</span><div class="prefsh__c" role="radiogroup">`+
     `<button type="button" class="${!prefShift?"on":""}" aria-pressed="${!prefShift}" onclick="setPrefShift('')">Bütün gün</button>`+
     L.map(({si})=>`<button type="button" class="${prefShift===shSid(si)?"on":""}" aria-pressed="${prefShift===shSid(si)}" onclick="setPrefShift('${shSid(si)}')">${hEsc(prefShLbl(si))}</button>`).join("")+`</div>`+
-    `<p class="prefsh__h">Aynı güne vardiya vardiya ayrı işaret koyabilirsin: ör. <b>${hEsc(prefShLbl(((L.find(x=>!isNightShift(shiftRows[x.si]))||L[0]).si)))}</b> seç → İstiyorum, <b>${hEsc(prefShLbl(((L.find(x=>isNightShift(shiftRows[x.si]))||L[L.length-1]).si)))}</b> seç → İstemiyorum, sonra güne dokun.</p>`;
+    `<p class="prefsh__h">Bir güne dokununca o günün vardiyaları açılır, her birini ayrı seçersin (ör. <b>${hEsc(prefShLbl(((L.find(x=>!isNightShift(shiftRows[x.si]))||L[0]).si)))}</b> İstiyorum, <b>${hEsc(prefShLbl(((L.find(x=>isNightShift(shiftRows[x.si]))||L[L.length-1]).si)))}</b> İstemiyorum). Çok güne aynı vardiyayı işaretlemek için burada vardiyayı seçip günlerin üstünden sürükle.</p>`;
   syncBrushShift();}
 function syncBrushShift(){const b=document.querySelector('#prefBrush [data-b="izin"]');if(b)b.style.display=prefShift?"none":"";
   if(prefShift&&prefBrush==="izin")setBrush("never");else setBrush(prefBrush);}
@@ -2364,7 +2384,9 @@ function setBrush(b){
     const C=reqLimCfg(),lim=b?C[b]||0:0,uid0=editingId(),used=lim?reqUsed(uid0,b):0;
     const limT=lim?` <span class="nowrap">· bu ay en fazla ${lim} (${used} kullanıldı)</span>`:"";
     const capT=(b==="izin"&&C.cap?` <span class="nowrap">· aynı gün en fazla ${C.cap} kişi izinli</span>`:"")+(b==="izin"&&uid0&&yearHak(uid0)?` <span class="nowrap">· yıllık izin ${yearHak(uid0)} gün, kalan ${Math.max(0,yearHak(uid0)-yearUsed(uid0))}</span>`:"");
-    n.innerHTML=b?`Seçili: <b>${BRUSH_AD[b]}</b>${shT} — günlere ${dk}${onay?" (yönetici onayına gider)":""}. Aynı güne tekrar ${dkn} kalkar.${limT}${capT}`:`Seçili: <b>Sil</b> — işaretini kaldırmak istediğin günlere ${dk}.`;}
+    const pdsT=pdsWanted()&&prefShiftList(uid0).length>1&&(()=>{const p=members.find(x=>x.id===uid0);return p&&onDuty(p);})();
+    n.innerHTML=b?(pdsT?`Seçili: <b>${BRUSH_AD[b]}</b> — bir güne ${dk}, o günün vardiyalarını ayrı ayrı seç${onay?" (yönetici onayına gider)":""}. Sürüklersen bütün gün işaretlenir.${limT}`
+      :`Seçili: <b>${BRUSH_AD[b]}</b>${shT} — günlere ${dk}${onay?" (yönetici onayına gider)":""}. Aynı güne tekrar ${dkn} kalkar.${limT}${capT}`):`Seçili: <b>Sil</b> — işaretini kaldırmak istediğin günlere ${dk}.`;}
 }
 function paintPref(d,tap){
   const uid=editingId();if(!canEdit(uid))return false;
@@ -2422,7 +2444,9 @@ function bindPrefPaint(){
   const cal=$("prefCal");if(!cal||cal._paint)return;cal._paint=1;
   let st=null;   // {id,x,y,d,t,mode:null|"paint",timer,last}
   const dayAt=(x,y)=>{const el=document.elementFromPoint?document.elementFromPoint(x,y):null;const c=el&&el.closest&&el.closest(".prefday");return c&&cal.contains(c)?+c.dataset.d:null;};
-  const hit=(d,tap)=>{if(d==null||(!tap&&d===st.last))return;st.last=d;if(paintPref(d,tap)){ND.haptic(4);prefPainted();}};
+  const hit=(d,tap)=>{if(d==null||(!tap&&d===st.last))return;st.last=d;
+    if(tap&&pdsWanted()&&pdsOpen(d)){cal._pdsAt=Date.now();return;}   // vardiyalı ekipte dokunma: o günün vardiyalarını seçtiren perde
+    if(paintPref(d,tap)){ND.haptic(4);prefPainted();}};
   const startPaint=()=>{if(!st||st.mode)return;st.mode="paint";clearTimeout(st.timer);ND.haptic(8);cal.classList.add("is-painting");hit(st.d);};
   cal.addEventListener("pointerdown",e=>{const c=e.target.closest(".prefday");if(!c)return;
     st={id:e.pointerId,x:e.clientX,y:e.clientY,d:+c.dataset.d,mode:null,last:null};
@@ -2443,7 +2467,40 @@ function bindPrefPaint(){
   cal.addEventListener("pointercancel",()=>{if(st)clearTimeout(st.timer);st=null;cal.classList.remove("is-painting");});
   // boyama sırasında sayfa kaymasın (iOS)
   cal.addEventListener("touchmove",e=>{if(st&&st.mode)e.preventDefault();},{passive:false});
+  // dokunuşla vardiya perdesi açıldıysa tarayıcının arkadan gönderdiği "tıklama" perdeye düşmesin (kapatmasın / seçim yapmasın)
+  cal.addEventListener("touchend",e=>{if(cal._pdsAt&&Date.now()-cal._pdsAt<600){e.preventDefault();cal._pdsAt=0;}},{passive:false});
 }
+
+/* ---------- İstek takvimi: güne dokununca vardiya seçimi ----------
+   Vardiyalı ekipte (kişinin 2+ vardiyası varsa) "İstiyorum / İstemiyorum / Kesin / Nöbet yok" fırçasıyla bir güne dokununca
+   alttan o günün vardiyaları açılır: her vardiya için ayrı seçilir (ör. Gündüz İstiyorum, Gece İstemiyorum).
+   Sürükleyerek boyama eskisi gibi bütün güne (ya da üstte seçili vardiyaya) işler. */
+let PDS=null;       // {d, uid, L}
+function pdsWanted(){return isShiftMode()&&!prefShift&&["yes","avoid","must","never"].includes(prefBrush);}
+function pdsOpen(d){const uid=editingId();if(!canEdit(uid))return false;const p=members.find(x=>x.id===uid);
+  const L=p&&onDuty(p)?prefShiftList(uid):[];if(L.length<2)return false;
+  if(isLeaveVal((allPrefs[uid]||{})[d]))return false;
+  PDS={d,uid,L,t:Date.now()};pdsRender();$("prefDaySheet").classList.add("on");ND.haptic&&ND.haptic(4);return true;}
+function pdsVal(si){const P=allPrefs[PDS.uid]||{};if(si==null)return String(P[PDS.d]||"");return String((((P._sh||{})[PDS.d])||{})[shSid(si)]||"");}
+function pdsRender(){if(!PDS)return;const {d,L}=PDS,{y,m}=monthInfo(),dow=(new Date(y,m-1,d).getDay()+6)%7;
+  const fam=(prefBrush==="must"||prefBrush==="never")?["must","never"]:["yes","avoid"];
+  const LAB={yes:"İstiyorum",avoid:"İstemiyorum",must:"Kesin nöbet",never:"Nöbet yok"};
+  const whole=pdsVal(null).replace(/_bek$/,"");
+  const row=(si,name,sub)=>{const raw=pdsVal(si),cur=raw.replace(/_bek$/,""),bek=/_bek$/.test(raw);
+    const eff=si!=null&&!cur&&whole?whole:"";       // bütün gün işareti bu vardiyayı da kapsıyor
+    return `<div class="pds-row"><div class="pds-n"><b>${hEsc(name)}</b>${sub?`<small>${hEsc(sub)}</small>`:""}${bek?'<small class="pds-bek">onay bekliyor</small>':""}${eff&&LAB[eff]?`<small class="pds-inh">bütün gün: ${LAB[eff].toLocaleLowerCase("tr")}</small>`:""}</div>
+      <div class="seg pds-seg">${fam.map(v=>`<button type="button" class="${cur===v?"on pv-"+v:""}" aria-pressed="${cur===v}" onclick="pdsSet(${si==null?"null":si},'${v}')">${LAB[v]}</button>`).join("")}<button type="button" class="${!cur?"on":""}" aria-pressed="${!cur}" onclick="pdsSet(${si==null?"null":si},'')">Fark etmez</button></div></div>`;};
+  $("pdsBody").innerHTML=`<h3 class="pds-h" id="pdsTitle">${d} ${MONTHS_TR[m-1]} ${["Pazartesi","Salı","Çarşamba","Perşembe","Cuma","Cumartesi","Pazar"][dow]}</h3>
+    <p class="hint" style="margin:2px 0 10px">Her vardiya için ayrı seç.${fam[0]==="must"&&!isAdmin()?" Kesin nöbet ve nöbet yok yönetici onayına gider.":""} ${fam[0]==="yes"?"Kesin nöbet / nöbet yok için üstteki fırçayı değiştir.":"İstiyorum / istemiyorum için üstteki fırçayı değiştir."}</p>
+    ${row(null,"Bütün gün","")}${L.map(({s,si})=>{const nm=prefShLbl(si);return row(si,nm,(s.start&&s.end&&!/\d/.test(nm))?`${s.start}–${s.end}`:"");}).join("")}`;}
+function pdsSet(si,v){if(!PDS)return;const P=allPrefs[PDS.uid]=allPrefs[PDS.uid]||{};let ch=false;
+  if(si==null&&!v){   // bütün gün "fark etmez": yalnız gün geneli işaret kalkar, vardiya işaretleri durur
+    if(P[PDS.d]&&!isLeaveVal(P[PDS.d])){delete P[PDS.d];ch=true;}
+  }else{const kb=prefBrush,ks=prefShift;prefShift=si==null?null:shSid(si);prefBrush=v;
+    try{ch=paintPref(PDS.d,false);}finally{prefBrush=kb;prefShift=ks;}}
+  if(ch){ND.haptic&&ND.haptic(4);prefPainted();}
+  pdsRender();}
+function pdsClose(){const s=$("prefDaySheet");if(s)s.classList.remove("on");PDS=null;}
 
 /* ---------- Takvim: gün paneli alttan açılır ---------- */
 let daySheetCtx="pub";
