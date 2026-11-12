@@ -22,6 +22,7 @@ Kısaltmalar: **D** = düşman senaryo üretici + bağımsız denetçi (`fuzz.js
 | Kesin gece sayısı programın hesapladığı paydan büyükse pay geceleri karşılayacak kadar artar | D, Ö (gece_payi, gece_payi_rastgele) |
 | İzne oranlı pay, devirli adalet (aylar arası), eski ay sayılarının yok sayılması | D, B |
 | Boş yer politikası: hepsi dolsun / sayılara göre boş kalabilir | D, B |
+| Yöneticinin yazdığı kesin sayılar tam tutar (kurallar, dilekler, eşit dağıt kuralı kaydıramaz); sonradan dolan yer için "boş kaldı" uyarısı kalmaz | Ö (sayi_koruma), D |
 | Önceki ayın son günleri (kuyruk) kurallarda sayılır | D, Ö (onceki_ay) |
 | Sabit ritim (2+2, 1+2 …) ve aralıklı ritim (art arda en az–en çok çalışma / izin) | D, B, Ö (sekreter_ritim) |
 | Kıdem: komposizyon (vardiyada / günde en az N üst, N alt), "alt kıdemli yalnız kalmasın" (vardiya / gün / aynı saatler) | D, B |

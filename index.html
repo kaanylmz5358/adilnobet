@@ -11344,7 +11344,8 @@ function solveSchedule(){
   const roomGap=!isShiftMode()&&!(patOnV>0)&&!RRC?Math.max(0,(+($("minGap").value||(dept&&dept.min_gap)||1))-1):null;
   /* ekip döngüsünde (sabit başlangıç) aynı ekip hep birlikte çalışır ve dengeyi döngü kurar:
      "her nöbette farklı kişi" ile gece / hafta sonu eşitleme cezaları uygulanmaz */
-  const HQA=HEQ&&fillAll()&&!CYC0?members.map((p,i)=>isFixed[i]&&autoFix[i]?wanted[i]:-1):null;   // saat eşitliği: kişi payları
+  /* kişi sayıları: yöneticinin yazdığı kesin sayılar her zaman, programın hesapladığı paylar "saatler eşit (kesin)"te korunur */
+  const HQA=fillAll()&&!CYC0&&members.some((p,i)=>isFixed[i]&&(!autoFix[i]||HEQ))?members.map((p,i)=>isFixed[i]&&(!autoFix[i]||HEQ)?wanted[i]:-1):null;
   const evalFn=makeEvaluator(slots,{pts:ptsCfg(),y,m,nDays,bays,IV,MT,pm:CYC&&(CYC.multi||CYC.fix!=null)?"off":partnerMode(),bDN:CYC&&(CYC.multi||CYC.fix!=null)?false:balDN(),bWE:CYC&&(CYC.multi||CYC.fix!=null)?false:balWE(),
     cycBal:CYC&&(CYC.multi||CYC.fix!=null)?members.map(p=>Math.max(0.05,(ratioOf(p)||100)/100)):null,
     patOn:patOnV,patOff:patOffV,expShare,minRest:minRestH(),wishPri:wishPri(),nightWant:nWant,
@@ -11509,6 +11510,7 @@ function solveSchedule(){
   }
 
   /* --- doldurulamayan yerler --- */
+  var EMPTY_EARLY=null;      // var: aşağıdaki son denetim aynı işlevin başka bloğunda
   empty=0;for(let s=0;s<S;s++)if(A[s]<0)empty++;
   const noCounts=!fillAll()&&!members.some((p,i)=>isFixed[i]&&wanted[i]>0);
   if(noCounts&&empty)viol.push(`⚠️ "Boş nöbet yeri: sayılara göre" seçili ama kimseye nöbet sayısı yazılmamış, bu yüzden ${empty} yerin hepsi boş kaldı. "Kim kaç nöbet tutacak" bölümünden sayıları gir ya da boş yerleri de doldur.`);
@@ -11517,12 +11519,13 @@ function solveSchedule(){
     for(let s=0;s<S;s++){
       if(A[s]>=0)continue;
       const sl=slots[s];
-      const k=sl.si<0?(sl.room==="G"?"Genel oda":sl.room.slice(2)+" odası"):((shiftRows[sl.si]||{}).name||"Vardiya");
+      const k=sl.si<0?(sl.room==="G"?"Genel oda":sl.room.slice(2)+" odası"):shName(sl.si);
       (ozet[k]=ozet[k]||[]).push(sl.d);
     }
     for(const k in ozet)
-      viol.push(`❗ ${k}: ${fmtDays(ozet[k])}. günler boş kaldı — bu günlerde çalışabilecek, sayısı dolmamış kimse yok.`);
+      viol.push(`❗ ${k}: ${fmtDays(ozet[k])}. ${ozet[k].length>1?"günler":"gün"} boş kaldı — bu günlerde çalışabilecek, sayısı dolmamış kimse yok.`);
     if(fillAll())viol.push("💡 Çözüm için: birine daha fazla nöbet ver, bir kişinin gün kısıtını gevşet ya da izinlerden birini kaldır.");
+    EMPTY_EARLY=viol.slice(-Object.keys(ozet).length-(fillAll()?1:0));       // sonraki aşamalar doldurursa taslaktan çıkarılır
   }
 
   /* --- 3. aşama: takaslarla ince ayar (sayılar sabit kalır) --- */
@@ -11620,6 +11623,7 @@ function solveSchedule(){
     if(cl.length){const ay=MONTHS_TR[m-1]||"";
       viol.push(`❗ Aynı kişiye aynı anda iki nöbet düşmesin diye ${cl.length} yer boş bırakıldı (${cl.slice(0,6).map(s=>slots[s].d+" "+ay).join(", ")}${cl.length>6?"…":""}). Ekipte bu yerler için yeterli kişi yok.`);}}
   empty=0;for(let s=0;s<S;s++)if(A2[s]<0)empty++;
+  if(EMPTY_EARLY&&!empty)EMPTY_EARLY.forEach(v=>{const i=viol.indexOf(v);if(i>=0)viol.splice(i,1);});     // o yerler sonradan doldu
   const rep=evalFn(A2,true);
   if(RRC&&rep.rrV>0){
     const [flo,fhi]=rrFit(RRC,nDays),dc={};for(let s=0;s<S;s++)if(A2[s]>=0){(dc[A2[s]]=dc[A2[s]]||new Set()).add(slots[s].d);}
