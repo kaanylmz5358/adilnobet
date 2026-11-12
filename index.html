@@ -8732,7 +8732,9 @@ function altSummary0(f){
   if(senActive()||(f.ov&&f.ov.sen))ch.push(r.senV?[`Kıdem ${r.senV} yerde eksik`,"w"]:["Kıdem tam","ok"]);
   if(genCfg()||(f.ov&&f.ov.gen))ch.push(r.genV?[`Karışım ${r.genV} yerde eksik`,"w"]:["Kadın–erkek dengesi tam","ok"]);
   if(rulesAll().some(x=>x.on!==false&&x.t!=="staff"&&x.t!=="only"))ch.push(r.ruleV?[`Kurallar ${r.ruleV} yerde tutmuyor`,"w"]:[fks.includes("rule")?"Diğer kurallar tam":"Kurallar tam","ok"]);
-  if(I.night||f.k==="nfree")ch.push(r.nightMiss?[`Gece ${r.nightMiss} yerde farklı`,"w"]:["Geceler tam","ok"]);
+  /* gece sayılarını programa bırakan öneri: kimin gece sayısı değişiyorsa kartta yazar */
+  const B0=ALT.base,ngc=fks.includes("nfree")&&B0&&B0.nc&&res.nc?members.filter(p=>onDuty(p)&&(res.nc[p.id]||0)!==(B0.nc[p.id]||0)).map(p=>`${kisaAd(p.name)} ${B0.nc[p.id]||0} → ${res.nc[p.id]||0}`):[];
+  if(I.night||fks.includes("nfree"))ch.push(r.nightMiss?[`Gece ${r.nightMiss} yerde farklı`,"w"]:ngc.length?[`${ngc.length} kişinin gece sayısı değişir`,"w"]:["Geceler tam","ok"]);
   if(I.wr||(f.ov&&f.ov.wr))ch.push((r.wrMax||0)+(r.wrOff||0)?[`Nöbet sonrası kuralı ${(r.wrMax||0)+(r.wrOff||0)} yerde tutmuyor`,"w"]:["Nöbet sonrası izinler tam","ok"]);
   if(f.k!=="base"&&r.hard>=HARDW)ch.push([`${Math.floor(r.hard/HARDW)} katı kural sorunu aynı kalır`,"w"]);
   if(f.k!=="base"&&r.pinMiss)ch.push([`${r.pinMiss} kesin gün yine yerleşmez`,"w"]);
@@ -8740,6 +8742,7 @@ function altSummary0(f){
   if(fks.includes("keep")||f.k==="base"){const em=(res.viol||[]).filter(v=>/boş bırakıldı|boş kaldı/.test(v)).map(v=>v.replace(/^ℹ️ |^❗ /,""));if(em.length)det+=em.slice(0,2).map(x=>`<li>${x}</li>`).join("");}
   if(f.k==="base"||fks.includes("relax")){const ex=rhythmExc(res,I.R||undefined);if(ex.length)det+=ex.slice(0,4).map(x=>`<li>${hEsc(x.txt)}</li>`).join("")+(ex.length>4?`<li>… ve ${ex.length-4} yer daha</li>`:"");}
   if(f.sc.dc.length)det+=`<li>Sayılar: ${hEsc(f.sc.dc.slice(0,6).join(", "))}${f.sc.dc.length>6?"…":""}</li>`;
+  if(ngc.length)det+=`<li>Geceler: ${hEsc(ngc.slice(0,6).join(", "))}${ngc.length>6?"…":""}</li>`;
   return {ch,det};
 }
 function renderAlts(){renderAlts0();try{renderAltQuick();}catch(e){console.error(e);}}

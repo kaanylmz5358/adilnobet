@@ -93,7 +93,7 @@ async function idle(E, max = 240000) { const t0 = Date.now(); await wait(150); w
       if (errors.length) rec.fails.push("JS: " + errors.slice(0, 2).join(" | "));
       // öneriler
       if (doSug) {
-        const L = E("ALT.list.map(f=>({k:f.k,parts:f.parts||[f.k],t:f.title,ov:f.ov,ok:f.sc.ok,cost:f.sc.cost,dc:f.sc.dc||[],res:f.res}))");
+        const L = E("ALT.list.map(f=>({k:f.k,parts:f.parts||[f.k],t:f.title,ov:f.ov,ok:f.sc.ok,cost:f.sc.cost,dc:f.sc.dc||[],nSum:f.sc.nSum||0,res:f.res}))");
         rec.sug = L.map(f => ({ k: f.k, t: f.t, cost: Math.round(f.cost * 10) / 10 }));
         const issues = E("altAny(draft)");
         if (issues && !L.length) rec.warns.push("sorun var ama hiç öneri yok");
@@ -117,7 +117,7 @@ async function idle(E, max = 240000) { const t0 = Date.now(); await wait(150); w
         });
         // sıralama mantığı: sorunları çözen, sayıları ve dolu yerleri değiştirmeyen bir öneri varken "aynen kalsın" ya da "boş bırak" önde olmamalı
         if (L.length > 1) {
-          const clean = L.slice(1).find(f => f.k !== "base" && f.k !== "keep" && !(f.ov || {}).keep && !(f.dc || []).length && !(f.res.emptyCount > (dr.emptyCount || 0)));
+          const clean = L.slice(1).find(f => f.k !== "base" && f.k !== "keep" && !(f.ov || {}).keep && !(f.dc || []).length && !(f.nSum > 0) && !(f.res.emptyCount > (dr.emptyCount || 0)));   // gece sayılarını değiştiren de "sayı değiştirir"
           if (clean && (L[0].k === "base" || L[0].k === "keep" || (L[0].ov || {}).keep)) rec.warns.push(`SIRALAMA: "${L[0].t}" önde, ama "${clean.t}" sayıları değiştirmeden çözüyor`);
         }
         if (L.length) {
