@@ -30,6 +30,10 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
     E("pdsSet(null,'never')");
     ok(String(E("allPrefs[editingId()][7]")) === "never_bek" && !E("allPrefs[editingId()]._sh&&allPrefs[editingId()]._sh[7]"), "bütün gün işareti o günün vardiya işaretlerinin yerine geçiyor");
     E("pdsClose()");
+    E("setBrush('yes')"); E("pdsOpen(12)"); E("pdsSet(null,'yes')"); E("pdsSet(1,'avoid')");
+    ok(E("allPrefs[editingId()]._sh[12][shSid(0)]") === "yes" && E("allPrefs[editingId()]._sh[12][shSid(1)]") === "avoid" && !E("allPrefs[editingId()][12]"),
+      "bütün gün İstiyorum iken Gece İstemiyorum seçilince Gündüz İstiyorum olarak kalıyor");
+    E("pdsClose()");
     E("setBrush('izin')"); ok(!E("pdsWanted()"), "İzin fırçasında perde açılmaz (izin bütün gündür)");
     E("setBrush('yes')"); E("setPrefShift(shSid(1))"); ok(!E("pdsWanted()"), "üstte vardiya seçiliyse dokunma doğrudan o vardiyayı işaretler");
     E("setPrefShift('')");
@@ -51,6 +55,16 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
     const { E } = await openApp(F);
     E("showTab('izin');setBrush('yes')");
     ok(!E("pdsWanted()") || !E("pdsOpen(5)"), "oda ekibinde dokunma doğrudan işaretler");
+  }
+  // 4) nöbet tutmayan yönetici: ekran nöbet tutan ilk kişiyle açılır, vardiya perdesi çalışır; kendi takviminde nedeni yazar
+  {
+    const F = fixture({ shifts: sh, people: [{ name: "Yönetici", noDuty: true }, ...people], meIdx: 0 });
+    const { E, errors } = await openApp(F);
+    E("showTab('izin');setBrush('yes')");
+    ok(E("editingId()") === uid(2) && E("pdsOpen(5)"), "nöbet tutmayan yönetici: ilk nöbetçi seçili geliyor, güne dokununca vardiyalar açılıyor");
+    E("pdsClose()"); E("$('asPerson').value=me.id;renderPrefShiftSel()");
+    ok(/nöbet listesinde değilsin/.test(E("$('prefShiftSel').textContent")), "kendi takviminde neden vardiya seçimi olmadığı yazıyor");
+    if (errors.length) { console.log(errors.slice(0, 3)); fails.push("js"); }
   }
   console.log("SONUÇ:", fails.length ? fails.length + " hata: " + fails.join(" / ") : "TAMAM"); process.exit(0);
 })();
